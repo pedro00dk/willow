@@ -16,7 +16,7 @@ class Globals:
         Initialize the default global scope.
         """
         host_builtins = globals()[Globals.BUILTINS]
-        builtins = host_builtins.copy() if type(host_builtins) is dict else vars(host_builtins).copy()
+        builtins = host_builtins.copy() if isinstance(host_builtins, dict) else vars(host_builtins).copy()
         self._globals = {Globals.BUILTINS: builtins, Globals.FILE: None, Globals.NAME: '__main__'}
 
     def property(self, name: str, value):
@@ -42,7 +42,7 @@ class Globals:
             :raise: AttributeError - if __builtins__ property was modified
             :return: self
         """
-        if type(self._globals[Globals.BUILTINS]) is not dict:
+        if not isinstance(self._globals[Globals.BUILTINS], dict):
             raise AttributeError('global __builtins__ attribute was modified')
 
         builtins = self._globals[Globals.BUILTINS]
