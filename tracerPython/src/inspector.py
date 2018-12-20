@@ -1,4 +1,4 @@
-import queue
+import multiprocessing as mp
 import sys
 import types
 
@@ -10,7 +10,7 @@ class Inspector:
 
     TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
 
-    def __init__(self, name: str, lines: list, command_queue: queue.Queue, result_queue: queue.Queue):
+    def __init__(self, name: str, lines: list, command_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initialize the tracer controller with the script name and lines.
 
