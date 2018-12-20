@@ -1,4 +1,6 @@
 import copy
+import sys
+import types
 
 
 class Globals:
@@ -59,3 +61,74 @@ class Globals:
             :return: created globals
         """
         return copy.deepcopy(self._globals)
+
+
+class Modules:
+    """
+    Halt modules from a specified scope.
+    """
+
+    # some default names
+    IMPORT = '__import__'
+
+    def __init__(self):
+        """
+        Initialize witout any halted module.
+        """
+        self._halted = []
+
+    def halt(self, modules: list):
+        """
+        Add modules to halted list.
+
+            :param module: modules to halt
+
+            :return: self
+        """
+        self._halted.extend(modules)
+        return self
+
+    def apply(self, scope: dict, full: bool = False):
+        """
+        Halt modules from the scope.
+
+            :param scope: scope to halt modules
+            :param full: halt from sys module (entire application)
+
+            :raise: KeyError - if scope does not contain __builtins__
+            :raise: TypeError - if __builtins__ is not a dict
+            :raise: AttributeError - if __builtins__ does not contain __import__
+            :return: scope copy with halted modules
+        """
+        if not isinstance(scope[Globals.BUILTINS], dict):
+            raise TypeError('__builtins__ is not a dict')
+        if Modules.IMPORT not in scope[Globals.BUILTINS]:
+            raise AttributeError('__builtins__ does not contain __import__')
+
+        scope = copy.deepcopy(scope)
+        scope_builtins = scope[Globals.BUILTINS]
+        default_import = scope_builtins[Modules.IMPORT]
+        halt_import = Modules._halt_import(default_import, copy.deepcopy(self._halted))
+        scope_builtins[Modules.IMPORT] = halt_import
+
+        if full:
+            sys.modules = {name: mod for name, mod in sys.modules.items() if name in self._halted}
+
+        return scope
+
+    @staticmethod
+    def _halt_import(default_import: types.BuiltinFunctionType, halted: list):
+        """
+        Creates a function that blocks imports.
+
+            :param default_import: default import function
+            :param halted: modules to block
+
+            :return: import function that blocks halted modules
+        """
+        def halt_import(module, global_scope, local_scope, attributes, level):
+            if module in halted:
+                raise ModuleNotFoundError(f'No module named {repr(module)}')
+            default_import(module, global_scope, local_scope, attributes, level)
+
+        return halt_import

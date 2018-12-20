@@ -17,7 +17,7 @@ class Tracer:
         """
         self.script = script
         self.lines = script.splitlines() if len(script) > 0 else ['']
-
+        
     def start(self):
         """
         Start to trace the script.
@@ -28,6 +28,9 @@ class Tracer:
             .builtin('exec', None)\
             .builtin('open', None)\
             .build()
+        script_globals = scope.Modules()\
+            .halt(['treading'])\
+            .apply(script_globals, full=True)
 
         try:
             sys.settrace(self._trace)
@@ -47,5 +50,5 @@ class Tracer:
             :param event: current code event, one of: 'call', 'line', 'return', 'exception' or 'opcode'
             :param args: context arguments in some code states
         """
-        print(self.lines[frame.f_lineno - 1])
+        print(frame.f_lineno, self.lines[frame.f_lineno - 1] if frame.f_code.co_filename == '<script>' else frame.f_code.co_filename, args if args else args)
         return self._trace
