@@ -2,6 +2,7 @@ import multiprocessing as mp
 import sys
 import types
 
+import events
 import inspector
 import scope
 
@@ -10,6 +11,10 @@ class Tracer:
     """
     Trace python code and analyses its state after every instruction.
     """
+
+    # tracer events
+    class Events:
+        START = 'start'
 
     @staticmethod
     def init_run(name: str, script: str, sandbox: bool, command_queue: mp.Queue, result_queue: mp.Queue):
@@ -45,6 +50,12 @@ class Tracer:
         """
         script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
         script_inspector = inspector.Inspector(self._name, self._lines, self._command_queue, self._result_queue)
+
+        # sync
+        self._result_queue.put(events.new(Tracer.Events.START))
+        self._command_queue.get()
+        #
+
         try:
             sys.settrace(script_inspector.trace)
             exec(compile(self._script, script_scope[scope.Globals.FILE], 'exec'), script_scope)
@@ -98,6 +109,11 @@ class TracerStepper:
             args=(self._name, self._script, self._sandbox, self._command_queue, self._result_queue)
         )
         self._tracer_process.start()
+
+        # sync
+        self._result_queue.get()
+        self._command_queue.put(events.new(Tracer.Events.START))
+        #
 
     def stop(self):
         """
