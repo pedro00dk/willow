@@ -44,6 +44,8 @@ class TraceController:
     Control the script tracing progression by receiving commands.
     """
 
+    TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
+
     def __init__(self, name: str, lines: list):
         """
         Initialize the tracer controller with the script name and lines.
@@ -54,6 +56,15 @@ class TraceController:
         self._name = name
         self._lines = lines
 
+    def code_line(self, frame: types.FrameType):
+        return self._lines[frame.f_lineno - 1] if self.is_base_file(frame) else None
+
+    def is_base_file(self, frame: types.FrameType):
+        return frame.f_code.co_filename == self._name
+    
+    def is_traceable_event(self, event: str):
+        return event in TraceController.TRACEABLE_EVENTS
+
     def trace(self, frame: types.FrameType, event: str, args):
         """
         The script trace function.
@@ -62,6 +73,9 @@ class TraceController:
             :param event: current code event, one of: 'call', 'line', 'return', 'exception' or 'opcode'
             :param args: context arguments in some code states
         """
-        print(frame.f_lineno, self._lines[frame.f_lineno - 1] if frame.f_code.co_filename ==
-              self._name else frame.f_code.co_filename, args if args else args)
+        if not self.is_base_file(frame) or not self.is_traceable_event(event):
+            return self.trace
+
+        print(self.code_line(frame))
+
         return self.trace
