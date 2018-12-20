@@ -1,4 +1,5 @@
 import sys
+import threading
 import types
 
 import scope
@@ -23,10 +24,20 @@ class Tracer:
         self._sandbox = sandbox
         self._lines = self._script.splitlines() if len(script) > 0 else ['']
         self._controller = inspector.Inspector(self._name, self._lines)
+        self._trace_thread = None
 
     def start(self):
         """
-        Start to trace the script.
+        Create a thread to trace the script.
+        Another thread is necessary because of blocking command link input calls in the script.
+        """
+        self._trace_thread = threading.Thread(target=self._trace_coroutine)
+        self._trace_thread.start()
+
+    def _trace_coroutine(self):
+        """
+        Starts the tracing coroutine.
+        Configure the scope, set the trace function and execute the script.
         """
         script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
         try:
