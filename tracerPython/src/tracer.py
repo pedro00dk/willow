@@ -74,10 +74,23 @@ class TracerStepper:
         self._result_queue = None
         self._tracer_process = None
 
+    def is_running(self):
+        """
+        Return if the tracer is running.
+
+            :return: if tracer is running
+        """
+        return self._tracer_process is not None
+
     def start(self):
         """
         Start the tracer in a new process.
+
+            :raise: AssertionError - if tracer already running
         """
+        if self.is_running():
+            raise AssertionError('tracer already running')
+
         self._command_queue = mp.Queue()
         self._result_queue = mp.Queue()
         self._tracer_process = mp.Process(
@@ -89,7 +102,12 @@ class TracerStepper:
     def stop(self):
         """
         Stop the tracer process and queues.
+
+            :raise: AssertionError - if tracer already stopped
         """
+        if not self.is_running():
+            raise AssertionError('tracer already stopped')
+
         self._tracer_process.terminate()
         self._tracer_process.join()
         self._command_queue.close()
