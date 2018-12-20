@@ -17,24 +17,16 @@ class Tracer:
         """
         self.script = script
         self.lines = script.splitlines() if len(script) > 0 else ['']
-        
+
     def start(self):
         """
         Start to trace the script.
         """
-        script_globals = scope.Globals()\
-            .property(scope.Globals.FILE, '<script>')\
-            .builtin('compile', None)\
-            .builtin('exec', None)\
-            .builtin('open', None)\
-            .build()
-        script_globals = scope.Modules()\
-            .halt('treading')\
-            .apply(script_globals, full=True)
+        script_scope = scope.sandbox_scope('<script>')
 
         try:
             sys.settrace(self._trace)
-            exec(compile(self.script, script_globals[scope.Globals.FILE], 'exec'), script_globals)
+            exec(compile(self.script, script_scope[scope.Globals.FILE], 'exec'), script_scope)
             print('done')
         except Exception as e:
             print('error')
@@ -50,5 +42,6 @@ class Tracer:
             :param event: current code event, one of: 'call', 'line', 'return', 'exception' or 'opcode'
             :param args: context arguments in some code states
         """
-        print(frame.f_lineno, self.lines[frame.f_lineno - 1] if frame.f_code.co_filename == '<script>' else frame.f_code.co_filename, args if args else args)
+        print(frame.f_lineno, self.lines[frame.f_lineno - 1] if frame.f_code.co_filename ==
+              '<script>' else frame.f_code.co_filename, args if args else args)
         return self._trace

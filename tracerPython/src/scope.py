@@ -3,6 +3,48 @@ import sys
 import types
 
 
+def default_scope(file: str):
+    """
+    Return a default scope.
+
+        :return: default scope
+    """
+    return Globals().property(Globals.FILE, file).build()
+
+
+def sandbox_scope(file: str):
+    """
+    Return a sandboxed scope.
+
+        :return: sandbox scope
+    """
+    builtins_to_remove = {'compile', 'exec', 'open'}
+    modules_to_keep = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
+    modules_to_remove = {module for module in default_modules_names() if module not in modules_to_keep}
+
+    globals_builder = Globals().property(Globals.FILE, file)
+    [globals_builder.builtin(builtin, None) for builtin in builtins_to_remove]
+
+    modules_halter = Modules()
+    [modules_halter.halt(module) for module in modules_to_remove]
+
+    return modules_halter.apply(globals_builder.build())
+
+
+def default_builtins_names():
+    """
+    List default builtins
+    """
+    return [*Globals().build()[Globals.BUILTINS].keys()]
+
+
+def default_modules_names():
+    """
+    List default modules
+    """
+    return[*sys.modules.keys()]
+
+
 class Globals:
     """
     Generate global scopes with the specificed names and restrictions.
