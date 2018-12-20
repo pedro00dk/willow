@@ -4,6 +4,8 @@ class Actions:
     """
 
     START = 'start'
+    QUIT = 'quit'
+    STEP = 'step'
 
 
 class Results:
@@ -12,7 +14,9 @@ class Results:
     """
 
     STARTED = 'started'
+    QUITTED = 'quitted'
     ERROR = 'error'
+    DATA = 'data'
 
 
 class Event:
