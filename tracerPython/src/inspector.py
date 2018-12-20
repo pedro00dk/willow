@@ -10,18 +10,18 @@ class Inspector:
 
     TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
 
-    def __init__(self, name: str, lines: list, command_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, lines: list, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initialize the tracer controller with the script name and lines.
 
             :param name: script name
             :param line: script lines
-            :param command_queue: queue to read commands
+            :param action_queue: queue to read actions
             :param result_queue: queue to write results
         """
         self._name = name
         self._lines = lines
-        self._command_queue = command_queue
+        self._action_queue = action_queue
         self._result_queue = result_queue
 
     def code_line(self, frame: types.FrameType):

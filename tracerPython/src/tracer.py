@@ -15,31 +15,32 @@ class Tracer:
     # tracer events
     class Events:
         START = 'start'
+        START = 'start'
 
     @staticmethod
-    def init_run(name: str, script: str, sandbox: bool, command_queue: mp.Queue, result_queue: mp.Queue):
+    def init_run(name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initialize the Tracer and run it.
         This static method shall be used when spawn a new process.
 
             :params ref(__init__):
         """
-        Tracer(name, script, sandbox, command_queue, result_queue).run()
+        Tracer(name, script, sandbox, action_queue, result_queue).run()
 
-    def __init__(self, name: str, script: str, sandbox: bool, command_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initialize the tracer with the python script.
 
             :param name: script name
             :param script: python script
             :param sandbox: use sandbox scope instead of default scope
-            :param command_queue: queue to send commands to inspector
+            :param action_queue: queue to send actions to inspector
             :param result_queue: queue to receive inspection results
         """
         self._name = name
         self._script = script
         self._sandbox = sandbox
-        self._command_queue = command_queue
+        self._action_queue = action_queue
         self._result_queue = result_queue
         self._lines = self._script.splitlines() if len(script) > 0 else ['']
 
@@ -49,18 +50,22 @@ class Tracer:
         Configure the scope, set the trace function and execute the script.
         """
         script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
-        script_inspector = inspector.Inspector(self._name, self._lines, self._command_queue, self._result_queue)
-
-        # sync
-        self._result_queue.put(events.new(Tracer.Events.START))
-        self._command_queue.get()
-        #
+        script_inspector = inspector.Inspector(self._name, self._lines, self._action_queue, self._result_queue)
 
         try:
+            compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
+            # sync
+            self._result_queue.put(events.new(Tracer.Events.START))
+            self._action_queue.get()
+            #
             sys.settrace(script_inspector.trace)
-            exec(compile(self._script, script_scope[scope.Globals.FILE], 'exec'), script_scope)
+            exec(compiled, script_scope)
             print('done')
         except Exception as e:
+            # sync
+            self._result_queue.put(events.new(Tracer.Events.START))
+            self._action_queue.get()
+            #
             print('error')
             print(str(e))
         finally:
@@ -81,7 +86,7 @@ class TracerStepper:
         self._name = name
         self._script = script
         self._sandbox = sandbox
-        self._command_queue = None
+        self._action_queue = None
         self._result_queue = None
         self._tracer_process = None
 
@@ -102,17 +107,17 @@ class TracerStepper:
         if self.is_running():
             raise AssertionError('tracer already running')
 
-        self._command_queue = mp.Queue()
+        self._action_queue = mp.Queue()
         self._result_queue = mp.Queue()
         self._tracer_process = mp.Process(
             target=Tracer.init_run,
-            args=(self._name, self._script, self._sandbox, self._command_queue, self._result_queue)
+            args=(self._name, self._script, self._sandbox, self._action_queue, self._result_queue)
         )
         self._tracer_process.start()
 
         # sync
         self._result_queue.get()
-        self._command_queue.put(events.new(Tracer.Events.START))
+        self._action_queue.put(events.new(Tracer.Events.START))
         #
 
     def stop(self):
@@ -126,8 +131,8 @@ class TracerStepper:
 
         self._tracer_process.terminate()
         self._tracer_process.join()
-        self._command_queue.close()
+        self._action_queue.close()
         self._result_queue.close()
         self._tracer_process = None
-        self._command_queue = None
+        self._action_queue = None
         self._result_queue = None
