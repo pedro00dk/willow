@@ -29,7 +29,7 @@ class Tracer:
             .builtin('open', None)\
             .build()
         script_globals = scope.Modules()\
-            .halt(['treading'])\
+            .halt('treading')\
             .apply(script_globals, full=True)
 
         try:

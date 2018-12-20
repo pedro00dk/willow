@@ -77,15 +77,15 @@ class Modules:
         """
         self._halted = []
 
-    def halt(self, modules: list):
+    def halt(self, module: str):
         """
-        Add modules to halted list.
+        Add module to halted list.
 
-            :param module: modules to halt
+            :param module: module to halt
 
             :return: self
         """
-        self._halted.extend(modules)
+        self._halted.append(module)
         return self
 
     def apply(self, scope: dict, full: bool = False):
