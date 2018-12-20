@@ -12,11 +12,6 @@ class Tracer:
     Trace python code and analyses its state after every instruction.
     """
 
-    # tracer events
-    class Events:
-        START = 'start'
-        ERROR = 'error'
-
     @staticmethod
     def init_run(name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
@@ -55,16 +50,16 @@ class Tracer:
         try:
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
             # sync
-            self._result_queue.put(events.Event(Tracer.Events.START))
             self._action_queue.get()
+            self._result_queue.put(events.Event(events.Results.STARTED))
             #
             sys.settrace(script_inspector.trace)
             exec(compiled, script_scope)
             print('done')
         except Exception as e:
             # sync
-            self._result_queue.put(events.Event(Tracer.Events.ERROR, str(e)))
             self._action_queue.get()
+            self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
             #
             print('error')
             print(str(e))
@@ -116,12 +111,11 @@ class TracerStepper:
         self._tracer_process.start()
 
         # sync
+        self._action_queue.put(events.Event(events.Actions.START))
         event = self._result_queue.get()
-        self._action_queue.put(events.Event(Tracer.Events.START))
-        if event.name == Tracer.Events.ERROR:
-            print('here')
+        if event.name == events.Results.ERROR:
             self.stop()
-        
+
         return event
 
     def stop(self):
