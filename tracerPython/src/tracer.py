@@ -34,6 +34,7 @@ class Tracer:
             exec(compile(self.script, script_globals[scope.Globals.FILE], 'exec'), script_globals)
             print('done')
         except Exception as e:
+            print('error')
             print(str(e))
         finally:
             sys.settrace(None)
