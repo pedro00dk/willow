@@ -108,7 +108,7 @@ class Modules:
         scope = copy.deepcopy(scope)
         scope_builtins = scope[Globals.BUILTINS]
         default_import = scope_builtins[Modules.IMPORT]
-        halt_import = Modules._halt_import(default_import, copy.deepcopy(self._halted))
+        halt_import = Modules._halt_import(default_import, self._halted)
         scope_builtins[Modules.IMPORT] = halt_import
 
         if full:
