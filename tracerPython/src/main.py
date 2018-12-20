@@ -8,7 +8,7 @@ def main():
     parser.add_argument('script', help='The python script to parse')
     arguments = parser.parse_args()
     
-    tracer.Tracer(arguments.script).start()
+    tracer.Tracer('<script>', arguments.script, True).start()
 
 
 
