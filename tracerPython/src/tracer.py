@@ -61,7 +61,7 @@ class TraceController:
 
     def is_base_file(self, frame: types.FrameType):
         return frame.f_code.co_filename == self._name
-    
+
     def is_traceable_event(self, event: str):
         return event in TraceController.TRACEABLE_EVENTS
 
@@ -76,6 +76,23 @@ class TraceController:
         if not self.is_base_file(frame) or not self.is_traceable_event(event):
             return self.trace
 
-        print(self.code_line(frame))
+        print(self.inspect_state(frame, event, args))
 
         return self.trace
+
+    # inspection methods
+
+    def inspect_state(self, frame: types.FrameType, event: str, args):
+        line = frame.f_lineno
+        text = self.code_line(frame)
+        return {
+            'event': event,
+            'line': line,
+            'text': text,
+        }
+
+    def inspect_stack(self, frame: types.FrameType):
+        pass
+
+    def inspect_heap(self, frame: types.FrameType):
+        pass
