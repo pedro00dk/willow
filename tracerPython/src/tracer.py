@@ -49,18 +49,23 @@ class Tracer:
 
         try:
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
+
             # sync
-            self._action_queue.get()
+            action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.STARTED))
             #
+
             sys.settrace(script_inspector.trace)
             exec(compiled, script_scope)
             print('done')
         except Exception as e:
             # sync
-            self._action_queue.get()
+            action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
+            action = self._action_queue.get()
+            self._result_queue.put(events.Event(events.Results.QUITTED, str(e)))
             #
+
             print('error')
             print(str(e))
         finally:
@@ -112,20 +117,27 @@ class TracerStepper:
 
         # sync
         self._action_queue.put(events.Event(events.Actions.START))
-        event = self._result_queue.get()
-        if event.name == events.Results.ERROR:
-            self.stop()
+        start_result = self._result_queue.get()
+        #
 
-        return event
+        stop_result = self.stop() if start_result.name == events.Results.ERROR else []
+
+        return [start_result, *stop_result]
 
     def stop(self):
         """
         Stop the tracer process and queues.
 
             :raise: AssertionError - if tracer already stopped
+            :return: list of results until start
         """
         if not self.is_running():
             raise AssertionError('tracer already stopped')
+
+        # sync
+        self._action_queue.put(events.Event(events.Actions.QUIT))
+        result = self._result_queue.get()
+        #
 
         self._tracer_process.terminate()
         self._tracer_process.join()
@@ -134,3 +146,5 @@ class TracerStepper:
         self._tracer_process = None
         self._action_queue = None
         self._result_queue = None
+
+        return [result]
