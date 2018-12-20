@@ -10,7 +10,9 @@ def main():
     parser.add_argument('script', help='The python script to parse')
     arguments = parser.parse_args()
 
-    tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox).start()
+    tracer_stepper = tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox)
+    tracer_stepper.start()
+    # tracer_stepper.stop()
 
 
 if __name__ == '__main__':

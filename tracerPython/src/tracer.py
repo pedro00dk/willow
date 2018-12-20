@@ -63,20 +63,37 @@ class TracerStepper:
 
     def __init__(self, name: str, script: str, sandbox: bool):
         """
-        Initialize the TracerStepper and prepare the internal tracer for running in another process.
+        Store tracer parameters for process spawning.
 
             :params ref(Tracer.__init__):
+        """
+        self._name = name
+        self._script = script
+        self._sandbox = sandbox
+        self._command_queue = None
+        self._result_queue = None
+        self._tracer_process = None
+
+    def start(self):
+        """
+        Start the tracer in a new process.
         """
         self._command_queue = mp.Queue()
         self._result_queue = mp.Queue()
         self._tracer_process = mp.Process(
             target=Tracer.init_run,
-            args=(name, script, sandbox, self._command_queue, self._result_queue)
+            args=(self._name, self._script, self._sandbox, self._command_queue, self._result_queue)
         )
-
-    def start(self):
-        """
-        Start the tracer in a new process
-        """
         self._tracer_process.start()
 
+    def stop(self):
+        """
+        Stop the tracer process and queues.
+        """
+        self._tracer_process.terminate()
+        self._tracer_process.join()
+        self._command_queue.close()
+        self._result_queue.close()
+        self._tracer_process = None
+        self._command_queue = None
+        self._result_queue = None
