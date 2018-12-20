@@ -1,18 +1,14 @@
-class EventFields:
+class Event:
     """
-    Event fields.
+    Store event data.
     """
-    TYPE = 'type'
-    VALUE = 'value'
 
+    def __init__(self, name: str, value=None):
+        """
+        Crate the event with its name and value.
 
-def new(type: str, value=None):
-    """
-    Create a new event.
-
-        :param type: event type
-        :param value: event value
-
-        :return: event dict
-    """
-    return {EventFields.TYPE: type, EventFields.VALUE: value}
+            :param name: event name
+            :param value: event value
+        """
+        self.name = name
+        self.value = value
