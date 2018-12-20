@@ -1,6 +1,8 @@
 import sys
 import types
 
+import scope
+
 
 class Tracer:
     """
@@ -20,9 +22,16 @@ class Tracer:
         """
         Start to trace the script.
         """
+        script_globals = scope.Globals()\
+            .property(scope.Globals.FILE, '<script>')\
+            .builtin('compile', None)\
+            .builtin('exec', None)\
+            .builtin('open', None)\
+            .build()
+
         try:
             sys.settrace(self._trace)
-            exec(compile(self.script, '<script>', 'exec'), {}, {})
+            exec(compile(self.script, script_globals[scope.Globals.FILE], 'exec'), script_globals)
             print('done')
         except Exception as e:
             print(str(e))
