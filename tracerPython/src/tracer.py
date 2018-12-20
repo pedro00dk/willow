@@ -1,9 +1,10 @@
 import sys
+import queue
 import threading
 import types
 
-import scope
 import inspector
+import scope
 
 
 class Tracer:
@@ -23,7 +24,10 @@ class Tracer:
         self._script = script
         self._sandbox = sandbox
         self._lines = self._script.splitlines() if len(script) > 0 else ['']
-        self._controller = inspector.Inspector(self._name, self._lines)
+
+        # threading control
+        self._command_queue = None
+        self._command_queue = None
         self._trace_thread = None
 
     def start(self):
@@ -31,17 +35,26 @@ class Tracer:
         Create a thread to trace the script.
         Another thread is necessary because of blocking command link input calls in the script.
         """
-        self._trace_thread = threading.Thread(target=self._trace_coroutine)
+        self._command_queue = queue.Queue()
+        self._result_queue = queue.Queue()
+        self._trace_thread = threading.Thread(
+            target=self._trace_coroutine,
+            args=(self._command_queue, self._result_queue)
+        )
         self._trace_thread.start()
 
-    def _trace_coroutine(self):
+    def _trace_coroutine(self, command_queue: queue.Queue, result_queue: queue.Queue):
         """
         Starts the tracing coroutine.
         Configure the scope, set the trace function and execute the script.
+
+            :param command_queue: queue to send commands
+            :param result_queue: queue to receive inspection results
         """
         script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
+        script_inspector = inspector.Inspector(self._name, self._lines, command_queue, result_queue)
         try:
-            sys.settrace(self._controller.trace)
+            sys.settrace(script_inspector.trace)
             exec(compile(self._script, script_scope[scope.Globals.FILE], 'exec'), script_scope)
             print('done')
         except Exception as e:

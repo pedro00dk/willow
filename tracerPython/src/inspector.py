@@ -1,3 +1,4 @@
+import queue
 import sys
 import types
 
@@ -9,15 +10,19 @@ class Inspector:
 
     TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
 
-    def __init__(self, name: str, lines: list):
+    def __init__(self, name: str, lines: list, command_queue: queue.Queue, result_queue: queue.Queue):
         """
         Initialize the tracer controller with the script name and lines.
 
             :param name: script name
             :param line: script lines
+            :param command_queue: queue to read commands
+            :param result_queue: queue to write results
         """
         self._name = name
         self._lines = lines
+        self._command_queue = command_queue
+        self._result_queue = result_queue
 
     def code_line(self, frame: types.FrameType):
         return self._lines[frame.f_lineno - 1] if self.is_base_file(frame) else None
@@ -38,7 +43,7 @@ class Inspector:
         """
         if not self.is_base_file(frame) or not self.is_traceable_event(event):
             return self.trace
-
+        
         print(self.inspect_state(frame, event, args))
 
         return self.trace
