@@ -48,23 +48,13 @@ class Tracer:
         script_inspector = inspector.Inspector(self._name, self._lines, self._action_queue, self._result_queue)
 
         try:
-            # sync
             action = self._action_queue.get()
-            #
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
-
-            # sync
             self._result_queue.put(events.Event(events.Results.STARTED))
-            #
-
             sys.settrace(script_inspector.trace)
             exec(compiled, script_scope)
         except Exception as e:
-
-            # sync
             self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
-            #
-
         finally:
             sys.settrace(None)
 
@@ -113,10 +103,8 @@ class TracerStepper:
         )
         self._tracer_process.start()
 
-        # sync
         self._action_queue.put(events.Event(events.Actions.START))
         result = self._result_queue.get()
-        #
 
         if result.name == events.Results.ERROR:
             self.stop()
@@ -133,9 +121,7 @@ class TracerStepper:
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
-        # sync
         self._action_queue.put(events.Event(events.Actions.QUIT))
-        #
 
         self._tracer_process.terminate()
         self._tracer_process.join()
@@ -151,10 +137,8 @@ class TracerStepper:
         if count < 1:
             raise AssertionError('count smaller than 1')
 
-        # sync
         self._action_queue.put(events.Event(events.Actions.STEP, {'count': count}))
         result = self._result_queue.get()
-        #
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
             self.stop()
