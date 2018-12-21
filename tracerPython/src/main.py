@@ -12,6 +12,11 @@ def main():
 
     tracer_stepper = tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox)
     print(tracer_stepper.start())
+    while True:
+        result = tracer_stepper.step()
+        print(result)
+        if result[-1].value['finish']:
+            break
 
 
 if __name__ == '__main__':

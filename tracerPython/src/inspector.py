@@ -2,6 +2,8 @@ import multiprocessing as mp
 import sys
 import types
 
+import events
+
 
 class Inspector:
     """
@@ -48,8 +50,10 @@ class Inspector:
         self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
         self.inspected_frame_count += 1
 
-        print(self.inspect_state(frame, event, args))
-        print(self.exec_call_frame)
+        action = self._action_queue.get()
+
+        if action.name == events.Actions.STEP:
+            self._result_queue.put(events.Event(events.Results.DATA, self.inspect_state(frame, event, args)))
 
         return self.trace
 

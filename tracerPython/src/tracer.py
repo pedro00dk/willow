@@ -59,6 +59,7 @@ class Tracer:
             exec(compiled, script_scope)
             print('done')
         except Exception as e:
+
             # sync
             action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
@@ -146,5 +147,18 @@ class TracerStepper:
         self._tracer_process = None
         self._action_queue = None
         self._result_queue = None
+
+        return [result]
+
+    def step(self, count:  int = 1):
+        if not self.is_tracer_running():
+            raise AssertionError('tracer not running')
+        if count < 1:
+            raise AssertionError('count smaller than 1')
+
+        # sync
+        self._action_queue.put(events.Event(events.Actions.STEP, {'count': count}))
+        result = self._result_queue.get()
+        #
 
         return [result]
