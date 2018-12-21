@@ -57,20 +57,22 @@ class Tracer:
 
             sys.settrace(script_inspector.trace)
             exec(compiled, script_scope)
-            print('done')
         except Exception as e:
 
             # sync
             action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
-            action = self._action_queue.get()
-            self._result_queue.put(events.Event(events.Results.QUITTED, str(e)))
             #
 
             print('error')
             print(str(e))
         finally:
             sys.settrace(None)
+
+            # sync
+            action = self._action_queue.get()
+            self._result_queue.put(events.Event(events.Results.QUITTED))
+            #
 
 
 class TracerStepper:
@@ -160,5 +162,8 @@ class TracerStepper:
         self._action_queue.put(events.Event(events.Actions.STEP, {'count': count}))
         result = self._result_queue.get()
         #
+
+        if result.value['finish']:
+            self.stop()
 
         return [result]
