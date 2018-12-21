@@ -48,10 +48,12 @@ class Tracer:
         script_inspector = inspector.Inspector(self._name, self._lines, self._action_queue, self._result_queue)
 
         try:
+            # sync
+            action = self._action_queue.get()
+            #
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
 
             # sync
-            action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.STARTED))
             #
 
@@ -60,19 +62,11 @@ class Tracer:
         except Exception as e:
 
             # sync
-            action = self._action_queue.get()
             self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
             #
 
-            print('error')
-            print(str(e))
         finally:
             sys.settrace(None)
-
-            # sync
-            action = self._action_queue.get()
-            self._result_queue.put(events.Event(events.Results.QUITTED))
-            #
 
 
 class TracerStepper:
@@ -106,6 +100,7 @@ class TracerStepper:
         Start the tracer in a new process.
 
             :raise: AssertionError - if tracer already running
+            :return: list of results until start
         """
         if self.is_tracer_running():
             raise AssertionError('tracer already running')
@@ -120,26 +115,26 @@ class TracerStepper:
 
         # sync
         self._action_queue.put(events.Event(events.Actions.START))
-        start_result = self._result_queue.get()
+        result = self._result_queue.get()
         #
 
-        stop_result = self.stop() if start_result.name == events.Results.ERROR else []
+        if result.name == events.Results.ERROR:
+            self.stop()
 
-        return [start_result, *stop_result]
+        print(result.name, result.value)
+        return [result]
 
     def stop(self):
         """
         Stop the tracer process and queues.
 
             :raise: AssertionError - if tracer already stopped
-            :return: list of results until start
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
         # sync
         self._action_queue.put(events.Event(events.Actions.QUIT))
-        result = self._result_queue.get()
         #
 
         self._tracer_process.terminate()
@@ -149,8 +144,6 @@ class TracerStepper:
         self._tracer_process = None
         self._action_queue = None
         self._result_queue = None
-
-        return [result]
 
     def step(self, count:  int = 1):
         if not self.is_tracer_running():
@@ -163,7 +156,8 @@ class TracerStepper:
         result = self._result_queue.get()
         #
 
-        if result.value['finish']:
+        if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
             self.stop()
 
+        print(result.name, result.value)
         return [result]
