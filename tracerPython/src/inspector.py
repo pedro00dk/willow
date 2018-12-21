@@ -28,10 +28,7 @@ class Inspector:
         self.exec_call_frame = None
         self.inspected_frame_count = 0
 
-    def code_line(self, frame: types.FrameType):
-        return self._lines[frame.f_lineno - 1] if self.is_base_file(frame) else None
-
-    def is_base_file(self, frame: types.FrameType):
+    def is_script_file(self, frame: types.FrameType):
         return frame.f_code.co_filename == self._name
 
     def is_traceable_event(self, event: str):
@@ -45,12 +42,12 @@ class Inspector:
             :param event: current code event, one of: 'call', 'line', 'return', 'exception' or 'opcode'
             :param args: context arguments in some code states
         """
-        if not self.is_base_file(frame) or not self.is_traceable_event(event):
+        if not self.is_script_file(frame) or not self.is_traceable_event(event):
             return self.trace
 
         self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
         self.inspected_frame_count += 1
-        
+
         print(self.inspect_state(frame, event, args))
         print(self.exec_call_frame)
 
@@ -60,7 +57,7 @@ class Inspector:
 
     def inspect_state(self, frame: types.FrameType, event: str, args):
         line = frame.f_lineno
-        text = self.code_line(frame)
+        text = self._lines[frame.f_lineno - 1]
         stack_frames, stack_data, stack_depth = self.inspect_stack(frame)
         finish = event == 'return' and stack_depth <= 1
         return {
@@ -79,8 +76,8 @@ class Inspector:
             stack_frames.append(current_frame)
             current_frame = current_frame.f_back
 
-        stack_frames = [frame for frame in stack_frames if self.is_base_file(frame)]
-        stack_data = [{'line': frame.f_lineno - 1, 'text': self.code_line(frame)} for frame in stack_frames]
+        stack_frames = [frame for frame in stack_frames if self.is_script_file(frame)]
+        stack_data = [{'line': frame.f_lineno - 1, 'text': self._lines[frame.f_lineno - 1]} for frame in stack_frames]
         stack_depth = len(stack_frames)
         return stack_frames, stack_data, stack_depth
 

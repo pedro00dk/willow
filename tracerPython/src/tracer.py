@@ -90,7 +90,7 @@ class TracerStepper:
         self._result_queue = None
         self._tracer_process = None
 
-    def is_running(self):
+    def is_tracer_running(self):
         """
         Return if the tracer is running.
 
@@ -104,7 +104,7 @@ class TracerStepper:
 
             :raise: AssertionError - if tracer already running
         """
-        if self.is_running():
+        if self.is_tracer_running():
             raise AssertionError('tracer already running')
 
         self._action_queue = mp.Queue()
@@ -131,7 +131,7 @@ class TracerStepper:
             :raise: AssertionError - if tracer already stopped
             :return: list of results until start
         """
-        if not self.is_running():
+        if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
         # sync
