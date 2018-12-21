@@ -11,7 +11,7 @@ def main():
     arguments = parser.parse_args()
 
     tracer_stepper = tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox)
-    print(tracer_stepper.start())
+    tracer_stepper.start()
     while True:
         try:
             tracer_stepper.step()

@@ -14,7 +14,6 @@ class Results:
     """
 
     STARTED = 'started'
-    QUITTED = 'quitted'
     ERROR = 'error'
     DATA = 'data'
 
