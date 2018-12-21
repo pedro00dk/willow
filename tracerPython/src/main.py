@@ -14,7 +14,7 @@ def main():
     print(tracer_stepper.start())
     while True:
         result = tracer_stepper.step()
-        print(result)
+        print(result[-1].value)
         if result[-1].value['finish']:
             break
 
