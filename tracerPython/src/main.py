@@ -13,9 +13,9 @@ def main():
     tracer_stepper = tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox)
     print(tracer_stepper.start())
     while True:
-        result = tracer_stepper.step()
-        print(result[-1].value)
-        if result[-1].value['finish']:
+        try:
+            tracer_stepper.step()
+        except:
             break
 
 
