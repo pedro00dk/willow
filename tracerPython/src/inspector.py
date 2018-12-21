@@ -24,6 +24,10 @@ class Inspector:
         self._action_queue = action_queue
         self._result_queue = result_queue
 
+        # inspection properties
+        self.exec_call_frame = None
+        self.inspected_frame_count = 0
+
     def code_line(self, frame: types.FrameType):
         return self._lines[frame.f_lineno - 1] if self.is_base_file(frame) else None
 
@@ -43,8 +47,12 @@ class Inspector:
         """
         if not self.is_base_file(frame) or not self.is_traceable_event(event):
             return self.trace
+
+        self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
+        self.inspected_frame_count += 1
         
         print(self.inspect_state(frame, event, args))
+        print(self.exec_call_frame)
 
         return self.trace
 
@@ -53,14 +61,28 @@ class Inspector:
     def inspect_state(self, frame: types.FrameType, event: str, args):
         line = frame.f_lineno
         text = self.code_line(frame)
+        stack_frames, stack_data, stack_depth = self.inspect_stack(frame)
+        finish = event == 'return' and stack_depth <= 1
         return {
             'event': event,
             'line': line,
             'text': text,
+            'stack_data': stack_data,
+            'stack_depth': stack_depth,
+            'finish': finish
         }
 
     def inspect_stack(self, frame: types.FrameType):
-        pass
+        current_frame = frame
+        stack_frames = []
+        while current_frame != self.exec_call_frame:
+            stack_frames.append(current_frame)
+            current_frame = current_frame.f_back
+
+        stack_frames = [frame for frame in stack_frames if self.is_base_file(frame)]
+        stack_data = [{'line': frame.f_lineno - 1, 'text': self.code_line(frame)} for frame in stack_frames]
+        stack_depth = len(stack_frames)
+        return stack_frames, stack_data, stack_depth
 
     def inspect_heap(self, frame: types.FrameType):
         pass
