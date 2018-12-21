@@ -54,6 +54,8 @@ class Inspector:
 
         if action.name == events.Actions.STEP:
             self._result_queue.put(events.Event(events.Results.DATA, self.inspect_state(frame, event, args)))
+        elif action.name == events.Actions.QUIT:
+            self._result_queue.put(events.Event(events.Results.DATA, {}))
 
         return self.trace
 
