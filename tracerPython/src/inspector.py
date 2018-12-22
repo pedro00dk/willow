@@ -31,9 +31,19 @@ class Inspector:
         self.inspected_frame_count = 0
 
     def is_script_file(self, frame: types.FrameType):
+        """
+        Check if the frame is from the main script file.
+
+            :return: frame is from script file
+        """
         return frame.f_code.co_filename == self._name
 
     def is_traceable_event(self, event: str):
+        """
+        Check if the frame event is traceable.
+
+            :return: if is traceable
+        """
         return event in Inspector.TRACEABLE_EVENTS
 
     def trace(self, frame: types.FrameType, event: str, args):
@@ -62,30 +72,46 @@ class Inspector:
     # inspection methods
 
     def inspect_state(self, frame: types.FrameType, event: str, args):
-        line = frame.f_lineno
-        text = self._lines[frame.f_lineno - 1]
-        stack_frames, stack_data, stack_depth = self.inspect_stack(frame)
-        finish = event == 'return' and stack_depth <= 1
+        """
+        Inspect the application state.
+        Analyse the stack and heap, collecting the objects.
+
+            :params ref(trace):
+            :return: dict with trace information
+        """
+        stack_frames, stack_lines = self.inspect_stack(frame)
+        stack_refs, heap_graph = self.inspect_heap(stack_frames)
+        finish = event == 'return' and len(stack_frames) == 1
         return {
             'event': event,
-            'line': line,
-            'text': text,
-            'stack_data': stack_data,
-            'stack_depth': stack_depth,
+            'line': stack_lines[0]['line'],
+            'text': stack_lines[0]['text'],
+            'stack_lines': stack_lines,
+            'stack_refs': stack_refs,
+            'heap_graph': heap_graph,
             'finish': finish
         }
 
     def inspect_stack(self, frame: types.FrameType):
+        """
+        Inspect the application stack.
+
+            :params ref(trace):
+            :return: stack frames of script only
+            :return: dict with frames names, lines and text
+        """
         current_frame = frame
-        stack_frames = []
+        frames = []
         while current_frame != self.exec_call_frame:
-            stack_frames.append(current_frame)
+            frames.append(current_frame)
             current_frame = current_frame.f_back
 
-        stack_frames = [frame for frame in stack_frames if self.is_script_file(frame)]
-        stack_data = [{'line': frame.f_lineno - 1, 'text': self._lines[frame.f_lineno - 1]} for frame in stack_frames]
-        stack_depth = len(stack_frames)
-        return stack_frames, stack_data, stack_depth
+        frames = [frame for frame in frames if self.is_script_file(frame)]
+        lines = [
+            {'name': frame.f_code.co_name, 'line': frame.f_lineno - 1, 'text': self._lines[frame.f_lineno - 1]}
+            for frame in frames
+        ]
+        return frames, lines
 
-    def inspect_heap(self, frame: types.FrameType):
-        pass
+    def inspect_heap(self, stack_frames: list):
+        return None, None
