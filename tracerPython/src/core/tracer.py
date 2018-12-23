@@ -6,7 +6,7 @@ import events
 from . import scope
 from .evaluator import Evaluator
 from .inspector import Inspector
-from .util import FrameUtil, ExceptionUtil
+from .util import ExceptionUtil, FrameUtil
 
 
 class Tracer:

@@ -1,6 +1,6 @@
 import types
 
-from .util import FrameUtil, ExceptionUtil
+from .util import ExceptionUtil, FrameUtil
 
 
 class Evaluator:
