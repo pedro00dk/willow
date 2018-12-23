@@ -4,6 +4,7 @@ import types
 
 import events
 from . import scope
+from .inspector import Inspector
 from .util import FrameUtil
 
 
@@ -87,14 +88,15 @@ class FrameProcessor:
 
                 # evaluate first and then inspect state
                 product = self.evaluate_expression(frame, expression)
-                inspection = {}  # self.inspect_state(frame, event, args) if inspect else {}
+                data = Inspector.inspect(frame, event, args, self._exec_call_frame) if inspect else {}
 
-                self._result_queue.put(events.Event(events.Results.PRODUCT, {**inspection, **product}))
+                self._result_queue.put(events.Event(events.Results.PRODUCT, {**data, **product}))
                 continue
 
             # progressive actions
             if action.name == events.Actions.STEP:
-                self._result_queue.put(events.Event(events.Results.DATA, {'finish': True}))
+                data = Inspector.inspect(frame, event, args, self._exec_call_frame)
+                self._result_queue.put(events.Event(events.Results.DATA, data))
             elif action.name == events.Actions.QUIT:
                 self._result_queue.put(events.Event(events.Results.DATA, {}))
             break
