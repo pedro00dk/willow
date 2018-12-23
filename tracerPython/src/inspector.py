@@ -80,15 +80,16 @@ class Inspector:
             :return: dict with trace information
         """
         stack_frames, stack_lines = self.inspect_stack(frame)
-        stack_refs, heap_graph = self.inspect_heap(stack_frames)
+        stack_references, heap_graph, user_classes = self.inspect_heap(stack_frames)
         finish = event == 'return' and len(stack_frames) == 1
         return {
             'event': event,
             'line': stack_lines[0]['line'],
             'text': stack_lines[0]['text'],
             'stack_lines': stack_lines,
-            'stack_refs': stack_refs,
+            'stack_references': stack_references,
             'heap_graph': heap_graph,
+            'user_classes': user_classes,
             'finish': finish
         }
 
@@ -114,4 +115,77 @@ class Inspector:
         return frames, lines
 
     def inspect_heap(self, stack_frames: list):
-        return None, None
+        """
+        Inspect the application heap.
+        Inspect every object found from the stack frames
+
+            :param stack_frames: list of stack frames
+            :return: stack references
+            :return: heap graph with references as keys
+            :return: user defined/manipulated classes (the tracer does not support safe type manipulation)
+        """
+        stack_references = []
+        heap_graph = {}
+        user_classes = set()
+
+        for frame in stack_frames[::-1]:
+            frame_variables = frame.f_locals
+            frame_references = [
+                (name, self.inspect_object(frame_variables[name], heap_graph, user_classes))
+                for name, value in frame_variables.items() if not name.startswith('_')
+            ]
+            stack_references.append(frame_references)
+
+        return stack_references, heap_graph, user_classes
+
+    def inspect_object(self, obj, heap_graph: dict, user_classes: set):
+        """
+        Inspect the received object.
+        If the object is a const (bool, int, float, None, complex, str), returns its value.
+        If the object is a type (type), returns its type name.
+        Otherwise, returns the object reference (list with a single number inside)
+        recursively, inspecting object members and filling the heap_graph and user_classes
+
+
+
+            :param obj: object to inspect
+            :param heap_graph: dict with existent objects references (mutable)
+            :param user_classes: list of found manipulated classes (mutable)
+            :return: object value if const or type, or object reference
+        """
+        # const type
+        if isinstance(obj, (bool, int, float, type(None))):
+            return obj
+        if isinstance(obj, (complex, str)):
+            return repr(obj)
+
+        # type type
+        if isinstance(obj, type):
+            if obj not in {list, tuple, set, dict}:
+                user_classes.add(obj)
+            return type(obj).__name__
+
+        # iterable object type
+        reference = id(obj)
+
+        if reference not in heap_graph:
+
+            if isinstance(obj, (list, tuple, set)):
+                members = enumerate(obj)
+            elif isinstance(obj, dict):
+                members = obj.items()
+            else:
+                members = ((name, value) for name, value in vars(obj).items() if not name.startswith('_'))
+
+            # add reference to heap graph (has to be added before other objects inspections)
+            heap_graph[reference] = {}
+
+            members_inspections = [
+                (self.inspect_object(name, heap_graph, user_classes), self.inspect_object(value, heap_graph, user_classes))
+                for name, value in members
+            ]
+
+            # update with all data
+            heap_graph[reference] = {'type': type(obj).__name__, 'members': members_inspections}
+
+        return reference,
