@@ -4,6 +4,7 @@ import types
 
 import events
 from . import scope
+from .evaluator import Evaluator
 from .inspector import Inspector
 from .util import FrameUtil, ExceptionUtil
 
@@ -76,7 +77,7 @@ class FrameProcessor:
         if not FrameUtil.is_file(frame, self._name) or not FrameUtil.is_traceable(event):
             return self.trace
 
-        self._exec_call_frame = frame.f_back if self._inspected_frame_count == 0 else self._exec_call_frame
+        self._exec_call_frame = FrameUtil.previous(frame) if self._inspected_frame_count == 0 else self._exec_call_frame
         self._inspected_frame_count += 1
 
         while True:
@@ -88,7 +89,7 @@ class FrameProcessor:
                 inspect = action.value['inspect']
 
                 # evaluate first and then inspect state
-                product = self.evaluate_expression(frame, expression)
+                product = Evaluator.evaluate(frame, expression)
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame) if inspect else {}
 
                 self._result_queue.put(events.Event(events.Results.PRODUCT, {**data, **product}))
@@ -103,17 +104,3 @@ class FrameProcessor:
             break
 
         return self.trace
-
-    # evaluation methods
-
-    def evaluate_expression(self, frame: types.FrameType, expression: str):
-        """
-        Evaluates expressions against the frame scope, process possible exceptions if any is thrown.
-        The expression is able to mutate the script state.
-        """
-        try:
-            product = eval(expression, frame.f_globals, frame.f_locals)
-        except Exception as e:
-            product = ExceptionUtil.dump(e)
-
-        return {'product': product}
