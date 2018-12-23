@@ -22,15 +22,12 @@ class Results:
 
 class Event:
     """
-    Store event data.
+    Stores event data.
     """
 
     def __init__(self, name: str, value=None):
         """
-        Crate the event with its name and value.
-
-            :param name: event name
-            :param value: event value
+        Crates the event with its name and value.
         """
         self.name = name
         self.value = value
