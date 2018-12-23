@@ -7,6 +7,7 @@ class Actions:
     QUIT = 'quit'
     STEP = 'step'
     EVAL = 'eval'
+    INPUT = 'input'
 
 
 class Results:
