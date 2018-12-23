@@ -116,6 +116,15 @@ class FrameProcessor:
         Hook action for input implementations.
         """
         self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
+        while True:
+            action = self._action_queue.get()
+            if action.name == events.Actions.INPUT:
+                return action.value['input']
+            if action.name == events.Actions.QUIT:
+                # add quit event in the queue again for stacked inputs until reach frame tracer
+                self._action_queue.put(event)
+                return ''
+            self._result_queue.put(events.Event(events.Results.LOCKED, 'input locked, skipping action'))
 
     def print_hook(self, text: str):
         """

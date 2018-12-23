@@ -81,7 +81,7 @@ class TracerBroker:
         while True:
             result = self._result_queue.get()
             results.append(result)
-            if result.name in {events.Results.DATA, events.Results.ERROR}:
+            if result.name in {events.Results.DATA, events.Results.ERROR, events.Results.LOCKED}:
                 break
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
@@ -101,10 +101,21 @@ class TracerBroker:
         while True:
             result = self._result_queue.get()
             results.append(result)
-            if result.name in {events.Results.PRODUCT, events.Results.ERROR}:
+            if result.name in {events.Results.PRODUCT, events.Results.ERROR, events.Results.LOCKED}:
                 break
 
         if result.name == events.Results.ERROR:
             self.stop()
 
         return results
+
+    def input(self, data: str):
+        """
+        Sends a input string to script. Inputs have no response.
+        """
+        if not self.is_tracer_running():
+            raise AssertionError('tracer not running')
+        if not data:
+            raise AttributeError('data cannot be None')
+
+        self._action_queue.put(events.Event(events.Actions.INPUT, {'input': data}))
