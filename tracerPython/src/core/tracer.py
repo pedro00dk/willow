@@ -3,8 +3,8 @@ import sys
 import types
 
 import events
-import inspector
-import scope
+from . import inspector
+from . import scope
 
 
 class Tracer:

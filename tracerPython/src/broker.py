@@ -1,7 +1,7 @@
 import multiprocessing as mp
 
+from core import tracer
 import events
-import tracer
 
 
 class TracerBroker:
