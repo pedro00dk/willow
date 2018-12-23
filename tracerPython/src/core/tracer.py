@@ -1,3 +1,4 @@
+import collections
 import multiprocessing as mp
 import sys
 import types
@@ -76,6 +77,9 @@ class FrameProcessor:
         self._exec_call_frame = None
         self._inspected_frame_count = 0
 
+        # hooks attributes
+        self._input_cache = collections.deque()
+
     def trace(self, frame: types.FrameType, event: str, args):
         """
         The script trace function.
@@ -101,6 +105,10 @@ class FrameProcessor:
                 self._result_queue.put(events.Event(events.Results.PRODUCT, {**data, **product}))
                 continue
 
+            if action.name == events.Actions.INPUT:
+                self._input_cache.append(action.value['input'])
+                continue
+
             # progressive actions
             if action.name == events.Actions.STEP:
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame)
@@ -116,6 +124,12 @@ class FrameProcessor:
         Hook action for input implementations.
         """
         self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
+
+        # cached input
+        if len(self._input_cache) > 0:
+            return self._input_cache.popleft()
+
+        # missing input
         while True:
             action = self._action_queue.get()
             if action.name == events.Actions.INPUT:
