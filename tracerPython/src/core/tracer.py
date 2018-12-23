@@ -5,7 +5,7 @@ import types
 import events
 from . import scope
 from .inspector import Inspector
-from .util import FrameUtil
+from .util import FrameUtil, ExceptionUtil
 
 
 class Tracer:
@@ -113,11 +113,6 @@ class FrameProcessor:
         try:
             product = eval(expression, frame.f_globals, frame.f_locals)
         except Exception as e:
-            product = {
-                'type': type(e).__name__,
-                'value': e.args,
-                'traceback': traceback.format_exception(type(e), e, e.__traceback__)
-            }
-            pass
-        finally:
-            return {'product': product}
+            product = ExceptionUtil.dump(e)
+
+        return {'product': product}

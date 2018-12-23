@@ -1,4 +1,5 @@
 import types
+import traceback
 
 
 class FrameUtil:
@@ -64,3 +65,20 @@ class FrameUtil:
         Returns true if the frame event is traceable.
         """
         return event in cls.TRACEABLE_EVENTS
+
+
+class ExceptionUtil:
+    """
+    Processes exceptions objects.
+    """
+
+    def dump(exception: Exception):
+        """
+        Raised exception cannot be pickled because of their traceback objects.
+        This method transforms the exception in a dict with all data.
+        """
+        return {
+            'type': type(exception).__name__,
+            'args': exception.args,
+            'traceback': traceback.format_exception(type(exception), exception, exception.__traceback__)
+        }
