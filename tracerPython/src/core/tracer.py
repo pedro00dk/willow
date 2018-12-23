@@ -6,7 +6,7 @@ import events
 from . import scope
 from .evaluator import Evaluator
 from .inspector import Inspector
-from .scriptio import Print
+from .scriptio import Input, Print
 from .util import ExceptionUtil, FrameUtil
 
 
@@ -39,6 +39,7 @@ class Tracer:
         """
         globals_builder, modules_halter = scope.default_scope_composers(self._name) if not self._sandbox else \
             scope.sandbox_scope_composers(self._name)
+        globals_builder.builtin('input', Input(self._action_queue, self._result_queue))
         globals_builder.builtin('print', Print(self._result_queue))
         script_scope = modules_halter.apply(globals_builder.build())
 

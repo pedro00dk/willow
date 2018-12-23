@@ -1,5 +1,6 @@
 import queue
 import functools
+import multiprocessing as mp
 
 import events
 
@@ -9,14 +10,15 @@ class Input:
     Redirects input as events over process connection queues.
     """
 
-    def __init__(self, input_queue: queue.Queue, output_queue: queue.Queue):
-        self._input_queue = input_queue
-        self._output_queue = output_queue
+    def __init__(self, action_queue: mp.Queue, result_queue: mp.Queue):
+        self._action_queue = action_queue
+        self._result_queue = result_queue
 
     def __call__(self, prompt=''):
         prompt = str(prompt)
-        self._output_queue.put(prompt)
-        return self._input_queue.get()
+        self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
+        #return self._input_queue.get()
+        return None
 
 
 class Print:
@@ -24,8 +26,8 @@ class Print:
     Redirects print as events over process connection queues.
     """
 
-    def __init__(self, result_queue: queue.Queue):
-        self.result_queue = result_queue
+    def __init__(self, result_queue: mp.Queue):
+        self._result_queue = result_queue
 
     def __call__(self, *values, sep=None, end=None):
         if sep is not None and not isinstance(sep, str):
@@ -37,4 +39,4 @@ class Print:
         end = end if end is not None else '\n'
         values = (str(value) for value in values)
         text = f'{sep.join(values)}{end}'
-        self.result_queue.put(events.Event(events.Results.PRINT, text))
+        self._result_queue.put(events.Event(events.Results.PRINT, text))
