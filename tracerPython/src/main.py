@@ -1,6 +1,6 @@
 import argparse
 
-import tracer
+import broker
 
 
 def main():
@@ -10,11 +10,15 @@ def main():
     parser.add_argument('script', help='The python script to parse')
     arguments = parser.parse_args()
 
-    tracer_stepper = tracer.TracerStepper(arguments.name, arguments.script, arguments.sandbox)
+    tracer_stepper = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
     tracer_stepper.start()
+    i = 0
     while True:
+        i += 1
         try:
             tracer_stepper.step()
+            if i % 10 == 0:
+                tracer_stepper.eval('a.update({\'i\': a[\'i\'] + 3})')
         except:
             break
 
