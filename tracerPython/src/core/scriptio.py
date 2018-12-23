@@ -1,6 +1,8 @@
 import queue
 import functools
 
+import events
+
 
 class Input:
     """
@@ -22,9 +24,8 @@ class Print:
     Redirects print as events over process connection queues.
     """
 
-    def __init__(self, input_queue: queue.Queue, output_queue: queue.Queue):
-        self._input_queue = input_queue
-        self._output_queue = output_queue
+    def __init__(self, result_queue: queue.Queue):
+        self.result_queue = result_queue
 
     def __call__(self, *values, sep=None, end=None):
         if sep is not None and not isinstance(sep, str):
@@ -36,4 +37,4 @@ class Print:
         end = end if end is not None else '\n'
         values = (str(value) for value in values)
         text = f'{sep.join(values)}{end}'
-        self._output_queue.put(text)
+        self.result_queue.put(events.Event(events.Results.PRINT, text))
