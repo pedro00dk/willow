@@ -21,6 +21,7 @@ class Results:
     PRODUCT = 'product'
     PRINT = 'print'
     PROMPT = 'prompt'
+    LOCKED = 'locked'
 
 
 class Event:
