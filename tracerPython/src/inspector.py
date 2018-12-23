@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import sys
+import traceback
 import types
 
 import events
@@ -66,7 +67,7 @@ class Inspector:
             # hold actions
             if action.name == events.Actions.EVAL:
                 expression = action.value
-                product = eval(expression, frame.f_globals, frame.f_locals)
+                product = self.evaluate_expression(frame, expression)
                 self._result_queue.put(events.Event(events.Results.PRODUCT, product))
                 continue
 
@@ -77,8 +78,30 @@ class Inspector:
                 self._result_queue.put(events.Event(events.Results.DATA, {}))
             break
 
-
         return self.trace
+
+    # evaluation methods
+
+    def evaluate_expression(self, frame: types.FrameType, expression: str):
+        """
+        Evaluate expressions against the frame scope, process the exception if any is thrown.
+        The expression is able to mutate the script state.
+            
+            :params ref(trace):
+            :param expression: expression to evaluate
+            :return: expression result
+        """
+        try:
+            product = eval(expression, frame.f_globals, frame.f_locals)
+        except Exception as e:
+            product = {
+                'type': type(e).__name__,
+                'value': e.args,
+                'traceback': traceback.format_exception(type(e), e, e.__traceback__)
+            }
+            pass
+        finally:
+            return product
 
     # inspection methods
 
