@@ -6,14 +6,12 @@ import tracer
 
 class TracerBroker:
     """
-    Provide basic stepping in the tracer.
+    Provides an easy interface for comunicating with the Tracer as it has to run in another process.
     """
 
     def __init__(self, name: str, script: str, sandbox: bool):
         """
-        Store tracer parameters for process spawning.
-
-            :params ref(Tracer.__init__):
+        Stores the Tracer parameters for posterior usage when starting the Tracer.
         """
         self._name = name
         self._script = script
@@ -24,18 +22,13 @@ class TracerBroker:
 
     def is_tracer_running(self):
         """
-        Return if the tracer is running.
-
-            :return: if tracer is running
+        Returns true if the tracer is running.
         """
         return self._tracer_process is not None
 
     def start(self):
         """
-        Start the tracer in a new process.
-
-            :raise: AssertionError - if tracer already running
-            :return: list of results until start
+        Starts the tracer in a new process.
         """
         if self.is_tracer_running():
             raise AssertionError('tracer already running')
@@ -59,9 +52,7 @@ class TracerBroker:
 
     def stop(self):
         """
-        Stop the tracer process and queues.
-
-            :raise: AssertionError - if tracer already stopped
+        Stops the tracer process and queues.
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
@@ -77,12 +68,15 @@ class TracerBroker:
         self._result_queue = None
 
     def step(self, count:  int = 1):
+        """
+        Steps into the script.
+        """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
         if count < 1:
             raise AssertionError('count smaller than 1')
 
-        self._action_queue.put(events.Event(events.Actions.STEP, 1))
+        self._action_queue.put(events.Event(events.Actions.STEP, {'count': 1}))
         result = self._result_queue.get()
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
@@ -92,6 +86,9 @@ class TracerBroker:
         return [result]
 
     def eval(self, expression: str):
+        """
+        Evaluates an expression in the current script scope.
+        """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
 
@@ -101,5 +98,5 @@ class TracerBroker:
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
             self.stop()
 
-        print(result.name, result.value, '\n\n')
+        print(result.name, result.value)
         return [result]
