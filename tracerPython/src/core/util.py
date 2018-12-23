@@ -72,7 +72,7 @@ class ExceptionUtil:
     Processes exceptions objects.
     """
 
-    def dump(exception: Exception):
+    def dump(exception: Exception, with_traceback: types.TracebackType = None):
         """
         Raised exception cannot be pickled because of their traceback objects.
         This method transforms the exception in a dict with all data.
@@ -80,5 +80,9 @@ class ExceptionUtil:
         return {
             'type': type(exception).__name__,
             'args': exception.args,
-            'traceback': traceback.format_exception(type(exception), exception, exception.__traceback__)
+            'traceback': traceback.format_exception(
+                type(exception),
+                exception,
+                exception.__traceback__ if not with_traceback else with_traceback
+            )
         }

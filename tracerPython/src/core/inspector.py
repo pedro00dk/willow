@@ -1,6 +1,6 @@
 import types
 
-from .util import FrameUtil
+from .util import ExceptionUtil, FrameUtil
 
 
 class Inspector:
@@ -15,9 +15,14 @@ class Inspector:
         """
         stack_frames, stack_lines = cls.inspect_stack(frame, exec_call_frame, True)
         stack_references, heap_graph, user_classes = cls.inspect_heap(stack_frames)
+
+        # args -> exception type, exception object, exception traceback (different from exception object __traceback__)
+        args = args if event != 'exception' else ExceptionUtil.dump(args[1], args[2])
+
         finish = event == 'return' and len(stack_frames) == 1
         return {
             'event': event,
+            'args': args,
             'line': stack_lines[0]['line'],
             'stack_lines': stack_lines,
             'stack_references': stack_references,
