@@ -66,29 +66,12 @@ class FrameProcessor:
         # frame common info
         self.exec_call_frame = None
         self.inspected_frame_count = 0
-    
-    # list of traceable events
-    TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
-
-    @staticmethod
-    def is_file(frame: types.FrameType, name: str):
-        """
-        Returns true if the frame is from the received file name.
-        """
-        return frame.f_code.co_filename == name
-
-    @staticmethod
-    def is_traceable(event: str):
-        """
-        Returns true if the frame event is traceable.
-        """
-        return event in FrameProcessor.TRACEABLE_EVENTS
 
     def trace(self, frame: types.FrameType, event: str, args):
         """
         The script trace function.
         """
-        if not FrameProcessor.is_file(frame, self._name) or not FrameProcessor.is_traceable(event):
+        if not FrameUtil.is_file(frame, self._name) or not FrameUtil.is_traceable(event):
             return self.trace
 
         self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
@@ -136,3 +119,26 @@ class FrameProcessor:
             pass
         finally:
             return {'product': product}
+
+
+class FrameUtil:
+    """
+    Utility objects and functions for processing frames.
+    """
+
+    # list of traceable events
+    TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
+
+    @staticmethod
+    def is_file(frame: types.FrameType, name: str):
+        """
+        Returns true if the frame is from the received file name.
+        """
+        return frame.f_code.co_filename == name
+
+    @staticmethod
+    def is_traceable(event: str):
+        """
+        Returns true if the frame event is traceable.
+        """
+        return event in FrameUtil.TRACEABLE_EVENTS
