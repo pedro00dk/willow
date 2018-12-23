@@ -7,12 +7,30 @@ def default_scope(file: str):
     """
     Returns a default scope.
     """
-    return Globals().property(Globals.FILE, file).build()
+    globals_builder, modules_halter = default_scope_composers(file)
+    return modules_halter.apply(globals_builder.build())
+
+
+def default_scope_composers(file: str):
+    """
+    Returns default scope composers.
+    """
+    globals_builder = Globals().property(Globals.FILE, file)
+    modules_halter = Modules()
+    return globals_builder, modules_halter
 
 
 def sandbox_scope(file: str):
     """
     Returns a sandboxed scope.
+    """
+    globals_builder, modules_halter = sandbox_scope_composers(file)
+    return modules_halter.apply(globals_builder.build())
+
+
+def sandbox_scope_composers(file: str):
+    """
+    Returns a sandboxed scope composers.
     """
     builtins_to_remove = {'compile', 'exec', 'open'}
     modules_to_keep = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
@@ -23,8 +41,7 @@ def sandbox_scope(file: str):
 
     modules_halter = Modules()
     [modules_halter.halt(module) for module in modules_to_remove]
-
-    return modules_halter.apply(globals_builder.build())
+    return globals_builder, modules_halter
 
 
 def default_builtins_names():
