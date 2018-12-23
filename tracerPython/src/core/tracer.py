@@ -3,8 +3,8 @@ import sys
 import types
 
 import events
-from . import inspector
 from . import scope
+from .util import FrameUtil
 
 
 class Tracer:
@@ -64,8 +64,8 @@ class FrameProcessor:
         self._result_queue = result_queue
 
         # frame common info
-        self.exec_call_frame = None
-        self.inspected_frame_count = 0
+        self._exec_call_frame = None
+        self._inspected_frame_count = 0
 
     def trace(self, frame: types.FrameType, event: str, args):
         """
@@ -74,8 +74,8 @@ class FrameProcessor:
         if not FrameUtil.is_file(frame, self._name) or not FrameUtil.is_traceable(event):
             return self.trace
 
-        self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
-        self.inspected_frame_count += 1
+        self._exec_call_frame = frame.f_back if self._inspected_frame_count == 0 else self._exec_call_frame
+        self._inspected_frame_count += 1
 
         while True:
             action = self._action_queue.get()
@@ -119,26 +119,3 @@ class FrameProcessor:
             pass
         finally:
             return {'product': product}
-
-
-class FrameUtil:
-    """
-    Utility objects and functions for processing frames.
-    """
-
-    # list of traceable events
-    TRACEABLE_EVENTS = {'call', 'line', 'exception', 'return'}
-
-    @staticmethod
-    def is_file(frame: types.FrameType, name: str):
-        """
-        Returns true if the frame is from the received file name.
-        """
-        return frame.f_code.co_filename == name
-
-    @staticmethod
-    def is_traceable(event: str):
-        """
-        Returns true if the frame event is traceable.
-        """
-        return event in FrameUtil.TRACEABLE_EVENTS
