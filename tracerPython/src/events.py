@@ -6,6 +6,7 @@ class Actions:
     START = 'start'
     QUIT = 'quit'
     STEP = 'step'
+    EVAL = 'eval'
 
 
 class Results:
@@ -16,6 +17,7 @@ class Results:
     STARTED = 'started'
     ERROR = 'error'
     DATA = 'data'
+    PRODUCT = 'product'
 
 
 class Event:
