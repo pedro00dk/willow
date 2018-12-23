@@ -1,33 +1,27 @@
-import queue
 import functools
-import multiprocessing as mp
-
-import events
+import types
 
 
-class Input:
+class HookedInput:
     """
-    Redirects input as events over process connection queues.
+    Uses the received hook to do whatever action with the prompted text and get the input value.
     """
 
-    def __init__(self, action_queue: mp.Queue, result_queue: mp.Queue):
-        self._action_queue = action_queue
-        self._result_queue = result_queue
+    def __init__(self, input_hook: types.FunctionType):
+        self._input_hook = input_hook
 
     def __call__(self, prompt=''):
         prompt = str(prompt)
-        self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
-        #return self._input_queue.get()
-        return None
+        return self._input_hook(prompt)
 
 
-class Print:
+class HookedPrint:
     """
-    Redirects print as events over process connection queues.
+    Uses the received hook to do whatever action with the printed text.
     """
 
-    def __init__(self, result_queue: mp.Queue):
-        self._result_queue = result_queue
+    def __init__(self, print_hook: types.FunctionType):
+        self._print_hook = print_hook
 
     def __call__(self, *values, sep=None, end=None):
         if sep is not None and not isinstance(sep, str):
@@ -39,4 +33,4 @@ class Print:
         end = end if end is not None else '\n'
         values = (str(value) for value in values)
         text = f'{sep.join(values)}{end}'
-        self._result_queue.put(events.Event(events.Results.PRINT, text))
+        self._print_hook(text)

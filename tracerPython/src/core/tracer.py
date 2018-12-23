@@ -6,7 +6,7 @@ import events
 from . import scope
 from .evaluator import Evaluator
 from .inspector import Inspector
-from .scriptio import Input, Print
+from .scriptio import HookedInput, HookedPrint
 from .util import ExceptionUtil, FrameUtil
 
 
@@ -37,13 +37,13 @@ class Tracer:
         """
         Configures the scope and runs the tracer, giving the tracing control to the frame processor.
         """
+        frame_processor = FrameProcessor(self._name, self._lines, self._action_queue, self._result_queue)
+
         globals_builder, modules_halter = scope.default_scope_composers(self._name) if not self._sandbox else \
             scope.sandbox_scope_composers(self._name)
-        globals_builder.builtin('input', Input(self._action_queue, self._result_queue))
-        globals_builder.builtin('print', Print(self._result_queue))
+        globals_builder.builtin('input', HookedInput(frame_processor.input_hook))
+        globals_builder.builtin('print', HookedPrint(frame_processor.print_hook))
         script_scope = modules_halter.apply(globals_builder.build())
-
-        frame_processor = FrameProcessor(self._name, self._lines, self._action_queue, self._result_queue)
 
         try:
             action = self._action_queue.get()
@@ -110,3 +110,15 @@ class FrameProcessor:
             break
 
         return self.trace
+
+    def input_hook(self, prompt: str):
+        """
+        Hook action for input implementations.
+        """
+        self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
+
+    def print_hook(self, text: str):
+        """
+        Hook action for input implementations.
+        """
+        self._result_queue.put(events.Event(events.Results.PRINT, text))
