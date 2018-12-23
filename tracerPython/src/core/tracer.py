@@ -6,6 +6,7 @@ import events
 from . import scope
 from .evaluator import Evaluator
 from .inspector import Inspector
+from .scriptio import Print
 from .util import ExceptionUtil, FrameUtil
 
 
@@ -36,7 +37,11 @@ class Tracer:
         """
         Configures the scope and runs the tracer, giving the tracing control to the frame processor.
         """
-        script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
+        globals_builder, modules_halter = scope.default_scope_composers(self._name) if not self._sandbox else \
+            scope.sandbox_scope_composers(self._name)
+        globals_builder.builtin('print', Print(self._result_queue))
+        script_scope = modules_halter.apply(globals_builder.build())
+
         frame_processor = FrameProcessor(self._name, self._lines, self._action_queue, self._result_queue)
 
         try:
