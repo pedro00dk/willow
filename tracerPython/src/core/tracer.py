@@ -45,7 +45,8 @@ class Tracer:
             sys.settrace(frame_processor.trace)
             exec(compiled, script_scope)
         except Exception as e:
-            self._result_queue.put(events.Event(events.Results.ERROR, str(e)))
+            exception_dump = ExceptionUtil.dump(e)
+            self._result_queue.put(events.Event(events.Results.ERROR, exception_dump))
         finally:
             sys.settrace(None)
 
