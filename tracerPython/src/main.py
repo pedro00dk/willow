@@ -26,7 +26,7 @@ def main():
 def run_uncontrolled(trace_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
         print('## Running in uncontrolled mode')
-        print('## Output format: <event result>\n<event value>')
+        print('## Output format: <event result>\\n<event value>')
 
     print_results(trace_broker.start())
     try:
@@ -40,13 +40,12 @@ def run_uncontrolled(trace_broker: broker.TracerBroker, omit_help: bool):
 def run_controlled(trace_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
         print('## Running in controlled mode')
-        print('## Output format: <event result>\n<event value>')
-        print('controled mode:')
-        print('actions:')
-        print('start -> start the tracer')
-        print('step -> run next step')
-        print('eval <expr> -> evaluates an expression (expr shall not have spaces)')
-        print('stop -> stops the tracer and the application')
+        print('## Output format: <event result>\\n<event value>')
+        print('## actions:')
+        print('## start -> start the tracer')
+        print('## step -> run next step')
+        print('## eval <expr> -> evaluates an expression (expr shall not have spaces)')
+        print('## stop -> stops the tracer and the application')
         print()
 
     while True:
@@ -55,14 +54,15 @@ def run_controlled(trace_broker: broker.TracerBroker, omit_help: bool):
             if action_data[0] == 'start':
                 print_results(trace_broker.start())
             elif action_data[0] == 'step':
-                print_results(trace_broker.step())
+                print_results(trace_broker.step(1))
             elif action_data[0] == 'eval':
-                print_results(trace_broker.step(action_data[1]))
+                print_results(trace_broker.eval(action_data[1]))
             elif action_data[0] == 'stop':
                 trace_broker.stop()
             else:
                 print('action not found, try again!')
         except Exception as e:
+            # raise e
             print(e)
             print('continuing')
 
