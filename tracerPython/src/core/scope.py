@@ -102,7 +102,7 @@ class Globals:
         """
         Returns the built globals.
         """
-        return copy.deepcopy(self._globals)
+        return copy.copy(self._globals)
 
 
 class Modules:
@@ -135,7 +135,7 @@ class Modules:
         if Modules.IMPORT not in scope[Globals.BUILTINS]:
             raise AttributeError('__builtins__ does not contain __import__')
 
-        scope = copy.deepcopy(scope)
+        scope = copy.copy(scope)
         scope_builtins = scope[Globals.BUILTINS]
         default_import = scope_builtins[Modules.IMPORT]
         halt_import = Modules._halt_import(default_import, self._halted)

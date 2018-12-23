@@ -16,6 +16,7 @@ class TracerBroker:
         self._name = name
         self._script = script
         self._sandbox = sandbox
+        self._queue_manager = None
         self._action_queue = None
         self._result_queue = None
         self._tracer_process = None
@@ -33,8 +34,9 @@ class TracerBroker:
         if self.is_tracer_running():
             raise AssertionError('tracer already running')
 
-        self._action_queue = mp.Queue()
-        self._result_queue = mp.Queue()
+        self._queue_manager = mp.Manager()
+        self._action_queue = self._queue_manager.Queue()
+        self._result_queue = self._queue_manager.Queue()
         self._tracer_process = mp.Process(
             target=tracer.Tracer.init_run,
             args=(self._name, self._script, self._sandbox, self._action_queue, self._result_queue)
