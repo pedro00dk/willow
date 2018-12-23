@@ -45,6 +45,7 @@ def run_controlled(trace_broker: broker.TracerBroker, omit_help: bool):
         print('## start -> start the tracer')
         print('## step -> run next step')
         print('## eval <expr> -> evaluates an expression (expr shall not have spaces)')
+        print('## input <data> -> sends input to script')
         print('## stop -> stops the tracer and the application')
         print()
 
@@ -57,8 +58,11 @@ def run_controlled(trace_broker: broker.TracerBroker, omit_help: bool):
                 print_results(trace_broker.step(1))
             elif action_data[0] == 'eval':
                 print_results(trace_broker.eval(action_data[1]))
+            elif action_data[0] == 'input':
+                trace_broker.input(action_data[1])
             elif action_data[0] == 'stop':
                 trace_broker.stop()
+                break
             else:
                 print('action not found, try again!')
         except Exception as e:
