@@ -60,12 +60,23 @@ class Inspector:
         self.exec_call_frame = frame.f_back if self.inspected_frame_count == 0 else self.exec_call_frame
         self.inspected_frame_count += 1
 
-        action = self._action_queue.get()
+        while True:
+            action = self._action_queue.get()
 
-        if action.name == events.Actions.STEP:
-            self._result_queue.put(events.Event(events.Results.DATA, self.inspect_state(frame, event, args)))
-        elif action.name == events.Actions.QUIT:
-            self._result_queue.put(events.Event(events.Results.DATA, {}))
+            # hold actions
+            if action.name == events.Actions.EVAL:
+                expression = action.value
+                product = eval(expression, frame.f_globals, frame.f_locals)
+                self._result_queue.put(events.Event(events.Results.PRODUCT, product))
+                continue
+
+            # progressive actions
+            if action.name == events.Actions.STEP:
+                self._result_queue.put(events.Event(events.Results.DATA, self.inspect_state(frame, event, args)))
+            elif action.name == events.Actions.QUIT:
+                self._result_queue.put(events.Event(events.Results.DATA, {}))
+            break
+
 
         return self.trace
 

@@ -137,11 +137,24 @@ class TracerStepper:
         if count < 1:
             raise AssertionError('count smaller than 1')
 
-        self._action_queue.put(events.Event(events.Actions.STEP, {'count': count}))
+        self._action_queue.put(events.Event(events.Actions.STEP, 1))
         result = self._result_queue.get()
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
             self.stop()
 
         print(result.name, result.value)
+        return [result]
+
+    def eval(self, expression: str):
+        if not self.is_tracer_running():
+            raise AssertionError('tracer not running')
+
+        self._action_queue.put(events.Event(events.Actions.EVAL, expression))
+        result = self._result_queue.get()
+
+        if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
+            self.stop()
+
+        print(result.name, result.value, '\n\n')
         return [result]
