@@ -5,18 +5,14 @@ import types
 
 def default_scope(file: str):
     """
-    Return a default scope.
-
-        :return: default scope
+    Returns a default scope.
     """
     return Globals().property(Globals.FILE, file).build()
 
 
 def sandbox_scope(file: str):
     """
-    Return a sandboxed scope.
-
-        :return: sandbox scope
+    Returns a sandboxed scope.
     """
     builtins_to_remove = {'compile', 'exec', 'open'}
     modules_to_keep = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
@@ -33,21 +29,21 @@ def sandbox_scope(file: str):
 
 def default_builtins_names():
     """
-    List default builtins
+    Lists default builtins.
     """
     return [*Globals().build()[Globals.BUILTINS].keys()]
 
 
 def default_modules_names():
     """
-    List default modules
+    Lists default modules.
     """
     return[*sys.modules.keys()]
 
 
 class Globals:
     """
-    Generate global scopes with the specificed names and restrictions.
+    Generates global scopes with the specificed names and restrictions.
     """
 
     # some default names
@@ -57,7 +53,7 @@ class Globals:
 
     def __init__(self):
         """
-        Initialize the default global scope.
+        Initializes the default global scope.
         """
         host_builtins = globals()[Globals.BUILTINS]
         builtins = host_builtins.copy() if isinstance(host_builtins, dict) else vars(host_builtins).copy()
@@ -65,26 +61,15 @@ class Globals:
 
     def property(self, name: str, value):
         """
-        Set a scope property, creating a new one if it does not exist.
-
-            :param name: property name to set
-            :param value: value to set in name property
-
-            :return: self
+        Sets a scope property, creating a new one if it does not exist.
         """
         self._globals[name] = value
         return self
 
     def builtin(self, name: str, value):
         """
-        Set a builtin property, creating anew one if it does not exist.
+        Sets a builtin property, creating anew one if it does not exist.
         Builtins should not be None, if None is set, the builtin is removed.
-
-            :param name: builtin name to set
-            :param value: value to set in name builtin
-
-            :raise: AttributeError - if __builtins__ property was modified
-            :return: self
         """
         if not isinstance(self._globals[Globals.BUILTINS], dict):
             raise AttributeError('global __builtins__ attribute was modified')
@@ -98,16 +83,14 @@ class Globals:
 
     def build(self) -> dict:
         """
-        Return the built globals.
-
-            :return: created globals
+        Returns the built globals.
         """
         return copy.deepcopy(self._globals)
 
 
 class Modules:
     """
-    Halt modules from a specified scope.
+    Halts modules from a specified scope.
     """
 
     # some default names
@@ -115,32 +98,20 @@ class Modules:
 
     def __init__(self):
         """
-        Initialize witout any halted module.
+        Initializes without any halted module.
         """
         self._halted = []
 
     def halt(self, module: str):
         """
-        Add module to halted list.
-
-            :param module: module to halt
-
-            :return: self
+        Adds a module to halted list.
         """
         self._halted.append(module)
         return self
 
     def apply(self, scope: dict, full: bool = False):
         """
-        Halt modules from the scope.
-
-            :param scope: scope to halt modules
-            :param full: halt from sys module (entire application)
-
-            :raise: KeyError - if scope does not contain __builtins__
-            :raise: TypeError - if __builtins__ is not a dict
-            :raise: AttributeError - if __builtins__ does not contain __import__
-            :return: scope copy with halted modules
+        Halts modules from the received scope.
         """
         if not isinstance(scope[Globals.BUILTINS], dict):
             raise TypeError('__builtins__ is not a dict')
@@ -162,11 +133,6 @@ class Modules:
     def _halt_import(default_import: types.BuiltinFunctionType, halted: list):
         """
         Creates a function that blocks imports.
-
-            :param default_import: default import function
-            :param halted: modules to block
-
-            :return: import function that blocks halted modules
         """
         def halt_import(module, global_scope, local_scope, attributes, level):
             if module in halted:

@@ -9,28 +9,19 @@ from . import scope
 
 class Tracer:
     """
-    Trace python code and analyses its state after every instruction.
+    Traces python script and analyses its state after every instruction.
     """
 
     @staticmethod
     def init_run(name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initialize the Tracer and run it.
-        This static method shall be used when spawn a new process.
-
-            :params ref(__init__):
+        Initializes the tracer and run it in a single function, usefull to start the tracer in a separated process.
         """
         Tracer(name, script, sandbox, action_queue, result_queue).run()
 
     def __init__(self, name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initialize the tracer with the python script.
-
-            :param name: script name
-            :param script: python script
-            :param sandbox: use sandbox scope instead of default scope
-            :param action_queue: queue to send actions to inspector
-            :param result_queue: queue to receive inspection results
+        Initializes the tracer with the script name, python script and sandbox flag.
         """
         self._name = name
         self._script = script
@@ -41,8 +32,7 @@ class Tracer:
 
     def run(self):
         """
-        Run the tracing inspector.
-        Configure the scope, set the trace function and execute the script.
+        Configures the scope and runs the tracer, giving the tracing control to the inspector.
         """
         script_scope = scope.default_scope(self._name) if not self._sandbox else scope.sandbox_scope(self._name)
         script_inspector = inspector.Inspector(self._name, self._lines, self._action_queue, self._result_queue)
