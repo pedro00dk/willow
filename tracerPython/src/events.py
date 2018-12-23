@@ -19,6 +19,7 @@ class Results:
     DATA = 'data'
     PRODUCT = 'product'
     PRINT = 'print'
+    PROMPT = 'prompt'
 
 
 class Event:
