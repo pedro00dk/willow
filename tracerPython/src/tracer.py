@@ -150,7 +150,7 @@ class TracerStepper:
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
 
-        self._action_queue.put(events.Event(events.Actions.EVAL, expression))
+        self._action_queue.put(events.Event(events.Actions.EVAL, {'expression': expression, 'inspect': True}))
         result = self._result_queue.get()
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:

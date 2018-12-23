@@ -66,9 +66,14 @@ class Inspector:
 
             # hold actions
             if action.name == events.Actions.EVAL:
-                expression = action.value
+                expression = action.value['expression']
+                inspect = action.value['inspect']
+
+                # evaluate first and then inspect state
                 product = self.evaluate_expression(frame, expression)
-                self._result_queue.put(events.Event(events.Results.PRODUCT, product))
+                inspection = self.inspect_state(frame, event, args) if inspect else {}
+
+                self._result_queue.put(events.Event(events.Results.PRODUCT, {**inspection, **product}))
                 continue
 
             # progressive actions
@@ -86,7 +91,7 @@ class Inspector:
         """
         Evaluate expressions against the frame scope, process the exception if any is thrown.
         The expression is able to mutate the script state.
-            
+
             :params ref(trace):
             :param expression: expression to evaluate
             :return: expression result
@@ -101,7 +106,7 @@ class Inspector:
             }
             pass
         finally:
-            return product
+            return {'product': product}
 
     # inspection methods
 
