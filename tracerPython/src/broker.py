@@ -16,7 +16,7 @@ class TracerBroker:
         self._name = name
         self._script = script
         self._sandbox = sandbox
-        self._queue_manager = None
+        self._manager = None
         self._action_queue = None
         self._result_queue = None
         self._tracer_process = None
@@ -34,9 +34,9 @@ class TracerBroker:
         if self.is_tracer_running():
             raise AssertionError('tracer already running')
 
-        self._queue_manager = mp.Manager()
-        self._action_queue = self._queue_manager.Queue()
-        self._result_queue = self._queue_manager.Queue()
+        self._manager = mp.Manager()
+        self._action_queue = self._manager.Queue()
+        self._result_queue = self._manager.Queue()
         self._tracer_process = mp.Process(
             target=tracer.Tracer.init_run,
             args=(self._name, self._script, self._sandbox, self._action_queue, self._result_queue)
@@ -49,7 +49,6 @@ class TracerBroker:
         if result.name == events.Results.ERROR:
             self.stop()
 
-        print(result.name, result.value)
         return [result]
 
     def stop(self):
@@ -63,9 +62,8 @@ class TracerBroker:
 
         self._tracer_process.terminate()
         self._tracer_process.join()
-        self._action_queue.close()
-        self._result_queue.close()
         self._tracer_process = None
+        self._manager = None
         self._action_queue = None
         self._result_queue = None
 
@@ -79,13 +77,17 @@ class TracerBroker:
             raise AssertionError('count smaller than 1')
 
         self._action_queue.put(events.Event(events.Actions.STEP, {'count': 1}))
-        result = self._result_queue.get()
+        results = []
+        while True:
+            result = self._result_queue.get()
+            results.append(result)
+            if result.name in {events.Results.DATA, events.Results.ERROR}:
+                break
 
         if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
             self.stop()
 
-        print(result.name, result.value)
-        return [result]
+        return results
 
     def eval(self, expression: str):
         """
@@ -95,10 +97,14 @@ class TracerBroker:
             raise AssertionError('tracer not running')
 
         self._action_queue.put(events.Event(events.Actions.EVAL, {'expression': expression, 'inspect': True}))
-        result = self._result_queue.get()
+        results = []
+        while True:
+            result = self._result_queue.get()
+            results.append(result)
+            if result.name in {events.Results.PRODUCT, events.Results.ERROR}:
+                break
 
-        if result.name == events.Results.DATA and result.value['finish'] or result.name == events.Results.ERROR:
+        if result.name == events.Results.ERROR:
             self.stop()
 
-        print(result.name, result.value)
-        return [result]
+        return results
