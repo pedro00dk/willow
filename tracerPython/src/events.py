@@ -11,13 +11,14 @@ class Actions:
 
 class Results:
     """
-    List of results of the tracer
+    List of results of the tracer.
     """
 
     STARTED = 'started'
     ERROR = 'error'
     DATA = 'data'
     PRODUCT = 'product'
+    PRINT = 'print'
 
 
 class Event:
