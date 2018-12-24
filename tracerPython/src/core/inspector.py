@@ -65,7 +65,7 @@ class Inspector:
             ]
             stack_references.append(frame_references)
 
-        return stack_references, heap_graph, user_classes
+        return stack_references, heap_graph, [user_class.__name__ for user_class in user_classes]
 
     @classmethod
     def inspect_object(cls, obj, heap_graph: dict, user_classes: set):
@@ -86,7 +86,7 @@ class Inspector:
         if isinstance(obj, type):
             if obj not in {list, tuple, set, dict}:
                 user_classes.add(obj)
-            return type(obj).__name__
+            return obj.__name__
 
         # iterable object type
         reference = id(obj)
@@ -97,8 +97,10 @@ class Inspector:
                 members = enumerate(obj)
             elif isinstance(obj, dict):
                 members = obj.items()
-            else:
+            elif isinstance(obj, (*user_classes,)):
                 members = ((name, value) for name, value in vars(obj).items() if not name.startswith('_'))
+            else:
+                members = ()
 
             # add reference to heap graph (has to be added before other objects inspections)
             heap_graph[reference] = {}
