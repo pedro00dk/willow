@@ -136,7 +136,7 @@ class FrameProcessor:
                 return action.value['input']
             if action.name == events.Actions.QUIT:
                 # add quit event in the queue again for stacked inputs until reach frame tracer
-                self._action_queue.put(event)
+                self._action_queue.put(action)
                 return ''
             self._result_queue.put(events.Event(events.Results.LOCKED, 'input locked, skipping action'))
 
