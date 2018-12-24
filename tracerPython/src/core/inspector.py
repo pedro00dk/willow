@@ -53,6 +53,8 @@ class Inspector:
         """
         Inspects the application heap by looking every object recursively found from the stack frames.
         """
+        module_name = FrameUtil.module(stack_frames[-1])
+
         stack_references = []
         heap_graph = {}
         user_classes = set()
@@ -60,15 +62,15 @@ class Inspector:
         for frame in stack_frames[::-1]:
             frame_variables = FrameUtil.locals(frame)
             frame_references = [
-                (name, cls.inspect_object(frame_variables[name], heap_graph, user_classes))
+                (name, cls.inspect_object(frame_variables[name], heap_graph, user_classes, module_name))
                 for name, value in frame_variables.items() if not name.startswith('_')
             ]
             stack_references.append(frame_references)
 
-        return stack_references, heap_graph, [user_class.__name__ for user_class in user_classes]
+        return stack_references, heap_graph, {user_class.__name__ for user_class in user_classes}
 
     @classmethod
-    def inspect_object(cls, obj, heap_graph: dict, user_classes: set):
+    def inspect_object(cls, obj, heap_graph: dict, user_classes: set, module_name: str):
         """
         Inspects the received object.
         If the object is a const (bool, int, float, None, complex, str), returns its value.
@@ -84,7 +86,7 @@ class Inspector:
 
         # type type
         if isinstance(obj, type):
-            if obj not in {list, tuple, set, dict}:
+            if obj.__module__ == module_name:
                 user_classes.add(obj)
             return obj.__name__
 
@@ -107,8 +109,8 @@ class Inspector:
 
             members_inspections = [
                 (
-                    cls.inspect_object(name, heap_graph, user_classes),
-                    cls.inspect_object(value, heap_graph, user_classes)
+                    cls.inspect_object(name, heap_graph, user_classes, module_name),
+                    cls.inspect_object(value, heap_graph, user_classes, module_name)
                 )
                 for name, value in members
             ]

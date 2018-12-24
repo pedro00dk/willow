@@ -25,6 +25,13 @@ class FrameUtil:
         return frame.f_code.co_name
 
     @classmethod
+    def module(cls, frame: types.FrameType):
+        """
+        Returns the module of the frame.
+        """
+        return cls.globals(frame)['__name__']
+
+    @classmethod
     def line(cls, frame: types.FrameType):
         """
         Returns the code line of the frame.
