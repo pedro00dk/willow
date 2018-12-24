@@ -32,7 +32,7 @@ def sandbox_scope_composers(file: str):
     """
     Returns a sandboxed scope composers.
     """
-    builtins_to_remove = {'compile', 'exec', 'open'}
+    builtins_to_remove = {'compile', 'exec', 'open', 'globals', 'locals', 'vars', 'memoryview'}
     modules_to_keep = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
     modules_to_remove = {module for module in default_modules_names() if module not in modules_to_keep}
 
