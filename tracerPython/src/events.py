@@ -4,7 +4,7 @@ class Actions:
     """
 
     START = 'start'
-    QUIT = 'quit'
+    STOP = 'stop'
     STEP = 'step'
     EVAL = 'eval'
     INPUT = 'input'

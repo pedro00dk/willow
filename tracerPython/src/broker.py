@@ -58,7 +58,7 @@ class TracerBroker:
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
-        self._action_queue.put(events.Event(events.Actions.QUIT))
+        self._action_queue.put(events.Event(events.Actions.STOP))
 
         self._tracer_process.terminate()
         self._tracer_process.join()
