@@ -115,7 +115,7 @@ class TracerBroker:
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
-        if not data:
+        if data is None:
             raise AttributeError('data cannot be None')
 
         self._action_queue.put(events.Event(events.Actions.INPUT, {'input': data}))
