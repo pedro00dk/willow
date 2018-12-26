@@ -78,35 +78,38 @@ class Inspector:
         Otherwise, returns the object reference (list with a single number inside) recursively, inspecting object
         members and filling the heap_graph and user_classes
         """
+        # already inspected
+        reference = id(obj)
+        if reference in heap_graph:
+            return reference
+
         # const type
         if isinstance(obj, (bool, int, float, type(None))):
             return obj
         if isinstance(obj, (complex, str)):
             return repr(obj)
-
-        # type type
         if isinstance(obj, type):
             if obj.__module__ == module_name:
                 user_classes.add(obj)
             return obj.__name__
 
-        # iterable object type
-        reference = id(obj)
+        # known type
+        if isinstance(obj, (list, tuple, set)):
+            members = enumerate(obj)
+        elif isinstance(obj, dict):
+            members = obj.items()
+        elif isinstance(obj, (*user_classes,)):
+            members = ((name, value) for name, value in vars(obj).items() if not name.startswith('_'))
 
-        if reference not in heap_graph:
+        # unknown type
+        else:
+            members = None
 
-            if isinstance(obj, (list, tuple, set)):
-                members = enumerate(obj)
-            elif isinstance(obj, dict):
-                members = obj.items()
-            elif isinstance(obj, (*user_classes,)):
-                members = ((name, value) for name, value in vars(obj).items() if not name.startswith('_'))
-            else:
-                members = ()
+        # known object type processing
+        if members:
 
             # add reference to heap graph (has to be added before other objects inspections)
             heap_graph[reference] = {}
-
             members_inspections = [
                 (
                     cls.inspect_object(name, heap_graph, user_classes, module_name),
@@ -117,5 +120,8 @@ class Inspector:
 
             # update with all data
             heap_graph[reference] = {'type': type(obj).__name__, 'members': members_inspections}
+            return reference,
 
-        return reference,
+        # unknown object type processing
+        else:
+            return cls.inspect_object(type(obj), heap_graph, user_classes, module_name)
