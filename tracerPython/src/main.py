@@ -2,6 +2,7 @@ import argparse
 import pprint
 
 import broker
+import events
 
 
 def main():
@@ -13,7 +14,6 @@ def main():
                         help='Run without stopping and print all results')
     parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('script', help='The python script to parse')
-
     arguments = parser.parse_args()
 
     trace_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
@@ -33,7 +33,10 @@ def run_uncontrolled(trace_broker: broker.TracerBroker, formated: bool, omit_hel
     print_results(trace_broker.start(), formated)
     while True:
         try:
-            print_results(trace_broker.step(), formated)
+            results = trace_broker.step()
+            print_results(results, formated)
+            if results[-1].name == events.Results.LOCKED:
+                trace_broker.input('')
         except:
             break
 
@@ -52,21 +55,24 @@ def run_controlled(trace_broker: broker.TracerBroker, formated: bool, omit_help:
 
     while True:
         action_data = input('>>> ').split()
+        action = action_data[0]
+        value = ' '.join(action_data[1:])
         try:
-            if action_data[0] == 'start':
+            if action == 'start':
                 print_results(trace_broker.start(), formated)
-            elif action_data[0] == 'step':
+            elif action == 'step':
                 print_results(trace_broker.step(1), formated)
-            elif action_data[0] == 'eval':
-                print_results(trace_broker.eval(action_data[1]), formated)
-            elif action_data[0] == 'input':
-                trace_broker.input(action_data[1], formated)
-            elif action_data[0] == 'stop':
+            elif action == 'eval':
+                print_results(trace_broker.eval(value), formated)
+            elif action == 'input':
+                trace_broker.input(value)
+            elif action == 'stop':
                 trace_broker.stop()
                 break
             else:
-                print('action not found, try again!')
+                print('action not found')
         except Exception as e:
+            print('exception:')
             print(e)
 
 
@@ -74,7 +80,10 @@ def print_results(results: list, formated: bool):
     print_function = print if not formated else pprint.pprint
     for result in results:
         print(result.name)
-        print_function(result.value)
+        if formated:
+            pprint.pprint(result.value)
+        else:
+            print(result.value)
         print()
 
 
