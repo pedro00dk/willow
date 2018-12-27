@@ -43,6 +43,10 @@ public class Project {
         return binPath != null;
     }
 
+    public String getMainClass() {
+        return filename.substring(0, filename.lastIndexOf('.'));
+    }
+
     public String getFilename() {
         return filename;
     }
