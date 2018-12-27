@@ -27,7 +27,7 @@ public class Tracer {
             project.compile();
             new Executor(project).execute();
 
-        } catch (IOException | IllegalConnectorArgumentsException | VMStartException e1) {
+        } catch (IOException | IllegalConnectorArgumentsException | VMStartException | InterruptedException e1) {
             e1.printStackTrace();
         }
     }
