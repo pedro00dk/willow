@@ -54,7 +54,11 @@ public class Executor {
 
     public void execute() throws VMStartException, IllegalConnectorArgumentsException, IOException, InterruptedException {
         startVirtualMachine();
-        //vm.version();
+
+        var methodEntryRequest =  vm.eventRequestManager().createMethodEntryRequest();
+        methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+        methodEntryRequest.enable();
+
         while(true) {
             var eventSet = vm.eventQueue().remove();
             eventSet.forEach(e -> System.out.println(e.getClass().getName()));
