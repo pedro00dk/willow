@@ -1,5 +1,8 @@
 package core.tracer;
 
+import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import com.sun.jdi.connect.VMStartException;
+
 import java.io.IOException;
 
 /**
@@ -18,13 +21,14 @@ public class Tracer {
     /**
      * Configures and runs the tracer.
      */
-    public void run() throws IOException {
+    public void run() {
         try {
             project.generate();
             project.compile();
+            new Executor(project).execute();
 
-        } catch (Exception e) {
-            throw e;
+        } catch (IOException | IllegalConnectorArgumentsException | VMStartException e1) {
+            e1.printStackTrace();
         }
     }
 }
