@@ -7,6 +7,11 @@
     </profile>
     <version value="1.0" />
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="JavaTracer" options="--add-exports=jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED" />
+    </option>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JavaTracer.iml" filepath="$PROJECT_DIR$/JavaTracer.iml" />
