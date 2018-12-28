@@ -32,13 +32,12 @@ class Tracer:
         self._sandbox = sandbox
         self._action_queue = action_queue
         self._result_queue = result_queue
-        self._lines = self._script.splitlines() if len(script) > 0 else ['']
 
     def run(self):
         """
         Configures the scope and runs the tracer, giving the tracing control to the frame processor.
         """
-        frame_processor = FrameProcessor(self._name, self._lines, self._action_queue, self._result_queue)
+        frame_processor = FrameProcessor(self._name, self._action_queue, self._result_queue)
 
         globals_builder, modules_halter = scope.default_scope_composers(self._name) if not self._sandbox else \
             scope.sandbox_scope_composers(self._name)
@@ -64,12 +63,11 @@ class FrameProcessor:
     Read action queue waiting for actions, process the frames and write the results in the queue. 
     """
 
-    def __init__(self, name: str, lines: list, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initializes the frame processor with the script name, lines and queues.
         """
         self._name = name
-        self._lines = lines
         self._action_queue = action_queue
         self._result_queue = result_queue
 
