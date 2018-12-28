@@ -1,12 +1,14 @@
 package core.exec;
 
 import com.sun.jdi.ThreadReference;
+import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.event.ThreadDeathEvent;
 import com.sun.jdi.event.ThreadStartEvent;
 import com.sun.jdi.event.VMDeathEvent;
+import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.tools.jdi.VirtualMachineManagerImpl;
@@ -43,18 +45,68 @@ public class Executor {
     /**
      * Executes the received project.
      */
-    public void execute() throws VMStartException, IllegalConnectorArgumentsException, IOException, InterruptedException {
+    public void execute() throws IOException, IllegalConnectorArgumentsException, VMStartException, VMDisconnectedException, InterruptedException {
         startVirtualMachine();
+        var allowedThreadsNames = configureEventRequests();
 
+        while (true) {
+            vm.resume();
+            var eventSet = vm.eventQueue().remove();
+            for (var event : eventSet) {
+                if (event instanceof VMDeathEvent) {
+                    vm.resume(); // two vm death events are emitted
+                    vm.eventQueue().remove();
+                    return;
+                } else if (event instanceof VMStartEvent) {
+                    continue;
+                } else if (event instanceof ThreadStartEvent) {
+                    var threadStartEvent = (ThreadStartEvent) event;
+                    if (!allowedThreadsNames.contains(threadStartEvent.thread().name()))
+                        threadStartEvent.thread().interrupt();
+                    continue;
+                } else if (event instanceof ThreadDeathEvent) {
+                    continue;
+                }
+                System.out.println(event);
+            }
+        }
+    }
+
+    /**
+     * Returns a virtual machine reference running the project.
+     */
+    private void startVirtualMachine() throws IOException, IllegalConnectorArgumentsException, VMStartException {
+        if (!project.isCompiled()) throw new IllegalStateException("project not compiled");
+        if (isRunning()) throw new IllegalStateException("executor already running");
+
+        var vmm = VirtualMachineManagerImpl.virtualMachineManager();
+        var connector = vmm.defaultConnector();
+
+        var connectorArguments = connector.defaultArguments();
+        connectorArguments.get(ConnectorArguments.SUSPEND.arg).setValue("true");
+        connectorArguments.get(ConnectorArguments.OPTIONS.arg).setValue(
+                "-cp \"" + project.getBinPath().toAbsolutePath().toString() + "\""
+        );
+        connectorArguments.get(ConnectorArguments.MAIN.arg).setValue(
+                project.getFilename().substring(0, project.getFilename().lastIndexOf('.'))
+        );
+
+        vm = connector.launch(connectorArguments);
+    }
+
+    /**
+     * Sets all necessary requests for executing the project.
+     */
+    private Set<String> configureEventRequests() {
         var defaultThreads = List.copyOf(vm.allThreads());
         var mainThread = defaultThreads.stream()
                 .filter(t -> t.name().equals("main"))
                 .findFirst()
                 .orElseThrow(() -> new NullPointerException("main thread not found"));
-        var allowedThreadNames = defaultThreads.stream()
+        var allowedThreadsNames = defaultThreads.stream()
                 .map(ThreadReference::name)
                 .collect(Collectors.toCollection(HashSet::new));
-        allowedThreadNames.addAll(Set.of("Common-Cleaner", "DestroyJavaVM"));
+        allowedThreadsNames.addAll(Set.of("Common-Cleaner", "DestroyJavaVM"));
 
         var vmDeathRequest = vm.eventRequestManager().createVMDeathRequest();
 
@@ -86,47 +138,6 @@ public class Executor {
         methodExitRequest.enable();
         stepRequest.enable();
 
-        while (true) {
-            vm.resume();
-            var eventSet = vm.eventQueue().remove();
-            System.out.println(eventSet.stream().toArray());
-            for (var event : eventSet) {
-                System.out.println(event.getClass().getName());
-                if (event instanceof ThreadStartEvent) {
-                    var threadStartEvent = (ThreadStartEvent) event;
-                    if (!allowedThreadNames.contains(threadStartEvent.thread().name()))
-                        threadStartEvent.thread().interrupt();
-                    System.out.println(((ThreadStartEvent) event).thread().name());
-                }
-                if (event instanceof ThreadDeathEvent) {
-                    System.out.println(((ThreadDeathEvent) event).thread().name());
-                }
-                if (event instanceof VMDeathEvent) {
-                    return;
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns a virtual machine reference running the project.
-     */
-    private void startVirtualMachine() throws IOException, IllegalConnectorArgumentsException, VMStartException {
-        if (!project.isCompiled()) throw new IllegalStateException("project not compiled");
-        if (isRunning()) throw new IllegalStateException("executor already running");
-
-        var vmm = VirtualMachineManagerImpl.virtualMachineManager();
-        var connector = vmm.defaultConnector();
-
-        var connectorArguments = connector.defaultArguments();
-        connectorArguments.get(ConnectorArguments.SUSPEND.arg).setValue("true");
-        connectorArguments.get(ConnectorArguments.OPTIONS.arg).setValue(
-                "-cp \"" + project.getBinPath().toAbsolutePath().toString() + "\""
-        );
-        connectorArguments.get(ConnectorArguments.MAIN.arg).setValue(
-                project.getFilename().substring(0, project.getFilename().lastIndexOf('.'))
-        );
-
-        vm = connector.launch(connectorArguments);
+        return allowedThreadsNames;
     }
 }
