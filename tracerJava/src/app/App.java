@@ -1,6 +1,6 @@
 package app;
 
-import core.tracer.Tracer;
+import core.Tracer;
 
 public class App {
 

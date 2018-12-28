@@ -1,4 +1,4 @@
-package core.tracer;
+package core;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
