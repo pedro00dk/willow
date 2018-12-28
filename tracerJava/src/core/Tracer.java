@@ -23,10 +23,11 @@ public class Tracer {
      * Configures and runs the tracer.
      */
     public void run() {
+        var eventProcessor = new EventProcessor();
         try {
             project.generate();
             project.compile();
-            new Executor(project).execute();
+            new Executor(project, eventProcessor).execute();
 
         } catch (IOException | IllegalConnectorArgumentsException | VMStartException | InterruptedException e) {
             e.printStackTrace();

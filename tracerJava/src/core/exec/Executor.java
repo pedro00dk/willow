@@ -12,6 +12,7 @@ import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.tools.jdi.VirtualMachineManagerImpl;
+import core.EventProcessor;
 import core.Project;
 
 import java.io.IOException;
@@ -25,13 +26,15 @@ import java.util.stream.Collectors;
  */
 public class Executor {
     private Project project;
+    private EventProcessor eventProcessor;
     private VirtualMachine vm;
 
     /**
-     * Initializes the executor with the received project, it shall be already compiled.
+     * Initializes the executor with the received project and the event processor, the project shall be compiled.
      */
-    public Executor(Project project) {
+    public Executor(Project project, EventProcessor eventProcessor) {
         this.project = project;
+        this.eventProcessor = eventProcessor;
     }
 
     public boolean isRunning() {
@@ -42,8 +45,12 @@ public class Executor {
         return project;
     }
 
+    public EventProcessor getEventProcessor() {
+        return eventProcessor;
+    }
+
     /**
-     * Executes the received project.
+     * Executes the received project and send filtered events to the event processor.
      */
     public void execute() throws IOException, IllegalConnectorArgumentsException, VMStartException, VMDisconnectedException, InterruptedException {
         startVirtualMachine();
@@ -67,7 +74,7 @@ public class Executor {
                 } else if (event instanceof ThreadDeathEvent) {
                     continue;
                 }
-                System.out.println(event);
+                eventProcessor.trace(event);
             }
         }
     }
