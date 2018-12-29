@@ -1,9 +1,7 @@
 package core;
 
 
-import com.sun.jdi.AbsentInformationException;
-import com.sun.jdi.IncompatibleThreadStateException;
-import com.sun.jdi.StackFrame;
+import com.sun.jdi.*;
 import com.sun.jdi.event.Event;
 import core.util.EventUtil;
 
@@ -71,7 +69,9 @@ public final class Inspector {
                         var localVariables = f.getValues(localVariablesDeclarationOrdered);
                         return localVariablesDeclarationOrdered.stream()
                                 .map(l -> Map.entry(l, localVariables.get(l)))
-                                .map(e -> List.of(e.getKey().name(), new Object()))
+                                .map(e -> Arrays.asList(
+                                        e.getKey().name(), inspectObject(e.getValue(), heapGraph, userClasses))
+                                )
                                 .collect(Collectors.toList());
                     } catch (AbsentInformationException e) {
                         throw new RuntimeException(e);
@@ -89,19 +89,17 @@ public final class Inspector {
      * Otherwise, returns the object reference (list with a single number inside) recursively, inspecting object
      * members and filling the heap_graph and user_classes
      */
-    private static Object inspectObject(Object obj, Map<Integer, Map<String, Object>> heapGraph, Set<String> userClasses) {
-        if (obj == null || obj instanceof Boolean || obj instanceof Byte || obj instanceof Short ||
-                obj instanceof Integer || obj instanceof Float || obj instanceof Double || obj instanceof Long ||
-                obj instanceof Character) {
-            return obj;
+    private static Object inspectObject(Value obj, Map<Integer, Map<String, Object>> heapGraph, Set<String> userClasses) {
+        if (obj instanceof PrimitiveValue) {
+            if (obj instanceof BooleanValue) return ((BooleanValue) obj).value();
+            if (obj instanceof CharValue) return ((CharValue) obj).value();
+            if (obj instanceof ByteValue) return ((ByteValue) obj).value();
+            if (obj instanceof ShortValue) return ((ShortValue) obj).value();
+            if (obj instanceof IntegerValue) return ((IntegerValue) obj).value();
+            if (obj instanceof LongValue) return ((LongValue) obj).value();
+            if (obj instanceof FloatValue) return ((FloatValue) obj).value();
+            if (obj instanceof DoubleValue) return ((DoubleValue) obj).value();
         }
-        if (obj instanceof String) {
-            return "\"" + obj.toString() + "\"";
-        }
-        if (obj instanceof Class) {
-            return ((Class) obj).getName();
-        }
-
         return null;
     }
 }
