@@ -19,7 +19,13 @@ public class Main {
                         "        //var scan = new Scanner(System.in);\n" +
                         "        //var input = scan.nextLine();\n" +
                         "        //System.out.println(input);\n" +
+                        "        anotherMethodForTesting();\n" +
                         "    }\n" +
+                        "\n"+
+                        "    public static void anotherMethodForTesting() {\n"+
+                        "        double v = 123.0;\n"+
+                        "        int vi = (int) v;\n"+
+                        "    }\n"+
                         "}\n"
         ).run();
     }
