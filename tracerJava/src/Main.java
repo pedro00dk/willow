@@ -1,10 +1,8 @@
-package app;
-
 import core.Tracer;
 
-public class App {
+public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new Tracer(
                 "Hello.java",
                 "import java.util.*;\n" +
