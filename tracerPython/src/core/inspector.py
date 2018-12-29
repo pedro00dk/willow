@@ -81,7 +81,7 @@ class Inspector:
         # already inspected
         reference = id(obj)
         if reference in heap_graph:
-            return reference
+            return reference,
 
         # const type
         if isinstance(obj, (bool, int, float, type(None))):
