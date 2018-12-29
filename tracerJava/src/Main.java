@@ -14,7 +14,8 @@ public class Main {
                         "        Thread ttt = Thread.currentThread();\n" +
                         "        String k = null;\n" +
                         "        String l = \"some string\";\n" +
-                        "        var x = 0;\n" +
+                        "        Boolean x = false;\n" +
+                        "        Double g = 321.312;\n" +
                         "        var y = -123l;\n" +
                         "        var a = new int[]{1,2,3,4};\n" +
                         "        var b = new String[]{\"a\",\"b\", \"c\", \"d\"};\n" +

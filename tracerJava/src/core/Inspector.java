@@ -107,6 +107,22 @@ public final class Inspector {
             return "\"" + ((StringReference) obj).value() + "\"";
         }
         if (obj instanceof ObjectReference) {
+            var objRef = (ObjectReference) obj;
+            var objType = (ReferenceType) obj.type();
+            Class<?> objClass;
+            try {
+                objClass = Class.forName(objType.name());
+            } catch (ClassNotFoundException e) {
+                return "unknown object";
+            }
+
+            // boxed primitives
+            if (objClass.isAssignableFrom(Boolean.class) || objClass.isAssignableFrom(Character.class) ||
+                    objClass.isAssignableFrom(Byte.class) || objClass.isAssignableFrom(Short.class) ||
+                    objClass.isAssignableFrom(Integer.class) || objClass.isAssignableFrom(Long.class) ||
+                    objClass.isAssignableFrom(Float.class) || objClass.isAssignableFrom(Double.class)) {
+                return objRef.getValue(objType.fieldByName("value"));
+            }
 
             return "unknown object";
         }
