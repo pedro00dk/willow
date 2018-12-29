@@ -10,6 +10,10 @@ public class Main {
                         "public class Hello {\n" +
                         "    public static void main(String[] args) {\n" +
                         "        System.out.println(\"from hello\");\n" +
+                        "        Class ccc = String.class;\n" +
+                        "        Thread ttt = Thread.currentThread();\n" +
+                        "        String k = null;\n" +
+                        "        String l = \"some string\";\n" +
                         "        var x = 0;\n" +
                         "        var y = -123l;\n" +
                         "        var a = new int[]{1,2,3,4};\n" +

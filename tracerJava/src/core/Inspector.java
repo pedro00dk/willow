@@ -68,7 +68,7 @@ public final class Inspector {
                         var localVariablesDeclarationOrdered = f.visibleVariables();
                         var localVariables = f.getValues(localVariablesDeclarationOrdered);
                         return localVariablesDeclarationOrdered.stream()
-                                .map(l -> Map.entry(l, localVariables.get(l)))
+                                .map(l -> new HashMap.SimpleEntry<>(l, localVariables.get(l)))
                                 .map(e -> Arrays.asList(
                                         e.getKey().name(), inspectObject(e.getValue(), heapGraph, userClasses))
                                 )
@@ -90,6 +90,8 @@ public final class Inspector {
      * members and filling the heap_graph and user_classes
      */
     private static Object inspectObject(Value obj, Map<Integer, Map<String, Object>> heapGraph, Set<String> userClasses) {
+
+        if (obj == null) return null;
         if (obj instanceof PrimitiveValue) {
             if (obj instanceof BooleanValue) return ((BooleanValue) obj).value();
             if (obj instanceof CharValue) return ((CharValue) obj).value();
@@ -99,7 +101,15 @@ public final class Inspector {
             if (obj instanceof LongValue) return ((LongValue) obj).value();
             if (obj instanceof FloatValue) return ((FloatValue) obj).value();
             if (obj instanceof DoubleValue) return ((DoubleValue) obj).value();
+            return "unknown primitive";
         }
-        return null;
+        if (obj instanceof StringReference) {
+            return "\"" + ((StringReference) obj).value() + "\"";
+        }
+        if (obj instanceof ObjectReference) {
+
+            return "unknown object";
+        }
+        return "unknown element";
     }
 }
