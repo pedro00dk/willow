@@ -155,7 +155,7 @@ public final class Inspector {
 
             try {
                 var objClass = Class.forName(objRef.referenceType().name());
-                if (List.class.isAssignableFrom(objClass)) {
+                if (List.class.isAssignableFrom(objClass) || Set.class.isAssignableFrom(objClass)) {
                     var arrayRef = (ArrayReference) objRef.invokeMethod(
                             threadReference,
                             objRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
