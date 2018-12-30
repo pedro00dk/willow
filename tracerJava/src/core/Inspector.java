@@ -31,11 +31,14 @@ public final class Inspector {
         var heapInspection = inspectHeap(event, stackFrames);
         //noinspection unchecked
         var stackReferences = (List<List<List<Object>>>) heapInspection.get("stack_references");
+        //noinspection unchecked
+        var heapGraph = (HashMap<Long, Map<String, Object>>) heapInspection.get("heap_graph");
 
 
         return Map.ofEntries(
                 Map.entry("stack_lines", stackLines),
-                Map.entry("stack_references", stackReferences)
+                Map.entry("stack_references", stackReferences),
+                Map.entry("heap_graph", heapGraph)
         );
     }
 
@@ -58,7 +61,7 @@ public final class Inspector {
      */
     private static Map<String, Object> inspectHeap(Event event, List<StackFrame> stackFrames) {
         // stack refs
-        var heapGraph = new HashMap<Integer, Map<String, Object>>();
+        var heapGraph = new HashMap<Long, Map<String, Object>>();
         var userClasses = new HashSet<String>();
 
         var stackReferences = IntStream.range(0, stackFrames.size())
@@ -79,19 +82,26 @@ public final class Inspector {
                 })
                 .collect(Collectors.toList());
 
-        return Map.ofEntries(Map.entry("stack_references", stackReferences));
+        return Map.ofEntries(Map.entry("stack_references", stackReferences), Map.entry("heap_graph", heapGraph));
     }
 
     /**
      * Inspects the received object.
-     * If the object is a const (bool, int, float, None, complex, str), returns its value.
-     * If the object is a type (type), returns its type name.
+     * If the object is a const (boolean, char, byte, short, int, long, float, double, null), returns its value.
+     * If is a boxed primitive, returns as primitive.
+     * If the object is a string, returns a string, with extra double quotes.
      * Otherwise, returns the object reference (list with a single number inside) recursively, inspecting object
      * members and filling the heap_graph and user_classes
      */
-    private static Object inspectObject(Value obj, Map<Integer, Map<String, Object>> heapGraph, Set<String> userClasses) {
+    private static Object inspectObject(Object obj, Map<Long, Map<String, Object>> heapGraph, Set<String> userClasses) {
 
+        // mirrored or non mirrored null values are always null
         if (obj == null) return null;
+
+        // non mirrored values
+        if (!(obj instanceof Value)) return obj;
+
+        // non boxed primitives
         if (obj instanceof PrimitiveValue) {
             if (obj instanceof BooleanValue) return ((BooleanValue) obj).value();
             if (obj instanceof CharValue) return ((CharValue) obj).value();
@@ -101,30 +111,60 @@ public final class Inspector {
             if (obj instanceof LongValue) return ((LongValue) obj).value();
             if (obj instanceof FloatValue) return ((FloatValue) obj).value();
             if (obj instanceof DoubleValue) return ((DoubleValue) obj).value();
-            return "unknown primitive";
         }
+
+        // default strings
         if (obj instanceof StringReference) {
             return "\"" + ((StringReference) obj).value() + "\"";
         }
+
+        // all other objects
         if (obj instanceof ObjectReference) {
             var objRef = (ObjectReference) obj;
-            var objType = (ReferenceType) obj.type();
-            Class<?> objClass;
-            try {
-                objClass = Class.forName(objType.name());
-            } catch (ClassNotFoundException e) {
-                return "unknown object";
-            }
+            var objType = (ReferenceType) objRef.type();
 
             // boxed primitives
-            if (objClass.isAssignableFrom(Boolean.class) || objClass.isAssignableFrom(Character.class) ||
-                    objClass.isAssignableFrom(Byte.class) || objClass.isAssignableFrom(Short.class) ||
-                    objClass.isAssignableFrom(Integer.class) || objClass.isAssignableFrom(Long.class) ||
-                    objClass.isAssignableFrom(Float.class) || objClass.isAssignableFrom(Double.class)) {
-                return objRef.getValue(objType.fieldByName("value"));
+            try {
+                var objClass = Class.forName(objType.name());
+                if (objClass.isAssignableFrom(Boolean.class) || objClass.isAssignableFrom(Character.class) ||
+                        objClass.isAssignableFrom(Byte.class) || objClass.isAssignableFrom(Short.class) ||
+                        objClass.isAssignableFrom(Integer.class) || objClass.isAssignableFrom(Long.class) ||
+                        objClass.isAssignableFrom(Float.class) || objClass.isAssignableFrom(Double.class)) {
+                    return objRef.getValue(objType.fieldByName("value"));
+                }
+            } catch (ClassNotFoundException e) {
+                // array types always throw this exception
             }
 
-            return "unknown object";
+            // arrays and collections
+            var reference = objRef.uniqueID();
+
+            String type = null;
+            List<Map.Entry<Integer, Value>> members = null;
+            if (objRef instanceof ArrayReference) {
+                var arrayRef = (ArrayReference) objRef;
+                var arrayLength = arrayRef.length();
+                var arrayValues = arrayRef.getValues();
+                type = arrayRef.type().signature();
+                members = IntStream.range(0, arrayLength)
+                        .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
+                        .collect(Collectors.toList());
+            }
+
+            if (members != null) {
+                heapGraph.put(reference, null);
+                var membersInspections = members.stream()
+                        .map(e -> Arrays.asList(
+                                inspectObject(e.getKey(), heapGraph, userClasses),
+                                inspectObject(e.getValue(), heapGraph, userClasses)
+                        ))
+                        .collect(Collectors.toList());
+                heapGraph.put(
+                        reference,
+                        Map.ofEntries(Map.entry("type", type), Map.entry("members", membersInspections))
+                );
+                return List.of(reference);
+            }
         }
         return "unknown element";
     }
