@@ -49,7 +49,7 @@ public final class Inspector {
         var frames = EventUtil.getStackFrames(event);
         var lines = frames.stream()
                 .map(StackFrame::location)
-                .map(l -> Map.ofEntries(Map.entry("name", l.method().name()), Map.entry("line", l.lineNumber())))
+                .map(l -> Map.ofEntries(Map.entry("name", l.method().name()), Map.entry("line", l.lineNumber() - 1)))
                 .collect(Collectors.toList());
 
         return Map.ofEntries(Map.entry("frames", frames), Map.entry("lines", lines));
@@ -79,7 +79,7 @@ public final class Inspector {
                 .map(e -> e.getKey().stream()
                         .map(l -> new HashMap.SimpleEntry<>(l, e.getValue().get(l)))
                         .map(ee -> Arrays.asList(
-                                ee.getKey().name(), inspectObject(e.getValue(), heapGraph, userClasses, threadReference))
+                                ee.getKey().name(), inspectObject(ee.getValue(), heapGraph, userClasses, threadReference))
                         )
                         .collect(Collectors.toList())
                 )
