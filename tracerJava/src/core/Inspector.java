@@ -47,7 +47,6 @@ public final class Inspector {
      */
     private static Map<String, Object> inspectStack(Event event) throws IncompatibleThreadStateException {
         var frames = EventUtil.getStackFrames(event);
-
         var lines = frames.stream()
                 .map(StackFrame::location)
                 .map(l -> Map.ofEntries(Map.entry("name", l.method().name()), Map.entry("line", l.lineNumber())))
@@ -63,23 +62,27 @@ public final class Inspector {
         // stack refs
         var heapGraph = new HashMap<Long, Map<String, Object>>();
         var userClasses = new HashSet<String>();
-
+        var threadReference = stackFrames.get(0).thread();
         var stackReferences = IntStream.range(0, stackFrames.size())
                 .mapToObj(i -> stackFrames.get(stackFrames.size() - 1 - i))
                 .map(f -> {
                     try {
-                        var localVariablesDeclarationOrdered = f.visibleVariables();
-                        var localVariables = f.getValues(localVariablesDeclarationOrdered);
-                        return localVariablesDeclarationOrdered.stream()
-                                .map(l -> new HashMap.SimpleEntry<>(l, localVariables.get(l)))
-                                .map(e -> Arrays.asList(
-                                        e.getKey().name(), inspectObject(e.getValue(), heapGraph, userClasses))
-                                )
-                                .collect(Collectors.toList());
+                        return Map.entry(f.visibleVariables(), f.getValues(f.visibleVariables()));
                     } catch (AbsentInformationException e) {
                         throw new RuntimeException(e);
                     }
                 })
+                // frames get invalid after invoking methods in objects
+                // because of this, all variables have to be collected before any evaluation
+                .collect(Collectors.toList())
+                .stream()
+                .map(e -> e.getKey().stream()
+                        .map(l -> new HashMap.SimpleEntry<>(l, e.getValue().get(l)))
+                        .map(ee -> Arrays.asList(
+                                ee.getKey().name(), inspectObject(e.getValue(), heapGraph, userClasses, threadReference))
+                        )
+                        .collect(Collectors.toList())
+                )
                 .collect(Collectors.toList());
 
         return Map.ofEntries(Map.entry("stack_references", stackReferences), Map.entry("heap_graph", heapGraph));
@@ -93,7 +96,7 @@ public final class Inspector {
      * Otherwise, returns the object reference (list with a single number inside) recursively, inspecting object
      * members and filling the heap_graph and user_classes
      */
-    private static Object inspectObject(Object obj, Map<Long, Map<String, Object>> heapGraph, Set<String> userClasses) {
+    private static Object inspectObject(Object obj, Map<Long, Map<String, Object>> heapGraph, Set<String> userClasses, ThreadReference threadReference) {
 
         // mirrored or non mirrored null values are always null
         if (obj == null) return null;
@@ -121,42 +124,63 @@ public final class Inspector {
         // all other objects
         if (obj instanceof ObjectReference) {
             var objRef = (ObjectReference) obj;
-            var objType = (ReferenceType) objRef.type();
 
             // boxed primitives
             try {
-                var objClass = Class.forName(objType.name());
-                if (objClass.isAssignableFrom(Boolean.class) || objClass.isAssignableFrom(Character.class) ||
-                        objClass.isAssignableFrom(Byte.class) || objClass.isAssignableFrom(Short.class) ||
-                        objClass.isAssignableFrom(Integer.class) || objClass.isAssignableFrom(Long.class) ||
-                        objClass.isAssignableFrom(Float.class) || objClass.isAssignableFrom(Double.class)) {
-                    return objRef.getValue(objType.fieldByName("value"));
+                var objClass = Class.forName(objRef.referenceType().name());
+                if (Boolean.class.isAssignableFrom(objClass) || Character.class.isAssignableFrom(objClass) ||
+                        Byte.class.isAssignableFrom(objClass) || Short.class.isAssignableFrom(objClass) ||
+                        Integer.class.isAssignableFrom(objClass) || Long.class.isAssignableFrom(objClass) ||
+                        Float.class.isAssignableFrom(objClass) || Double.class.isAssignableFrom(objClass)) {
+                    return objRef.getValue(objRef.referenceType().fieldByName("value"));
                 }
             } catch (ClassNotFoundException e) {
                 // array types always throw this exception
             }
 
-            // arrays and collections
+            // common objects
             var reference = objRef.uniqueID();
-
-            String type = null;
+            var type = objRef.referenceType().signature();
             List<Map.Entry<Integer, Value>> members = null;
+
+            // arrays and collections
             if (objRef instanceof ArrayReference) {
                 var arrayRef = (ArrayReference) objRef;
                 var arrayLength = arrayRef.length();
                 var arrayValues = arrayRef.getValues();
-                type = arrayRef.type().signature();
                 members = IntStream.range(0, arrayLength)
                         .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
                         .collect(Collectors.toList());
             }
 
+            try {
+                var objClass = Class.forName(objRef.referenceType().name());
+                if (List.class.isAssignableFrom(objClass)) {
+                    var arrayRef = (ArrayReference) objRef.invokeMethod(
+                            threadReference,
+                            objRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
+                            List.of(),
+                            ObjectReference.INVOKE_SINGLE_THREADED
+                    );
+                    var arrayLength = arrayRef.length();
+                    var arrayValues = arrayRef.getValues();
+                    members = IntStream.range(0, arrayLength)
+                            .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
+                            .collect(Collectors.toList());
+                }
+            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
+                // invoke errors
+            } catch (ClassNotFoundException e) {
+                // array types always throw this exception (already checked)
+            }
+
+
             if (members != null) {
                 heapGraph.put(reference, null);
                 var membersInspections = members.stream()
                         .map(e -> Arrays.asList(
-                                inspectObject(e.getKey(), heapGraph, userClasses),
-                                inspectObject(e.getValue(), heapGraph, userClasses)
+                                inspectObject(e.getKey(), heapGraph, userClasses, threadReference),
+                                inspectObject(e.getValue(), heapGraph, userClasses, threadReference)
                         ))
                         .collect(Collectors.toList());
                 heapGraph.put(
