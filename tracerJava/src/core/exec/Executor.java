@@ -122,28 +122,44 @@ public class Executor {
         var threadDeathRequest = vm.eventRequestManager().createThreadDeathRequest();
         threadDeathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
 
-        var methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-        methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-        methodEntryRequest.addClassFilter(project.getMainClass());
-        methodEntryRequest.addThreadFilter(mainThread);
+        var classNames = project.getClasses();
 
-        var methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
-        methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-        methodExitRequest.addClassFilter(project.getMainClass());
-        methodExitRequest.addThreadFilter(mainThread);
+        var methodEntryRequests = classNames.stream()
+                .map(c -> {
+                    var methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
+                    methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+                    methodEntryRequest.addThreadFilter(mainThread);
+                    methodEntryRequest.addClassFilter(c);
+                    return methodEntryRequest;
+                })
+                .collect(Collectors.toList());
 
-        var stepRequest = vm.eventRequestManager().createStepRequest(
-                mainThread, StepRequest.STEP_MIN, StepRequest.STEP_INTO
-        );
-        stepRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-        stepRequest.addClassFilter(project.getMainClass());
+        var methodExitRequests = classNames.stream()
+                .map(c -> {
+                    var methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
+                    methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+                    methodExitRequest.addThreadFilter(mainThread);
+                    methodExitRequest.addClassFilter(c);
+                    return methodExitRequest;
+                })
+                .collect(Collectors.toList());
+
+        var stepRequests = classNames.stream()
+                .map(c -> {
+                    var stepRequest = vm.eventRequestManager().createStepRequest(
+                            mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO
+                    );
+                    stepRequest.addClassFilter(c);
+                    return stepRequest;
+                })
+                .collect(Collectors.toList());
 
         vmDeathRequest.enable();
         threadStartRequest.enable();
         threadDeathRequest.enable();
-        methodEntryRequest.enable();
-        methodExitRequest.enable();
-        stepRequest.enable();
+        methodEntryRequests.forEach(EventRequest::enable);
+        methodExitRequests.forEach(EventRequest::enable);
+        stepRequests.forEach(EventRequest::enable);
 
         return allowedThreadsNames;
     }
