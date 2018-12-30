@@ -140,7 +140,7 @@ public final class Inspector {
 
             // common objects
             var reference = objRef.uniqueID();
-            var type = objRef.referenceType().signature();
+            var type = objRef.referenceType().name();
             List<Map.Entry> members = null;
 
             // arrays
