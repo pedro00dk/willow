@@ -1,7 +1,10 @@
+import java.nio.file.*;
+
 
 public class Test {
     public static void main(String[] args) {
         var person = new Person("Peter");
+        var path = Path.of("/tmp");
     }
 
     public static class Person {

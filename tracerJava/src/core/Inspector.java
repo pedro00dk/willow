@@ -216,6 +216,16 @@ public final class Inspector {
                 // ignore errors
             }
 
+            // locally declared classes
+            var classReferenceData = objRef.referenceType().toString().split(" ");
+            if (classReferenceData[0].equals("class") && !classReferenceData[1].contains(".")) {
+                var orderedFields = objRef.referenceType().allFields();
+                var fieldsValues = objRef.getValues(orderedFields);
+                members = orderedFields.stream()
+                        .map(f -> new HashMap.SimpleEntry<>(f.name(), fieldsValues.get(f)))
+                        .collect(Collectors.toList());
+            }
+
             if (members != null) {
                 heapGraph.put(reference, null);
                 var membersInspections = members.stream()
@@ -229,6 +239,8 @@ public final class Inspector {
                         Map.ofEntries(Map.entry("type", type), Map.entry("members", membersInspections))
                 );
                 return List.of(reference);
+            } else {
+                return type;
             }
         }
         return "unknown element";
