@@ -141,9 +141,9 @@ public final class Inspector {
             // common objects
             var reference = objRef.uniqueID();
             var type = objRef.referenceType().signature();
-            List<Map.Entry<Integer, Value>> members = null;
+            List<Map.Entry> members = null;
 
-            // arrays and collections
+            // arrays
             if (objRef instanceof ArrayReference) {
                 var arrayRef = (ArrayReference) objRef;
                 var arrayLength = arrayRef.length();
@@ -155,6 +155,8 @@ public final class Inspector {
 
             try {
                 var objClass = Class.forName(objRef.referenceType().name());
+
+                // Lists and Sets
                 if (List.class.isAssignableFrom(objClass) || Set.class.isAssignableFrom(objClass)) {
                     var arrayRef = (ArrayReference) objRef.invokeMethod(
                             threadReference,
@@ -167,13 +169,52 @@ public final class Inspector {
                     members = IntStream.range(0, arrayLength)
                             .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
                             .collect(Collectors.toList());
-                }
-            } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
-                // invoke errors
-            } catch (ClassNotFoundException e) {
-                // array types always throw this exception (already checked)
-            }
 
+                    // Maps
+                } else if (Map.class.isAssignableFrom(objClass)) {
+                    var setRef = (ObjectReference) objRef.invokeMethod(
+                            threadReference,
+                            objRef.referenceType().methodsByName("entrySet").get(0),
+                            List.of(),
+                            ObjectReference.INVOKE_SINGLE_THREADED
+                    );
+                    var arrayRef = (ArrayReference) setRef.invokeMethod(
+                            threadReference,
+                            setRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
+                            List.of(),
+                            ObjectReference.INVOKE_SINGLE_THREADED
+                    );
+
+                    var arrayLength = arrayRef.length();
+                    var arrayValues = arrayRef.getValues();
+                    members = arrayValues.stream()
+                            .map(v -> (ObjectReference) v)
+                            .map(v -> {
+                                        try {
+                                            return new HashMap.SimpleEntry<>(
+                                                    v.invokeMethod(
+                                                            threadReference,
+                                                            v.referenceType().methodsByName("getKey").get(0),
+                                                            List.of(),
+                                                            ObjectReference.INVOKE_SINGLE_THREADED
+                                                    ),
+                                                    v.invokeMethod(
+                                                            threadReference,
+                                                            v.referenceType().methodsByName("getValue").get(0),
+                                                            List.of(),
+                                                            ObjectReference.INVOKE_SINGLE_THREADED
+                                                    )
+                                            );
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                            )
+                            .collect(Collectors.toList());
+                }
+            } catch (ClassNotFoundException | InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException e) {
+                // ignore errors
+            }
 
             if (members != null) {
                 heapGraph.put(reference, null);

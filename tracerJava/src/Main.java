@@ -10,6 +10,7 @@ public class Main {
                         "public class Hello {\n" +
                         "    public static void main(String[] args) {\n" +
                         "        var lll = List.of(1,2,3,4, \"asdf\");\n" +
+                        "        var mmm = Map.of(1,2,3,4, \"string\", lll);\n" +
                         "        var sss = Set.of(1,2,3,4, \"asdf\");\n" +
                         "        System.out.println(\"from hello\");\n" +
                         "        Class ccc = String.class;\n" +
