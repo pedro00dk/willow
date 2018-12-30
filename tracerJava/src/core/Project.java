@@ -8,7 +8,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -77,8 +76,8 @@ public class Project {
     public void generate() throws IOException {
         if (isGenerated()) throw new IllegalStateException("project already generated");
         projectPath = Files.createTempDirectory("");
-        srcPath = Paths.get(projectPath.toString(), DEFAULT_SRC_PATH);
-        mainPath = Paths.get(srcPath.toString(), filename);
+        srcPath = Path.of(projectPath.toString(), DEFAULT_SRC_PATH);
+        mainPath = Path.of(srcPath.toString(), filename);
         Files.createDirectory(srcPath);
         Files.writeString(mainPath, code);
     }
@@ -89,7 +88,7 @@ public class Project {
     public void compile() throws IOException {
         if (!isGenerated()) throw new IllegalStateException("project not generated");
 
-        binPath = Paths.get(projectPath.toString(), DEFAULT_BIN_PATH);
+        binPath = Path.of(projectPath.toString(), DEFAULT_BIN_PATH);
         Files.createDirectory(binPath);
 
         var compiler = ToolProvider.getSystemJavaCompiler();
