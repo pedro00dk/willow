@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description='Tracer CLI parser')
     parser.add_argument('--name', default='<script>', help='The script name')
     parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
-    parser.add_argument('--formated', default=False, action='store_true', help='Print formated results')
+    parser.add_argument('--formatted', default=False, action='store_true', help='Print formatted results')
     parser.add_argument('--uncontrolled', default=False, action='store_true',
                         help='Run without stopping and print all results')
     parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
@@ -19,29 +19,29 @@ def main():
     trace_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
 
     if arguments.uncontrolled:
-        run_uncontrolled(trace_broker, arguments.formated, arguments.omit_help)
+        run_uncontrolled(trace_broker, arguments.formatted, arguments.omit_help)
     else:
-        run_controlled(trace_broker, arguments.formated, arguments.omit_help)
+        run_controlled(trace_broker, arguments.formatted, arguments.omit_help)
 
 
-def run_uncontrolled(trace_broker: broker.TracerBroker, formated: bool, omit_help: bool):
+def run_uncontrolled(trace_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
     if not omit_help:
         print('## Running in uncontrolled mode')
         print('## Output format: <event result>\\n<event value>')
         print()
 
-    print_results(trace_broker.start(), formated)
+    print_results(trace_broker.start(), formatted)
     while True:
         try:
             results = trace_broker.step()
-            print_results(results, formated)
+            print_results(results, formatted)
             if results[-1].name == events.Results.LOCKED:
                 trace_broker.input('')
         except:
             break
 
 
-def run_controlled(trace_broker: broker.TracerBroker, formated: bool, omit_help: bool):
+def run_controlled(trace_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
     if not omit_help:
         print('## Running in controlled mode')
         print('## Output format: <event result>\\n<event value>')
@@ -59,11 +59,11 @@ def run_controlled(trace_broker: broker.TracerBroker, formated: bool, omit_help:
         value = ' '.join(action_data[1:])
         try:
             if action == 'start':
-                print_results(trace_broker.start(), formated)
+                print_results(trace_broker.start(), formatted)
             elif action == 'step':
-                print_results(trace_broker.step(1), formated)
+                print_results(trace_broker.step(1), formatted)
             elif action == 'eval':
-                print_results(trace_broker.eval(value), formated)
+                print_results(trace_broker.eval(value), formatted)
             elif action == 'input':
                 trace_broker.input(value)
             elif action == 'stop':
@@ -76,11 +76,11 @@ def run_controlled(trace_broker: broker.TracerBroker, formated: bool, omit_help:
             print(e)
 
 
-def print_results(results: list, formated: bool):
-    print_function = print if not formated else pprint.pprint
+def print_results(results: list, formatted: bool):
+    print_function = print if not formatted else pprint.pprint
     for result in results:
         print(result.name)
-        if formated:
+        if formatted:
             pprint.pprint(result.value)
         else:
             print(result.value)
