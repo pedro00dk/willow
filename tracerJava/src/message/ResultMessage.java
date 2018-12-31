@@ -18,7 +18,7 @@ public class ResultMessage extends Message {
     /**
      * List of results of the tracer.
      */
-    enum Result {
+    public enum Result {
         STARTED,
         ERROR,
         DATA,
