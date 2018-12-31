@@ -21,7 +21,6 @@ public final class Inspector {
      * Inspects the program state. Analyses the stack and heap, collecting the objects.
      */
     public static Map<String, Object> inspect(Event event) throws IncompatibleThreadStateException {
-        System.out.println(event);
         var stackInspection = inspectStack(event);
         //noinspection unchecked
         var stackFrames = (List<StackFrame>) stackInspection.get("frames");

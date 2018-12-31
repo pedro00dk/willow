@@ -81,7 +81,6 @@ public class Project {
         mainPath = Path.of(srcPath.toString(), filename);
         Files.createDirectory(srcPath);
         Files.writeString(mainPath, code);
-        System.out.println(projectPath);
     }
 
     /**
@@ -106,8 +105,13 @@ public class Project {
         );
         var output = new StringWriter();
         var task = compiler.getTask(output, fileManager, dgCollector, javacOptions, null, javaFiles);
-        if (!task.call()) throw new IllegalStateException("Compilation fail:\n" + output.toString());
-        dgCollector.getDiagnostics().forEach(d -> System.out.println(d.getMessage(Locale.ENGLISH)));
+        if (!task.call())
+            throw new IllegalStateException(
+                    "Compilation fail:\n" + output.toString() +
+                            dgCollector.getDiagnostics().stream()
+                                    .map(d -> d.getMessage(Locale.ENGLISH))
+                                    .collect(Collectors.joining("\n", "\n", "\n"))
+            );
     }
 
     /**
