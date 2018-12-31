@@ -31,7 +31,7 @@ public class Tracer {
      * Configures and runs the tracer.
      */
     public void run() {
-        var eventProcessor = new EventProcessor();
+        var eventProcessor = new EventProcessor(this.actionQueue, this.resultQueue);
         try {
             actionQueue.take();
             project.generate();

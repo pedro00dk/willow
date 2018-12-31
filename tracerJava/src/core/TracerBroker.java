@@ -4,7 +4,9 @@ import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
@@ -64,7 +66,7 @@ public class TracerBroker {
         if (!isTracerRunning()) throw new IllegalStateException("tracer already stopped");
 
         try {
-            actionQueue.put(new ActionMessage(ActionMessage.Action.STOP, null));
+            actionQueue.offer(new ActionMessage(ActionMessage.Action.STOP, null));
             tracerThread.join();
         } catch (InterruptedException e) {
             // ignore interruptions
@@ -73,4 +75,39 @@ public class TracerBroker {
         actionQueue = null;
         resultQueue = null;
     }
+
+    /**
+     * Steps into the script.
+     */
+    public List<ResultMessage> step(int count) {
+        if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
+        if (count < 1) throw new IllegalArgumentException("count smaller than 1");
+
+        List<ResultMessage> results = new ArrayList<>();
+        ResultMessage result = null;
+        try {
+            actionQueue.put(new ActionMessage(ActionMessage.Action.STEP, Map.ofEntries(Map.entry("count", 1))));
+            while (true) {
+                result = resultQueue.take();
+                results.add(result);
+                if (result.getResult().equals(ResultMessage.Result.DATA) ||
+                        result.getResult().equals(ResultMessage.Result.ERROR) ||
+                        result.getResult().equals(ResultMessage.Result.LOCKED))
+                    break;
+            }
+        } catch (InterruptedException e) {
+            var exceptionDump = ExceptionUtil.dump(e);
+            result = new ResultMessage(ResultMessage.Result.ERROR, exceptionDump);
+            results.add(result);
+        }
+
+        //noinspection unchecked
+        if (result.getResult() == ResultMessage.Result.DATA &&
+                (boolean) ((Map<String, Object>) result.getValue()).get("finish") ||
+                result.getResult() == ResultMessage.Result.ERROR)
+            stop();
+
+        return results;
+    }
+
 }

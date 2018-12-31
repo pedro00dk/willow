@@ -53,7 +53,14 @@ public class Main {
             System.out.println();
         }
         printResults(tracerBroker.start(), formatted);
-        // TODO implement step loop
+        while (true) {
+            try {
+                var results = tracerBroker.step(1);
+                printResults(results, formatted);
+            } catch (Exception e) {
+                break;
+            }
+        }
     }
 
     static void runControlled(TracerBroker tracerBroker, boolean formatted, boolean omitHelp) {
