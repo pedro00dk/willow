@@ -74,7 +74,11 @@ public class Executor {
                 } else if (event instanceof ThreadDeathEvent) {
                     continue;
                 }
-                eventProcessor.trace(event);
+                var continueTracing = eventProcessor.trace(event);
+                if (!continueTracing) {
+                    vm.exit(0);
+                    break;
+                }
             }
         }
     }

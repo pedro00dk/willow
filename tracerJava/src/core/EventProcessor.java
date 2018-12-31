@@ -8,11 +8,16 @@ import com.sun.jdi.event.Event;
  */
 public class EventProcessor {
 
-    public void trace(Event event) {
+    /**
+     * The code trace function, returns if should continue tracing.
+     */
+    public boolean trace(Event event) {
         try {
             System.out.println(Inspector.inspect(event));
+            return true;
         } catch (IncompatibleThreadStateException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }
