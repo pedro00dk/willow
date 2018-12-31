@@ -2,6 +2,7 @@ package core;
 
 import com.sun.jdi.*;
 import com.sun.jdi.event.Event;
+import com.sun.jdi.event.MethodExitEvent;
 import core.util.EventUtil;
 
 import java.util.*;
@@ -33,11 +34,13 @@ public final class Inspector {
         //noinspection unchecked
         var heapGraph = (HashMap<Long, Map<String, Object>>) heapInspection.get("heap_graph");
 
+        var finish = event instanceof MethodExitEvent && stackFrames.size() == 1;
 
         return Map.ofEntries(
                 Map.entry("stack_lines", stackLines),
                 Map.entry("stack_references", stackReferences),
-                Map.entry("heap_graph", heapGraph)
+                Map.entry("heap_graph", heapGraph),
+                Map.entry("finish", finish)
         );
     }
 
