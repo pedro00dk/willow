@@ -5,6 +5,7 @@ import com.sun.jdi.connect.VMStartException;
 import core.exec.Executor;
 
 import java.io.IOException;
+import java.util.Queue;
 
 /**
  * Traces a java file and analyses its state after every instruction.

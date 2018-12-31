@@ -1,6 +1,5 @@
 package core;
 
-
 import com.sun.jdi.*;
 import com.sun.jdi.event.Event;
 import core.util.EventUtil;
