@@ -3,7 +3,7 @@ import multiprocessing as mp
 import sys
 import types
 
-import events
+import message
 from . import scope
 from .evaluator import Evaluator
 from .inspector import Inspector
@@ -48,12 +48,12 @@ class Tracer:
         try:
             action = self._action_queue.get()
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
-            self._result_queue.put(events.Event(events.Results.STARTED))
+            self._result_queue.put(message.Message(message.Results.STARTED))
             sys.settrace(frame_processor.trace)
             exec(compiled, script_scope)
         except Exception as e:
             exception_dump = ExceptionUtil.dump(e)
-            self._result_queue.put(events.Event(events.Results.ERROR, exception_dump))
+            self._result_queue.put(message.Message(message.Results.ERROR, exception_dump))
         finally:
             sys.settrace(None)
 
@@ -92,7 +92,7 @@ class FrameProcessor:
             action = self._action_queue.get()
 
             # hold actions
-            if action.name == events.Actions.EVAL:
+            if action.name == message.Actions.EVAL:
                 expression = action.value['expression']
                 inspect = action.value['inspect']
 
@@ -100,19 +100,19 @@ class FrameProcessor:
                 product = Evaluator.evaluate(frame, expression)
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame) if inspect else {}
 
-                self._result_queue.put(events.Event(events.Results.PRODUCT, {**data, **product}))
+                self._result_queue.put(message.Message(message.Results.PRODUCT, {**data, **product}))
                 continue
 
-            if action.name == events.Actions.INPUT:
+            if action.name == message.Actions.INPUT:
                 self._input_cache.append(action.value['input'])
                 continue
 
             # progressive actions
-            if action.name == events.Actions.STEP:
+            if action.name == message.Actions.STEP:
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame)
-                self._result_queue.put(events.Event(events.Results.DATA, data))
-            elif action.name == events.Actions.STOP:
-                self._result_queue.put(events.Event(events.Results.DATA, {}))
+                self._result_queue.put(message.Message(message.Results.DATA, data))
+            elif action.name == message.Actions.STOP:
+                self._result_queue.put(message.Message(message.Results.DATA, {}))
             break
 
         return self.trace
@@ -121,7 +121,7 @@ class FrameProcessor:
         """
         Hook action for input implementations.
         """
-        self._result_queue.put(events.Event(events.Results.PROMPT, prompt))
+        self._result_queue.put(message.Message(message.Results.PROMPT, prompt))
 
         # cached input
         if len(self._input_cache) > 0:
@@ -130,16 +130,16 @@ class FrameProcessor:
         # missing input
         while True:
             action = self._action_queue.get()
-            if action.name == events.Actions.INPUT:
+            if action.name == message.Actions.INPUT:
                 return action.value['input']
-            if action.name == events.Actions.STOP:
-                # add stop event in the queue again for stacked inputs until reach frame tracer
+            if action.name == message.Actions.STOP:
+                # add stop message in the queue again for stacked inputs until reach frame tracer
                 self._action_queue.put(action)
                 return ''
-            self._result_queue.put(events.Event(events.Results.LOCKED, 'input locked, skipping action'))
+            self._result_queue.put(message.Message(message.Results.LOCKED, 'input locked, skipping action'))
 
     def print_hook(self, text: str):
         """
         Hook action for input implementations.
         """
-        self._result_queue.put(events.Event(events.Results.PRINT, text))
+        self._result_queue.put(message.Message(message.Results.PRINT, text))

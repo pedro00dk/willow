@@ -24,14 +24,14 @@ class Results:
     LOCKED = 'locked'
 
 
-class Event:
+class Message:
     """
-    Stores event data.
+    Stores message data.
     """
 
     def __init__(self, name: str, value=None):
         """
-        Crates the event with its name and value.
+        Crates the message with its name and value.
         """
         self.name = name
         self.value = value

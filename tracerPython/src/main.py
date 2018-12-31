@@ -2,7 +2,7 @@ import argparse
 import pprint
 
 import broker
-import events
+import message
 
 
 def main():
@@ -35,7 +35,7 @@ def run_uncontrolled(trace_broker: broker.TracerBroker, formatted: bool, omit_he
         try:
             results = trace_broker.step()
             print_results(results, formatted)
-            if results[-1].name == events.Results.LOCKED:
+            if results[-1].name == message.Results.LOCKED:
                 trace_broker.input('')
         except:
             break
