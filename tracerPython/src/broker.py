@@ -43,10 +43,10 @@ class TracerBroker:
         )
         self._tracer_process.start()
 
-        self._action_queue.put(message.Message(message.Actions.START))
+        self._action_queue.put(message.Message(message.Action.START))
         result = self._result_queue.get()
 
-        if result.name == message.Results.ERROR:
+        if result.name == message.Result.ERROR:
             self.stop()
 
         return [result]
@@ -58,7 +58,7 @@ class TracerBroker:
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
-        self._action_queue.put(message.Message(message.Actions.STOP))
+        self._action_queue.put(message.Message(message.Action.STOP))
 
         self._tracer_process.terminate()
         self._tracer_process.join()
@@ -76,15 +76,15 @@ class TracerBroker:
         if count < 1:
             raise AssertionError('count smaller than 1')
 
-        self._action_queue.put(message.Message(message.Actions.STEP, {'count': 1}))
+        self._action_queue.put(message.Message(message.Action.STEP, {'count': 1}))
         results = []
         while True:
             result = self._result_queue.get()
             results.append(result)
-            if result.name in {message.Results.DATA, message.Results.ERROR, message.Results.LOCKED}:
+            if result.name in {message.Result.DATA, message.Result.ERROR, message.Result.LOCKED}:
                 break
 
-        if result.name == message.Results.DATA and result.value['finish'] or result.name == message.Results.ERROR:
+        if result.name == message.Result.DATA and result.value['finish'] or result.name == message.Result.ERROR:
             self.stop()
 
         return results
@@ -96,15 +96,15 @@ class TracerBroker:
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
 
-        self._action_queue.put(message.Message(message.Actions.EVAL, {'expression': expression, 'inspect': True}))
+        self._action_queue.put(message.Message(message.Action.EVAL, {'expression': expression, 'inspect': True}))
         results = []
         while True:
             result = self._result_queue.get()
             results.append(result)
-            if result.name in {message.Results.PRODUCT, message.Results.ERROR, message.Results.LOCKED}:
+            if result.name in {message.Result.PRODUCT, message.Result.ERROR, message.Result.LOCKED}:
                 break
 
-        if result.name == message.Results.ERROR:
+        if result.name == message.Result.ERROR:
             self.stop()
 
         return results
@@ -118,4 +118,4 @@ class TracerBroker:
         if data is None:
             raise AttributeError('data cannot be None')
 
-        self._action_queue.put(message.Message(message.Actions.INPUT, {'input': data}))
+        self._action_queue.put(message.Message(message.Action.INPUT, {'input': data}))

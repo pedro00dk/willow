@@ -35,7 +35,7 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker, formatted: bool, omit_h
         try:
             results = tracer_broker.step()
             print_results(results, formatted)
-            if results[-1].name == message.Results.LOCKED:
+            if results[-1].name == message.Result.LOCKED:
                 tracer_broker.input('')
         except:
             break

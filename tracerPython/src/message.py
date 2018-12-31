@@ -1,4 +1,4 @@
-class Actions:
+class Action:
     """
     List of available actions that can be sent to the tracer.
     """
@@ -10,7 +10,7 @@ class Actions:
     INPUT = 'input'
 
 
-class Results:
+class Result:
     """
     List of results of the tracer.
     """

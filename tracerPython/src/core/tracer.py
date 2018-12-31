@@ -48,12 +48,12 @@ class Tracer:
         try:
             action = self._action_queue.get()
             compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
-            self._result_queue.put(message.Message(message.Results.STARTED))
+            self._result_queue.put(message.Message(message.Result.STARTED))
             sys.settrace(frame_processor.trace)
             exec(compiled, script_scope)
         except Exception as e:
             exception_dump = ExceptionUtil.dump(e)
-            self._result_queue.put(message.Message(message.Results.ERROR, exception_dump))
+            self._result_queue.put(message.Message(message.Result.ERROR, exception_dump))
         finally:
             sys.settrace(None)
 
@@ -65,7 +65,7 @@ class FrameProcessor:
 
     def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initializes the frame processor with the script name, lines and queues.
+        Initializes the frame processor with the script name and queues.
         """
         self._name = name
         self._action_queue = action_queue
@@ -92,7 +92,7 @@ class FrameProcessor:
             action = self._action_queue.get()
 
             # hold actions
-            if action.name == message.Actions.EVAL:
+            if action.name == message.Action.EVAL:
                 expression = action.value['expression']
                 inspect = action.value['inspect']
 
@@ -100,19 +100,19 @@ class FrameProcessor:
                 product = Evaluator.evaluate(frame, expression)
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame) if inspect else {}
 
-                self._result_queue.put(message.Message(message.Results.PRODUCT, {**data, **product}))
+                self._result_queue.put(message.Message(message.Result.PRODUCT, {**data, **product}))
                 continue
 
-            if action.name == message.Actions.INPUT:
+            if action.name == message.Action.INPUT:
                 self._input_cache.append(action.value['input'])
                 continue
 
             # progressive actions
-            if action.name == message.Actions.STEP:
+            if action.name == message.Action.STEP:
                 data = Inspector.inspect(frame, event, args, self._exec_call_frame)
-                self._result_queue.put(message.Message(message.Results.DATA, data))
-            elif action.name == message.Actions.STOP:
-                self._result_queue.put(message.Message(message.Results.DATA, {}))
+                self._result_queue.put(message.Message(message.Result.DATA, data))
+            elif action.name == message.Action.STOP:
+                self._result_queue.put(message.Message(message.Result.DATA, {}))
             break
 
         return self.trace
@@ -121,7 +121,7 @@ class FrameProcessor:
         """
         Hook action for input implementations.
         """
-        self._result_queue.put(message.Message(message.Results.PROMPT, prompt))
+        self._result_queue.put(message.Message(message.Result.PROMPT, prompt))
 
         # cached input
         if len(self._input_cache) > 0:
@@ -130,16 +130,16 @@ class FrameProcessor:
         # missing input
         while True:
             action = self._action_queue.get()
-            if action.name == message.Actions.INPUT:
+            if action.name == message.Action.INPUT:
                 return action.value['input']
-            if action.name == message.Actions.STOP:
+            if action.name == message.Action.STOP:
                 # add stop message in the queue again for stacked inputs until reach frame tracer
                 self._action_queue.put(action)
                 return ''
-            self._result_queue.put(message.Message(message.Results.LOCKED, 'input locked, skipping action'))
+            self._result_queue.put(message.Message(message.Result.LOCKED, 'input locked, skipping action'))
 
     def print_hook(self, text: str):
         """
         Hook action for input implementations.
         """
-        self._result_queue.put(message.Message(message.Results.PRINT, text))
+        self._result_queue.put(message.Message(message.Result.PRINT, text))
