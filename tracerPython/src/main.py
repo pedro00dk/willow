@@ -16,32 +16,32 @@ def main():
     parser.add_argument('script', help='The python script to parse')
     arguments = parser.parse_args()
 
-    trace_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
+    tracer_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
 
     if arguments.uncontrolled:
-        run_uncontrolled(trace_broker, arguments.formatted, arguments.omit_help)
+        run_uncontrolled(tracer_broker, arguments.formatted, arguments.omit_help)
     else:
-        run_controlled(trace_broker, arguments.formatted, arguments.omit_help)
+        run_controlled(tracer_broker, arguments.formatted, arguments.omit_help)
 
 
-def run_uncontrolled(trace_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
+def run_uncontrolled(tracer_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
     if not omit_help:
         print('## Running in uncontrolled mode')
         print('## Output format: <event result>\\n<event value>')
         print()
 
-    print_results(trace_broker.start(), formatted)
+    print_results(tracer_broker.start(), formatted)
     while True:
         try:
-            results = trace_broker.step()
+            results = tracer_broker.step()
             print_results(results, formatted)
             if results[-1].name == message.Results.LOCKED:
-                trace_broker.input('')
+                tracer_broker.input('')
         except:
             break
 
 
-def run_controlled(trace_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
+def run_controlled(tracer_broker: broker.TracerBroker, formatted: bool, omit_help: bool):
     if not omit_help:
         print('## Running in controlled mode')
         print('## Output format: <event result>\\n<event value>')
@@ -59,15 +59,15 @@ def run_controlled(trace_broker: broker.TracerBroker, formatted: bool, omit_help
         value = ' '.join(action_data[1:])
         try:
             if action == 'start':
-                print_results(trace_broker.start(), formatted)
+                print_results(tracer_broker.start(), formatted)
             elif action == 'step':
-                print_results(trace_broker.step(1), formatted)
+                print_results(tracer_broker.step(1), formatted)
             elif action == 'eval':
-                print_results(trace_broker.eval(value), formatted)
+                print_results(tracer_broker.eval(value), formatted)
             elif action == 'input':
-                trace_broker.input(value)
+                tracer_broker.input(value)
             elif action == 'stop':
-                trace_broker.stop()
+                tracer_broker.stop()
                 break
             else:
                 print('action not found')

@@ -6,7 +6,7 @@ import message
 
 class TracerBroker:
     """
-    Provides an easy interface for comunicating with the Tracer as it has to run in another process.
+    Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
 
     def __init__(self, name: str, script: str, sandbox: bool):
