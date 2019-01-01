@@ -67,7 +67,7 @@ class Inspector:
             ]
             stack_references.append(frame_references)
 
-        return stack_references, heap_graph, {user_class.__name__ for user_class in user_classes}
+        return stack_references, heap_graph, [user_class.__name__ for user_class in user_classes]
 
     @classmethod
     def inspect_object(cls, obj, heap_graph: dict, user_classes: set, module_name: str):
