@@ -89,26 +89,6 @@ class TracerBroker:
 
         return results
 
-    def eval(self, expression: str):
-        """
-        Evaluates an expression in the current script scope.
-        """
-        if not self.is_tracer_running():
-            raise AssertionError('tracer not running')
-
-        self._action_queue.put(message.Message(message.Action.EVAL, {'expression': expression, 'inspect': True}))
-        results = []
-        while True:
-            result = self._result_queue.get()
-            results.append(result)
-            if result.name in {message.Result.PRODUCT, message.Result.ERROR, message.Result.LOCKED}:
-                break
-
-        if result.name == message.Result.ERROR:
-            self.stop()
-
-        return results
-
     def input(self, data: str):
         """
         Sends a input string to script. Inputs have no response.

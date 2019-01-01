@@ -5,7 +5,6 @@ import types
 
 import message
 from . import scope
-from .evaluator import Evaluator
 from .inspector import Inspector
 from .scriptio import HookedInput, HookedPrint
 from .util import ExceptionUtil, FrameUtil
@@ -91,18 +90,7 @@ class FrameProcessor:
         while True:
             action = self._action_queue.get()
 
-            # hold actions
-            if action.name == message.Action.EVAL:
-                expression = action.value['expression']
-                inspect = action.value['inspect']
-
-                # evaluate first and then inspect state
-                product = Evaluator.evaluate(frame, expression)
-                data = Inspector.inspect(frame, event, args, self._exec_call_frame) if inspect else {}
-
-                self._result_queue.put(message.Message(message.Result.PRODUCT, {**data, **product}))
-                continue
-
+            # hold action (does not consume the frame)
             if action.name == message.Action.INPUT:
                 self._input_cache.append(action.value['input'])
                 continue
