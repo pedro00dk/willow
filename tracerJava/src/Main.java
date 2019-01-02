@@ -85,6 +85,7 @@ public class Main {
 
             try {
                 if (action.equals("start")) printResults(tracerBroker.start(), formatted);
+                else if (action.equals("step")) printResults(tracerBroker.step(1), formatted);
                 else if (action.equals("stop")) {
                     tracerBroker.stop();
                     break;
