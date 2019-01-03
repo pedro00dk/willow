@@ -85,6 +85,7 @@ public class Main {
 
         var scanner = new Scanner(System.in);
         while (true) {
+            System.out.print(">>> ");
             var actionData = scanner.nextLine();
             var spaceIndex = actionData.indexOf(' ');
             var action = spaceIndex != -1 ? actionData.substring(0, spaceIndex) : actionData;
