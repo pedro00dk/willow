@@ -2,6 +2,8 @@ import core.TracerBroker;
 import message.ResultMessage;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,12 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+        if (args.length == 0) {
+            var code = Files.readString(Path.of("./res/Test.java"));
+            var tracerBroker = new TracerBroker("Test.java", code);
+            runControlled(tracerBroker, false, false);
+            return;
+        }
         var arguments = parseArgs(args);
 
         var tracerBroker = new TracerBroker((String) arguments.get("name"), (String) arguments.get("code"));
