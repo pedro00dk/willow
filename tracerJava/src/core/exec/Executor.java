@@ -77,7 +77,7 @@ public class Executor {
                 var continueTracing = eventProcessor.trace(event);
                 if (!continueTracing) {
                     vm.exit(0);
-                    break;
+                    return;
                 }
             }
         }

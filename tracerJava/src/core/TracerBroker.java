@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Provides an easy interface for communication with the Tracer as it has to run in another process.
@@ -38,8 +38,8 @@ public class TracerBroker {
     public List<ResultMessage> start() {
         if (isTracerRunning()) throw new IllegalStateException("tracer already running");
 
-        actionQueue = new SynchronousQueue<>();
-        resultQueue = new SynchronousQueue<>();
+        actionQueue = new LinkedBlockingDeque<>();
+        resultQueue = new LinkedBlockingDeque<>();
         tracerThread = new Thread(() -> new Tracer(filename, code, actionQueue, resultQueue).run());
         tracerThread.start();
 
