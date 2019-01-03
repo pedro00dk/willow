@@ -56,6 +56,9 @@ public class Executor {
         startVirtualMachine();
         var allowedThreadsNames = configureEventRequests();
 
+        var processPrintStream = vm.process().getInputStream();
+        var processErrorStream = vm.process().getErrorStream();
+
         while (true) {
             vm.resume();
             var eventSet = vm.eventQueue().remove();
@@ -74,6 +77,16 @@ public class Executor {
                 } else if (event instanceof ThreadDeathEvent) {
                     continue;
                 }
+
+                // process output readers
+                var printAvailable = processPrintStream.available();
+                if (printAvailable > 0)
+                    eventProcessor.printHook(new String(processPrintStream.readNBytes(printAvailable)));
+
+                var errorAvailable = processErrorStream.available();
+                if (errorAvailable > 0)
+                    eventProcessor.printHook(new String(processErrorStream.readNBytes(errorAvailable)));
+
                 var continueTracing = eventProcessor.trace(event);
                 if (!continueTracing) {
                     vm.exit(0);

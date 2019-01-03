@@ -3,6 +3,13 @@ import java.nio.file.*;
 
 public class Test {
     public static void main(String[] args) {
+        System.out.println("hello world!");
+        System.err.println("hello error!");
+        System.out.println("hello world2!");
+        System.out.println("hello world3!");
+        System.err.println("hello error2!");
+        System.out.println("hello world4!");
+        var x = 1;
         var person = new Person("Peter");
         var path = Path.of("/tmp");
     }

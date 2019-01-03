@@ -51,4 +51,20 @@ public class EventProcessor {
         }
         return true;
     }
+
+    /**
+     * Hook for print or error calls.
+     */
+    public void printHook(String text) {
+        try {
+            resultQueue.put(new ResultMessage(ResultMessage.Result.PRINT, text));
+        } catch (InterruptedException e) {
+            var exceptionDump = ExceptionUtil.dump(e);
+            try {
+                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
 }
