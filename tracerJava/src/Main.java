@@ -18,16 +18,16 @@ public class Main {
         if (args.length == 0) {
             var code = Files.readString(Path.of("./res/Test.java"));
             var tracerBroker = new TracerBroker("Test.java", code);
-            runControlled(tracerBroker, false, false);
+            runControlled(tracerBroker, false);
             return;
         }
         var arguments = parseArgs(args);
 
         var tracerBroker = new TracerBroker((String) arguments.get("name"), (String) arguments.get("code"));
         if ((Boolean) arguments.get("uncontrolled")) {
-            runUncontrolled(tracerBroker, (Boolean) arguments.get("formatted"), (Boolean) arguments.get("omitHelp"));
+            runUncontrolled(tracerBroker, (Boolean) arguments.get("omitHelp"));
         } else {
-            runControlled(tracerBroker, (Boolean) arguments.get("formatted"), (Boolean) arguments.get("omitHelp"));
+            runControlled(tracerBroker, (Boolean) arguments.get("omitHelp"));
         }
     }
 
@@ -35,7 +35,6 @@ public class Main {
         var argsList = Stream.of(args).collect(Collectors.toList());
         var map = new HashMap<String, Object>();
         map.put("sandbox", argsList.remove("--sandbox"));
-        map.put("formatted", argsList.remove("--formatted"));
         map.put("uncontrolled", argsList.remove("--uncontrolled"));
         map.put("omitHelp", argsList.contains("--omit-help"));
         var nameIndex = argsList.indexOf("--name");
@@ -55,24 +54,24 @@ public class Main {
         return map;
     }
 
-    static void runUncontrolled(TracerBroker tracerBroker, boolean formatted, boolean omitHelp) {
+    static void runUncontrolled(TracerBroker tracerBroker, boolean omitHelp) {
         if (!omitHelp) {
             System.out.println("## Running in uncontrolled mode");
             System.out.println("## Output format: <event result>\\n<event value>");
             System.out.println();
         }
-        printResults(tracerBroker.start(), formatted);
+        printResults(tracerBroker.start());
         while (true) {
             try {
                 var results = tracerBroker.step(1);
-                printResults(results, formatted);
+                printResults(results);
             } catch (Exception e) {
                 break;
             }
         }
     }
 
-    static void runControlled(TracerBroker tracerBroker, boolean formatted, boolean omitHelp) {
+    static void runControlled(TracerBroker tracerBroker, boolean omitHelp) {
         if (!omitHelp) {
             System.out.println("## Running in controlled mode");
             System.out.println("## Output format: <event result>\\n<event value>");
@@ -92,8 +91,8 @@ public class Main {
             var value = spaceIndex != -1 ? actionData.substring(spaceIndex + 1) : "";
 
             try {
-                if (action.equals("start")) printResults(tracerBroker.start(), formatted);
-                else if (action.equals("step")) printResults(tracerBroker.step(1), formatted);
+                if (action.equals("start")) printResults(tracerBroker.start());
+                else if (action.equals("step")) printResults(tracerBroker.step(1));
                 else if (action.equals("stop")) {
                     try {
                         tracerBroker.stop();
@@ -111,11 +110,10 @@ public class Main {
         }
     }
 
-    static void printResults(List<ResultMessage> resultMessages, boolean formatted) {
+    static void printResults(List<ResultMessage> resultMessages) {
         resultMessages.forEach(r -> {
             System.out.println(r.getResult().name().toLowerCase());
             System.out.println(new Gson().toJson(r.getValue()));
-            //System.out.println(r.getValue()); // TODO implement formatted print
             System.out.println();
         });
     }
