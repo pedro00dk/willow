@@ -64,7 +64,10 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
             elif action == 'input':
                 tracer_broker.input(value)
             elif action == 'stop':
-                tracer_broker.stop()
+                try:
+                    tracer_broker.stop()
+                except Exception as e:
+                    pass
                 break
             else:
                 print('action not found')
