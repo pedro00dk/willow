@@ -78,7 +78,6 @@ public class Main {
             System.out.println("## actions:");
             System.out.println("## start -> start the tracer");
             System.out.println("## step -> run next step");
-            System.out.println("## eval <expr> -> evaluates an expression (expr shall not have spaces)");
             System.out.println("## input <data> -> sends input to script");
             System.out.println("## stop -> stops the tracer and the application");
             System.out.println();
@@ -95,7 +94,11 @@ public class Main {
                 if (action.equals("start")) printResults(tracerBroker.start(), formatted);
                 else if (action.equals("step")) printResults(tracerBroker.step(1), formatted);
                 else if (action.equals("stop")) {
-                    tracerBroker.stop();
+                    try {
+                        tracerBroker.stop();
+                    } catch (Exception e) {
+                        // ignore
+                    }
                     break;
                 } else { // TODO implement all actions
                     System.out.println("action not found");
