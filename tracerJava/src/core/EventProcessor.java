@@ -37,7 +37,7 @@ public class EventProcessor {
                 var data = Inspector.inspect(event);
                 resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, data));
             } else if (action.getAction() == ActionMessage.Action.STOP) {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, null));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, null));
                 return false;
             }
         } catch (InterruptedException | IncompatibleThreadStateException e) {
