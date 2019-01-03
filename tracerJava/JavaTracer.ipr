@@ -4,6 +4,7 @@
   <component name="InspectionProjectProfileManager">
     <profile version="1.0">
       <option name="myName" value="Project Default" />
+      <inspection_tool class="MagicConstant" enabled="false" level="WARNING" enabled_by_default="false" />
     </profile>
     <version value="1.0" />
   </component>
@@ -22,5 +23,14 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+  <component name="libraryTable">
+    <library name="gson-2.8.5">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/gson-2.8.5.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
 </project>

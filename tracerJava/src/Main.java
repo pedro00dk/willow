@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import core.TracerBroker;
 import message.ResultMessage;
 
@@ -113,7 +114,8 @@ public class Main {
     static void printResults(List<ResultMessage> resultMessages, boolean formatted) {
         resultMessages.forEach(r -> {
             System.out.println(r.getResult().name().toLowerCase());
-            System.out.println(r.getValue()); // TODO implement formatted print
+            System.out.println(new Gson().toJson(r.getValue()));
+            //System.out.println(r.getValue()); // TODO implement formatted print
             System.out.println();
         });
     }
