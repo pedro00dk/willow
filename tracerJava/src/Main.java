@@ -65,6 +65,7 @@ public class Main {
             try {
                 var results = tracerBroker.step(1);
                 printResults(results);
+                if (results.get(results.size() - 1).getResult() == ResultMessage.Result.LOCKED) tracerBroker.input("");
             } catch (Exception e) {
                 break;
             }
@@ -94,6 +95,8 @@ public class Main {
             try {
                 if (action.equals("start")) printResults(tracerBroker.start());
                 else if (action.equals("step")) printResults(tracerBroker.step(1));
+                else if (action.equals("input")) tracerBroker.input(value);
+
                 else if (action.equals("stop")) {
                     try {
                         tracerBroker.stop();
@@ -101,7 +104,7 @@ public class Main {
                         // ignore
                     }
                     break;
-                } else { // TODO implement all actions
+                } else {
                     System.out.println("action not found");
                 }
             } catch (Exception e) {

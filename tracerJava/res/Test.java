@@ -2,7 +2,9 @@ import java.nio.file.*;
 
 
 public class Test {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        System.out.println(System.in.available());
+        System.out.println(new String(System.in.readNBytes(10)));
         System.out.println("hello world!");
         System.err.println("hello error!");
         System.out.println("hello world2!");
