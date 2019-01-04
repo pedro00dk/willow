@@ -2,6 +2,7 @@ package core;
 
 import com.sun.jdi.*;
 import com.sun.jdi.event.Event;
+import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.MethodExitEvent;
 import core.util.EventUtil;
 
@@ -21,6 +22,15 @@ public final class Inspector {
      * Inspects the program state. Analyses the stack and heap, collecting the objects.
      */
     public static Map<String, Object> inspect(Event event) throws IncompatibleThreadStateException {
+        String eventType;
+        if (event instanceof MethodEntryEvent) {
+            eventType = "call";
+        } else if (event instanceof MethodExitEvent) {
+            eventType = "return";
+        } else {
+            eventType = "line";
+        }
+
         var stackInspection = inspectStack(event);
         //noinspection unchecked
         var stackFrames = (List<StackFrame>) stackInspection.get("frames");
@@ -31,14 +41,20 @@ public final class Inspector {
         //noinspection unchecked
         var stackReferences = (List<List<List<Object>>>) heapInspection.get("stack_references");
         //noinspection unchecked
-        var heapGraph = (HashMap<Long, Map<String, Object>>) heapInspection.get("heap_graph");
+        var heapGraph = (Map<Long, Map<String, Object>>) heapInspection.get("heap_graph");
+        //noinspection unchecked
+        var userClasses = (Set<String>) heapInspection.get("user_classes");
 
-        var finish = event instanceof MethodExitEvent && stackFrames.size() == 1;
+        var finish = eventType.equals("return") && stackFrames.size() == 1;
 
         return Map.ofEntries(
+                Map.entry("event", eventType),
+                Map.entry("args", "null"), // TODO get exception args
+                Map.entry("line", stackLines.get(0).get("line")),
                 Map.entry("stack_lines", stackLines),
                 Map.entry("stack_references", stackReferences),
                 Map.entry("heap_graph", heapGraph),
+                Map.entry("user_classes", userClasses),
                 Map.entry("finish", finish)
         );
     }
@@ -86,7 +102,11 @@ public final class Inspector {
                 )
                 .collect(Collectors.toList());
 
-        return Map.ofEntries(Map.entry("stack_references", stackReferences), Map.entry("heap_graph", heapGraph));
+        return Map.ofEntries(
+                Map.entry("stack_references", stackReferences),
+                Map.entry("heap_graph", heapGraph),
+                Map.entry("user_classes", userClasses)
+        );
     }
 
     /**
@@ -222,6 +242,7 @@ public final class Inspector {
             if (classReferenceData[0].equals("class") && !classReferenceData[1].contains(".")) {
                 var orderedFields = objRef.referenceType().allFields();
                 var fieldsValues = objRef.getValues(orderedFields);
+                userClasses.add(classReferenceData[1]);
                 members = orderedFields.stream()
                         .map(f -> new HashMap.SimpleEntry<>(f.name(), fieldsValues.get(f)))
                         .collect(Collectors.toList());
