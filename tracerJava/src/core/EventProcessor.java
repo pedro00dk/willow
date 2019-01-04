@@ -6,6 +6,7 @@ import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -50,6 +51,33 @@ public class EventProcessor {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Hook for input calls.
+     */
+    public String inputHook() {
+        try {
+            while (true) {
+                var action = actionQueue.take();
+                if (action.getAction() == ActionMessage.Action.INPUT)
+                    // noinspection unchecked
+                    return ((Map<String, String>) action.getValue()).get("input");
+                if (action.getAction() == ActionMessage.Action.STOP) {
+                    actionQueue.put(new ActionMessage(ActionMessage.Action.STOP, null));
+                    return "";
+                }
+                resultQueue.put(new ResultMessage(ResultMessage.Result.LOCKED, "input locked, skipping action"));
+            }
+        } catch (InterruptedException e) {
+            var exceptionDump = ExceptionUtil.dump(e);
+            try {
+                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return "";
     }
 
     /**
