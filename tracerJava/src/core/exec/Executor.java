@@ -58,10 +58,18 @@ public class Executor {
 
         var processPrintStream = vm.process().getInputStream();
         var processErrorStream = vm.process().getErrorStream();
+        var processReadStream = vm.process().getOutputStream();
 
         while (true) {
             vm.resume();
-            var eventSet = vm.eventQueue().remove();
+            var eventSet = vm.eventQueue().remove(100);
+
+            // input hook TODO check better strategies
+            while (eventSet == null) {
+                processReadStream.write((eventProcessor.inputHook() + "\n").getBytes());
+                processReadStream.flush();
+                eventSet = vm.eventQueue().remove(100);
+            }
             for (var event : eventSet) {
                 if (event instanceof VMDeathEvent) {
                     vm.resume(); // two vm death events are emitted
@@ -78,7 +86,7 @@ public class Executor {
                     continue;
                 }
 
-                // process output readers
+                // print hooks
                 var printAvailable = processPrintStream.available();
                 if (printAvailable > 0)
                     eventProcessor.printHook(new String(processPrintStream.readNBytes(printAvailable)));
@@ -87,6 +95,7 @@ public class Executor {
                 if (errorAvailable > 0)
                     eventProcessor.printHook(new String(processErrorStream.readNBytes(errorAvailable)));
 
+                // trace
                 var continueTracing = eventProcessor.trace(event);
                 if (!continueTracing) {
                     vm.exit(0);
