@@ -1,5 +1,6 @@
 import argparse
 import json
+import pathlib
 
 import broker
 import message
@@ -13,14 +14,20 @@ def main():
                         help='Run without stopping and print all results')
     parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('script', help='The python script to parse')
-    arguments = parser.parse_args()
 
-    tracer_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
+    try:
+        arguments = parser.parse_args()
+        tracer_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
+        if arguments.uncontrolled:
+            run_uncontrolled(tracer_broker, arguments.omit_help)
+        else:
+            run_controlled(tracer_broker, arguments.omit_help)
 
-    if arguments.uncontrolled:
-        run_uncontrolled(tracer_broker, arguments.omit_help)
-    else:
-        run_controlled(tracer_broker, arguments.omit_help)
+    except:
+        tracer_broker = broker.TracerBroker(
+            '<script>', pathlib.Path('./res/main.py').read_text(encoding='utf8'), True
+        )
+        run_uncontrolled(tracer_broker, False)
 
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
