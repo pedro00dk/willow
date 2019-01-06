@@ -1,5 +1,6 @@
 package core;
 
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
@@ -109,7 +110,7 @@ public class Project {
             throw new IllegalStateException(
                     "Compilation fail:\n" + output.toString() +
                             dgCollector.getDiagnostics().stream()
-                                    .map(d -> d.getMessage(Locale.ENGLISH))
+                                    .map(Diagnostic::toString)
                                     .collect(Collectors.joining("\n", "\n", "\n"))
             );
     }
