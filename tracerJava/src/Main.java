@@ -15,20 +15,19 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        if (args.length == 0) {
-            var code = Files.readString(Path.of("./res/Test.java"));
-            var tracerBroker = new TracerBroker("Test.java", code);
+        try {
+            var arguments = parseArgs(args);
+            var tracerBroker = new TracerBroker((String) arguments.get("name"), (String) arguments.get("code"));
+            if ((Boolean) arguments.get("uncontrolled")) {
+                runUncontrolled(tracerBroker, (Boolean) arguments.get("omitHelp"));
+            } else {
+                runControlled(tracerBroker, (Boolean) arguments.get("omitHelp"));
+            }
+        } catch (IllegalArgumentException e) {
+            var tracerBroker = new TracerBroker("Test.java", Files.readString(Path.of("./res/Test.java")));
             runControlled(tracerBroker, false);
-            return;
         }
-        var arguments = parseArgs(args);
 
-        var tracerBroker = new TracerBroker((String) arguments.get("name"), (String) arguments.get("code"));
-        if ((Boolean) arguments.get("uncontrolled")) {
-            runUncontrolled(tracerBroker, (Boolean) arguments.get("omitHelp"));
-        } else {
-            runControlled(tracerBroker, (Boolean) arguments.get("omitHelp"));
-        }
     }
 
     static Map<String, Object> parseArgs(String[] args) {
@@ -100,25 +99,19 @@ public class Main {
                 else if (action.equals("stop")) {
                     try {
                         tracerBroker.stop();
-                    } catch (Exception e) {
-                        // ignore
+                    } catch (Exception e) { // ignore
                     }
                     break;
                 } else {
-                    System.out.println("action not found");
+                    throw new Exception("action not found");
                 }
             } catch (Exception e) {
-                System.out.println("exception:");
-                System.out.println(e.getMessage());
+                System.out.println(new Gson().toJson("exception: " + e.getMessage()));
             }
         }
     }
 
     static void printResults(List<ResultMessage> resultMessages) {
-        resultMessages.forEach(r -> {
-            System.out.println(r.getResult().name().toLowerCase());
-            System.out.println(new Gson().toJson(r.getValue()));
-            System.out.println();
-        });
+        resultMessages.forEach(r -> System.out.println(new Gson().toJson(r)));
     }
 }
