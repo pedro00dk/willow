@@ -153,7 +153,17 @@ public final class Inspector {
                         Byte.class.isAssignableFrom(objClass) || Short.class.isAssignableFrom(objClass) ||
                         Integer.class.isAssignableFrom(objClass) || Long.class.isAssignableFrom(objClass) ||
                         Float.class.isAssignableFrom(objClass) || Double.class.isAssignableFrom(objClass)) {
-                    return objRef.getValue(objRef.referenceType().fieldByName("value"));
+                    var primitiveValue = objRef.getValue(objRef.referenceType().fieldByName("value"));
+                    if (primitiveValue instanceof PrimitiveValue) {
+                        if (primitiveValue instanceof BooleanValue) return ((BooleanValue) primitiveValue).value();
+                        if (primitiveValue instanceof CharValue) return ((CharValue) primitiveValue).value();
+                        if (primitiveValue instanceof ByteValue) return ((ByteValue) primitiveValue).value();
+                        if (primitiveValue instanceof ShortValue) return ((ShortValue) primitiveValue).value();
+                        if (primitiveValue instanceof IntegerValue) return ((IntegerValue) primitiveValue).value();
+                        if (primitiveValue instanceof LongValue) return ((LongValue) primitiveValue).value();
+                        if (primitiveValue instanceof FloatValue) return ((FloatValue) primitiveValue).value();
+                        if (primitiveValue instanceof DoubleValue) return ((DoubleValue) primitiveValue).value();
+                    }
                 }
             } catch (ClassNotFoundException e) {
                 // array types always throw this exception
