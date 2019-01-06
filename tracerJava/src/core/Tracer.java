@@ -38,7 +38,7 @@ public class Tracer {
             project.compile();
             resultQueue.put(new ResultMessage(ResultMessage.Result.STARTED, null));
             new Executor(project, eventProcessor).execute();
-        } catch (IOException | IllegalConnectorArgumentsException | VMStartException | InterruptedException e) {
+        } catch (Exception e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {
                 resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
