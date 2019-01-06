@@ -22,8 +22,7 @@ def main():
             run_uncontrolled(tracer_broker, arguments.omit_help)
         else:
             run_controlled(tracer_broker, arguments.omit_help)
-
-    except:
+    except SystemExit:
         tracer_broker = broker.TracerBroker(
             '<script>', pathlib.Path('./res/main.py').read_text(encoding='utf8'), True
         )
@@ -73,21 +72,17 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
             elif action == 'stop':
                 try:
                     tracer_broker.stop()
-                except Exception as e:
+                except:
                     pass
                 break
             else:
-                print('action not found')
+                raise Exception('action not found')
         except Exception as e:
-            print('exception:')
-            print(e)
+            print(json.dumps(f'exception: {e}'))
 
 
 def print_results(results: list):
-    for result in results:
-        print(result.name)
-        print(json.dumps(result.value))
-        print()
+    [print(json.dumps({'result': r.name, 'value': r.value})) for r in results]
 
 
 if __name__ == '__main__':
