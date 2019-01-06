@@ -24,7 +24,7 @@ public class Main {
                 runControlled(tracerBroker, (Boolean) arguments.get("omitHelp"));
             }
         } catch (IllegalArgumentException e) {
-            var tracerBroker = new TracerBroker("Test.java", Files.readString(Path.of("./res/Test.java")));
+            var tracerBroker = new TracerBroker("Test.java", Files.readString(Path.of("./res/Main.java")));
             runControlled(tracerBroker, false);
         }
 
