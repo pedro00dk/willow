@@ -3,13 +3,15 @@ import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 import { Writable } from 'stream'
 
+import { Result } from './result'
+
 
 /**
  * Connects to a tracer process.
  */
 export class TracerClient {
     private command: string
-    private stdout: rx.Observable<object> | undefined
+    private stdout: rx.Observable<Result> | undefined
     private stderr: rx.Observable<string> | undefined
 
     /**
@@ -28,7 +30,7 @@ export class TracerClient {
         this.stdout = observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
             .pipe(
                 rxOps.filter(str => str.startsWith('{')),
-                rxOps.map(str => JSON.parse(str))
+                rxOps.map(str => JSON.parse(str) as Result)
             )
         this.stdout.subscribe(obj => console.log(obj))
 
