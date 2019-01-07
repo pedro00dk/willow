@@ -9,7 +9,7 @@ import { Writable } from 'stream'
  */
 export class TracerClient {
     private command: string
-    private stdout: rx.Observable<string> | undefined
+    private stdout: rx.Observable<object> | undefined
     private stderr: rx.Observable<string> | undefined
 
     /**
@@ -26,7 +26,11 @@ export class TracerClient {
         let instance = cp.spawn(this.command, { shell: true })
 
         this.stdout = observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
-        this.stdout.subscribe(str => console.log(str))
+            .pipe(
+                rxOps.filter(str => str.startsWith('{')),
+                rxOps.map(str => JSON.parse(str))
+            )
+        this.stdout.subscribe(obj => console.log(obj))
 
         this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
         this.stderr.subscribe(str => console.error(str))
