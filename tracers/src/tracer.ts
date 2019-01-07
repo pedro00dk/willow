@@ -11,8 +11,9 @@ import { Result } from './result'
  */
 export class TracerClient {
     private command: string
-    private stdout: rx.Observable<Result> | undefined
-    private stderr: rx.Observable<string> | undefined
+    private instance: cp.ChildProcess
+    private stdout: rx.Observable<Result>
+    private stderr: rx.Observable<string>
 
     /**
      * Initializes the client with the command to spawn the process.
@@ -22,23 +23,47 @@ export class TracerClient {
     }
 
     /**
+     * Throws an exception if the tracer instance is not spawned.
+     */
+    public requireSpawned() {
+        if (!this.instance) throw 'tracer not spawned'
+    }
+
+    /**
     * Spawns the tracer server process.
     */
     spawn() {
-        let instance = cp.spawn(this.command, { shell: true })
+        this.instance = cp.spawn(this.command, { shell: true })
 
-        this.stdout = observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
+        this.stdout = observableAnyToLines(rx.fromEvent(this.instance.stdout, 'data'))
             .pipe(
                 rxOps.filter(str => str.startsWith('{')),
                 rxOps.map(str => JSON.parse(str) as Result)
             )
         this.stdout.subscribe(obj => console.log(obj))
 
-        this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
+        this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
         this.stderr.subscribe(str => console.error(str))
+    }
 
-        instance.stdin.write('start\n')
-        setInterval(() => instance.stdin.write('step\n'), 1000)
+    start() {
+        this.requireSpawned()
+        this.instance.stdin.write('start\n')
+    }
+
+    step() {
+        this.requireSpawned()
+        this.instance.stdin.write('step\n')
+    }
+
+    input(input: string) {
+        this.requireSpawned()
+        this.instance.stdin.write(`input ${input}\n`)
+    }
+
+    stop() {
+        this.requireSpawned()
+        this.instance.stdin.write(`stop\n`)
     }
 }
 
