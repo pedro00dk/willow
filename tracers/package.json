@@ -1,0 +1,18 @@
+{
+    "name": "tracer_server",
+    "version": "0.0.1",
+    "author": {
+        "name": "Pedro Henrique",
+        "email": "pedro00dk@gmail.com"
+    },
+    "license": "ISC",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "*",
+        "typescript": "*"
+    },
+    "scripts": {
+        "start": "tsc && node ./dist/index.js",
+        "debug": "tsc && node --nolazy --inspect-brk=9229 ./dist/index.js"
+    }
+}
