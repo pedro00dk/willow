@@ -11,6 +11,9 @@
         "@types/node": "*",
         "typescript": "*"
     },
+    "dependencies": {
+        "rxjs": "*"
+    },
     "scripts": {
         "start": "tsc && node ./dist/index.js",
         "debug": "tsc && node --nolazy --inspect-brk=9229 ./dist/index.js"

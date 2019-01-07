@@ -1,4 +1,6 @@
 import * as cp from 'child_process'
+import * as rx from 'rxjs'
+import * as rxOps from 'rxjs/operators'
 import { Writable } from 'stream'
 
 
@@ -16,13 +18,24 @@ export class TracerClient {
     }
 
     /**
-     * Spawns the tracer server process.
-     */
+    * Spawns the tracer server process.
+    */
     spawn() {
         let instance = cp.spawn(this.command, { shell: true })
 
-        instance.stdout.pipe(process.stdout)
-        instance.stderr.pipe(process.stderr)
+        rx.fromEvent(instance.stdout, 'data')
+            .pipe(
+                rxOps.map(obj => obj as Buffer),
+                rxOps.map(buf => buf.toString('utf8'))
+            )
+            .subscribe(str => console.log(str))
+
+        rx.fromEvent(instance.stderr, 'data')
+            .pipe(
+                rxOps.map(obj => obj as Buffer),
+                rxOps.map(buf => buf.toString('utf8'))
+            )
+            .subscribe(str => console.error(str))
 
         instance.stdin.write('start\n')
         setInterval(() => instance.stdin.write('step\n'), 1000)
