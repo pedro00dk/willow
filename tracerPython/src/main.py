@@ -9,24 +9,19 @@ import message
 def main():
     parser = argparse.ArgumentParser(description='Tracer CLI parser')
     parser.add_argument('--name', default='<script>', help='The script name')
+    parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
     parser.add_argument('--uncontrolled', default=False, action='store_true',
                         help='Run without stopping and print all results')
-    parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
-    parser.add_argument('script', help='The python script to parse')
+    parser.add_argument('script', nargs='?', help='The python script to parse')
 
-    try:
-        arguments = parser.parse_args()
-        tracer_broker = broker.TracerBroker(arguments.name, arguments.script, arguments.sandbox)
-        if arguments.uncontrolled:
-            run_uncontrolled(tracer_broker, arguments.omit_help)
-        else:
-            run_controlled(tracer_broker, arguments.omit_help)
-    except SystemExit:
-        tracer_broker = broker.TracerBroker(
-            '<script>', pathlib.Path('./res/main.py').read_text(encoding='utf8'), True
-        )
-        run_uncontrolled(tracer_broker, False)
+    arguments = parser.parse_args()
+    script = arguments.script if arguments.script != None else pathlib.Path('./res/main.py').read_text(encoding='utf8')
+    tracer_broker = broker.TracerBroker(arguments.name, script, arguments.sandbox)
+    if arguments.uncontrolled:
+        run_uncontrolled(tracer_broker, arguments.omit_help)
+    else:
+        run_controlled(tracer_broker, arguments.omit_help)
 
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
