@@ -50,16 +50,16 @@ export class TracerClient {
         this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
     }
 
-    async start() {
+    start() {
         this.requireSpawned()
         this.instance.stdin.write('start\n')
-        console.log(await this.stdoutGenerator.next())
+        return this.stdoutGenerator.next()
     }
 
-    async step() {
+    step() {
         this.requireSpawned()
         this.instance.stdin.write('step\n')
-        console.log(await this.stdoutGenerator.next())
+        return this.stdoutGenerator.next()
     }
 
     input(input: string) {
@@ -77,7 +77,7 @@ export class TracerClient {
 /**
  * Pipes an rx.Observable<any> containing text split in any form to string lines obtained from the buffers. 
  */
-function observableAnyToLines(observable: rx.Observable<Buffer>): rx.Observable<string> {
+function observableAnyToLines(observable: rx.Observable<any>): rx.Observable<string> {
     return observable
         .pipe(
             rxOps.map(obj => obj as Buffer),
@@ -103,6 +103,6 @@ async function* observableGenerator<T>(observable: rx.Observable<T>, stopPredica
             })
         }) as T
         if (!next || stopPredicate(next)) return next
-        else yield next
+        yield next
     }
 }
