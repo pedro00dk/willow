@@ -13,10 +13,19 @@ def main():
     parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
     parser.add_argument('--uncontrolled', default=False, action='store_true',
                         help='Run without stopping and print all results')
+    parser.add_argument('--test', default=False, action='store_true',
+                        help='Ignores a possibly provided script and runs the test script')
     parser.add_argument('script', nargs='?', help='The python script to parse')
 
     arguments = parser.parse_args()
-    script = arguments.script if arguments.script != None else pathlib.Path('./res/main.py').read_text(encoding='utf8')
+
+    script = pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else None
+    script = arguments.script if not arguments.test else script
+
+    if not script:
+        print('## No script or test flag provided. check --help')
+        return 1
+
     tracer_broker = broker.TracerBroker(arguments.name, script, arguments.sandbox)
     if arguments.uncontrolled:
         run_uncontrolled(tracer_broker, arguments.omit_help)
