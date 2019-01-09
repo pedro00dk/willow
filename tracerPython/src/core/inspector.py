@@ -21,7 +21,7 @@ class Inspector:
 
         finish = event == 'return' and len(stack_frames) == 1
         return {
-            'event': event,
+            'name': event,
             'args': args,
             'line': stack_lines[0]['line'],
             'stack_lines': stack_lines,
