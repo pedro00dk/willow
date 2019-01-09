@@ -2,7 +2,7 @@ import * as cp from 'child_process'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 
-import { Result } from './result'
+import { Result, Event } from './result'
 
 
 /**
@@ -11,7 +11,8 @@ import { Result } from './result'
 export class TracerClient {
     private command: string
     private instance: cp.ChildProcess
-    private stdout: rx.Observable<Result>
+    private stdout: rx.Observable<Array<Result>>
+    private stdoutGenerator: AsyncIterableIterator<Array<Result>>
     private stderr: rx.Observable<string>
 
     /**
@@ -36,24 +37,29 @@ export class TracerClient {
 
         this.stdout = observableAnyToLines(rx.fromEvent(this.instance.stdout, 'data'))
             .pipe(
-                rxOps.filter(str => str.startsWith('{')),
-                rxOps.map(str => JSON.parse(str) as Result)
+                rxOps.filter(str => str.startsWith('[')),
+                rxOps.map(str => JSON.parse(str) as Array<Result>),
             )
+        this.stdoutGenerator = observableGenerator(
+            this.stdout,
+            results => {
+                let last = results[results.length - 1]
+                return last.name === 'data' && (last.value as Event).finish
+            }
+        )
         this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
     }
 
     async start() {
         this.requireSpawned()
-        let resultPromise = observableNextAsPromise(this.stdout)
         this.instance.stdin.write('start\n')
-        console.log(await resultPromise)
+        console.log(await this.stdoutGenerator.next())
     }
 
     async step() {
         this.requireSpawned()
-        let resultPromise = observableNextAsPromise(this.stdout)
         this.instance.stdin.write('step\n')
-        console.log(await resultPromise)
+        console.log(await this.stdoutGenerator.next())
     }
 
     input(input: string) {
@@ -86,17 +92,17 @@ function observableAnyToLines(observable: rx.Observable<Buffer>): rx.Observable<
 }
 
 /**
- * Returns a promise to consume the next observable element.
+ * Creates an async generator for the received observable results.
  */
-function observableNextAsPromise<T>(observable: rx.Observable<T>) {
-    return new Promise(
-        res => {
-            let subscription = observable.subscribe(
-                val => {
-                    res(val)
-                    subscription.unsubscribe()
-                }
-            )
-        }
-    )
+async function* observableGenerator<T>(observable: rx.Observable<T>, stopPredicate: (element: T) => boolean): AsyncIterableIterator<T> {
+    while (true) {
+        let next = await new Promise(res => {
+            let subscription = observable.subscribe(val => {
+                subscription.unsubscribe()
+                res(val)
+            })
+        }) as T
+        if (!next || stopPredicate(next)) return next
+        else yield next
+    }
 }
