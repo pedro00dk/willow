@@ -86,7 +86,7 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
 
 
 def print_results(results: list):
-    [print(json.dumps({'result': r.name, 'value': r.value})) for r in results]
+    print(json.dumps([r.__dict__ for r in results]))
 
 
 if __name__ == '__main__':
