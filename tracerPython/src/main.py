@@ -35,30 +35,26 @@ def main():
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
-        print('## Running in uncontrolled mode')
-        print('## Output format: <event result>\\n<event value>')
+        print('# uncontrolled mode')
         print()
 
     print_results(tracer_broker.start())
-    while True:
-        try:
-            results = tracer_broker.step()
-            print_results(results)
-            if results[-1].name == message.Result.LOCKED:
-                tracer_broker.input('')
-        except:
+    while not is_last_result:
+        results = tracer_broker.step()
+        print_results(results)
+        if results[-1].name == message.Result.LOCKED:
+            tracer_broker.input('')
+        elif results[-1].name == message.Result.DATA and results[-1].value['finish']:
             break
 
 
 def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
-        print('## Running in controlled mode')
-        print('## Output format: <event result>\\n<event value>')
-        print('## actions:')
-        print('## start -> start the tracer')
-        print('## step -> run next step')
-        print('## input <data> -> sends input to script')
-        print('## stop -> stops the tracer and the application')
+        print('# controlled mode')
+        print('# start -> start the tracer')
+        print('# step -> run next step')
+        print('# input <string> -> sends input to script')
+        print('# stop -> stops the tracer')
         print()
 
     while True:
@@ -70,7 +66,10 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
             if action == 'start':
                 print_results(tracer_broker.start())
             elif action == 'step':
-                print_results(tracer_broker.step(1))
+                results = tracer_broker.step()
+                print_results(results)
+                if results[-1].name == message.Result.DATA and results[-1].value['finish']:
+                    break
             elif action == 'input':
                 tracer_broker.input(value)
             elif action == 'stop':

@@ -40,6 +40,7 @@ def fib(i):
 
 fff = fib(4)
 
+
 def deep_exception(i):
     if (i < 1):
         raise Exception('some exception')
