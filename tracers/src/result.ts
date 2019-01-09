@@ -1,6 +1,6 @@
 // Result fields
 export type Result = {
-    result: ResultType
+    name: ResultType
     value: ValueType
 }
 
@@ -10,7 +10,7 @@ export type ValueType = null | string | Event
 
 // Event fields
 export type Event = {
-    event: EventType
+    name: EventType
     args: ArgsType
     stack_lines: StackLinesType
     stack_references: StackReferencesType
