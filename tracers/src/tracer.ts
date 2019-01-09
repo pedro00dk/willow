@@ -1,7 +1,6 @@
 import * as cp from 'child_process'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
-import { Writable } from 'stream'
 
 import { Result } from './result'
 
@@ -26,7 +25,7 @@ export class TracerClient {
      * Throws an exception if the tracer instance is not spawned.
      */
     public requireSpawned() {
-        if (!this.instance) throw 'tracer not spawned'
+        if (!this.instance || this.instance.killed) throw 'tracer not spawned'
     }
 
     /**
@@ -40,20 +39,21 @@ export class TracerClient {
                 rxOps.filter(str => str.startsWith('{')),
                 rxOps.map(str => JSON.parse(str) as Result)
             )
-        this.stdout.subscribe(obj => console.log(obj))
-
         this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
-        this.stderr.subscribe(str => console.error(str))
     }
 
-    start() {
+    async start() {
         this.requireSpawned()
+        let resultPromise = observableNextAsPromise(this.stdout)
         this.instance.stdin.write('start\n')
+        console.log(await resultPromise)
     }
 
-    step() {
+    async step() {
         this.requireSpawned()
+        let resultPromise = observableNextAsPromise(this.stdout)
         this.instance.stdin.write('step\n')
+        console.log(await resultPromise)
     }
 
     input(input: string) {
@@ -64,6 +64,7 @@ export class TracerClient {
     stop() {
         this.requireSpawned()
         this.instance.stdin.write(`stop\n`)
+        this.instance = this.stdout = this.stderr = null
     }
 }
 
@@ -82,4 +83,20 @@ function observableAnyToLines(observable: rx.Observable<Buffer>): rx.Observable<
             rxOps.filter(arr => arr[arr.length - 1] === '\n'),
             rxOps.map(arr => arr.join('')),
         )
+}
+
+/**
+ * Returns a promise to consume the next observable element.
+ */
+function observableNextAsPromise<T>(observable: rx.Observable<T>) {
+    return new Promise(
+        res => {
+            let subscription = observable.subscribe(
+                val => {
+                    res(val)
+                    subscription.unsubscribe()
+                }
+            )
+        }
+    )
 }
