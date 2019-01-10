@@ -3,6 +3,7 @@ import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 
 import { Result, Event } from '../result'
+import { Writable } from 'stream';
 
 
 /**
@@ -10,67 +11,89 @@ import { Result, Event } from '../result'
  */
 export class ProcessClient {
     private command: string
-    private instance: cp.ChildProcess
-    private stdout: rx.Observable<Array<Result>>
-    private stdoutGenerator: AsyncIterableIterator<Array<Result>>
-    private stderr: rx.Observable<string>
+    private state: 'created' | 'spawned' | 'started' | 'stopped'
+    private stdin: Writable
+    private stdout: AsyncIterableIterator<Array<Result>>
+    private stderr: AsyncIterableIterator<string>
+
+    static isLastResult: (res: Result) => boolean = res => res.name === 'data' && (res.value as Event).finish
 
     /**
      * Initializes the client with the command to spawn the process.
      */
     constructor(command: string) {
         this.command = command
+        this.state = 'created'
     }
 
     /**
-     * Throws an exception if the tracer instance is not spawned.
+     * Throws an exception if the tracer state is not expected.
      */
-    public requireSpawned() {
-        if (!this.instance || this.instance.killed) throw 'tracer not spawned'
+    public requireState(state: typeof ProcessClient.prototype.state) {
+        if (this.state !== state) throw `unexpected tracer state: ${this.state}, expected: ${state}`
     }
 
     /**
     * Spawns the tracer server process.
     */
     spawn() {
-        this.instance = cp.spawn(this.command, { shell: true })
+        this.requireState('created')
 
-        this.stdout = observableAnyToLines(rx.fromEvent(this.instance.stdout, 'data'))
-            .pipe(
-                rxOps.filter(str => str.startsWith('[')),
-                rxOps.map(str => JSON.parse(str) as Array<Result>),
-            )
-        this.stdoutGenerator = observableGenerator(
-            this.stdout,
-            results => {
-                let last = results[results.length - 1]
-                return last.name === 'data' && (last.value as Event).finish
-            }
+        let instance = cp.spawn(this.command, { shell: true })
+        this.stdin = instance.stdin
+        this.stdout = observableGenerator(
+            observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
+                .pipe(
+                    rxOps.filter(str => str.startsWith('[')),
+                    rxOps.map(str => JSON.parse(str) as Array<Result>),
+                ),
+            next => ProcessClient.isLastResult(next[next.length - 1])
         )
-        this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
+        this.stderr = observableGenerator(
+            observableAnyToLines(rx.fromEvent(instance.stderr, 'data')),
+            next => false
+        )
+
+        this.state = 'spawned'
     }
 
     async start() {
-        this.requireSpawned()
-        this.instance.stdin.write('start\n')
-        return (await this.stdoutGenerator.next()).value
+        this.requireState('spawned')
+
+        this.stdin.write('start\n')
+        let results = (await this.stdout.next()).value
+
+        this.state = 'started'
+        return results
     }
 
     async step() {
-        this.requireSpawned()
-        this.instance.stdin.write('step\n')
-        return (await this.stdoutGenerator.next()).value
+        this.requireState('started')
+
+        this.stdin.write('step\n')
+        let results = (await this.stdout.next()).value
+
+        if (ProcessClient.isLastResult(results[results.length - 1]))
+            this.stop()
+
+        return results
     }
 
     input(input: string) {
-        this.requireSpawned()
-        this.instance.stdin.write(`input ${input}\n`)
+        this.requireState('started')
+
+        this.stdin.write(`input ${input}\n`)
     }
 
     stop() {
-        this.requireSpawned()
-        this.instance.stdin.write(`stop\n`)
-        this.instance = this.stdout = this.stderr = null
+        this.requireState('started')
+
+        try {
+            this.stdin.write(`stop\n`)
+        } catch (error) { }
+        this.stdin = this.stdout = this.stderr = null
+
+        this.state = 'stopped'
     }
 }
 
