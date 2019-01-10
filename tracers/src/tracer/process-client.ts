@@ -2,13 +2,13 @@ import * as cp from 'child_process'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 
-import { Result, Event } from './result'
+import { Result, Event } from '../result'
 
 
 /**
  * Connects to a tracer process.
  */
-export class TracerClient {
+export class ProcessClient {
     private command: string
     private instance: cp.ChildProcess
     private stdout: rx.Observable<Array<Result>>
