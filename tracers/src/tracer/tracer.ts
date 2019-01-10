@@ -110,7 +110,8 @@ export class DefaultTracer implements Tracer {
             let stepResults = await this.step()
             results.push(...stepResults)
 
-            if (this.lastDataResult && (this.lastDataResult.value as Event).stack_lines ||
+            if (this.getState() === 'stopped' ||
+                this.lastDataResult && (this.lastDataResult.value as Event).stack_lines ||
                 results[results.length - 1].name === 'locked')
                 break
         }
@@ -125,7 +126,8 @@ export class DefaultTracer implements Tracer {
         while (true) {
             let stepResults = await this.step()
             results.push(...stepResults)
-            if (this.lastDataResult && (this.lastDataResult.value as Event).stack_lines.length === stackLength - 1 ||
+            if (this.getState() === 'stopped' ||
+                this.lastDataResult && (this.lastDataResult.value as Event).stack_lines.length === stackLength - 1 ||
                 results[results.length - 1].name === 'locked')
                 break
         }
@@ -140,7 +142,9 @@ export class DefaultTracer implements Tracer {
             let stepResults = await this.step()
             results.push(...stepResults)
             let currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : null
-            if (this.breakpoints.has(currentLine) || results[results.length - 1].name === 'locked') break
+            if (this.getState() === 'stopped' || this.breakpoints.has(currentLine) ||
+                results[results.length - 1].name === 'locked')
+                break
         }
         return results
     }
