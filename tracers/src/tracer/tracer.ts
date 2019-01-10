@@ -7,6 +7,11 @@ import { type } from 'os';
 export interface Tracer {
 
     /**
+     * Returns the current state of the tracer
+     */
+    getState() : 'created' | 'started' | 'stopped'
+    
+    /**
      * Starts the tracer process.
      */
     start(): Promise<Array<Result>>
@@ -29,12 +34,12 @@ export interface Tracer {
     /**
      * Steps over the traced code.
      */
-    step_over?(): Promise<Array<Result>>
+    stepOver?(): Promise<Array<Result>>
 
     /**
      * Steps out the traced code.
      */
-    step_out?(): Promise<Array<Result>>
+    stepOut?(): Promise<Array<Result>>
 
     /**
      * Steps until next breakpoint or de code ends.

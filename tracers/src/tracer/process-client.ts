@@ -1,10 +1,10 @@
 import * as cp from 'child_process'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
+import { Writable } from 'stream'
 
 import { Result, Event } from '../result'
-import { Writable } from 'stream';
-import { Tracer } from './tracer';
+import { Tracer } from './tracer'
 
 
 /**
@@ -12,7 +12,7 @@ import { Tracer } from './tracer';
  */
 export class ProcessClient implements Tracer {
     private command: string
-    private state: 'created' | 'spawned' | 'started' | 'stopped'
+    private state: 'created' | 'started' | 'stopped'
     private stdin: Writable
     private stdout: AsyncIterableIterator<Array<Result>>
     private stderr: AsyncIterableIterator<string>
@@ -24,6 +24,7 @@ export class ProcessClient implements Tracer {
     constructor(command: string) {
         this.command = command
         this.state = 'created'
+        this.spawn()
     }
 
     /**
@@ -41,11 +42,9 @@ export class ProcessClient implements Tracer {
     }
 
     /**
-    * Spawns the tracer server process.
-    */
-    spawn() {
-        this.requireState('created')
-
+     * Spawns the tracer server process.
+     */
+    private spawn() {
         let instance = cp.spawn(this.command, { shell: true })
         this.stdin = instance.stdin
         this.stdout = observableGenerator(
@@ -60,12 +59,14 @@ export class ProcessClient implements Tracer {
             observableAnyToLines(rx.fromEvent(instance.stderr, 'data')),
             next => false
         )
+    }
 
-        this.state = 'spawned'
+    getState() {
+        return this.state
     }
 
     async start() {
-        this.requireState('spawned')
+        this.requireState('created')
 
         this.stdin.write('start\n')
         let results = (await this.stdout.next()).value
