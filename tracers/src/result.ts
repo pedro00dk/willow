@@ -12,6 +12,7 @@ export type ValueType = null | string | Event
 export type Event = {
     name: EventType
     args: ArgsType
+    line: number
     stack_lines: StackLinesType
     stack_references: StackReferencesType
     heap_graph: HeapGraphType
