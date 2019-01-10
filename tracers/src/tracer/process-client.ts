@@ -4,19 +4,19 @@ import * as rxOps from 'rxjs/operators'
 
 import { Result, Event } from '../result'
 import { Writable } from 'stream';
+import { Tracer } from './tracer';
 
 
 /**
  * Connects to a tracer process.
  */
-export class ProcessClient {
+export class ProcessClient implements Tracer {
     private command: string
     private state: 'created' | 'spawned' | 'started' | 'stopped'
     private stdin: Writable
     private stdout: AsyncIterableIterator<Array<Result>>
     private stderr: AsyncIterableIterator<string>
 
-    static isLastResult: (res: Result) => boolean = res => res.name === 'data' && (res.value as Event).finish
 
     /**
      * Initializes the client with the command to spawn the process.
@@ -29,8 +29,15 @@ export class ProcessClient {
     /**
      * Throws an exception if the tracer state is not expected.
      */
-    public requireState(state: typeof ProcessClient.prototype.state) {
+    private requireState(state: typeof ProcessClient.prototype.state) {
         if (this.state !== state) throw `unexpected tracer state: ${this.state}, expected: ${state}`
+    }
+
+    /**
+     * Returns true if a result is the last.
+     */
+    private isLastResult(res: Result) {
+        return res.name === 'data' && (res.value as Event).finish
     }
 
     /**
@@ -47,7 +54,7 @@ export class ProcessClient {
                     rxOps.filter(str => str.startsWith('[')),
                     rxOps.map(str => JSON.parse(str) as Array<Result>),
                 ),
-            next => ProcessClient.isLastResult(next[next.length - 1])
+            next => this.isLastResult(next[next.length - 1])
         )
         this.stderr = observableGenerator(
             observableAnyToLines(rx.fromEvent(instance.stderr, 'data')),
@@ -67,16 +74,14 @@ export class ProcessClient {
         return results
     }
 
-    async step() {
+    stop() {
         this.requireState('started')
 
-        this.stdin.write('step\n')
-        let results = (await this.stdout.next()).value
+        try { this.stdin.write(`stop\n`) }
+        catch (error) { }
+        this.stdin = this.stdout = this.stderr = null
 
-        if (ProcessClient.isLastResult(results[results.length - 1]))
-            this.stop()
-
-        return results
+        this.state = 'stopped'
     }
 
     input(input: string) {
@@ -85,15 +90,15 @@ export class ProcessClient {
         this.stdin.write(`input ${input}\n`)
     }
 
-    stop() {
+    async step() {
         this.requireState('started')
 
-        try {
-            this.stdin.write(`stop\n`)
-        } catch (error) { }
-        this.stdin = this.stdout = this.stderr = null
+        this.stdin.write('step\n')
+        let results = (await this.stdout.next()).value
 
-        this.state = 'stopped'
+        if (this.isLastResult(results[results.length - 1])) this.stop()
+
+        return results
     }
 }
 
