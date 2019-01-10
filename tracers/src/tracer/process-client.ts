@@ -50,16 +50,16 @@ export class ProcessClient {
         this.stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
     }
 
-    start() {
+    async start() {
         this.requireSpawned()
         this.instance.stdin.write('start\n')
-        return this.stdoutGenerator.next()
+        return (await this.stdoutGenerator.next()).value
     }
 
-    step() {
+    async step() {
         this.requireSpawned()
         this.instance.stdin.write('step\n')
-        return this.stdoutGenerator.next()
+        return (await this.stdoutGenerator.next()).value
     }
 
     input(input: string) {
