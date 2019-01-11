@@ -9,12 +9,12 @@ class TracerBroker:
     Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
 
-    def __init__(self, name: str, script: str, sandbox: bool):
+    def __init__(self, name: str, code: str, sandbox: bool):
         """
         Stores the Tracer parameters for posterior usage when starting the Tracer.
         """
         self._name = name
-        self._script = script
+        self._code = code
         self._sandbox = sandbox
         self._manager = None
         self._action_queue = None
@@ -39,7 +39,7 @@ class TracerBroker:
         self._result_queue = self._manager.Queue()
         self._tracer_process = mp.Process(
             target=tracer.Tracer.init_run,
-            args=(self._name, self._script, self._sandbox, self._action_queue, self._result_queue)
+            args=(self._name, self._code, self._sandbox, self._action_queue, self._result_queue)
         )
         self._tracer_process.start()
 
@@ -69,7 +69,7 @@ class TracerBroker:
 
     def step(self, count:  int = 1):
         """
-        Steps into the script.
+        Steps into the code.
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
@@ -91,7 +91,7 @@ class TracerBroker:
 
     def input(self, data: str):
         """
-        Sends a input string to script. Inputs have no response.
+        Sends a input string to the code. Inputs have no response.
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')

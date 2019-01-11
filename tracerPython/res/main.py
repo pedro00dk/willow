@@ -1,4 +1,4 @@
-# test script
+# test code
 
 b = True
 i = 1234

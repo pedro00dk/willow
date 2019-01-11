@@ -8,25 +8,25 @@ import message
 
 def main():
     parser = argparse.ArgumentParser(description='Tracer CLI parser')
-    parser.add_argument('--name', default='<script>', help='The script name')
+    parser.add_argument('--name', default='<code>', help='The code name')
     parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
     parser.add_argument('--uncontrolled', default=False, action='store_true',
                         help='Run without stopping and print all results')
     parser.add_argument('--test', default=False, action='store_true',
-                        help='Ignores a possibly provided script and runs the test script')
-    parser.add_argument('script', nargs='?', help='The python script to parse')
+                        help='Ignores a possibly provided code and runs the test code')
+    parser.add_argument('code', nargs='?', help='The python code to parse')
 
     arguments = parser.parse_args()
 
-    script = pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else None
-    script = arguments.script if not arguments.test else script
+    code = pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else None
+    code = arguments.code if not arguments.test else code
 
-    if not script:
-        print('## No script or test flag provided. check --help')
+    if not code:
+        print('## No code or test flag provided. check --help')
         return 1
 
-    tracer_broker = broker.TracerBroker(arguments.name, script, arguments.sandbox)
+    tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox)
     if arguments.uncontrolled:
         run_uncontrolled(tracer_broker, arguments.omit_help)
     else:
@@ -39,7 +39,7 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
         print()
 
     print_results(tracer_broker.start())
-    while not is_last_result:
+    while True:
         results = tracer_broker.step()
         print_results(results)
         if results[-1].name == message.Result.LOCKED:
@@ -53,7 +53,7 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
         print('# controlled mode')
         print('# start -> start the tracer')
         print('# step -> run next step')
-        print('# input <string> -> sends input to script')
+        print('# input <string> -> sends input to the code')
         print('# stop -> stops the tracer')
         print()
 

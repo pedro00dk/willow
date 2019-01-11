@@ -6,28 +6,28 @@ import types
 import message
 from . import scope
 from .inspector import Inspector
-from .scriptio import HookedInput, HookedPrint
+from .io import HookedInput, HookedPrint
 from .util import ExceptionUtil, FrameUtil
 
 
 class Tracer:
     """
-    Traces python script and analyses its state after every instruction.
+    Traces python code and analyses its state after every instruction.
     """
 
     @staticmethod
-    def init_run(name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
+    def init_run(name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initializes the tracer and run it in a single function, usefull to start the tracer in a separated process.
         """
-        Tracer(name, script, sandbox, action_queue, result_queue).run()
+        Tracer(name, code, sandbox, action_queue, result_queue).run()
 
-    def __init__(self, name: str, script: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initializes the tracer with the script name, python script and sandbox flag.
+        Initializes the tracer with the code name, python code and sandbox flag.
         """
         self._name = name
-        self._script = script
+        self._code = code
         self._sandbox = sandbox
         self._action_queue = action_queue
         self._result_queue = result_queue
@@ -42,14 +42,14 @@ class Tracer:
             scope.sandbox_scope_composers(self._name)
         globals_builder.builtin('input', HookedInput(frame_processor.input_hook))
         globals_builder.builtin('print', HookedPrint(frame_processor.print_hook))
-        script_scope = modules_halter.apply(globals_builder.build())
+        scope_instance = modules_halter.apply(globals_builder.build())
 
         try:
             action = self._action_queue.get()
-            compiled = compile(self._script, script_scope[scope.Globals.FILE], 'exec')
+            compiled = compile(self._code, scope_instance[scope.Globals.FILE], 'exec')
             self._result_queue.put(message.Message(message.Result.STARTED))
             sys.settrace(frame_processor.trace)
-            exec(compiled, script_scope)
+            exec(compiled, scope_instance)
         except Exception as e:
             exception_dump = ExceptionUtil.dump(e)
             self._result_queue.put(message.Message(message.Result.ERROR, exception_dump))
@@ -64,7 +64,7 @@ class FrameProcessor:
 
     def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initializes the frame processor with the script name and queues.
+        Initializes the frame processor with the code name and queues.
         """
         self._name = name
         self._action_queue = action_queue
@@ -79,7 +79,7 @@ class FrameProcessor:
 
     def trace(self, frame: types.FrameType, event: str, args):
         """
-        The script trace function.
+        The code trace function.
         """
         if not FrameUtil.is_file(frame, self._name) or not FrameUtil.is_traceable(event):
             return self.trace
