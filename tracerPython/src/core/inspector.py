@@ -24,10 +24,10 @@ class Inspector:
             'name': event,
             'args': args,
             'line': stack_lines[0]['line'],
-            'stack_lines': stack_lines,
-            'stack_references': stack_references,
-            'heap_graph': heap_graph,
-            'user_classes': user_classes,
+            'stackLines': stack_lines,
+            'stackReferences': stack_references,
+            'heapGraph': heap_graph,
+            'userClasses': user_classes,
             'finish': finish
         }
 
