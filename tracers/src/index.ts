@@ -1,6 +1,8 @@
 import * as yargs from 'yargs'
-import { ProcessClient } from './tracer/process-client';
-import { Tracer } from './tracer/tracer';
+
+import { ProcessClient } from './tracer/process-client'
+import { Tracer } from './tracer/tracer'
+import { TracerServer } from './server'
 
 
 let parser = yargs
@@ -28,8 +30,8 @@ let tracerProviders = new Map(
         .map((_, i) => [arguments_.tracer[i * 2], arguments_.tracer[i * 2 + 1]] as [string, string])
         .map(([tracer, command]) => {
             let tracerProvider = command.indexOf('{}') != -1
-                ? (code: string) => new ProcessClient(command.replace('{}', code.replace('\'', '\\\'')))
-                : (code: string) => new ProcessClient(command + ' $\'' + code.replace('\'', '\\\'') + '\'')
+                ? (code: string) => new ProcessClient(command.replace(/{}/, `'${code.replace(/'/g, '\'"\'"\'')}'`))
+                : (code: string) => new ProcessClient(`${command} '${code.replace(/'/g, '\'"\'"\'')}'`)
             return [tracer, tracerProvider] as [string, (code: string) => Tracer]
         })
 )
