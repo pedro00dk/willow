@@ -42,9 +42,11 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
     while True:
         results = tracer_broker.step()
         print_results(results)
+
         if results[-1].name == message.Result.LOCKED:
             tracer_broker.input('')
-        elif results[-1].name == message.Result.DATA and results[-1].value['finish']:
+
+        if not tracer_broker.is_tracer_running():
             break
 
 
@@ -68,8 +70,6 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
             elif action == 'step':
                 results = tracer_broker.step()
                 print_results(results)
-                if results[-1].name == message.Result.DATA and results[-1].value['finish']:
-                    break
             elif action == 'input':
                 tracer_broker.input(value)
             elif action == 'stop':
@@ -77,9 +77,12 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
                     tracer_broker.stop()
                 except:
                     pass
-                break
             else:
                 raise Exception('action not found')
+
+            if not tracer_broker.is_tracer_running():
+                break
+
         except Exception as e:
             print(json.dumps(f'exception: {e}'))
 
