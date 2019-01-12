@@ -13,10 +13,10 @@ export type Event = {
     name: EventType
     args: ArgsType
     line: number
-    stack_lines: StackLinesType
-    stack_references: StackReferencesType
-    heap_graph: HeapGraphType
-    user_classes: UserClassesType
+    stackLines: StackLinesType
+    stackReferences: StackReferencesType
+    heapGraph: HeapGraphType
+    userClasses: UserClassesType
     finish: FinishType
 }
 

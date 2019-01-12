@@ -111,7 +111,7 @@ export class DefaultTracer implements Tracer {
             results.push(...stepResults)
 
             if (this.getState() === 'stopped' ||
-                this.lastDataResult && (this.lastDataResult.value as Event).stack_lines ||
+                this.lastDataResult && (this.lastDataResult.value as Event).stackLines ||
                 results[results.length - 1].name === 'locked')
                 break
         }
@@ -121,13 +121,13 @@ export class DefaultTracer implements Tracer {
     async stepOut() {
         let results: Array<Result> = []
         let stackLength = this.lastDataResult
-            ? (this.lastDataResult.value as Event).stack_lines.length
+            ? (this.lastDataResult.value as Event).stackLines.length
             : 1
         while (true) {
             let stepResults = await this.step()
             results.push(...stepResults)
             if (this.getState() === 'stopped' ||
-                this.lastDataResult && (this.lastDataResult.value as Event).stack_lines.length === stackLength - 1 ||
+                this.lastDataResult && (this.lastDataResult.value as Event).stackLines.length === stackLength - 1 ||
                 results[results.length - 1].name === 'locked')
                 break
         }
@@ -136,7 +136,7 @@ export class DefaultTracer implements Tracer {
     async continue() {
         let results = new Array<Result>()
         let stackLength = this.lastDataResult
-            ? (this.lastDataResult.value as Event).stack_lines.length
+            ? (this.lastDataResult.value as Event).stackLines.length
             : 1
         while (true) {
             let stepResults = await this.step()
