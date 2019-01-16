@@ -91,6 +91,8 @@ class FrameProcessor:
         self._exec_call_frame = FrameUtil.previous(frame) if self._inspected_frame_count == 0 else self._exec_call_frame
         self._inspected_frame_count += 1
 
+        self._constraints.check_max_frames(self._inspected_frame_count)
+
         while True:
             action = self._action_queue.get()
 
