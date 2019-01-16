@@ -1,6 +1,7 @@
 import argparse
 import json
 import pathlib
+import sys
 
 import broker
 import message
@@ -22,8 +23,8 @@ def main():
     code = pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else None
     code = arguments.code if not arguments.test else code
 
-    if not code:
-        print('## No code or test flag provided. check --help')
+    if code is None:
+        print('No code or test flag provided. check --help', file=sys.stderr)
         return 1
 
     tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox)
@@ -35,7 +36,7 @@ def main():
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
-        print('# uncontrolled mode')
+        print('uncontrolled mode')
         print()
 
     print_results(tracer_broker.start())
@@ -52,11 +53,11 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
 
 def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
     if not omit_help:
-        print('# controlled mode')
-        print('# start -> start the tracer')
-        print('# step -> run next step')
-        print('# input <string> -> sends input to the code')
-        print('# stop -> stops the tracer')
+        print('controlled mode')
+        print('start -> start the tracer')
+        print('step -> run next step')
+        print('input <string> -> sends input to the code')
+        print('stop -> stops the tracer')
         print()
 
     while True:
