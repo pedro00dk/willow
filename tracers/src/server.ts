@@ -1,6 +1,7 @@
 import * as express from 'express'
 
-import { Tracer, DefaultTracer } from './tracer/tracer'
+import { DefaultTracer } from './tracer/default-tracer'
+import { Tracer } from './tracer/tracer'
 
 
 /**
