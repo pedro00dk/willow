@@ -9,14 +9,18 @@ import message
 
 def main():
     parser = argparse.ArgumentParser(description='Tracer CLI parser')
-    parser.add_argument('--name', default='<code>', help='The code name')
-    parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
-    parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
-    parser.add_argument('--uncontrolled', default=False, action='store_true',
-                        help='Run without stopping and print all results')
-    parser.add_argument('--test', default=False, action='store_true',
-                        help='Ignores a possibly provided code and runs the test code')
     parser.add_argument('code', nargs='?', help='The python code to parse')
+    parser.add_argument('--name', default='<code>', help='The code name')
+    parser.add_argument('--test', default=False, action='store_true', help='Run the test code, ignore any provided')
+    parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
+    parser.add_argument('--uncontrolled', default=False, action='store_true', help='Run without stopping')
+    parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
+    parser.add_argument('--max-frames', type=int, help='Limit the number of frames')
+    parser.add_argument('--max-stacks', type=int, help='Limit the number of stacks')
+    parser.add_argument('--max-objects', type=int, help='Limit the number of complex objects in heap')
+    parser.add_argument('--max-properties', type=int, help='Limit user defined objects properties count')
+    parser.add_argument('--max-iterables', type=int, help='Limit tuples, lists, sets and dicts length')
+    parser.add_argument('--max-strings', type=int, help='Limit strings length')
 
     arguments = parser.parse_args()
 
