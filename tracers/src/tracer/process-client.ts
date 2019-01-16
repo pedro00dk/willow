@@ -3,7 +3,7 @@ import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 import { Writable } from 'stream'
 
-import { Result, isLastResult } from '../result'
+import { isErrorResult, isLastResult, Result } from '../result'
 import { Tracer } from './tracer'
 
 
@@ -61,8 +61,8 @@ export class ProcessClient implements Tracer {
 
         this.stdin.write('start\n')
         let results = (await this.stdout.next()).value
-
         this.state = 'started'
+        if (isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
 
@@ -71,9 +71,8 @@ export class ProcessClient implements Tracer {
 
         try { this.stdin.write(`stop\n`) }
         catch (error) { }
-        this.stdin = this.stdout = this.stderr = null
-
         this.state = 'stopped'
+        this.stdin = this.stdout = this.stderr = null
     }
 
     input(input: string) {
@@ -87,9 +86,7 @@ export class ProcessClient implements Tracer {
 
         this.stdin.write('step\n')
         let results = (await this.stdout.next()).value
-
-        if (isLastResult(results[results.length - 1])) this.stop()
-
+        if (isLastResult(results[results.length - 1]) || isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
 }

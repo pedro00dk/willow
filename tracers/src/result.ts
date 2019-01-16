@@ -50,8 +50,15 @@ export type FinishType = boolean
 // Results utility functions
 
 /**
+ * Returns true if is a error type result.
+ */
+export function isErrorResult(result: Result) {
+    return result.name === 'error'
+}
+
+/**
  * Returns true if a result is the last emitted by the tracer.
  */
-export function isLastResult(res: Result) {
-    return res.name === 'data' && (res.value as Event).finish
+export function isLastResult(result: Result) {
+    return result.name === 'data' && (result.value as Event).finish
 }
