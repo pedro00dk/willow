@@ -1,5 +1,6 @@
 import * as yargs from 'yargs'
 
+import { TracerServer } from './server'
 import { ProcessClient } from './tracer/process-client'
 import { Tracer } from './tracer/tracer'
 
@@ -36,3 +37,5 @@ let tracerSuppliers = new Map(
 
 console.log(arguments_, tracerSuppliers)
 console.log(tracerSuppliers)
+
+new TracerServer(serverPort, tracerSuppliers).listen()

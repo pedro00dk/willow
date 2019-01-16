@@ -8,11 +8,13 @@
     "license": "ISC",
     "main": "index.ts",
     "devDependencies": {
+        "@types/express": "*",
         "@types/node": "*",
         "@types/yargs": "*",
         "typescript": "*"
     },
     "dependencies": {
+        "express": "*",
         "rxjs": "*",
         "yargs": "*"
     },
