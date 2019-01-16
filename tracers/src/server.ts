@@ -96,8 +96,36 @@ export class TracerServer {
         if (id == null || !this.sessions.has(id)) throw 'session id not found or wrong type'
         if (action == null) throw 'action not found or wrong type'
 
-        let result = this.sessions.get(id).tracer[action](...(args != null ? args : []))
-        return result instanceof Promise ? await result : result
+        let tracer = this.sessions.get(id).tracer
+        switch (action) {
+            case 'getState':
+                return tracer.getState()
+            case 'start':
+                return await tracer.start()
+            case 'stop':
+                this.sessions.delete(id)
+                return tracer.stop()
+            case 'input':
+                let data = args[0] as string
+                if (data == null) throw 'input not found in args or wrong type'
+                return tracer.input(data)
+            case 'step':
+                return await tracer.step()
+            case 'stepOver':
+                return await tracer.stepOver()
+            case 'stepOut':
+                return await tracer.stepOut()
+            case 'continue':
+                return await tracer.continue()
+            case 'getBreakpoints':
+                return [...tracer.getBreakpoints()]
+            case 'setBreakpoint':
+                let line = args[0] as number
+                if (line == null) throw 'line not found in args or wrong type'
+                return tracer.setBreakpoint(line)
+            default:
+                throw 'action not found or wrong type'
+        }
     }
 
     /**
