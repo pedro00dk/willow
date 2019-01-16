@@ -4,6 +4,7 @@ import pathlib
 import sys
 
 import broker
+from constraints import Constraints
 import message
 
 
@@ -31,15 +32,15 @@ def main():
         print('No code or test flag provided. check --help', file=sys.stderr)
         return 1
 
-    constraints = {
-        'max_frames': arguments.max_frames,
-        'max_stacks': arguments.max_stacks,
-        'max_objects': arguments.max_objects,
-        'max_properties': arguments.max_properties,
-        'max_iterables': arguments.max_iterables,
-        'max_strings': arguments.max_strings,
-        'sandbox': arguments.sandbox
-    }
+    constraints = Constraints(
+        arguments.max_frames,
+        arguments.max_stacks,
+        arguments.max_objects,
+        arguments.max_properties,
+        arguments.max_iterables,
+        arguments.max_strings,
+        arguments.sandbox
+    )
 
     tracer_broker = broker.TracerBroker(arguments.name, code, constraints)
     if arguments.uncontrolled:

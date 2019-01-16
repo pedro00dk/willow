@@ -3,7 +3,9 @@ import multiprocessing as mp
 import sys
 import types
 
+from constraints import Constraints
 import message
+
 from . import scope
 from .inspector import Inspector
 from .io import HookedInput, HookedPrint
@@ -16,13 +18,13 @@ class Tracer:
     """
 
     @staticmethod
-    def init_run(name: str, code: str, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
+    def init_run(name: str, code: str, constraints: Constraints, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initializes the tracer and run it in a single function, useful to start the tracer in a separated process.
         """
         Tracer(name, code, constraints, action_queue, result_queue).run()
 
-    def __init__(self, name: str, code: str, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, code: str, constraints: Constraints, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initializes the tracer with the code name, python code and constraints.
         """
@@ -36,10 +38,10 @@ class Tracer:
         """
         Configures the scope and runs the tracer, giving the tracing control to the frame processor.
         """
-        frame_processor = FrameProcessor(self._name, self._action_queue, self._result_queue)
+        frame_processor = FrameProcessor(self._name, self._constraints, self._action_queue, self._result_queue)
 
         globals_builder, modules_halter = scope.default_scope_composers(self._name)\
-            if not self._constraints['sandbox']\
+            if not self._constraints.is_sandbox()\
             else scope.sandbox_scope_composers(self._name)
         globals_builder.builtin('input', HookedInput(frame_processor.input_hook))
         globals_builder.builtin('print', HookedPrint(frame_processor.print_hook))
@@ -63,11 +65,12 @@ class FrameProcessor:
     Read action queue waiting for actions, process the frames and write the results in the queue. 
     """
 
-    def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, constraints: Constraints, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initializes the frame processor with the code name and queues.
+        Initializes the frame processor with the code name, constraints and queues.
         """
         self._name = name
+        self._constraints = constraints
         self._action_queue = action_queue
         self._result_queue = result_queue
 

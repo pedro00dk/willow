@@ -1,7 +1,9 @@
 import multiprocessing as mp
 
-from core import tracer
+from constraints import Constraints
 import message
+
+from core import tracer
 
 
 class TracerBroker:
@@ -9,7 +11,7 @@ class TracerBroker:
     Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
 
-    def __init__(self, name: str, code: str, constraints: dict):
+    def __init__(self, name: str, code: str, constraints: Constraints):
         """
         Stores the Tracer parameters for posterior usage when starting the Tracer.
         """
