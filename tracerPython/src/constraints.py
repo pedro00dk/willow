@@ -17,27 +17,27 @@ class Constraints:
 
     def check_max_frames(self, frames: int):
         if (self._max_frames and self._max_frames <= frames):
-            raise Exception('maximum frames reached')
+            raise Exception('constraint: maximum frames reached')
 
     def check_max_stacks(self, stacks: int):
         if (self._max_stacks and self._max_stacks <= stacks):
-            raise Exception('maximum stacks reached')
+            raise Exception('constraint: maximum stacks reached')
 
     def check_max_objects(self, objects: int):
         if (self._max_objects and self._max_objects <= objects):
-            raise Exception('maximum objects reached')
+            raise Exception('constraint: maximum objects reached')
 
     def check_max_properties(self, properties: int):
         if (self._max_properties and self._max_properties <= properties):
-            raise Exception('maximum properties reached')
+            raise Exception('constraint: maximum properties reached')
 
     def check_max_iterables(self, iterables: int):
         if (self._max_iterables and self._max_iterables <= iterables):
-            raise Exception('maximum iterables reached')
+            raise Exception('constraint: maximum iterables reached')
 
     def check_max_strings(self, strings: int):
         if (self._max_strings and self._max_strings <= strings):
-            raise Exception('maximum strings reached')
+            raise Exception('constraint: maximum strings reached')
 
     def is_sandbox(self):
         return self._sandbox
