@@ -35,7 +35,4 @@ let tracerSuppliers = new Map(
         })
 )
 
-console.log(arguments_, tracerSuppliers)
-console.log(tracerSuppliers)
-
 new TracerServer(serverPort, tracerSuppliers).listen()
