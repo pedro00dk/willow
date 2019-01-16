@@ -14,8 +14,7 @@
                 "debug"
             ],
             "port": 9229,
-            "args": [],
-            "stopOnEntry": true
+            "args": ["--", "--port", "8000"]
         },
         {
             "name": "Project (node, no tsc)",
@@ -24,8 +23,14 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/",
             "program": "${workspaceFolder}/dist/index.js",
-            "args": [],
-            "stopOnEntry": true
+            "args": ["--port", "8000"]
+        },
+        {
+            "name": "Project (attach)",
+            "type": "node",
+            "request": "attach",
+            "cwd": "${workspaceFolder}",
+            "processId": "${command:PickProcess}"
         }
     ]
 }
