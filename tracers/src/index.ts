@@ -2,7 +2,6 @@ import * as yargs from 'yargs'
 
 import { ProcessClient } from './tracer/process-client'
 import { Tracer } from './tracer/tracer'
-import { TracerServer } from './server'
 
 
 let parser = yargs
@@ -17,7 +16,6 @@ let parser = yargs
             array: true,
             string: true,
             nargs: 2,
-            demandOption: true,
             description: 'Tracer <name> <spawn-cmd{<script>}>'
         }
     )
@@ -25,8 +23,8 @@ let parser = yargs
 let arguments_ = parser.argv
 
 let serverPort = arguments_.port
-let tracerProviders = new Map(
-    [...Array(arguments_.tracer.length / 2)]
+let tracerSuppliers = new Map(
+    [...Array(arguments_.tracer ? arguments_.tracer.length / 2 : 0)]
         .map((_, i) => [arguments_.tracer[i * 2], arguments_.tracer[i * 2 + 1]] as [string, string])
         .map(([tracer, command]) => {
             let tracerProvider = command.indexOf('{}') != -1
@@ -36,4 +34,5 @@ let tracerProviders = new Map(
         })
 )
 
-console.log(serverPort, tracerProviders)
+console.log(arguments_, tracerSuppliers)
+console.log(tracerSuppliers)
