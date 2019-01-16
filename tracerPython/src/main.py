@@ -31,7 +31,16 @@ def main():
         print('No code or test flag provided. check --help', file=sys.stderr)
         return 1
 
-    tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox)
+    constraints = {
+        'max_frames': arguments.max_frames,
+        'max_stacks': arguments.max_stacks,
+        'max_objects': arguments.max_objects,
+        'max_properties': arguments.max_properties,
+        'max_iterables': arguments.max_iterables,
+        'max_strings': arguments.max_strings,
+    }
+
+    tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox, constraints)
     if arguments.uncontrolled:
         run_uncontrolled(tracer_broker, arguments.omit_help)
     else:
