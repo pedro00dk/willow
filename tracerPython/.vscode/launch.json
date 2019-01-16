@@ -10,8 +10,7 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/",
             "program": "${workspaceFolder}/src/main.py",
-            "args": [],
-            "stopOnEntry": true,
+            "args": ["--test", "--uncontrolled"]
         }
     ]
 }
