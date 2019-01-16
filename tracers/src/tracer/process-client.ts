@@ -15,7 +15,7 @@ export class ProcessClient implements Tracer {
     private state: 'created' | 'started' | 'stopped'
     private stdin: Writable
     private stdout: AsyncIterableIterator<Array<Result>>
-    private stderr: AsyncIterableIterator<string>
+    private stderr: rx.Observable<string>
 
 
     /**
@@ -28,10 +28,10 @@ export class ProcessClient implements Tracer {
     }
 
     /**
-     * Throws an exception if the tracer state is not expected.
+     * Throws an exception if the tracer state is not in the expected states list.
      */
-    private requireState(state: typeof ProcessClient.prototype.state) {
-        if (this.state !== state) throw `unexpected tracer state: ${this.state}, expected: ${state}`
+    private requireState(...states: Array<typeof ProcessClient.prototype.state>) {
+        if (!states.includes(this.state)) throw `unexpected tracer state: ${this.state}, expected one of: ${states}`
     }
 
     /**
@@ -55,10 +55,8 @@ export class ProcessClient implements Tracer {
                 ),
             next => this.isLastResult(next[next.length - 1])
         )
-        this.stderr = observableGenerator(
-            observableAnyToLines(rx.fromEvent(instance.stderr, 'data')),
-            next => false
-        )
+        this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
+        this.stderr.subscribe(err => console.error(err))
     }
 
     getState() {
@@ -76,7 +74,7 @@ export class ProcessClient implements Tracer {
     }
 
     stop() {
-        this.requireState('started')
+        this.requireState('started', "created")
 
         try { this.stdin.write(`stop\n`) }
         catch (error) { }
