@@ -50,13 +50,13 @@ export class ProcessClient implements Tracer {
         this.stdout = observableGenerator(
             observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
                 .pipe(
-                    rxOps.filter(str => str.startsWith('[')),
-                    rxOps.map(str => JSON.parse(str) as Array<Result>),
+                    rxOps.filter(line => line.startsWith('[')),
+                    rxOps.map(line => JSON.parse(line) as Array<Result>),
                 ),
             next => this.isLastResult(next[next.length - 1])
         )
         this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
-        this.stderr.subscribe(err => console.error(err))
+        this.stderr.subscribe(error => console.error(error))
     }
 
     getState() {
@@ -107,14 +107,14 @@ export class ProcessClient implements Tracer {
 function observableAnyToLines(observable: rx.Observable<any>): rx.Observable<string> {
     return observable
         .pipe(
-            rxOps.map(obj => obj as Buffer),
-            rxOps.map(buf => buf.toString('utf8')),
-            rxOps.flatMap(str => rx.from(str.split(/(\n)/))),
-            rxOps.filter(str => str.length !== 0),
-            rxOps.map(str => [str]),
-            rxOps.scan((acc, val) => acc[acc.length - 1] === '\n' ? val : [...acc, ...val], ['\n']),
-            rxOps.filter(arr => arr[arr.length - 1] === '\n'),
-            rxOps.map(arr => arr.join('')),
+            rxOps.map(object => object as Buffer),
+            rxOps.map(buffer => buffer.toString('utf8')),
+            rxOps.flatMap(string => rx.from(string.split(/(\n)/))),
+            rxOps.filter(part => part.length !== 0),
+            rxOps.map(part => [part]),
+            rxOps.scan((acc, parts) => acc[acc.length - 1] === '\n' ? parts : [...acc, ...parts], ['\n']),
+            rxOps.filter(parts => parts[parts.length - 1] === '\n'),
+            rxOps.map(lineParts => lineParts.join('')),
         )
 }
 
@@ -123,10 +123,10 @@ function observableAnyToLines(observable: rx.Observable<any>): rx.Observable<str
  */
 async function* observableGenerator<T>(observable: rx.Observable<T>, stopPredicate: (element: T) => boolean): AsyncIterableIterator<T> {
     while (true) {
-        let next = await new Promise(res => {
-            let subscription = observable.subscribe(val => {
+        let next = await new Promise(resolve => {
+            let subscription = observable.subscribe(value => {
                 subscription.unsubscribe()
-                res(val)
+                resolve(value)
             })
         }) as T
         if (!next || stopPredicate(next)) return next

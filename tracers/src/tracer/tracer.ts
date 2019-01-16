@@ -78,7 +78,7 @@ export class DefaultTracer implements Tracer {
      * Updates the last found data result.
      */
     private updateLastDataResult(results: Array<Result>) {
-        let dataResults = results.filter(res => res.name === 'data')
+        let dataResults = results.filter(result => result.name === 'data')
         if (dataResults.length != 0) this.lastDataResult = dataResults[dataResults.length - 1]
     }
 
