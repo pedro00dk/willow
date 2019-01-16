@@ -3,7 +3,7 @@ import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 import { Writable } from 'stream'
 
-import { Result, Event } from '../result'
+import { Result, isLastResult } from '../result'
 import { Tracer } from './tracer'
 
 
@@ -35,13 +35,6 @@ export class ProcessClient implements Tracer {
     }
 
     /**
-     * Returns true if a result is the last.
-     */
-    private isLastResult(res: Result) {
-        return res.name === 'data' && (res.value as Event).finish
-    }
-
-    /**
      * Spawns the tracer server process.
      */
     private spawn() {
@@ -53,7 +46,7 @@ export class ProcessClient implements Tracer {
                     rxOps.filter(line => line.startsWith('[')),
                     rxOps.map(line => JSON.parse(line) as Array<Result>),
                 ),
-            next => this.isLastResult(next[next.length - 1])
+            next => isLastResult(next[next.length - 1])
         )
         this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
         this.stderr.subscribe(error => console.error(error))
@@ -95,7 +88,7 @@ export class ProcessClient implements Tracer {
         this.stdin.write('step\n')
         let results = (await this.stdout.next()).value
 
-        if (this.isLastResult(results[results.length - 1])) this.stop()
+        if (isLastResult(results[results.length - 1])) this.stop()
 
         return results
     }

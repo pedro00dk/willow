@@ -45,3 +45,13 @@ export type ReferenceType = [number]
 export type UserClassesType = Array<string>
 
 export type FinishType = boolean
+
+
+// Results utility functions
+
+/**
+ * Returns true if a result is the last emitted by the tracer.
+ */
+export function isLastResult(res: Result) {
+    return res.name === 'data' && (res.value as Event).finish
+}
