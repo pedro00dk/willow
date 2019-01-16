@@ -66,8 +66,8 @@ export class TracerServer {
      * Creates a new tracer session with the received supplier and code.
      */
     private createSession(supplier: string, code: string) {
-        if (supplier === null) throw 'supplier key not found or wrong type'
-        if (code === null) throw 'code key not found or wrong type'
+        if (supplier == null) throw 'supplier key not found or wrong type'
+        if (code == null) throw 'code key not found or wrong type'
         if (!this.suppliers.has(supplier)) throw `supplier ${supplier} not found`
 
         let id = this.sessionIdGenerator++
