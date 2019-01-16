@@ -9,13 +9,12 @@ class TracerBroker:
     Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
 
-    def __init__(self, name: str, code: str, sandbox: bool, constraints: dict):
+    def __init__(self, name: str, code: str, constraints: dict):
         """
         Stores the Tracer parameters for posterior usage when starting the Tracer.
         """
         self._name = name
         self._code = code
-        self._sandbox = sandbox
         self._constraints = constraints
         self._manager = None
         self._action_queue = None
@@ -40,7 +39,7 @@ class TracerBroker:
         self._result_queue = self._manager.Queue()
         self._tracer_process = mp.Process(
             target=tracer.Tracer.init_run,
-            args=(self._name, self._code, self._sandbox, self._constraints, self._action_queue, self._result_queue)
+            args=(self._name, self._code, self._constraints, self._action_queue, self._result_queue)
         )
         self._tracer_process.start()
 

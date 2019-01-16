@@ -12,7 +12,6 @@ def main():
     parser.add_argument('code', nargs='?', help='The python code to parse')
     parser.add_argument('--name', default='<code>', help='The code name')
     parser.add_argument('--test', default=False, action='store_true', help='Run the test code, ignore any provided')
-    parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
     parser.add_argument('--uncontrolled', default=False, action='store_true', help='Run without stopping')
     parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('--max-frames', type=int, help='Limit the number of frames')
@@ -21,6 +20,7 @@ def main():
     parser.add_argument('--max-properties', type=int, help='Limit user defined objects properties count')
     parser.add_argument('--max-iterables', type=int, help='Limit tuples, lists, sets and dicts length')
     parser.add_argument('--max-strings', type=int, help='Limit strings length')
+    parser.add_argument('--sandbox', default=False, action='store_true', help='Run in a restricted scope')
 
     arguments = parser.parse_args()
 
@@ -38,9 +38,10 @@ def main():
         'max_properties': arguments.max_properties,
         'max_iterables': arguments.max_iterables,
         'max_strings': arguments.max_strings,
+        'sandbox': arguments.sandbox
     }
 
-    tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox, constraints)
+    tracer_broker = broker.TracerBroker(arguments.name, code, constraints)
     if arguments.uncontrolled:
         run_uncontrolled(tracer_broker, arguments.omit_help)
     else:

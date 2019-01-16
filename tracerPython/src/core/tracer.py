@@ -16,19 +16,18 @@ class Tracer:
     """
 
     @staticmethod
-    def init_run(name: str, code: str, sandbox: bool, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
+    def init_run(name: str, code: str, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
         """
         Initializes the tracer and run it in a single function, useful to start the tracer in a separated process.
         """
-        Tracer(name, code, sandbox, constraints, action_queue, result_queue).run()
+        Tracer(name, code, constraints, action_queue, result_queue).run()
 
-    def __init__(self, name: str, code: str, sandbox: bool, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, code: str, constraints: dict, action_queue: mp.Queue, result_queue: mp.Queue):
         """
-        Initializes the tracer with the code name, python code, sandbox flag and code constraints.
+        Initializes the tracer with the code name, python code and constraints.
         """
         self._name = name
         self._code = code
-        self._sandbox = sandbox
         self._constraints = constraints
         self._action_queue = action_queue
         self._result_queue = result_queue
@@ -39,8 +38,9 @@ class Tracer:
         """
         frame_processor = FrameProcessor(self._name, self._action_queue, self._result_queue)
 
-        globals_builder, modules_halter = scope.default_scope_composers(self._name) if not self._sandbox else \
-            scope.sandbox_scope_composers(self._name)
+        globals_builder, modules_halter = scope.default_scope_composers(self._name)\
+            if not self._constraints['sandbox']\
+            else scope.sandbox_scope_composers(self._name)
         globals_builder.builtin('input', HookedInput(frame_processor.input_hook))
         globals_builder.builtin('print', HookedPrint(frame_processor.print_hook))
         scope_instance = modules_halter.apply(globals_builder.build())
