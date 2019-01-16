@@ -51,7 +51,7 @@ class Tracer:
             sys.settrace(frame_processor.trace)
             exec(compiled, scope_instance)
         except Exception as e:
-            exception_dump = ExceptionUtil.dump(e)
+            exception_dump = ExceptionUtil.dump(e, remove_lines=(1,))
             self._result_queue.put(message.Message(message.Result.ERROR, exception_dump))
         finally:
             sys.settrace(None)
