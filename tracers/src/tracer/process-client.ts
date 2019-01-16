@@ -67,7 +67,7 @@ export class ProcessClient implements Tracer {
     }
 
     stop() {
-        this.requireState('started', "created")
+        this.requireState('started', 'created')
 
         try { this.stdin.write(`stop\n`) }
         catch (error) { }

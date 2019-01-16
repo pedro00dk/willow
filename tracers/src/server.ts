@@ -45,6 +45,16 @@ export class TracerServer {
                 catch (error) { response.status(400).send(error) }
             }
         )
+        this.server.post(
+            '/execute',
+            async (request, response) => {
+                let id = request.body['id'] as number
+                let action = request.body['action'] as string
+                let args = request.body['args'] as Array<any>
+                try { response.send(await this.executeOnSession(id, action, args)) }
+                catch (error) { response.status(400).send(error) }
+            }
+        )
     }
 
     /**
@@ -66,8 +76,8 @@ export class TracerServer {
      * Creates a new tracer session with the received supplier and code.
      */
     private createSession(supplier: string, code: string) {
-        if (supplier == null) throw 'supplier key not found or wrong type'
-        if (code == null) throw 'code key not found or wrong type'
+        if (supplier == null) throw 'supplier not found or wrong type'
+        if (code == null) throw 'code not found or wrong type'
         if (!this.suppliers.has(supplier)) throw `supplier ${supplier} not found`
 
         let id = this.sessionIdGenerator++
@@ -76,6 +86,17 @@ export class TracerServer {
 
         this.sessions.set(id, { supplier, tracer })
         return { id, supplier }
+    }
+
+    /**
+     * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
+     */
+    private async executeOnSession(id: number, action: string, args: Array<any>) {
+        if (id == null || !this.sessions.has(id)) throw 'session id not found or wrong type'
+        if (action == null) throw 'action not found or wrong type'
+
+        let result = this.sessions.get(id).tracer[action](...(args != null ? args : []))
+        return result instanceof Promise ? await result : result
     }
 
     /**
