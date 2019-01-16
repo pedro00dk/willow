@@ -97,35 +97,47 @@ export class TracerServer {
         if (action == null) throw 'action not found or wrong type'
 
         let tracer = this.sessions.get(id).tracer
+        let result: any
         switch (action) {
             case 'getState':
-                return tracer.getState()
+                result = tracer.getState()
+                break
             case 'start':
-                return await tracer.start()
+                result = await tracer.start()
+                break
             case 'stop':
-                this.sessions.delete(id)
-                return tracer.stop()
+                result = tracer.stop()
+                break
             case 'input':
                 let data = args[0] as string
                 if (data == null) throw 'input not found in args or wrong type'
-                return tracer.input(data)
+                result = tracer.input(data)
+                break
             case 'step':
-                return await tracer.step()
+                result = await tracer.step()
+                break
             case 'stepOver':
-                return await tracer.stepOver()
+                result = await tracer.stepOver()
+                break
             case 'stepOut':
-                return await tracer.stepOut()
+                result = await tracer.stepOut()
+                break
             case 'continue':
-                return await tracer.continue()
+                result = await tracer.continue()
+                break
             case 'getBreakpoints':
-                return [...tracer.getBreakpoints()]
+                result = [...tracer.getBreakpoints()]
+                break
             case 'setBreakpoint':
                 let line = args[0] as number
                 if (line == null) throw 'line not found in args or wrong type'
-                return tracer.setBreakpoint(line)
+                result = tracer.setBreakpoint(line)
+                break
             default:
                 throw 'action not found or wrong type'
         }
+        if (tracer.getState() === 'stopped') this.sessions.delete(id)
+        return result
     }
 
     /**
