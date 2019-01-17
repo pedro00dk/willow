@@ -1,5 +1,7 @@
 import types
 
+from constraints import Constraints
+
 from .util import ExceptionUtil, FrameUtil
 
 
@@ -8,13 +10,21 @@ class Inspector:
     Inspects the received frame, building the stack and heap data and references.
     """
 
-    @classmethod
-    def inspect(cls, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
+    def __init__(self, constraints: Constraints):
+        """
+        Initializes the Inspector with the received constraints.
+        """
+        self._constraints = constraints
+
+    def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
         """
         Inspects the application state. Analyses the stack and heap, collecting the objects.
         """
-        stack_frames, stack_lines = cls.inspect_stack(frame, exec_call_frame, True)
-        stack_references, heap_graph, user_classes = cls.inspect_heap(stack_frames)
+        stack_frames, stack_lines = self.inspect_stack(frame, exec_call_frame, True)
+        self._constraints.check_max_stacks(len(stack_lines))
+
+        stack_references, heap_graph, user_classes = self.inspect_heap(stack_frames)
+        self._constraints.check_max_objects(len(heap_graph))
 
         # args -> exception type, exception object, exception traceback (different from exception object __traceback__)
         args = args if event != 'exception' else ExceptionUtil.dump(args[1], args[2])
@@ -31,8 +41,7 @@ class Inspector:
             'finish': finish
         }
 
-    @classmethod
-    def inspect_stack(cls, frame: types.FrameType, exec_call_frame: types.FrameType, only_frame_file: bool):
+    def inspect_stack(self, frame: types.FrameType, exec_call_frame: types.FrameType, only_frame_file: bool):
         """
         Inspects the application stack.
         """
@@ -48,8 +57,7 @@ class Inspector:
         lines = [{'name': FrameUtil.name(frame), 'line': FrameUtil.line(frame)} for frame in frames]
         return frames, lines
 
-    @classmethod
-    def inspect_heap(cls, stack_frames: list):
+    def inspect_heap(self, stack_frames: list):
         """
         Inspects the application heap by looking every object recursively found from the stack frames.
         """
@@ -62,15 +70,14 @@ class Inspector:
         for frame in stack_frames[::-1]:
             frame_variables = FrameUtil.locals(frame)
             frame_references = [
-                (name, cls.inspect_object(frame_variables[name], heap_graph, user_classes, module_name))
+                (name, self.inspect_object(frame_variables[name], heap_graph, user_classes, module_name))
                 for name, value in frame_variables.items() if not name.startswith('_')
             ]
             stack_references.append(frame_references)
 
         return stack_references, heap_graph, [user_class.__name__ for user_class in user_classes]
 
-    @classmethod
-    def inspect_object(cls, obj, heap_graph: dict, user_classes: set, module_name: str):
+    def inspect_object(self, obj, heap_graph: dict, user_classes: set, module_name: str):
         """
         Inspects the received object.
         If the object is a const (bool, int, float, None, complex, str), returns its value.
@@ -87,6 +94,8 @@ class Inspector:
         if isinstance(obj, (bool, int, float, type(None))):
             return obj
         if isinstance(obj, (complex, str)):
+            if isinstance(obj, str):
+                self._constraints.check_max_strings(len(obj))
             return repr(obj)
         if isinstance(obj, type):
             if obj.__module__ == module_name:
@@ -95,11 +104,14 @@ class Inspector:
 
         # known type
         if isinstance(obj, (list, tuple, set)):
-            members = enumerate(obj)
+            members = [*enumerate(obj)]
+            self._constraints.check_max_iterables(len(members))
         elif isinstance(obj, dict):
-            members = obj.items()
+            members = [*obj.items()]
+            self._constraints.check_max_iterables(len(members))
         elif isinstance(obj, (*user_classes,)):
-            members = ((name, value) for name, value in vars(obj).items() if not name.startswith('_'))
+            members = [(name, value) for name, value in vars(obj).items() if not name.startswith('_')]
+            self._constraints.check_max_properties(len(members))
 
         # unknown type
         else:
@@ -112,8 +124,8 @@ class Inspector:
             heap_graph[reference] = {}
             members_inspections = [
                 (
-                    cls.inspect_object(name, heap_graph, user_classes, module_name),
-                    cls.inspect_object(value, heap_graph, user_classes, module_name)
+                    self.inspect_object(name, heap_graph, user_classes, module_name),
+                    self.inspect_object(value, heap_graph, user_classes, module_name)
                 )
                 for name, value in members
             ]
@@ -124,4 +136,4 @@ class Inspector:
 
         # unknown object type processing
         else:
-            return cls.inspect_object(type(obj), heap_graph, user_classes, module_name)
+            return self.inspect_object(type(obj), heap_graph, user_classes, module_name)

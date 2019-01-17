@@ -73,6 +73,8 @@ class FrameProcessor:
         self._constraints = constraints
         self._action_queue = action_queue
         self._result_queue = result_queue
+        
+        self._inspector = Inspector(self._constraints)
 
         # frame common info
         self._exec_call_frame = None
@@ -103,7 +105,7 @@ class FrameProcessor:
 
             # progressive actions
             if action.name == message.Action.STEP:
-                data = Inspector.inspect(frame, event, args, self._exec_call_frame)
+                data = self._inspector.inspect(frame, event, args, self._exec_call_frame)
                 self._result_queue.put(message.Message(message.Result.DATA, data))
             elif action.name == message.Action.STOP:
                 self._result_queue.put(message.Message(message.Result.DATA, {}))
