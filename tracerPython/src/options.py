@@ -1,11 +1,11 @@
-class Constraints:
+class Options:
     """
-    Stores code constraints.
+    Stores code options.
     """
 
     def __init__(self, max_frames: int, max_stacks: int, max_objects: int, max_properties: int, max_iterables: int, max_strings: int, sandbox: bool):
         """
-        Crates the constraints object with its values.
+        Crates the options object with its values.
         """
         self._max_frames = max_frames
         self._max_stacks = max_stacks
@@ -17,31 +17,31 @@ class Constraints:
 
     def check_max_frames(self, frames: int):
         if (self._max_frames and self._max_frames <= frames):
-            raise Exception(f'constraint: maximum frame count reached ({self._max_frames}), shorten your code')
+            raise Exception(f'maximum frame count reached ({self._max_frames}), shorten your code')
 
     def check_max_stacks(self, stacks: int):
         if (self._max_stacks and self._max_stacks <= stacks):
-            raise Exception(f'constraint: maximum stack size reached ({self._max_stacks}), stack overflow')
+            raise Exception(f'maximum stack size reached ({self._max_stacks}), stack overflow')
 
     def check_max_objects(self, objects: int):
         if (self._max_objects and self._max_objects <= objects):
-            raise Exception(f'constraint: maximum object count reached ({self._max_objects}), reduce the object count')
+            raise Exception(f'maximum object count reached ({self._max_objects}), reduce the object count')
 
     def check_max_properties(self, properties: int):
         if (self._max_properties and self._max_properties <= properties):
             raise Exception(
-                f'constraint: maximum object property count reached ({self._max_properties}), some object has too many properties'
+                f'maximum object property count reached ({self._max_properties}), some object has too many properties'
             )
 
     def check_max_iterables(self, iterables: int):
         if (self._max_iterables and self._max_iterables <= iterables):
             raise Exception(
-                f'constraint: maximum iterable length reached ({self._max_iterables}), some tuple, list, set or dict is too big'
+                f'maximum iterable length reached ({self._max_iterables}), some tuple, list, set or dict is too big'
             )
 
     def check_max_strings(self, strings: int):
         if (self._max_strings and self._max_strings <= strings):
-            raise Exception(f'constraint: maximum string length reached ({self._max_strings}), some string is too big')
+            raise Exception(f'maximum string length reached ({self._max_strings}), some string is too big')
 
     def is_sandbox(self):
         return self._sandbox
