@@ -5,7 +5,7 @@ import { ProcessClient } from './tracer/process-client'
 import { Tracer } from './tracer/tracer'
 
 
-let parser = yargs
+const parser = yargs
     .usage('Http API for CLI tracers') // not being used as usage, but description
     .alias('h', 'help')
     .hide('version')
@@ -15,20 +15,19 @@ let parser = yargs
         {
             // type: 'array', type: 'string'
             array: true,
-            string: true,
-            nargs: 2,
-            description: 'Tracer <name> <spawn-cmd{<script>}>'
+            description: 'Tracer <name> <spawn-cmd{<script>}>',
+            nargs: 2
         }
     )
 
-let arguments_ = parser.argv
+const argumentS = parser.argv
 
-let serverPort = arguments_.port
-let tracerSuppliers = new Map(
-    [...Array(arguments_.tracer ? arguments_.tracer.length / 2 : 0)]
-        .map((_, i) => [arguments_.tracer[i * 2], arguments_.tracer[i * 2 + 1]] as [string, string])
+const serverPort = argumentS.port
+const tracerSuppliers = new Map(
+    [...Array(argumentS.tracer ? argumentS.tracer.length / 2 : 0)]
+        .map((_, i) => [argumentS.tracer[i * 2], argumentS.tracer[i * 2 + 1]] as [string, string])
         .map(([tracer, command]) => {
-            let tracerProvider = command.indexOf('{}') != -1
+            const tracerProvider = command.indexOf('{}') !== -1
                 ? (code: string) => new ProcessClient(command.replace(/{}/, `'${code.replace(/'/g, '\'"\'"\'')}'`))
                 : (code: string) => new ProcessClient(`${command} '${code.replace(/'/g, '\'"\'"\'')}'`)
             return [tracer, tracerProvider] as [string, (code: string) => Tracer]

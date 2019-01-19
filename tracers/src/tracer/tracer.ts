@@ -14,7 +14,7 @@ export interface Tracer {
     /**
      * Starts the tracer process.
      */
-    start(): Promise<Array<Result>>
+    start(): Promise<Result[]>
 
     /**
      * Forces the tracer to stop.
@@ -29,22 +29,22 @@ export interface Tracer {
     /**
      * Steps into the traced code.
      */
-    step(): Promise<Array<Result>>
+    step(): Promise<Result[]>
 
     /**
      * Steps over the traced code.
      */
-    stepOver?(): Promise<Array<Result>>
+    stepOver?(): Promise<Result[]>
 
     /**
      * Steps out the traced code.
      */
-    stepOut?(): Promise<Array<Result>>
+    stepOut?(): Promise<Result[]>
 
     /**
      * Steps until next breakpoint or de code ends.
      */
-    continue?(): Promise<Array<Result>>
+    continue?(): Promise<Result[]>
 
     /**
      * Gets the set of breakpoints.

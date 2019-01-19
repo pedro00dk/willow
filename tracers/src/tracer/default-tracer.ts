@@ -1,4 +1,4 @@
-import { Result, Event } from '../result'
+import { Event, Result } from '../result'
 import { Tracer } from './tracer'
 
 
@@ -21,9 +21,9 @@ export class DefaultTracer implements Tracer {
     /**
      * Updates the last found data result.
      */
-    private updateLastDataResult(results: Array<Result>) {
-        let dataResults = results.filter(result => result.name === 'data')
-        if (dataResults.length != 0) this.lastDataResult = dataResults[dataResults.length - 1]
+    private updateLastDataResult(results: Result[]) {
+        const dataResults = results.filter(result => result.name === 'data')
+        if (dataResults.length !== 0) this.lastDataResult = dataResults[dataResults.length - 1]
     }
 
     getState() {
@@ -43,15 +43,15 @@ export class DefaultTracer implements Tracer {
     }
 
     async step() {
-        let results = await this.internalTracer.step()
+        const results = await this.internalTracer.step()
         this.updateLastDataResult(results)
         return results
     }
 
     async stepOver() {
-        let results: Array<Result> = []
+        const results: Result[] = []
         while (true) {
-            let stepResults = await this.step()
+            const stepResults = await this.step()
             results.push(...stepResults)
 
             if (this.getState() === 'stopped' ||
@@ -63,12 +63,12 @@ export class DefaultTracer implements Tracer {
     }
 
     async stepOut() {
-        let results: Array<Result> = []
-        let stackLength = this.lastDataResult
+        const results: Result[] = []
+        const stackLength = this.lastDataResult
             ? (this.lastDataResult.value as Event).stackLines.length
             : 1
         while (true) {
-            let stepResults = await this.step()
+            const stepResults = await this.step()
             results.push(...stepResults)
             if (this.getState() === 'stopped' ||
                 this.lastDataResult && (this.lastDataResult.value as Event).stackLines.length === stackLength - 1 ||
@@ -78,14 +78,14 @@ export class DefaultTracer implements Tracer {
         return results
     }
     async continue() {
-        let results = new Array<Result>()
-        let stackLength = this.lastDataResult
+        const results = new Array<Result>()
+        const stackLength = this.lastDataResult
             ? (this.lastDataResult.value as Event).stackLines.length
             : 1
         while (true) {
-            let stepResults = await this.step()
+            const stepResults = await this.step()
             results.push(...stepResults)
-            let currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : null
+            const currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : null
             if (this.getState() === 'stopped' || this.breakpoints.has(currentLine) ||
                 results[results.length - 1].name === 'locked')
                 break
@@ -98,7 +98,7 @@ export class DefaultTracer implements Tracer {
     }
 
     setBreakpoint(line: number) {
-        if (line < 0) throw 'line should be positive'
+        if (line < 0) throw new Error('line should be positive')
         this.breakpoints.add(line)
     }
 }

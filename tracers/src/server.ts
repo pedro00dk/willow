@@ -18,7 +18,7 @@ export class TracerServer {
      * Creates the server with the port and the tracer suppliers.
      */
     constructor(port: number, suppliers: Map<string, (code: string) => Tracer>) {
-        if (port < 0 || port > 65355) throw 'Illegal port number'
+        if (port < 0 || port > 65355) throw new Error('Illegal port number')
 
         this.server = express()
         this.server.use(express.json())
@@ -40,8 +40,8 @@ export class TracerServer {
         this.server.post(
             '/create',
             (request, response) => {
-                let supplier = request.body['supplier'] as string
-                let code = request.body['code'] as string
+                const supplier = request.body['supplier'] as string
+                const code = request.body['code'] as string
                 try { response.send(this.createSession(supplier, code)) }
                 catch (error) { response.status(400).send(error) }
             }
@@ -49,9 +49,9 @@ export class TracerServer {
         this.server.post(
             '/execute',
             async (request, response) => {
-                let id = request.body['id'] as number
-                let action = request.body['action'] as string
-                let args = request.body['args'] as Array<any>
+                const id = request.body['id'] as number
+                const action = request.body['action'] as string
+                const args = request.body['args'] as any[]
                 try { response.send(await this.executeOnSession(id, action, args)) }
                 catch (error) { response.status(400).send(error) }
             }
@@ -77,11 +77,11 @@ export class TracerServer {
      * Creates a new tracer session with the received supplier and code.
      */
     private createSession(supplier: string, code: string) {
-        if (supplier == null) throw 'supplier not found or wrong type'
-        if (code == null) throw 'code not found or wrong type'
-        if (!this.suppliers.has(supplier)) throw `supplier ${supplier} not found`
+        if (supplier == null) throw new Error('supplier not found or wrong type')
+        if (code == null) throw new Error('code not found or wrong type')
+        if (!this.suppliers.has(supplier)) throw new Error(`supplier ${supplier} not found`)
 
-        let id = this.sessionIdGenerator++
+        const id = this.sessionIdGenerator++
         let tracer = this.suppliers.get(supplier)(code)
         tracer = tracer instanceof DefaultTracer ? tracer : new DefaultTracer(tracer)
 
@@ -92,11 +92,11 @@ export class TracerServer {
     /**
      * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
      */
-    private async executeOnSession(id: number, action: string, args: Array<any>) {
-        if (id == null || !this.sessions.has(id)) throw 'session id not found or wrong type'
-        if (action == null) throw 'action not found or wrong type'
+    private async executeOnSession(id: number, action: string, args: any[]) {
+        if (id == null || !this.sessions.has(id)) throw new Error('session id not found or wrong type')
+        if (action == null) throw new Error('action not found or wrong type')
 
-        let tracer = this.sessions.get(id).tracer
+        const tracer = this.sessions.get(id).tracer
         let result: any
         switch (action) {
             case 'getState':
@@ -109,8 +109,8 @@ export class TracerServer {
                 result = tracer.stop()
                 break
             case 'input':
-                let data = args[0] as string
-                if (data == null) throw 'input not found in args or wrong type'
+                const data = args[0] as string
+                if (data == null) throw new Error('input not found in args or wrong type')
                 result = tracer.input(data)
                 break
             case 'step':
@@ -129,12 +129,12 @@ export class TracerServer {
                 result = [...tracer.getBreakpoints()]
                 break
             case 'setBreakpoint':
-                let line = args[0] as number
-                if (line == null) throw 'line not found in args or wrong type'
+                const line = args[0] as number
+                if (line == null) throw new Error('line not found in args or wrong type')
                 result = tracer.setBreakpoint(line)
                 break
             default:
-                throw 'action not found or wrong type'
+                throw new Error('action not found or wrong type')
         }
         if (tracer.getState() === 'stopped') this.sessions.delete(id)
         return result
