@@ -22,6 +22,9 @@
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
         "debug": "tsc && node --nolazy --inspect-brk=9229 -- ./dist/index.js",
-        "start": "tsc && node -- ./dist/index.js"
+        "start": "tsc && node -- ./dist/index.js",
+        "start-docker-build": "docker image build --file ./Dockerfile --tag tracer:server -- ./",
+        "start-docker-run": "docker container run --rm --interactive --tty --publish 8000:8000 -- tracer:server -- --port 8000",
+        "start-docker": "npm run-script -- start-docker-build && npm run-script -- start-docker-run"
     }
 }
