@@ -11,6 +11,7 @@
         "@types/express": "*",
         "@types/node": "*",
         "@types/yargs": "*",
+        "tslint": "*",
         "typescript": "*"
     },
     "dependencies": {
@@ -19,6 +20,7 @@
         "yargs": "*"
     },
     "scripts": {
+        "lint": "tslint --config ./tslint.json --project ./package.json",
         "start": "tsc && node ./dist/index.js",
         "debug": "tsc && node --nolazy --inspect-brk=9229 ./dist/index.js"
     }
