@@ -8,5 +8,5 @@ RUN npm install
 ADD ./src ./src
 ADD ./tsconfig.json ./
 
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "npm", "run-script", "start" ]
 CMD [ "--", "--help" ]
