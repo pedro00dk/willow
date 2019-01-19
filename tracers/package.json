@@ -21,16 +21,19 @@
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
-        "debug": "tsc && node --nolazy --inspect-brk=9229 -- ./dist/index.js",
-        "start": "tsc && node -- ./dist/index.js",
-        "start-docker-build": "docker image build --file ./Dockerfile --tag tracer:server -- ./",
-        "start-docker-run": "docker container run --rm --interactive --tty --publish 8000:8000 -- tracer:server -- --port 8000",
-        "start-docker": "npm run-script -- start-docker-build && npm run-script -- start-docker-run",
-        "start-docker-tracers-server-build": "docker image build --file ./dockerhost.Dockerfile --tag tracer:server -- ./",
-        "start-docker-tracers-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag tracer:java -- ./JavaTracer/",
-        "start-docker-tracers-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag tracer:python -- ./PythonTracer/",
-        "start-docker-tracers-build": "npm run-script -- start-docker-tracers-server-build && npm run-script -- start-docker-tracers-java-build && npm run-script -- start-docker-tracers-python-build",
-        "start-docker-tracers-run": "docker container run --rm --interactive --tty --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock -- tracer:server -- --port 8000 --tracer java 'docker container run --rm --interactive -- tracer:java {}' --tracer python 'docker container run --rm --interactive -- tracer:python {}'",
-        "start-docker-tracers": "npm run-script -- start-docker-tracers-build && npm run-script -- start-docker-tracers-run"
+
+        "debug": "tsc && node --nolazy --inspect-brk=9229 ./dist/index.js",
+        "debug-tracers": "npm run debug -- --tracer java 'docker run --rm -i tracer:java {}' --tracer python 'docker run --rm -i tracer:python {}'",
+
+        "start": "tsc && node ./dist/index.js",
+        "start-tracers": "npm run start -- --tracer java 'docker run --rm -i tracer:java {}' --tracer python 'docker run --rm -i tracer:python {}'",
+
+        "docker-build": "docker image build --tag tracer:server -- ./",
+        "docker-start": "docker container run --rm --interactive --tty --publish 8000:8000 -- tracer:server --",
+        "docker-start-tracers": "docker container run --rm --interactive --tty --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock -- tracer:server -- --tracer java 'docker run --rm -i tracer:java {}' --tracer python 'docker run --rm -i tracer:python {}'",
+
+        "tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag tracer:java -- ./JavaTracer/",
+        "tracer-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag tracer:python -- ./PythonTracer/",
+        "tracers-build": "npm run-script tracer-java-build && npm run-script tracer-python-build"
     }
 }
