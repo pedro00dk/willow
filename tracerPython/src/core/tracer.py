@@ -48,7 +48,7 @@ class Tracer:
         scope_instance = modules_halter.apply(globals_builder.build())
 
         try:
-            action = self._action_queue.get()
+            self._action_queue.get()  # sync
             compiled = compile(self._code, scope_instance[scope.Globals.FILE], 'exec')
             self._result_queue.put(message.Message(message.Result.STARTED))
             sys.settrace(frame_processor.trace)
@@ -62,7 +62,7 @@ class Tracer:
 
 class FrameProcessor:
     """
-    Read action queue waiting for actions, process the frames and write the results in the queue. 
+    Read action queue waiting for actions, process the frames and write the results in the queue.
     """
 
     def __init__(self, name: str, options: Options, action_queue: mp.Queue, result_queue: mp.Queue):
@@ -73,7 +73,7 @@ class FrameProcessor:
         self._options = options
         self._action_queue = action_queue
         self._result_queue = result_queue
-        
+
         self._inspector = Inspector(self._options)
 
         # frame common info

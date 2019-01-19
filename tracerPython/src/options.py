@@ -3,7 +3,16 @@ class Options:
     Stores code options.
     """
 
-    def __init__(self, max_frames: int, max_stacks: int, max_objects: int, max_properties: int, max_iterables: int, max_strings: int, sandbox: bool):
+    def __init__(
+        self,
+        max_frames: int,
+        max_stacks: int,
+        max_objects: int,
+        max_properties: int,
+        max_iterables: int,
+        max_strings: int,
+        sandbox: bool
+    ):
         """
         Crates the options object with its values.
         """

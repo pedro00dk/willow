@@ -91,7 +91,7 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
             elif action == 'stop':
                 try:
                     tracer_broker.stop()
-                except:
+                except Exception:
                     pass
             else:
                 raise Exception('action not found')
