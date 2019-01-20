@@ -100,7 +100,7 @@ class FrameProcessor:
 
             # hold action (does not consume the frame)
             if action.name == message.Action.INPUT:
-                self._input_cache.append(action.value['input'])
+                self._input_cache.append(action.value)
                 continue
 
             # progressive actions
@@ -127,7 +127,7 @@ class FrameProcessor:
         while True:
             action = self._action_queue.get()
             if action.name == message.Action.INPUT:
-                return action.value['input']
+                return action.value
             if action.name == message.Action.STOP:
                 # add stop message in the queue again for stacked inputs until reach frame tracer
                 self._action_queue.put(action)

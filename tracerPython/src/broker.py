@@ -69,16 +69,14 @@ class TracerBroker:
         self._action_queue = None
         self._result_queue = None
 
-    def step(self, count:  int = 1):
+    def step(self):
         """
         Steps into the code.
         """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
-        if count < 1:
-            raise AssertionError('count smaller than 1')
 
-        self._action_queue.put(message.Message(message.Action.STEP, {'count': 1}))
+        self._action_queue.put(message.Message(message.Action.STEP))
         results = []
         while True:
             result = self._result_queue.get()
@@ -100,4 +98,4 @@ class TracerBroker:
         if data is None:
             raise AttributeError('data cannot be None')
 
-        self._action_queue.put(message.Message(message.Action.INPUT, {'input': data}))
+        self._action_queue.put(message.Message(message.Action.INPUT, data))
