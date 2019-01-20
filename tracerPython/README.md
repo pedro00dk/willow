@@ -3,13 +3,6 @@
 A tool to inspect python code, analyzing it line by line and returning its state (stack and heap data).
 
 ```
-usage: main.py [-h] [--name NAME] [--test] [--uncontrolled] [--omit-help]
-               [--max-frames MAX_FRAMES] [--max-stacks MAX_STACKS]
-               [--max-objects MAX_OBJECTS] [--max-properties MAX_PROPERTIES]
-               [--max-iterables MAX_ITERABLES] [--max-strings MAX_STRINGS]
-               [--sandbox]
-               [code]
-
 Tracer CLI parser
 
 positional arguments:
@@ -20,7 +13,6 @@ optional arguments:
   --name NAME           The code name
   --test                Run the test code, ignore any provided
   --uncontrolled        Run without stopping
-  --omit-help           Omit help messages
   --max-frames MAX_FRAMES
                         Limit the number of frames
   --max-stacks MAX_STACKS

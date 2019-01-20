@@ -9,12 +9,11 @@ import message
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Tracer CLI parser')
+    parser = argparse.ArgumentParser(description='Tracer CLI parser', usage=argparse.SUPPRESS)
     parser.add_argument('code', nargs='?', help='The python code to parse')
     parser.add_argument('--name', default='<code>', help='The code name')
     parser.add_argument('--test', default=False, action='store_true', help='Run the test code, ignore any provided')
     parser.add_argument('--uncontrolled', default=False, action='store_true', help='Run without stopping')
-    parser.add_argument('--omit-help', default=False, action='store_true', help='Omit help messages')
     parser.add_argument('--max-frames', type=int, help='Limit the number of frames')
     parser.add_argument('--max-stacks', type=int, help='Limit the number of stacks')
     parser.add_argument('--max-objects', type=int, help='Limit the number of complex objects in heap')
@@ -29,7 +28,7 @@ def main():
     code = arguments.code if not arguments.test else code
 
     if code is None:
-        print('No code or test flag provided. check --help', file=sys.stderr)
+        print_error('No code or test flag provided. check --help')
         return 1
 
     options = Options(
@@ -43,17 +42,14 @@ def main():
     )
 
     tracer_broker = broker.TracerBroker(arguments.name, code, options)
+    print_results([])
     if arguments.uncontrolled:
-        run_uncontrolled(tracer_broker, arguments.omit_help)
+        run_uncontrolled(tracer_broker)
     else:
-        run_controlled(tracer_broker, arguments.omit_help)
+        run_controlled(tracer_broker)
 
 
-def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
-    if not omit_help:
-        print('uncontrolled mode')
-        print()
-
+def run_uncontrolled(tracer_broker: broker.TracerBroker):
     print_results(tracer_broker.start())
     while True:
         results = tracer_broker.step()
@@ -66,15 +62,7 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker, omit_help: bool):
             break
 
 
-def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
-    if not omit_help:
-        print('controlled mode')
-        print('start -> start the tracer')
-        print('step -> run next step')
-        print('input <string> -> sends input to the code')
-        print('stop -> stops the tracer')
-        print()
-
+def run_controlled(tracer_broker: broker.TracerBroker):
     while True:
         action_data = input('>>>\n')
         split_index = action_data.find(' ')
@@ -100,11 +88,15 @@ def run_controlled(tracer_broker: broker.TracerBroker, omit_help: bool):
                 break
 
         except Exception as e:
-            print(json.dumps(f'exception: {e}'))
+            print_error(str(e))
 
 
 def print_results(results: list):
     print(json.dumps([r.__dict__ for r in results]))
+
+
+def print_error(error: str):
+    print(f'error: {error}', file=sys.stderr)
 
 
 if __name__ == '__main__':
