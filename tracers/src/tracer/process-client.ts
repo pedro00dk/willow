@@ -24,7 +24,6 @@ export class ProcessClient implements Tracer {
     constructor(command: string) {
         this.command = command
         this.state = 'created'
-        this.spawn()
     }
 
     /**
@@ -60,6 +59,7 @@ export class ProcessClient implements Tracer {
     async start() {
         this.requireState('created')
 
+        this.spawn()
         this.stdin.write('start\n')
         const results = (await this.stdout.next()).value
         this.state = 'started'
