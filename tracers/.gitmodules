@@ -1,6 +1,7 @@
 [submodule "PythonTracer"]
 	path = PythonTracer
 	url = https://github.com/pedro00dk/PythonTracer
+	master = master
 [submodule "JavaTracer"]
 	path = JavaTracer
 	url = https://github.com/pedro00dk/JavaTracer
