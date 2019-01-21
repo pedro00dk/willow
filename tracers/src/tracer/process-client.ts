@@ -13,9 +13,9 @@ import { Tracer } from './tracer'
 export class ProcessClient implements Tracer {
     private command: string
     private state: 'created' | 'started' | 'stopped'
+    private instance: cp.ChildProcess
     private stdin: Writable
-    private stdout: AsyncIterableIterator<Result[]>
-    private stderr: rx.Observable<string>
+    private stdStreamsGenerator: AsyncIterableIterator<{ source: string, value: string }>
 
 
     /**
@@ -38,19 +38,52 @@ export class ProcessClient implements Tracer {
      * Spawns the tracer server process.
      */
     private async spawn() {
-        const instance = cp.spawn(this.command, { shell: true })
-        this.stdin = instance.stdin
-        this.stdout = observableGenerator(
-            observableAnyToLines(rx.fromEvent(instance.stdout, 'data'))
+        this.instance = cp.spawn(this.command, { shell: true })
+        this.stdin = this.instance.stdin
+
+        const observableAnyToLines =
+            (observable: rx.Observable<any>) => observable
                 .pipe(
-                    rxOps.filter(line => line.startsWith('[')),
-                    rxOps.map(line => JSON.parse(line) as Result[]),
-                ),
-            next => false
+                    rxOps.map(object => object as Buffer),
+                    rxOps.map(buffer => buffer.toString('utf8')),
+                    rxOps.flatMap(text => rx.from(text.split(/(\n)/))),
+                    rxOps.filter(part => part.length !== 0),
+                    rxOps.map(part => [part]),
+                    rxOps.scan((acc, parts) => acc[acc.length - 1] === '\n' ? parts : [...acc, ...parts], ['\n']),
+                    rxOps.filter(parts => parts[parts.length - 1] === '\n'),
+                    rxOps.map(lineParts => lineParts.join(''))
+                )
+
+        const stdout = observableAnyToLines(rx.fromEvent(this.instance.stdout, 'data'))
+            .pipe(rxOps.map(value => ({ source: 'stdout', value })))
+        const stderr = observableAnyToLines(rx.fromEvent(this.instance.stderr, 'data'))
+            .pipe(rxOps.map(value => ({ source: 'stderr', value })))
+        this.stdStreamsGenerator = observableGenerator(
+            rx.never().pipe(rxOps.merge(stdout), rxOps.merge(stderr)),
+            next => next.source === 'stderr' || !next.value.startsWith('[')
         )
-        this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
-        this.stderr.subscribe(error => console.error(error))
-        await this.stdout.next()
+        await this.getNextResults()
+    }
+
+    /**
+     * Tries to return the next results from stdout, otherwise stops call stop and throws an exception.
+     */
+    private async getNextResults() {
+        const next = await this.stdStreamsGenerator.next()
+        if (next.value.source === 'stderr') {
+            this.stop()
+            throw new Error(next.value.value)
+        }
+        if (!next.value.value.startsWith('[')) {
+            this.stop()
+            throw new Error(`non json array result: ${next.value.value}`)
+        }
+        try {
+            return JSON.parse(next.value.value) as Result[]
+        } catch (error) {
+            this.stop()
+            throw error
+        }
     }
 
     getState() {
@@ -61,8 +94,8 @@ export class ProcessClient implements Tracer {
         this.requireState('created')
 
         await this.spawn()
-        this.stdin.write('start\n')
-        const results = (await this.stdout.next()).value
+        this.stdin.write('start2\n')
+        const results = await this.getNextResults()
         this.state = 'started'
         if (isErrorResult(results[results.length - 1])) this.stop()
         return results
@@ -71,10 +104,13 @@ export class ProcessClient implements Tracer {
     stop() {
         this.requireState('started', 'created')
 
-        try { this.stdin.write(`stop\n`) }
+        try {
+            this.stdin.write(`stop\n`)
+            if (this.instance.killed) this.instance.kill()
+        }
         catch (error) { /* ignored */ }
         this.state = 'stopped'
-        this.stdin = this.stdout = this.stderr = null
+        this.instance = this.stdin = this.stdStreamsGenerator = null
     }
 
     input(input: string) {
@@ -87,27 +123,10 @@ export class ProcessClient implements Tracer {
         this.requireState('started')
 
         this.stdin.write('step\n')
-        const results = (await this.stdout.next()).value
+        const results = await this.getNextResults()
         if (isLastResult(results[results.length - 1]) || isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
-}
-
-/**
- * Pipes an rx.Observable<any> containing text split in any form to string lines obtained from the buffers.
- */
-function observableAnyToLines(observable: rx.Observable<any>): rx.Observable<string> {
-    return observable
-        .pipe(
-            rxOps.map(object => object as Buffer),
-            rxOps.map(buffer => buffer.toString('utf8')),
-            rxOps.flatMap(text => rx.from(text.split(/(\n)/))),
-            rxOps.filter(part => part.length !== 0),
-            rxOps.map(part => [part]),
-            rxOps.scan((acc, parts) => acc[acc.length - 1] === '\n' ? parts : [...acc, ...parts], ['\n']),
-            rxOps.filter(parts => parts[parts.length - 1] === '\n'),
-            rxOps.map(lineParts => lineParts.join('')),
-        )
 }
 
 /**
