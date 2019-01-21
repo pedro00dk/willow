@@ -64,7 +64,7 @@ def run_uncontrolled(tracer_broker: broker.TracerBroker):
 
 def run_controlled(tracer_broker: broker.TracerBroker):
     while True:
-        action_data = input('>>>\n')
+        action_data = input()
         split_index = action_data.find(' ')
         action = action_data[:split_index if split_index != -1 else None]
         value = action_data[split_index + 1: 0 if split_index == -1 else None]
