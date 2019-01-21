@@ -78,7 +78,7 @@ export class DefaultTracer implements Tracer {
         return results
     }
     async continue() {
-        const results = new Array<Result>()
+        const results: Result[] = []
         const stackLength = this.lastDataResult
             ? (this.lastDataResult.value as Event).stackLines.length
             : 1

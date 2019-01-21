@@ -43,7 +43,7 @@ export class TracerServer {
                 const supplier = request.body['supplier'] as string
                 const code = request.body['code'] as string
                 try { response.send(this.createSession(supplier, code)) }
-                catch (error) { response.status(400).send(error) }
+                catch (error) { response.status(400).send(error.message) }
             }
         )
         this.server.post(
@@ -53,7 +53,7 @@ export class TracerServer {
                 const action = request.body['action'] as string
                 const args = request.body['args'] as any[]
                 try { response.send(await this.executeOnSession(id, action, args)) }
-                catch (error) { response.status(400).send(error) }
+                catch (error) { response.status(400).send(error.message) }
             }
         )
     }
