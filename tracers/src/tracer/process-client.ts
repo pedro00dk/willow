@@ -37,7 +37,7 @@ export class ProcessClient implements Tracer {
     /**
      * Spawns the tracer server process.
      */
-    private spawn() {
+    private async spawn() {
         const instance = cp.spawn(this.command, { shell: true })
         this.stdin = instance.stdin
         this.stdout = observableGenerator(
@@ -46,10 +46,11 @@ export class ProcessClient implements Tracer {
                     rxOps.filter(line => line.startsWith('[')),
                     rxOps.map(line => JSON.parse(line) as Result[]),
                 ),
-            next => isLastResult(next[next.length - 1])
+            next => false
         )
         this.stderr = observableAnyToLines(rx.fromEvent(instance.stderr, 'data'))
         this.stderr.subscribe(error => console.error(error))
+        await this.stdout.next()
     }
 
     getState() {
@@ -59,7 +60,7 @@ export class ProcessClient implements Tracer {
     async start() {
         this.requireState('created')
 
-        this.spawn()
+        await this.spawn()
         this.stdin.write('start\n')
         const results = (await this.stdout.next()).value
         this.state = 'started'
