@@ -25,6 +25,13 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
   </component>
   <component name="libraryTable">
+    <library name="argparse4j-0.8.1">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/argparse4j-0.8.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
     <library name="gson-2.8.5">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/gson-2.8.5.jar!/" />

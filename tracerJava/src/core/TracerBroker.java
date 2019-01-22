@@ -79,14 +79,13 @@ public class TracerBroker {
     /**
      * Steps into the script.
      */
-    public List<ResultMessage> step(int count) {
+    public List<ResultMessage> step() {
         if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
-        if (count < 1) throw new IllegalArgumentException("count smaller than 1");
 
         List<ResultMessage> results = new ArrayList<>();
         ResultMessage result = null;
         try {
-            actionQueue.put(new ActionMessage(ActionMessage.Action.STEP, Map.ofEntries(Map.entry("count", 1))));
+            actionQueue.put(new ActionMessage(ActionMessage.Action.STEP, null));
             while (true) {
                 result = resultQueue.take();
                 results.add(result);

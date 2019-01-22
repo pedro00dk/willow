@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="gson-2.8.5" level="project" />
+    <orderEntry type="library" name="argparse4j-0.8.1" level="project" />
   </component>
 </module>
