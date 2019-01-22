@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import core.TracerBroker;
 import message.ResultMessage;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -83,8 +84,10 @@ public class Main {
         }
     }
 
+    private static final Gson SERIALIZER = new GsonBuilder().serializeNulls().create();
+
     private static void printResults(List<ResultMessage> resultMessages) {
-        System.out.println(new Gson().toJson(resultMessages));
+        System.out.println(SERIALIZER.toJson(resultMessages));
     }
 
     private static void printError(String error) {
