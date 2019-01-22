@@ -78,6 +78,7 @@ public class Main {
                 } else {
                     throw new Exception("action not found");
                 }
+                if (!tracerBroker.isTracerRunning()) break;
             } catch (Exception e) {
                 printError(e.getMessage());
             }
