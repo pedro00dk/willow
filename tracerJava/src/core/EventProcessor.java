@@ -6,7 +6,8 @@ import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -16,6 +17,7 @@ public class EventProcessor {
     private BlockingQueue<ActionMessage> actionQueue;
     private BlockingQueue<ResultMessage> resultQueue;
     private int inspectedEventCount;
+    private Queue<String> inputCache;
 
     /**
      * Initializes the event processor with the communication queues.
@@ -23,7 +25,12 @@ public class EventProcessor {
     public EventProcessor(BlockingQueue<ActionMessage> actionQueue, BlockingQueue<ResultMessage> resultQueue) {
         this.actionQueue = actionQueue;
         this.resultQueue = resultQueue;
+
+        // frame common info
         inspectedEventCount = 0;
+
+        // hooks attributes
+        inputCache = new LinkedList<>();
     }
 
     /**
@@ -33,13 +40,24 @@ public class EventProcessor {
         inspectedEventCount++;
 
         try {
-            var action = actionQueue.take();
-            if (action.getAction() == ActionMessage.Action.STEP) {
-                var data = Inspector.inspect(event);
-                resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, data));
-            } else if (action.getAction() == ActionMessage.Action.STOP) {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, null));
-                return false;
+            while (true) {
+                var action = actionQueue.take();
+
+                // hold action (does not consume the frame)
+                if (action.getAction() == ActionMessage.Action.INPUT) {
+                    inputCache.offer((String) action.getValue());
+                    continue;
+                }
+
+                // progressive actions
+                if (action.getAction() == ActionMessage.Action.STEP) {
+                    var data = Inspector.inspect(event);
+                    resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, data));
+                } else if (action.getAction() == ActionMessage.Action.STOP) {
+                    resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, null));
+                    return false;
+                }
+                break;
             }
         } catch (InterruptedException | IncompatibleThreadStateException e) {
             var exceptionDump = ExceptionUtil.dump(e);
@@ -57,13 +75,18 @@ public class EventProcessor {
      * Hook for input calls.
      */
     public String inputHook() {
+
+        // cached input
+        if (!inputCache.isEmpty()) return inputCache.poll();
+
+        // missing input
         try {
             while (true) {
                 var action = actionQueue.take();
                 if (action.getAction() == ActionMessage.Action.INPUT)
                     return (String) action.getValue();
                 if (action.getAction() == ActionMessage.Action.STOP) {
-                    actionQueue.put(new ActionMessage(ActionMessage.Action.STOP, null));
+                    actionQueue.put(action);
                     return "";
                 }
                 resultQueue.put(new ResultMessage(ResultMessage.Result.LOCKED, "input locked, skipping action"));
