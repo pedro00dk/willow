@@ -2,8 +2,10 @@ package core.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Processes exception objects.
@@ -22,7 +24,11 @@ public final class ExceptionUtil {
         return Map.ofEntries(
                 Map.entry("type", exception.getClass().getName()),
                 Map.entry("args", List.of(exception.getMessage())),
-                Map.entry("traceback", tracebackWriter.toString())
+                Map.entry(
+                        "traceback",
+                        Arrays.stream(tracebackWriter.toString().split("\n"))
+                                .map(l -> l + '\n')
+                                .collect(Collectors.toList()))
         );
     }
 }
