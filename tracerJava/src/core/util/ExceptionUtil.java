@@ -19,7 +19,6 @@ public final class ExceptionUtil {
     public static Map<String, Object> dump(Exception exception) {
         var tracebackWriter = new StringWriter();
         exception.printStackTrace(new PrintWriter(tracebackWriter, true));
-        exception.printStackTrace();
         return Map.ofEntries(
                 Map.entry("type", exception.getClass().getName()),
                 Map.entry("args", List.of(exception.getMessage())),
