@@ -106,10 +106,10 @@ export class TracerServer {
                 const data = args[0] as string
                 if (data == null) throw new Error('input not found in args or wrong type')
                 result = tracer.input(data)
-            } else if (action === 'step') result = tracer.step()
-            else if (action === 'stepOver') result = tracer.stepOver()
-            else if (action === 'stepOut') result = tracer.stepOut()
-            else if (action === 'continue') result = tracer.continue()
+            } else if (action === 'step') result = await tracer.step()
+            else if (action === 'stepOver') result = await tracer.stepOver()
+            else if (action === 'stepOut') result = await tracer.stepOut()
+            else if (action === 'continue') result = await tracer.continue()
             else if (action === 'getBreakpoints') result = tracer.getBreakpoints()
             else if (action === 'setBreakpoints') {
                 const line = args[0] as number
