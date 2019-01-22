@@ -70,7 +70,7 @@ export class TracerServer {
      */
     private getSessions() {
         return [...this.sessions.entries()]
-            .map(([id, { supplier }]) => ({ id, supplier }))
+            .map(([id, { supplier, tracer }]) => ({ id, supplier, state: tracer.getState() }))
     }
 
     /**
