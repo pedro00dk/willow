@@ -5,10 +5,7 @@ import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.VMStartException;
-import com.sun.jdi.event.ThreadDeathEvent;
 import com.sun.jdi.event.ThreadStartEvent;
-import com.sun.jdi.event.VMDeathEvent;
-import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.tools.jdi.VirtualMachineManagerImpl;
@@ -56,51 +53,50 @@ public class Executor {
         startVirtualMachine();
         var allowedThreadsNames = configureEventRequests();
 
-        var processPrintStream = vm.process().getInputStream();
-        var processErrorStream = vm.process().getErrorStream();
-        var processReadStream = vm.process().getOutputStream();
+        var vmStdin = vm.process().getOutputStream();
+        var vmStdout = vm.process().getInputStream();
+        var vmStderr = vm.process().getErrorStream();
 
         while (true) {
-            vm.resume();
-            var eventSet = vm.eventQueue().remove(100);
+            try {
+                vm.resume();
 
-            // input hook TODO check better strategies
-            while (eventSet == null) {
-                processReadStream.write((eventProcessor.inputHook() + "\n").getBytes());
-                processReadStream.flush();
-                eventSet = vm.eventQueue().remove(100);
-            }
-            for (var event : eventSet) {
-                if (event instanceof VMDeathEvent) {
-                    vm.resume(); // two vm death events are emitted
-                    vm.eventQueue().remove();
-                    return;
-                } else if (event instanceof VMStartEvent) {
-                    continue;
-                } else if (event instanceof ThreadStartEvent) {
-                    var threadStartEvent = (ThreadStartEvent) event;
-                    if (!allowedThreadsNames.contains(threadStartEvent.thread().name()))
-                        threadStartEvent.thread().interrupt();
-                    continue;
-                } else if (event instanceof ThreadDeathEvent) {
-                    continue;
+                var eventSet = vm.eventQueue().remove(100);
+
+                // input hook TODO check better strategies
+                while (eventSet == null) {
+                    vmStdin.write((eventProcessor.inputHook() + "\n").getBytes());
+                    vmStdin.flush();
+                    eventSet = vm.eventQueue().remove(100);
                 }
 
-                // print hooks
-                var printAvailable = processPrintStream.available();
-                if (printAvailable > 0)
-                    eventProcessor.printHook(new String(processPrintStream.readNBytes(printAvailable)));
+                for (var event : eventSet) {
 
-                var errorAvailable = processErrorStream.available();
-                if (errorAvailable > 0)
-                    eventProcessor.printHook(new String(processErrorStream.readNBytes(errorAvailable)));
+                    // interrupt not allowed threads
+                    if (event instanceof ThreadStartEvent &&
+                            !allowedThreadsNames.contains(((ThreadStartEvent) event).thread().name()))
+                        ((ThreadStartEvent) event).thread().interrupt();
 
-                // trace
-                var continueTracing = eventProcessor.trace(event);
-                if (!continueTracing) {
-                    vm.exit(0);
-                    return;
+
+                    // print hooks
+                    var printAvailable = vmStdout.available();
+                    if (printAvailable > 0)
+                        eventProcessor.printHook(new String(vmStdout.readNBytes(printAvailable)));
+                    var errorAvailable = vmStderr.available();
+                    if (errorAvailable > 0)
+                        eventProcessor.printHook(new String(vmStderr.readNBytes(errorAvailable)));
+
+                    // trace
+                    var continueTracing = eventProcessor.trace(event);
+                    if (!continueTracing) {
+                        vm.exit(0);
+                        // breaks only internal loop to stop event set iterator
+                        // throws precipitated VMDisconnectedException without reading the rest of the events
+                        break;
+                    }
                 }
+            } catch (VMDisconnectedException e) {
+                break;
             }
         }
     }
@@ -172,11 +168,21 @@ public class Executor {
 
         var stepRequests = classNames.stream()
                 .map(c -> {
-                    var stepRequest = vm.eventRequestManager().createStepRequest(
-                            mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO
-                    );
+                    var stepRequest = vm.eventRequestManager()
+                            .createStepRequest(mainThread, StepRequest.STEP_MIN, StepRequest.STEP_INTO);
+                    stepRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                     stepRequest.addClassFilter(c);
                     return stepRequest;
+                })
+                .collect(Collectors.toList());
+
+        var exceptionRequests = classNames.stream()
+                .map(c -> {
+                    var exceptionRequest = vm.eventRequestManager()
+                            .createExceptionRequest(null, true, true);
+                    exceptionRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+                    exceptionRequest.addClassFilter(c);
+                    return exceptionRequest;
                 })
                 .collect(Collectors.toList());
         // TODO implement step into try blocks
@@ -187,6 +193,7 @@ public class Executor {
         methodEntryRequests.forEach(EventRequest::enable);
         methodExitRequests.forEach(EventRequest::enable);
         stepRequests.forEach(EventRequest::enable);
+        exceptionRequests.forEach(EventRequest::enable);
 
         return allowedThreadsNames;
     }

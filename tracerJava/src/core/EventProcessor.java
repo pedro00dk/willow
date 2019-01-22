@@ -2,6 +2,9 @@ package core;
 
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.event.Event;
+import com.sun.jdi.event.MethodEntryEvent;
+import com.sun.jdi.event.MethodExitEvent;
+import com.sun.jdi.event.StepEvent;
 import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
@@ -16,6 +19,7 @@ import java.util.concurrent.BlockingQueue;
 public class EventProcessor {
     private BlockingQueue<ActionMessage> actionQueue;
     private BlockingQueue<ResultMessage> resultQueue;
+    private Event previousEvent;
     private int inspectedEventCount;
     private Queue<String> inputCache;
 
@@ -27,6 +31,7 @@ public class EventProcessor {
         this.resultQueue = resultQueue;
 
         // frame common info
+        previousEvent = null;
         inspectedEventCount = 0;
 
         // hooks attributes
@@ -37,6 +42,11 @@ public class EventProcessor {
      * The code trace function. Returns if should continue tracing.
      */
     public boolean trace(Event event) {
+        if (!(event instanceof MethodEntryEvent) && !(event instanceof MethodExitEvent) &&
+                !(event instanceof StepEvent))
+            return true;
+
+        previousEvent = event;
         inspectedEventCount++;
 
         try {
