@@ -98,45 +98,29 @@ export class TracerServer {
 
         const tracer = this.sessions.get(id).tracer
         let result: any
-        switch (action) {
-            case 'getState':
-                result = tracer.getState()
-                break
-            case 'start':
-                result = await tracer.start()
-                break
-            case 'stop':
-                result = tracer.stop()
-                break
-            case 'input':
+        try {
+            if (action === 'getState') result = tracer.getState()
+            else if (action === 'start') result = await tracer.start()
+            else if (action === 'stop') result = tracer.stop()
+            else if (action === 'input') {
                 const data = args[0] as string
                 if (data == null) throw new Error('input not found in args or wrong type')
                 result = tracer.input(data)
-                break
-            case 'step':
-                result = await tracer.step()
-                break
-            case 'stepOver':
-                result = await tracer.stepOver()
-                break
-            case 'stepOut':
-                result = await tracer.stepOut()
-                break
-            case 'continue':
-                result = await tracer.continue()
-                break
-            case 'getBreakpoints':
-                result = [...tracer.getBreakpoints()]
-                break
-            case 'setBreakpoint':
+            } else if (action === 'step') result = tracer.step()
+            else if (action === 'stepOver') result = tracer.stepOver()
+            else if (action === 'stepOut') result = tracer.stepOut()
+            else if (action === 'continue') result = tracer.continue()
+            else if (action === 'getBreakpoints') result = tracer.getBreakpoints()
+            else if (action === 'setBreakpoints') {
                 const line = args[0] as number
                 if (line == null) throw new Error('line not found in args or wrong type')
                 result = tracer.setBreakpoint(line)
-                break
-            default:
-                throw new Error('action not found or wrong type')
+            } else throw new Error('action not found or wrong type')
+        } catch (error) {
+            throw error
+        } finally {
+            if (tracer.getState() === 'stopped') this.sessions.delete(id)
         }
-        if (tracer.getState() === 'stopped') this.sessions.delete(id)
         return result
     }
 

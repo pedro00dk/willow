@@ -94,7 +94,7 @@ export class ProcessClient implements Tracer {
         this.requireState('created')
 
         await this.spawn()
-        this.stdin.write('start2\n')
+        this.stdin.write('start\n')
         const results = await this.getNextResults()
         this.state = 'started'
         if (isErrorResult(results[results.length - 1])) this.stop()
