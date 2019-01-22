@@ -39,11 +39,11 @@ public final class Inspector {
 
         var heapInspection = inspectHeap(event, stackFrames);
         //noinspection unchecked
-        var stackReferences = (List<List<List<Object>>>) heapInspection.get("stack_references");
+        var stackReferences = (List<List<List<Object>>>) heapInspection.get("stackReferences");
         //noinspection unchecked
-        var heapGraph = (Map<Long, Map<String, Object>>) heapInspection.get("heap_graph");
+        var heapGraph = (Map<Long, Map<String, Object>>) heapInspection.get("heapGraph");
         //noinspection unchecked
-        var userClasses = (Set<String>) heapInspection.get("user_classes");
+        var userClasses = (Set<String>) heapInspection.get("userClasses");
 
         var finish = eventType.equals("return") && stackFrames.size() == 1;
 
@@ -51,10 +51,10 @@ public final class Inspector {
                 Map.entry("event", eventType),
                 Map.entry("args", "null"), // TODO get exception args
                 Map.entry("line", stackLines.get(0).get("line")),
-                Map.entry("stack_lines", stackLines),
-                Map.entry("stack_references", stackReferences),
-                Map.entry("heap_graph", heapGraph),
-                Map.entry("user_classes", userClasses),
+                Map.entry("stackLines", stackLines),
+                Map.entry("stackReferences", stackReferences),
+                Map.entry("heapGraph", heapGraph),
+                Map.entry("userClasses", userClasses),
                 Map.entry("finish", finish)
         );
     }
@@ -103,9 +103,9 @@ public final class Inspector {
                 .collect(Collectors.toList());
 
         return Map.ofEntries(
-                Map.entry("stack_references", stackReferences),
-                Map.entry("heap_graph", heapGraph),
-                Map.entry("user_classes", userClasses)
+                Map.entry("stackReferences", stackReferences),
+                Map.entry("heapGraph", heapGraph),
+                Map.entry("userClasses", userClasses)
         );
     }
 
@@ -115,7 +115,7 @@ public final class Inspector {
      * If is a boxed primitive, returns as primitive.
      * If the object is a string, returns a string, with extra double quotes.
      * Otherwise, returns the object reference (list with a single number inside) recursively, inspecting object
-     * members and filling the heap_graph and user_classes
+     * members and filling the heapGraph and userClasses
      */
     private static Object inspectObject(Object obj, Map<Long, Map<String, Object>> heapGraph, Set<String> userClasses, ThreadReference threadReference) {
 
