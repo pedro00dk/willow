@@ -51,6 +51,10 @@ def main():
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker):
     print_results(tracer_broker.start())
+
+    if not tracer_broker.is_tracer_running():
+        return
+
     while True:
         results = tracer_broker.step()
         print_results(results)
