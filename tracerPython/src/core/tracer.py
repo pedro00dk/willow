@@ -108,7 +108,8 @@ class FrameProcessor:
                 data = self._inspector.inspect(frame, event, args, self._exec_call_frame)
                 self._result_queue.put(message.Message(message.Result.DATA, data))
             elif action.name == message.Action.STOP:
-                self._result_queue.put(message.Message(message.Result.DATA, {}))
+                self._result_queue.put(message.Message(message.Result.DATA, None))
+                return None
             break
 
         return self.trace
