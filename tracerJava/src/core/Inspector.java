@@ -47,16 +47,16 @@ public final class Inspector {
 
         var finish = eventType.equals("return") && stackFrames.size() == 1;
 
-        return Map.ofEntries(
-                Map.entry("event", eventType),
-                Map.entry("args", "null"), // TODO get exception args
-                Map.entry("line", stackLines.get(0).get("line")),
-                Map.entry("stackLines", stackLines),
-                Map.entry("stackReferences", stackReferences),
-                Map.entry("heapGraph", heapGraph),
-                Map.entry("userClasses", userClasses),
-                Map.entry("finish", finish)
-        );
+        var result = new HashMap<String, Object>(); // Map.of does not support null keys or values
+        result.put("event", eventType);
+        result.put("args", null); // TODO get exception args
+        result.put("line", stackLines.get(0).get("line"));
+        result.put("stackLines", stackLines);
+        result.put("stackReferences", stackReferences);
+        result.put("heapGraph", heapGraph);
+        result.put("userClasses", userClasses);
+        result.put("finish", finish);
+        return result;
     }
 
     /**
