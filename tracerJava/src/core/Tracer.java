@@ -5,6 +5,7 @@ import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -35,6 +36,14 @@ public class Tracer {
             project.compile();
             resultQueue.put(new ResultMessage(ResultMessage.Result.started, null));
             new Executor(project, eventProcessor).execute();
+        } catch (InstantiationException e) {
+            // compilation error
+            var exceptionDump = ExceptionUtil.dump(e, Set.of(-1, -2, -3, -4));
+            try {
+                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
         } catch (Exception e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {

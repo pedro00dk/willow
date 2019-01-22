@@ -87,7 +87,7 @@ public class Project {
     /**
      * Compiles the generated project.
      */
-    public void compile() throws IOException {
+    public void compile() throws InstantiationException, IOException {
         if (!isGenerated()) throw new IllegalStateException("project not generated");
 
         binPath = Path.of(projectPath.toString(), DEFAULT_BIN_PATH);
@@ -107,7 +107,7 @@ public class Project {
         var output = new StringWriter();
         var task = compiler.getTask(output, fileManager, dgCollector, javacOptions, null, javaFiles);
         if (!task.call())
-            throw new IllegalStateException(
+            throw new InstantiationException(
                     "Compilation fail:\n" + output.toString() +
                             dgCollector.getDiagnostics().stream()
                                     .map(Diagnostic::toString)
