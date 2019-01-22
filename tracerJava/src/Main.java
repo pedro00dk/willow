@@ -50,10 +50,12 @@ public class Main {
 
     private static void runUncontrolled(TracerBroker tracerBroker) throws InterruptedException {
         printResults(tracerBroker.start());
+        if (!tracerBroker.isTracerRunning()) return;
         while (true) {
             var results = tracerBroker.step();
             printResults(results);
             if (results.get(results.size() - 1).getName() == ResultMessage.Result.locked) tracerBroker.input("");
+            System.out.println(tracerBroker.isTracerRunning());
             if (!tracerBroker.isTracerRunning()) break;
         }
     }
