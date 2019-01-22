@@ -44,16 +44,16 @@ public class EventProcessor {
                 var action = actionQueue.take();
 
                 // hold action (does not consume the frame)
-                if (action.getAction() == ActionMessage.Action.input) {
+                if (action.getName() == ActionMessage.Action.input) {
                     inputCache.offer((String) action.getValue());
                     continue;
                 }
 
                 // progressive actions
-                if (action.getAction() == ActionMessage.Action.step) {
+                if (action.getName() == ActionMessage.Action.step) {
                     var data = Inspector.inspect(event);
                     resultQueue.put(new ResultMessage(ResultMessage.Result.data, data));
-                } else if (action.getAction() == ActionMessage.Action.stop) {
+                } else if (action.getName() == ActionMessage.Action.stop) {
                     resultQueue.put(new ResultMessage(ResultMessage.Result.data, null));
                     return false;
                 }
@@ -83,9 +83,9 @@ public class EventProcessor {
         try {
             while (true) {
                 var action = actionQueue.take();
-                if (action.getAction() == ActionMessage.Action.input)
+                if (action.getName() == ActionMessage.Action.input)
                     return (String) action.getValue();
-                if (action.getAction() == ActionMessage.Action.stop) {
+                if (action.getName() == ActionMessage.Action.stop) {
                     actionQueue.put(action);
                     return "";
                 }

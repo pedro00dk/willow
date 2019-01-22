@@ -4,15 +4,15 @@ package message;
  * Action message type.
  */
 public class ResultMessage extends Message {
-    private Result result;
+    private Result name;
 
-    public ResultMessage(Result result, Object value) {
+    public ResultMessage(Result name, Object value) {
         super(value);
-        this.result = result;
+        this.name = name;
     }
 
-    public Result getResult() {
-        return result;
+    public Result getName() {
+        return name;
     }
 
     /**

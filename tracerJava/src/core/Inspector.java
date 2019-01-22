@@ -48,7 +48,7 @@ public final class Inspector {
         var finish = eventType.equals("return") && stackFrames.size() == 1;
 
         var result = new HashMap<String, Object>(); // Map.of does not support null keys or values
-        result.put("event", eventType);
+        result.put("name", eventType);
         result.put("args", null); // TODO get exception args
         result.put("line", stackLines.get(0).get("line"));
         result.put("stackLines", stackLines);

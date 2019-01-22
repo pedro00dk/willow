@@ -52,7 +52,7 @@ public class TracerBroker {
             result = new ResultMessage(ResultMessage.Result.error, exceptionDump);
         }
 
-        if (result.getResult() == ResultMessage.Result.error) {
+        if (result.getName() == ResultMessage.Result.error) {
             stop();
         }
 
@@ -89,9 +89,9 @@ public class TracerBroker {
             while (true) {
                 result = resultQueue.take();
                 results.add(result);
-                if (result.getResult().equals(ResultMessage.Result.data) ||
-                        result.getResult().equals(ResultMessage.Result.error) ||
-                        result.getResult().equals(ResultMessage.Result.locked))
+                if (result.getName().equals(ResultMessage.Result.data) ||
+                        result.getName().equals(ResultMessage.Result.error) ||
+                        result.getName().equals(ResultMessage.Result.locked))
                     break;
             }
         } catch (InterruptedException e) {
@@ -101,9 +101,9 @@ public class TracerBroker {
         }
 
         //noinspection unchecked
-        if (result.getResult() == ResultMessage.Result.data &&
+        if (result.getName() == ResultMessage.Result.data &&
                 (boolean) ((Map<String, Object>) result.getValue()).get("finish") ||
-                result.getResult() == ResultMessage.Result.error)
+                result.getName() == ResultMessage.Result.error)
             stop();
 
         return results;

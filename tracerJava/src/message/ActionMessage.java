@@ -4,15 +4,15 @@ package message;
  * Action message type.
  */
 public class ActionMessage extends Message {
-    private Action action;
+    private Action name;
 
-    public ActionMessage(Action action, Object value) {
+    public ActionMessage(Action name, Object value) {
         super(value);
-        this.action = action;
+        this.name = name;
     }
 
-    public Action getAction() {
-        return action;
+    public Action getName() {
+        return name;
     }
 
     /**
