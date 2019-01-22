@@ -61,8 +61,7 @@ public class EventProcessor {
             while (true) {
                 var action = actionQueue.take();
                 if (action.getAction() == ActionMessage.Action.INPUT)
-                    // noinspection unchecked
-                    return ((Map<String, String>) action.getValue()).get("input");
+                    return (String) action.getValue();
                 if (action.getAction() == ActionMessage.Action.STOP) {
                     actionQueue.put(new ActionMessage(ActionMessage.Action.STOP, null));
                     return "";

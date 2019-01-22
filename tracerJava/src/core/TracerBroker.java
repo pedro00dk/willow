@@ -116,6 +116,6 @@ public class TracerBroker {
         if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
         if (data == null) throw new NullPointerException("data cannot be null");
 
-        actionQueue.put(new ActionMessage(ActionMessage.Action.INPUT, Map.ofEntries(Map.entry("input", data))));
+        actionQueue.put(new ActionMessage(ActionMessage.Action.INPUT, data));
     }
 }
