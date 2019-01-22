@@ -5,3 +5,4 @@
 [submodule "JavaTracer"]
 	path = JavaTracer
 	url = https://github.com/pedro00dk/JavaTracer
+	master = master
