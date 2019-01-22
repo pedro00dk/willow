@@ -45,14 +45,14 @@ public class TracerBroker {
 
         ResultMessage result;
         try {
-            actionQueue.put(new ActionMessage(ActionMessage.Action.START, null));
+            actionQueue.put(new ActionMessage(ActionMessage.Action.start, null));
             result = resultQueue.take();
         } catch (InterruptedException e) {
             var exceptionDump = ExceptionUtil.dump(e);
-            result = new ResultMessage(ResultMessage.Result.ERROR, exceptionDump);
+            result = new ResultMessage(ResultMessage.Result.error, exceptionDump);
         }
 
-        if (result.getResult() == ResultMessage.Result.ERROR) {
+        if (result.getResult() == ResultMessage.Result.error) {
             stop();
         }
 
@@ -66,7 +66,7 @@ public class TracerBroker {
         if (!isTracerRunning()) throw new IllegalStateException("tracer already stopped");
 
         try {
-            actionQueue.offer(new ActionMessage(ActionMessage.Action.STOP, null));
+            actionQueue.offer(new ActionMessage(ActionMessage.Action.stop, null));
             tracerThread.join();
         } catch (InterruptedException e) {
             // ignore interruptions
@@ -85,25 +85,25 @@ public class TracerBroker {
         List<ResultMessage> results = new ArrayList<>();
         ResultMessage result = null;
         try {
-            actionQueue.put(new ActionMessage(ActionMessage.Action.STEP, null));
+            actionQueue.put(new ActionMessage(ActionMessage.Action.step, null));
             while (true) {
                 result = resultQueue.take();
                 results.add(result);
-                if (result.getResult().equals(ResultMessage.Result.DATA) ||
-                        result.getResult().equals(ResultMessage.Result.ERROR) ||
-                        result.getResult().equals(ResultMessage.Result.LOCKED))
+                if (result.getResult().equals(ResultMessage.Result.data) ||
+                        result.getResult().equals(ResultMessage.Result.error) ||
+                        result.getResult().equals(ResultMessage.Result.locked))
                     break;
             }
         } catch (InterruptedException e) {
             var exceptionDump = ExceptionUtil.dump(e);
-            result = new ResultMessage(ResultMessage.Result.ERROR, exceptionDump);
+            result = new ResultMessage(ResultMessage.Result.error, exceptionDump);
             results.add(result);
         }
 
         //noinspection unchecked
-        if (result.getResult() == ResultMessage.Result.DATA &&
+        if (result.getResult() == ResultMessage.Result.data &&
                 (boolean) ((Map<String, Object>) result.getValue()).get("finish") ||
-                result.getResult() == ResultMessage.Result.ERROR)
+                result.getResult() == ResultMessage.Result.error)
             stop();
 
         return results;
@@ -116,6 +116,6 @@ public class TracerBroker {
         if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
         if (data == null) throw new NullPointerException("data cannot be null");
 
-        actionQueue.put(new ActionMessage(ActionMessage.Action.INPUT, data));
+        actionQueue.put(new ActionMessage(ActionMessage.Action.input, data));
     }
 }

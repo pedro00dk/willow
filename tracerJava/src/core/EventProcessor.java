@@ -44,17 +44,17 @@ public class EventProcessor {
                 var action = actionQueue.take();
 
                 // hold action (does not consume the frame)
-                if (action.getAction() == ActionMessage.Action.INPUT) {
+                if (action.getAction() == ActionMessage.Action.input) {
                     inputCache.offer((String) action.getValue());
                     continue;
                 }
 
                 // progressive actions
-                if (action.getAction() == ActionMessage.Action.STEP) {
+                if (action.getAction() == ActionMessage.Action.step) {
                     var data = Inspector.inspect(event);
-                    resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, data));
-                } else if (action.getAction() == ActionMessage.Action.STOP) {
-                    resultQueue.put(new ResultMessage(ResultMessage.Result.DATA, null));
+                    resultQueue.put(new ResultMessage(ResultMessage.Result.data, data));
+                } else if (action.getAction() == ActionMessage.Action.stop) {
+                    resultQueue.put(new ResultMessage(ResultMessage.Result.data, null));
                     return false;
                 }
                 break;
@@ -62,7 +62,7 @@ public class EventProcessor {
         } catch (InterruptedException | IncompatibleThreadStateException e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
@@ -83,18 +83,18 @@ public class EventProcessor {
         try {
             while (true) {
                 var action = actionQueue.take();
-                if (action.getAction() == ActionMessage.Action.INPUT)
+                if (action.getAction() == ActionMessage.Action.input)
                     return (String) action.getValue();
-                if (action.getAction() == ActionMessage.Action.STOP) {
+                if (action.getAction() == ActionMessage.Action.stop) {
                     actionQueue.put(action);
                     return "";
                 }
-                resultQueue.put(new ResultMessage(ResultMessage.Result.LOCKED, "input locked, skipping action"));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.locked, "input locked, skipping action"));
             }
         } catch (InterruptedException e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
@@ -107,11 +107,11 @@ public class EventProcessor {
      */
     public void printHook(String text) {
         try {
-            resultQueue.put(new ResultMessage(ResultMessage.Result.PRINT, text));
+            resultQueue.put(new ResultMessage(ResultMessage.Result.print, text));
         } catch (InterruptedException e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }

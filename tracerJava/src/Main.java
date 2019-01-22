@@ -52,7 +52,7 @@ public class Main {
         while (true) {
             var results = tracerBroker.step();
             printResults(results);
-            if (results.get(results.size() - 1).getResult() == ResultMessage.Result.LOCKED) tracerBroker.input("");
+            if (results.get(results.size() - 1).getResult() == ResultMessage.Result.locked) tracerBroker.input("");
             if (!tracerBroker.isTracerRunning()) break;
         }
     }

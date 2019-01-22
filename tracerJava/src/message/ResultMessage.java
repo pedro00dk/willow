@@ -19,13 +19,13 @@ public class ResultMessage extends Message {
      * List of results of the tracer.
      */
     public enum Result {
-        STARTED,
-        ERROR,
-        DATA,
-        PRODUCT,
-        PRINT,
-        PROMPT,
-        LOCKED
+        started,
+        error,
+        data,
+        product,
+        print,
+        prompt,
+        locked
     }
 }
 

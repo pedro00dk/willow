@@ -19,10 +19,10 @@ public class ActionMessage extends Message {
      * List of available actions that can be sent to the tracer.
      */
     public enum Action {
-        START,
-        STOP,
-        STEP,
-        EVAL,
-        INPUT
+        start,
+        stop,
+        step,
+        eval,
+        input
     }
 }

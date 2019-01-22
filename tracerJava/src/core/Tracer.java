@@ -1,13 +1,10 @@
 package core;
 
-import com.sun.jdi.connect.IllegalConnectorArgumentsException;
-import com.sun.jdi.connect.VMStartException;
 import core.exec.Executor;
 import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
-import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -36,12 +33,12 @@ public class Tracer {
             actionQueue.take();
             project.generate();
             project.compile();
-            resultQueue.put(new ResultMessage(ResultMessage.Result.STARTED, null));
+            resultQueue.put(new ResultMessage(ResultMessage.Result.started, null));
             new Executor(project, eventProcessor).execute();
         } catch (Exception e) {
             var exceptionDump = ExceptionUtil.dump(e);
             try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.ERROR, exceptionDump));
+                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
