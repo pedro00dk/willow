@@ -72,17 +72,17 @@ export class ProcessClient implements Tracer {
         const next = await this.stdStreamsGenerator.next()
         if (next.value.source === 'stderr') {
             this.stop()
-            throw new Error(next.value.value)
+            throw new Error(`process stderr: ${next.value.value}`)
         }
         if (!next.value.value.startsWith('[')) {
             this.stop()
-            throw new Error(`non json array result: ${next.value.value}`)
+            throw new Error(`process stdout: non json array result (${next.value.value})`)
         }
         try {
             return JSON.parse(next.value.value) as Result[]
         } catch (error) {
             this.stop()
-            throw error
+            throw new SyntaxError(`process stdout: ${error.message}`)
         }
     }
 
