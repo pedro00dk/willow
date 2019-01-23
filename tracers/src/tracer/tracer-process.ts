@@ -21,7 +21,7 @@ export class TracerProcess implements Tracer {
     /**
      * Throws an exception if the tracer state is not in the expected states list.
      */
-    private requireState(...states: Array<typeof TracerProcess.prototype.state>) {
+    private requireState(...states: typeof TracerProcess.prototype.state[]) {
         if (!states.includes(this.state))
             throw new Error(`unexpected tracer state: ${this.state}, expected one of: ${states}`)
     }

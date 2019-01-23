@@ -5,6 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
+        "array-type": [true, "array"],
         "arrow-parens": false,
         "curly": false,
         "interface-name": false,
@@ -14,8 +15,8 @@
         "no-consecutive-blank-lines": false,
         "no-string-literal": false,
         "one-line": false,
-        "quotemark": false,
-        "semicolon": false,
+        "quotemark": [true, "single"],
+        "semicolon": [true, "never"],
         "trailing-comma": false
     },
     "rulesDirectory": [],

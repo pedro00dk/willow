@@ -42,7 +42,7 @@ export class MultiplexProcess {
      * Spawns the process.
      */
     spawn() {
-        if (this.isRunning()) throw new Error("process is running")
+        if (this.isRunning()) throw new Error('process is running')
 
         this.instance = cp.spawn(this.command, { shell: true })
         this.stdin = this.instance.stdin
@@ -71,7 +71,7 @@ export class MultiplexProcess {
      * Sends a string through process stdin, automatically appends a line break.
      */
     write(message: string) {
-        if (!this.isRunning()) throw new Error("process not running")
+        if (!this.isRunning()) throw new Error('process not running')
 
         this.stdin.write(`${message}\n`)
     }
@@ -80,7 +80,7 @@ export class MultiplexProcess {
      * Reads the next available line in the stderr or stdout.
      */
     async read() {
-        if (!this.isRunning()) throw new Error("process not running")
+        if (!this.isRunning()) throw new Error('process not running')
 
         return (await this.stdMux.next()).value
     }
@@ -98,7 +98,7 @@ export class MultiplexProcess {
      * Kills the process.
      */
     kill(force?: boolean) {
-        if (!this.isRunning()) throw new Error("process not running")
+        if (!this.isRunning()) throw new Error('process not running')
 
         this.instance.kill(force ? 'SIGKILL' : undefined)
     }
