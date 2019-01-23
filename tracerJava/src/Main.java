@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        var parser = ArgumentParsers.newFor("tracer").build().description("Tracer CLI parser").usage(null);
+        var parser = ArgumentParsers.newFor("tracer").build().description("Tracer CLI parser");
         parser.addArgument("code").nargs("?").help("The python code to parse");
         parser.addArgument("--name").setDefault("Main.java").help("The code name");
         parser.addArgument("--test").setDefault(false).action(new StoreTrueArgumentAction())
