@@ -3,6 +3,7 @@ import com.google.gson.GsonBuilder;
 import core.TracerBroker;
 import message.ResultMessage;
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.helper.HelpScreenException;
 import net.sourceforge.argparse4j.impl.action.StoreTrueArgumentAction;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -15,7 +16,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws ArgumentParserException, InterruptedException, IOException {
         var parser = ArgumentParsers.newFor("tracer").build().description("Tracer CLI parser");
         parser.addArgument("code").nargs("?").help("The python code to parse");
         parser.addArgument("--name").setDefault("Main.java").help("The code name");
@@ -30,7 +31,8 @@ public class Main {
         Namespace arguments;
         try {
             arguments = parser.parseArgs(args);
-        } catch (ArgumentParserException e) {
+        } catch (HelpScreenException e) {
+            // throws all ArgumentParserException except HelpScreens
             return;
         }
 
