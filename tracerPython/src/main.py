@@ -8,7 +8,7 @@ import message
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Tracer CLI parser')
+    parser = argparse.ArgumentParser(description='Tracer CLI parser', usage=argparse.SUPPRESS)
     parser.add_argument('code', nargs='?', help='The python code to parse')
     parser.add_argument('--name', default='<code>', help='The code name')
     parser.add_argument('--test', default=False, action='store_true', help='Run the test code, ignore any provided')
