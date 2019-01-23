@@ -75,8 +75,10 @@ public class Project {
     /**
      * Generates project directory and files.
      */
-    public void generate() throws IOException {
+    public void generate() throws InstantiationException, IOException {
         if (isGenerated()) throw new IllegalStateException("project already generated");
+        if (code.isBlank())
+            throw new InstantiationException("Compilation fail:\nUnable to create class from empty file.");
         projectPath = Files.createTempDirectory("");
         srcPath = Path.of(projectPath.toString(), DEFAULT_SRC_PATH);
         mainPath = Path.of(srcPath.toString(), filename);
