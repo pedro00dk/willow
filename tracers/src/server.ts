@@ -1,7 +1,6 @@
 import * as express from 'express'
 
-import { DefaultTracer } from './tracer/default-tracer'
-import { Tracer } from './tracer/tracer'
+import { Tracer, TracerWrapper } from './tracer/tracer'
 
 
 /**
@@ -83,7 +82,7 @@ export class TracerServer {
 
         const id = this.sessionIdGenerator++
         let tracer = this.suppliers.get(supplier)(code)
-        tracer = tracer instanceof DefaultTracer ? tracer : new DefaultTracer(tracer)
+        tracer = tracer instanceof TracerWrapper ? tracer : new TracerWrapper(tracer)
 
         this.sessions.set(id, { supplier, tracer })
         return { id, supplier }
