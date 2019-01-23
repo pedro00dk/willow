@@ -1,7 +1,5 @@
 import types
 
-from options import Options
-
 from .util import ExceptionUtil, FrameUtil
 
 
@@ -10,22 +8,19 @@ class Inspector:
     Inspects the received frame, building the stack and heap data and references.
     """
 
-    def __init__(self, options: Options):
+    def __init__(self):
         """
-        Initializes the Inspector with the received options.
+        Initializes the Inspector.
         """
-        self._options = options
+        pass
 
     def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
         """
         Inspects the application state. Analyses the stack and heap, collecting the objects.
         """
         stack_frames, stack_lines = self.inspect_stack(frame, exec_call_frame, True)
-        self._options.check_max_stacks(len(stack_lines))
-
         stack_references, heap_graph, user_classes = self.inspect_heap(stack_frames)
-        self._options.check_max_objects(len(heap_graph))
-
+        
         # args -> exception type, exception object, exception traceback (different from exception object __traceback__)
         args = args if event != 'exception' else ExceptionUtil.dump(args[1], args[2])
 
@@ -94,8 +89,6 @@ class Inspector:
         if isinstance(obj, (bool, int, float, type(None))):
             return obj
         if isinstance(obj, (complex, str)):
-            if isinstance(obj, str):
-                self._options.check_max_strings(len(obj))
             return repr(obj)
         if isinstance(obj, type):
             if obj.__module__ == module_name:
@@ -105,13 +98,10 @@ class Inspector:
         # known type
         if isinstance(obj, (list, tuple, set)):
             members = [*enumerate(obj)]
-            self._options.check_max_iterables(len(members))
         elif isinstance(obj, dict):
             members = [*obj.items()]
-            self._options.check_max_iterables(len(members))
         elif isinstance(obj, (*user_classes,)):
             members = [(name, value) for name, value in vars(obj).items() if not name.startswith('_')]
-            self._options.check_max_properties(len(members))
 
         # unknown type
         else:
