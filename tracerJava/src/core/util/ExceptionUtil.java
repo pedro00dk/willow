@@ -31,17 +31,32 @@ public final class ExceptionUtil {
         var tracebackWriter = new StringWriter();
         exception.printStackTrace(new PrintWriter(tracebackWriter, true));
 
-        var tracebackLines = Arrays.stream(tracebackWriter.toString().split("\n"))
+        var formattedTraceback = Arrays.stream(tracebackWriter.toString().split("\n"))
                 .map(l -> l + "\n")
                 .collect(Collectors.toList());
-        var formattedTraceback = IntStream.range(0, tracebackLines.size())
-                .filter(i -> !removeLines.contains(i) && !removeLines.contains(i - tracebackLines.size()))
-                .mapToObj(tracebackLines::get)
+        var filteredTraceback = IntStream.range(0, formattedTraceback.size())
+                .filter(i -> !removeLines.contains(i) && !removeLines.contains(i - formattedTraceback.size()))
+                .mapToObj(formattedTraceback::get)
                 .collect(Collectors.toList());
 
         return Map.ofEntries(
                 Map.entry("type", exception.getClass().getName()),
                 Map.entry("args", List.of(exception.getMessage() != null ? exception.getMessage() : "")),
+                Map.entry("traceback", filteredTraceback)
+        );
+    }
+
+    /**
+     * Creates the exception data form the received fields.
+     */
+    public static Map<String, Object> dump(String clazz, List<Object> args, String traceback) {
+        var formattedTraceback = Arrays.stream(traceback.split("\n"))
+                .map(l -> l + "\n")
+                .collect(Collectors.toList());
+
+        return Map.ofEntries(
+                Map.entry("type", clazz),
+                Map.entry("args", args),
                 Map.entry("traceback", formattedTraceback)
         );
     }

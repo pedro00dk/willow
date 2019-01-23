@@ -1,15 +1,13 @@
 package core;
 
 import com.sun.jdi.IncompatibleThreadStateException;
-import com.sun.jdi.event.Event;
-import com.sun.jdi.event.MethodEntryEvent;
-import com.sun.jdi.event.MethodExitEvent;
-import com.sun.jdi.event.StepEvent;
+import com.sun.jdi.event.*;
 import core.util.ExceptionUtil;
 import message.ActionMessage;
 import message.ResultMessage;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
@@ -20,6 +18,7 @@ public class EventProcessor {
     private BlockingQueue<ActionMessage> actionQueue;
     private BlockingQueue<ResultMessage> resultQueue;
     private Event previousEvent;
+    private Map<String, Object> previousEventData;
     private int inspectedEventCount;
     private Queue<String> inputCache;
 
@@ -32,6 +31,7 @@ public class EventProcessor {
 
         // frame common info
         previousEvent = null;
+        previousEventData = null;
         inspectedEventCount = 0;
 
         // hooks attributes
@@ -42,11 +42,12 @@ public class EventProcessor {
      * The code trace function. Returns if should continue tracing.
      */
     public boolean trace(Event event) {
-        if (!(event instanceof MethodEntryEvent) && !(event instanceof MethodExitEvent) &&
-                !(event instanceof StepEvent))
+        if (event instanceof VMStartEvent || event instanceof VMDeathEvent || event instanceof VMDisconnectEvent ||
+                event instanceof ThreadStartEvent
+                // uncatch exceptions are followed by a ThreadDeathEvent
+                || (event instanceof ThreadDeathEvent && !(previousEvent instanceof ExceptionEvent)))
             return true;
 
-        previousEvent = event;
         inspectedEventCount++;
 
         try {
@@ -61,7 +62,9 @@ public class EventProcessor {
 
                 // progressive actions
                 if (action.getName() == ActionMessage.Action.step) {
-                    var data = Inspector.inspect(event);
+                    var data = Inspector.inspect(event, previousEventData);
+                    previousEvent = event;
+                    previousEventData = data;
                     resultQueue.put(new ResultMessage(ResultMessage.Result.data, data));
                 } else if (action.getName() == ActionMessage.Action.stop) {
                     resultQueue.put(new ResultMessage(ResultMessage.Result.data, null));
@@ -78,6 +81,8 @@ public class EventProcessor {
             }
             return false;
         }
+
+
         return true;
     }
 

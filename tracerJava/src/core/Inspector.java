@@ -1,10 +1,9 @@
 package core;
 
 import com.sun.jdi.*;
-import com.sun.jdi.event.Event;
-import com.sun.jdi.event.MethodEntryEvent;
-import com.sun.jdi.event.MethodExitEvent;
+import com.sun.jdi.event.*;
 import core.util.EventUtil;
+import core.util.ExceptionUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,14 +20,23 @@ public final class Inspector {
     /**
      * Inspects the program state. Analyses the stack and heap, collecting the objects.
      */
-    public static Map<String, Object> inspect(Event event) throws IncompatibleThreadStateException {
+    public static Map<String, Object> inspect(Event event, Map<String, Object> previousEventData) throws IncompatibleThreadStateException {
         String eventType;
         if (event instanceof MethodEntryEvent) {
             eventType = "call";
-        } else if (event instanceof MethodExitEvent) {
+        } else if (event instanceof MethodExitEvent || event instanceof ThreadDeathEvent) {
             eventType = "return";
+        } else if (event instanceof ExceptionEvent) {
+            eventType = "exception";
         } else {
             eventType = "line";
+        }
+
+        if (event instanceof ThreadDeathEvent) {
+            previousEventData.put("name", eventType);
+            previousEventData.put("args", null);
+            previousEventData.put("finish", true);
+            return previousEventData;
         }
 
         var stackInspection = inspectStack(event);
@@ -45,11 +53,26 @@ public final class Inspector {
         //noinspection unchecked
         var userClasses = (Set<String>) heapInspection.get("userClasses");
 
+        Map<String, Object> args = null;
+        if (event instanceof ExceptionEvent) {
+            var exceptionEvent = (ExceptionEvent) event;
+            var exceptionMessage = ((StringReference) exceptionEvent.exception().getValue(
+                    exceptionEvent.exception().referenceType().fieldByName("detailMessage")
+            )).value();
+            args = ExceptionUtil.dump(
+                    exceptionEvent.exception().referenceType().name(),
+                    List.of(exceptionMessage),
+                    exceptionMessage
+            );
+        }
+        // ((ExceptionEvent) event).exception().referenceType()
+        //var args = eventType.equals("exception") ? null : null;
+
         var finish = eventType.equals("return") && stackFrames.size() == 1;
 
         var result = new HashMap<String, Object>(); // Map.of does not support null keys or values
         result.put("name", eventType);
-        result.put("args", null); // TODO get exception args
+        result.put("args", args);
         result.put("line", stackLines.get(0).get("line"));
         result.put("stackLines", stackLines);
         result.put("stackReferences", stackReferences);
