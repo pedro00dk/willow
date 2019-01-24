@@ -2,7 +2,6 @@ import * as cp from 'child_process'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 import { Writable } from 'stream'
-import { promisify } from 'util'
 
 
 /**

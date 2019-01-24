@@ -1,6 +1,7 @@
 import * as express from 'express'
 
-import { Tracer, TracerWrapper } from './tracer/tracer'
+import { Tracer } from './tracer/tracer'
+import { TracerWrapper } from './tracer/tracer-wrapper'
 
 
 /**
