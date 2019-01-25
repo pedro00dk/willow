@@ -17,7 +17,14 @@
         "one-line": false,
         "quotemark": [true, "single"],
         "semicolon": [true, "never"],
-        "trailing-comma": false
+        "trailing-comma": [
+            true,
+            {
+                "multiline": "never",
+                "singleline": "never"
+            }
+        ],
+        "variable-name": [true, "ban-keywords", "check-format", "allow-trailing-underscore"]
     },
     "rulesDirectory": [],
     "linterOptions": {

@@ -1,4 +1,6 @@
-import { MultiplexProcess, ProcessResponse } from '../process/multiplex-process'
+import * as rx from 'rxjs'
+import * as rxOps from 'rxjs/operators'
+import { ObservableProcess, StreamLine } from '../process/observable-process'
 import { isErrorResult, isLastResult, Result } from '../result'
 import { Tracer } from './tracer'
 
@@ -7,14 +9,15 @@ import { Tracer } from './tracer'
  * Connects to a tracer process.
  */
 export class TracerProcess implements Tracer {
-    private multiplexProcess: MultiplexProcess
+    private process: ObservableProcess
+    private results: rx.Observable<Result[]>
     private state: 'created' | 'started' | 'stopped'
 
     /**
      * Initializes the client with the command to spawn the process.
      */
     constructor(command: string) {
-        this.multiplexProcess = new MultiplexProcess(command)
+        this.process = new ObservableProcess(command)
         this.state = 'created'
     }
 
@@ -26,26 +29,6 @@ export class TracerProcess implements Tracer {
             throw new Error(`unexpected tracer state: ${this.state}, expected one of: ${states}`)
     }
 
-    /**
-     * Checks if the process response are tracer results.
-     */
-    private processResponseAsTracerResults(response: ProcessResponse) {
-        if (response.source === 'stderr') {
-            this.stop()
-            throw new Error(`process stderr: ${response.value}`)
-        }
-        if (!response.value.startsWith('[')) {
-            this.stop()
-            throw new Error(`process stdout: non json array result (${response.value})`)
-        }
-        try {
-            return JSON.parse(response.value) as Result[]
-        } catch (error) {
-            this.stop()
-            throw new SyntaxError(`process stdout: ${error.message}`)
-        }
-    }
-
     getState() {
         return this.state
     }
@@ -53,11 +36,20 @@ export class TracerProcess implements Tracer {
     async start() {
         this.requireState('created')
 
-        this.multiplexProcess.spawn()
-        this.processResponseAsTracerResults(await this.multiplexProcess.read())
+        this.process.spawn()
+        this.results = this.process.stdMux
+            .pipe(
+                rxOps.map(streamLine => {
+                    if (streamLine.stream === 'stderr') throw new Error(`process stderr: ${streamLine.line}`)
+                    if (!streamLine.line.startsWith('[')) throw new Error(`process stdout: ${streamLine.line}`)
+                    try { return JSON.parse(streamLine.line) as Result[] }
+                    catch (error) { throw new SyntaxError(`process stdout: ${error.message}`) }
+                })
+            )
+        await this.results.pipe(rxOps.take(1)).toPromise()
 
-        const response = await this.multiplexProcess.question('start')
-        const results = this.processResponseAsTracerResults(response)
+        this.process.stdin.next('start')
+        const results = await this.results.pipe(rxOps.take(1)).toPromise()
         this.state = 'started'
         if (isErrorResult(results[results.length - 1])) this.stop()
         return results
@@ -67,25 +59,23 @@ export class TracerProcess implements Tracer {
         this.requireState('started', 'created')
 
         try {
-            this.multiplexProcess.write('stop')
-            this.multiplexProcess.kill()
-        }
-        catch (error) { /* ignored */ }
+            this.process.stdin.next('stop')
+            this.process.stdin.complete()
+        } catch (error) { /* ignore */ }
         this.state = 'stopped'
-        this.multiplexProcess = null
     }
 
     input(input: string) {
         this.requireState('started')
 
-        this.multiplexProcess.write(`input ${input}`)
+        this.process.stdin.next(`input ${input}`)
     }
 
     async step() {
         this.requireState('started')
 
-        const response = await this.multiplexProcess.question('step')
-        const results = this.processResponseAsTracerResults(response)
+        this.process.stdin.next('step')
+        const results = await this.results.pipe(rxOps.take(1)).toPromise()
         if (isLastResult(results[results.length - 1]) || isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
