@@ -194,7 +194,8 @@ public final class Inspector {
 
             // common objects
             var reference = objRef.uniqueID();
-            var type = objRef.referenceType().name();
+            var genericType = "";
+            var languageType = objRef.referenceType().name();
             List<Map.Entry> members = null;
 
             // arrays
@@ -205,6 +206,7 @@ public final class Inspector {
                 members = IntStream.range(0, arrayLength)
                         .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
                         .collect(Collectors.toList());
+                genericType = "list";
             }
 
             try {
@@ -223,6 +225,7 @@ public final class Inspector {
                     members = IntStream.range(0, arrayLength)
                             .mapToObj(i -> new HashMap.SimpleEntry<>(i, arrayValues.get(i)))
                             .collect(Collectors.toList());
+                    genericType = List.class.isAssignableFrom(objClass) ? "list" : "set";
 
                     // Maps
                 } else if (Map.class.isAssignableFrom(objClass)) {
@@ -265,6 +268,7 @@ public final class Inspector {
                                     }
                             )
                             .collect(Collectors.toList());
+                    genericType = "map";
                 }
             } catch (ClassNotFoundException | InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException | RuntimeException e) {
                 // ignore errors
@@ -279,6 +283,7 @@ public final class Inspector {
                 members = orderedFields.stream()
                         .map(f -> new HashMap.SimpleEntry<>(f.name(), fieldsValues.get(f)))
                         .collect(Collectors.toList());
+                genericType = "udo";
             }
 
             if (members != null) {
@@ -291,11 +296,15 @@ public final class Inspector {
                         .collect(Collectors.toList());
                 heapGraph.put(
                         reference,
-                        Map.ofEntries(Map.entry("type", type), Map.entry("members", membersInspections))
+                        Map.ofEntries(
+                                Map.entry("type", genericType),
+                                Map.entry("languageType", languageType),
+                                Map.entry("members", membersInspections)
+                        )
                 );
                 return List.of(reference);
             } else {
-                return type;
+                return languageType;
             }
         }
         return "unknown element";
