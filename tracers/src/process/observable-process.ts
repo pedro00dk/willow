@@ -6,7 +6,7 @@ import * as rxOps from 'rxjs/operators'
 /**
  * Process stream line.
  */
-export type StreamLine = { stream: 'stdout' | 'stderr', line: string }
+export type StreamLine = { source: 'stdout' | 'stderr', line: string }
 
 /**
  * Creates and connects to a process providing easy access to multiplexed formatted streams.
@@ -39,12 +39,15 @@ export class ObservableProcess {
     }
 
     /**
-     * Spawns the process.
+     * Spawns the process and initializes the streams.
      */
     spawn() {
         if (this.isRunning()) throw new Error('process is running')
 
         this.instance = cp.spawn(this.command, { shell: true })
+
+        const stopObservable = rx.merge(rx.fromEvent(this.instance, 'error'), rx.fromEvent(this.instance, 'exit'))
+
         this.stdin_ = new rx.Subject()
         this.stdin_
             .pipe(rxOps.map(input => `${input}\n`))
@@ -53,6 +56,7 @@ export class ObservableProcess {
                 error => { if (!this.instance.killed) this.instance.kill() },
                 () => { if (!this.instance.killed) this.instance.kill() }
             )
+        stopObservable.subscribe(next => this.stdin.complete())
 
         const unknownObservableToLines =
             (observable: rx.Observable<unknown>) =>
@@ -68,15 +72,13 @@ export class ObservableProcess {
                         rxOps.map(lineParts => lineParts.join(''))
                     )
 
-        const errorObservable = rx.fromEvent(this.instance, 'error')
-        const exitObservable = rx.fromEvent(this.instance, 'exit')
         this.stdout_ = unknownObservableToLines(rx.fromEvent(this.instance.stdout, 'data'))
-            .pipe(rxOps.takeUntil(errorObservable), rxOps.takeUntil(exitObservable))
+            .pipe(rxOps.takeUntil(stopObservable))
         this.stderr_ = unknownObservableToLines(rx.fromEvent(this.instance.stderr, 'data'))
-            .pipe(rxOps.takeUntil(errorObservable), rxOps.takeUntil(exitObservable))
+            .pipe(rxOps.takeUntil(stopObservable))
         this.stdMux_ = rx.merge(
-            this.stdout_.pipe(rxOps.map(line => ({ source: 'stdout', line } as unknown as StreamLine))),
-            this.stderr_.pipe(rxOps.map(line => ({ source: 'stderr', line } as unknown as StreamLine)))
+            this.stdout_.pipe(rxOps.map(line => ({ source: 'stdout', line } as StreamLine))),
+            this.stderr_.pipe(rxOps.map(line => ({ source: 'stderr', line } as StreamLine)))
         )
     }
 }

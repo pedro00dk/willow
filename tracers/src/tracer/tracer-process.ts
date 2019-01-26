@@ -29,6 +29,31 @@ export class TracerProcess implements Tracer {
             throw new Error(`unexpected tracer state: ${this.state}, expected one of: ${states}`)
     }
 
+    /**
+     * Spawns the tracer process and configures the observables to transform the input and check for errors.
+     */
+    private async spawn() {
+        this.process.spawn()
+        this.results = this.process.stdMux
+            .pipe(
+                rxOps.map(streamLine => {
+                    if (streamLine.source === 'stderr') throw new Error(`process stderr: ${streamLine.line}`)
+                    if (!streamLine.line.startsWith('[')) throw new Error(`process stdout: ${streamLine.line}`)
+                    try { return JSON.parse(streamLine.line) as Result[] }
+                    catch (error) { throw new SyntaxError(`process stdout: ${error.message}`) }
+                })
+            )
+        this.results
+            .pipe(
+                rxOps.flatMap(results => rx.from(results)),
+                rxOps.filter(result => isErrorResult(result) || isLastResult(result)),
+                rxOps.take(1)
+            )
+            .subscribe(undefined, error => this.stop(), () => this.stop())
+
+        await this.results.pipe(rxOps.take(1)).toPromise()
+    }
+
     getState() {
         return this.state
     }
@@ -36,22 +61,10 @@ export class TracerProcess implements Tracer {
     async start() {
         this.requireState('created')
 
-        this.process.spawn()
-        this.results = this.process.stdMux
-            .pipe(
-                rxOps.map(streamLine => {
-                    if (streamLine.stream === 'stderr') throw new Error(`process stderr: ${streamLine.line}`)
-                    if (!streamLine.line.startsWith('[')) throw new Error(`process stdout: ${streamLine.line}`)
-                    try { return JSON.parse(streamLine.line) as Result[] }
-                    catch (error) { throw new SyntaxError(`process stdout: ${error.message}`) }
-                })
-            )
-        await this.results.pipe(rxOps.take(1)).toPromise()
-
+        await this.spawn()
         this.process.stdin.next('start')
         const results = await this.results.pipe(rxOps.take(1)).toPromise()
         this.state = 'started'
-        if (isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
 
@@ -76,7 +89,6 @@ export class TracerProcess implements Tracer {
 
         this.process.stdin.next('step')
         const results = await this.results.pipe(rxOps.take(1)).toPromise()
-        if (isLastResult(results[results.length - 1]) || isErrorResult(results[results.length - 1])) this.stop()
         return results
     }
 }
