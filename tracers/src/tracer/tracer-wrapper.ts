@@ -1,5 +1,5 @@
 import { Event, Result } from '../result'
-import { Tracer } from './tracer'
+import { applyStepPreprocessorStack, StepProcessor, Tracer } from './tracer'
 
 
 /**
@@ -7,6 +7,7 @@ import { Tracer } from './tracer'
  */
 export class TracerWrapper implements Tracer {
     private internalTracer: Tracer
+    private processors: StepProcessor[]
     private breakpoints: Set<number>
     private lastDataResult: Result
 
@@ -15,6 +16,7 @@ export class TracerWrapper implements Tracer {
      */
     constructor(internalTracer: Tracer) {
         this.internalTracer = internalTracer
+        this.processors = []
         this.breakpoints = new Set()
     }
 
@@ -43,7 +45,7 @@ export class TracerWrapper implements Tracer {
     }
 
     async step() {
-        const results = await this.internalTracer.step()
+        const results = await applyStepPreprocessorStack(this.processors, () => this.internalTracer.step())
         this.updateLastDataResult(results)
         return results
     }
@@ -94,6 +96,11 @@ export class TracerWrapper implements Tracer {
 
     setBreakpoint(line: number) {
         if (line < 0) throw new Error('line is negative')
+
         this.breakpoints.add(line)
+    }
+
+    addStepProcessor(processor: StepProcessor) {
+        this.processors.push(processor)
     }
 }

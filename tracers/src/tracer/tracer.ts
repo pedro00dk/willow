@@ -56,4 +56,27 @@ export interface Tracer {
      * Sets a breakpoint in a line.
      */
     setBreakpoint?(line: number): void
+
+    /**
+     * Adds a step processor to the step call.
+     */
+    addStepProcessor?(processor: StepProcessor): void
+}
+
+/**
+ * Interface for step processor objects.
+ */
+export interface StepProcessor {
+
+    /**
+     * Consumes the base step function to make any type of processes with the function results.
+     */
+    consume(step: () => Promise<Result[]>): Promise<Result[]>
+}
+
+/**
+ * Applies to all processors the received step function.
+ */
+export function applyStepPreprocessorStack(processors: StepProcessor[], step: () => Promise<Result[]>) {
+    return processors.reduceRight((acc, processor) => () => processor.consume(acc), step)()
 }
