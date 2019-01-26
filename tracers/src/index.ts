@@ -1,5 +1,4 @@
 import * as yargs from 'yargs'
-
 import { TracerServer } from './server'
 import { Tracer } from './tracer/tracer'
 import { TracerProcess } from './tracer/tracer-process'

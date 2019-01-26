@@ -35,7 +35,8 @@ export type ScopeReferencesType = ScopeReferenceType[]
 export type ScopeReferenceType = [string, AnyType]
 
 export type HeapGraphType = Map<string, HeapObjectType>
-export type HeapObjectType = { type: string, members: HeapObjectMemberType[] }
+export type HeapObjectType = { type: string, languageType: string, members: HeapObjectMemberType[] }
+export type GenericType = 'list' | 'set' | 'map' | 'udo' // udo => user defined object
 export type HeapObjectMemberType = [AnyType, AnyType]
 
 export type AnyType = LiteralType | ReferenceType

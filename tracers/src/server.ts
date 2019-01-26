@@ -1,5 +1,4 @@
 import * as express from 'express'
-
 import { Tracer } from './tracer/tracer'
 import { TracerWrapper } from './tracer/tracer-wrapper'
 
