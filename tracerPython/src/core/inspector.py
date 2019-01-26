@@ -20,7 +20,7 @@ class Inspector:
         """
         stack_frames, stack_lines = self.inspect_stack(frame, exec_call_frame, True)
         stack_references, heap_graph, user_classes = self.inspect_heap(stack_frames)
-        
+
         # args -> exception type, exception object, exception traceback (different from exception object __traceback__)
         args = args if event != 'exception' else ExceptionUtil.dump(args[1], args[2])
 
@@ -96,12 +96,17 @@ class Inspector:
             return obj.__name__
 
         # known type
+        generic_type = None
+
         if isinstance(obj, (list, tuple, set)):
             members = [*enumerate(obj)]
+            generic_type = 'list' if isinstance(obj, (list, tuple)) else 'set'
         elif isinstance(obj, dict):
             members = [*obj.items()]
+            generic_type = 'map'
         elif isinstance(obj, (*user_classes,)):
             members = [(name, value) for name, value in vars(obj).items() if not name.startswith('_')]
+            generic_type = 'udo'
 
         # unknown type
         else:
@@ -121,7 +126,9 @@ class Inspector:
             ]
 
             # update with all data
-            heap_graph[reference] = {'type': type(obj).__name__, 'members': members_inspections}
+            heap_graph[reference] = {
+                'type': generic_type, 'languageType': type(obj).__name__, 'members': members_inspections
+            }
             return reference,
 
         # unknown object type processing
