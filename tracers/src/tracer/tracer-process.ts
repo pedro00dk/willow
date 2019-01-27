@@ -49,7 +49,7 @@ export class TracerProcess implements Tracer {
                 rxOps.filter(result => isErrorResult(result) || isLastResult(result)),
                 rxOps.take(1)
             )
-            .subscribe(undefined, error => this.stop(), () => this.stop())
+            .subscribe(value => this.stop())
 
         await this.results.pipe(rxOps.take(1)).toPromise()
     }
