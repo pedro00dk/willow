@@ -61,14 +61,16 @@ public class Executor {
             try {
                 vm.resume();
 
+                var eventSet = vm.eventQueue().remove();
+                /*
+                // input hook TODO check better strategies (not working well)
                 var eventSet = vm.eventQueue().remove(100);
-
-                // input hook TODO check better strategies
                 while (eventSet == null) {
                     vmStdin.write((eventProcessor.inputHook() + "\n").getBytes());
                     vmStdin.flush();
                     eventSet = vm.eventQueue().remove(100);
                 }
+                */
 
                 for (var event : eventSet) {
 

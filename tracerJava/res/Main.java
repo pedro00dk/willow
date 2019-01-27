@@ -38,9 +38,9 @@ public class Main {
         System.out.println(ccc);
         System.out.println(cci);
 
-        var scan = new Scanner(System.in);
-        var iii = scan.nextLine();
-        System.out.println(iii);
+        // var scan = new Scanner(System.in);
+        // var iii = scan.nextLine();
+        // System.out.println(iii);
 
         var fff = fib(4);
 
