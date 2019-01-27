@@ -61,21 +61,21 @@ export class TracerProcess implements Tracer {
     async start() {
         this.requireState('created')
 
+        this.state = 'started'
         await this.spawn()
         this.process.stdin.next('start')
         const results = await this.results.pipe(rxOps.take(1)).toPromise()
-        this.state = 'started'
         return results
     }
 
     stop() {
         this.requireState('started', 'created')
 
+        this.state = 'stopped'
         try {
             this.process.stdin.next('stop')
             this.process.stdin.complete()
         } catch (error) { /* ignore */ }
-        this.state = 'stopped'
     }
 
     input(input: string) {
