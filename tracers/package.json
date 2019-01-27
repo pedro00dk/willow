@@ -27,6 +27,7 @@
 
         "start": "tsc && node ./dist/index.js",
         "start-tracers": "npm run start -- --tracer java 'cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main {}' --tracer python 'cd ./PythonTracer/ && python -OO ./src/main.py {}'",
+        "start-tracers-test": "npm run start -- --tracer java 'cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main --test {}' --tracer python 'cd ./PythonTracer/ && python -OO ./src/main.py --test {}'",
 
         "docker-tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag tracer:java -- ./JavaTracer/",
         "docker-tracer-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag tracer:python -- ./PythonTracer/",
