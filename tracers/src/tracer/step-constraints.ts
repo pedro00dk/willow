@@ -54,8 +54,12 @@ export class StepConstraints implements StepProcessor {
         if (Object.keys(event.heapGraph).length > this.heapSize)
             throw new Error(`tracer constraint: max heap size exceeded ${this.heapSize}`)
 
-        for (const value of queryValueTypes(event, 'string')) if ((value as string).length > this.stringLength)
-            throw new Error(`tracer constraint: max string length exceeded ${this.stringLength}`)
+        for (const value of queryValueTypes(event, 'string')) {
+            const stringValue = value as string
+            if ((stringValue.startsWith('\'') || stringValue.startsWith('"')) &&
+                stringValue.length > this.stringLength + 2)
+                throw new Error(`tracer constraint: max string length exceeded ${this.stringLength}`)
+        }
 
         for (const value of queryReferenceTypes(event, 'list', 'map', 'set'))
             if ((value as HeapObjectType).members.length > this.iterableLength)

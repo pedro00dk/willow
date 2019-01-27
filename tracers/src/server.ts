@@ -84,7 +84,7 @@ export class TracerServer {
         const id = this.sessionIdGenerator++
         let tracer = this.suppliers.get(supplier)(code)
         tracer = tracer instanceof TracerWrapper ? tracer : new TracerWrapper(tracer)
-        tracer.addStepProcessor(new StepConstraints(1000, 50, 50, 100, 100, 10))
+        tracer.addStepProcessor(new StepConstraints(1000, 50, 50, 20, 100, 10))
 
         this.sessions.set(id, { supplier, tracer })
         return { id, supplier }
