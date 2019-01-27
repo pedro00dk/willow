@@ -171,7 +171,7 @@ public class Executor {
         var stepRequests = classNames.stream()
                 .map(c -> {
                     var stepRequest = vm.eventRequestManager()
-                            .createStepRequest(mainThread, StepRequest.STEP_MIN, StepRequest.STEP_INTO);
+                            .createStepRequest(mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
                     stepRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                     stepRequest.addClassFilter(c);
                     return stepRequest;
