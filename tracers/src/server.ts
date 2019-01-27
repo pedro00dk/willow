@@ -1,4 +1,5 @@
 import * as express from 'express'
+import { StepConstraints } from './tracer/step-constraints'
 import { Tracer } from './tracer/tracer'
 import { TracerWrapper } from './tracer/tracer-wrapper'
 
@@ -17,7 +18,7 @@ export class TracerServer {
      * Creates the server with the port and the tracer suppliers.
      */
     constructor(port: number, suppliers: Map<string, (code: string) => Tracer>) {
-        if (port < 0 || port > 65355) throw new Error('Illegal port number')
+        if (port < 0 || port > 65355) throw new Error('illegal port number')
 
         this.server = express()
         this.server.use(express.json())
@@ -42,7 +43,7 @@ export class TracerServer {
                 const supplier = request.body['supplier'] as string
                 const code = request.body['code'] as string
                 try { response.send(this.createSession(supplier, code)) }
-                catch (error) { response.status(400).send(error.message) }
+                catch (error) { response.status(400).send(error.stack) }
             }
         )
         this.server.post(
@@ -52,7 +53,7 @@ export class TracerServer {
                 const action = request.body['action'] as string
                 const args = request.body['args'] as any[]
                 try { response.send(await this.executeOnSession(id, action, args)) }
-                catch (error) { response.status(400).send(error.message) }
+                catch (error) { response.status(400).send(error.stack) }
             }
         )
     }
@@ -83,6 +84,7 @@ export class TracerServer {
         const id = this.sessionIdGenerator++
         let tracer = this.suppliers.get(supplier)(code)
         tracer = tracer instanceof TracerWrapper ? tracer : new TracerWrapper(tracer)
+        tracer.addStepProcessor(new StepConstraints(1000, 50, 50, 20, 100, 10))
 
         this.sessions.set(id, { supplier, tracer })
         return { id, supplier }
