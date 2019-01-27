@@ -1,0 +1,27 @@
+{
+    "name": "willow_server",
+    "version": "0.0.1",
+    "author": {
+        "name": "Pedro Henrique",
+        "email": "pedro00dk@gmail.com"
+    },
+    "license": "ISC",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "*",
+        "@types/react": "*",
+        "@types/react-dom": "*",
+        "parcel-bundler": "*",
+        "tslint": "*",
+        "typescript": "*"
+    },
+    "dependencies": {
+        "react": "next",
+        "react-dom": "next"
+    },
+    "scripts": {
+        "lint": "tslint --config ./tslint.json --project ./package.json",
+        "build": "parcel build --no-cache --no-source-maps --public-url ./ --out-dir ./dist/build -- ./public/index.html",
+        "start": "parcel serve --no-cache --port 8000 -- ./public/index.html"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["dom", "esnext"],
+        "jsx": "react",
+        "downlevelIteration": true,
+        "sourceMap": true,
+        "outDir": "./dist/"
+    }
+}
