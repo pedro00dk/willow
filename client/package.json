@@ -8,6 +8,7 @@
     "license": "ISC",
     "main": "index.ts",
     "devDependencies": {
+        "@types/classnames": "*",
         "@types/node": "*",
         "@types/react": "*",
         "@types/react-dom": "*",
@@ -16,6 +17,8 @@
         "typescript": "*"
     },
     "dependencies": {
+        "classnames": "*",
+        "emotion": "*",
         "react": "next",
         "react-dom": "next"
     },
