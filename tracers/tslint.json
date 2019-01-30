@@ -13,6 +13,7 @@
         "member-access": [true, "no-public"],
         "member-ordering": false,
         "no-consecutive-blank-lines": false,
+        "no-null-keyword": true,
         "no-shadowed-variable": false,
         "no-string-literal": false,
         "one-line": false,
@@ -25,10 +26,7 @@
                 "singleline": "never"
             }
         ],
+        "triple-equals": [true, "allow-undefined-check"],
         "variable-name": [true, "ban-keywords", "check-format", "allow-trailing-underscore"]
-    },
-    "rulesDirectory": [],
-    "linterOptions": {
-        "exclude": []
     }
 }

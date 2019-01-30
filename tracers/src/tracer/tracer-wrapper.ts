@@ -82,7 +82,7 @@ export class TracerWrapper implements Tracer {
         while (true) {
             const stepResults = await this.step()
             results.push(...stepResults)
-            const currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : null
+            const currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : undefined
             if (this.getState() === 'stopped' || this.breakpoints.has(currentLine) ||
                 results[results.length - 1].name === 'locked')
                 break

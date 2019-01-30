@@ -77,8 +77,8 @@ export class Server {
      * Creates a new tracer session with the received supplier and code.
      */
     createSession(supplier: string, code: string) {
-        if (supplier == null) throw new Error('supplier not found or wrong type')
-        if (code == null) throw new Error('code not found or wrong type')
+        if (supplier == undefined) throw new Error('supplier not found or wrong type')
+        if (code == undefined) throw new Error('code not found or wrong type')
         if (!this.suppliers.has(supplier)) throw new Error(`supplier ${supplier} not found`)
 
         const id = this.sessionIdGenerator++
@@ -94,8 +94,8 @@ export class Server {
      * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
      */
     async executeOnSession(id: number, action: string, args: any[]) {
-        if (id == null || !this.sessions.has(id)) throw new Error('session id not found or wrong type')
-        if (action == null) throw new Error('action not found or wrong type')
+        if (id == undefined || !this.sessions.has(id)) throw new Error('session id not found or wrong type')
+        if (action == undefined) throw new Error('action not found or wrong type')
 
         const tracer = this.sessions.get(id).tracer
         let result: any
@@ -105,7 +105,7 @@ export class Server {
             else if (action === 'stop') result = tracer.stop()
             else if (action === 'input') {
                 const data = args[0] as string
-                if (data == null) throw new Error('input not found in args or wrong type')
+                if (data == undefined) throw new Error('input not found in args or wrong type')
                 result = tracer.input(data)
             } else if (action === 'step') result = await tracer.step()
             else if (action === 'stepOver') result = await tracer.stepOver()
@@ -114,7 +114,7 @@ export class Server {
             else if (action === 'getBreakpoints') result = tracer.getBreakpoints()
             else if (action === 'setBreakpoints') {
                 const line = args[0] as number
-                if (line == null) throw new Error('line not found in args or wrong type')
+                if (line == undefined) throw new Error('line not found in args or wrong type')
                 result = tracer.setBreakpoint(line)
             } else throw new Error('action not found or wrong type')
         } catch (error) {
