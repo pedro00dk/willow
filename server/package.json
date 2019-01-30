@@ -10,11 +10,14 @@
     "devDependencies": {
         "@types/jest": "*",
         "@types/node": "*",
+        "@types/yargs": "*",
         "jest": "*",
         "tslint": "*",
         "typescript": "*"
     },
-    "dependencies": {},
+    "dependencies": {
+        "yargs": "*"
+    },
     "config": {
         "main": "./dist/src/index.js",
         "test": "./dist/test"
