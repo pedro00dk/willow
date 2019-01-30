@@ -6,7 +6,7 @@
         "email": "pedro00dk@gmail.com"
     },
     "license": "ISC",
-    "main": "index.ts",
+    "main": "./src/index.ts",
     "devDependencies": {
         "@types/express": "*",
         "@types/node": "*",
@@ -19,21 +19,28 @@
         "rxjs": "*",
         "yargs": "*"
     },
+    "config": {
+        "main": "./dist/index.js",
+        "java-supplier": "cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main {}",
+        "java-supplier-test": "cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main --test {}",
+        "python-supplier": "cd ./PythonTracer/ && python -OO ./src/main.py {}",
+        "python-supplier-test": "cd ./PythonTracer/ && python -OO ./src/main.py --test {}",
+        "java-docker-image": "tracer:java",
+        "python-docker-image": "tracer:python",
+        "tracer-docker-image": "tracer:server"
+    },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
-
-        "debug": "tsc && node --nolazy --inspect-brk=9229 ./dist/index.js",
-        "debug-tracers": "npm run debug -- --tracer java 'cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main {}' --tracer python 'cd ./PythonTracer/ && python -OO ./src/main.py {}'",
-
-        "start": "tsc && node ./dist/index.js",
-        "start-tracers": "npm run start -- --tracer java 'cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main {}' --tracer python 'cd ./PythonTracer/ && python -OO ./src/main.py {}'",
-        "start-tracers-test": "npm run start -- --tracer java 'cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main --test {}' --tracer python 'cd ./PythonTracer/ && python -OO ./src/main.py --test {}'",
-
-        "docker-tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag tracer:java -- ./JavaTracer/",
-        "docker-tracer-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag tracer:python -- ./PythonTracer/",
-        "docker-tracer-server-build": "docker image build --tag tracer:server -- ./",
+        "debug": "tsc && node --nolazy --inspect-brk=9229 $npm_package_config_main",
+        "debug-tracers": "npm run debug -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
+        "start": "tsc && node ./dist/src/index.js",
+        "start-tracers": "npm run start -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
+        "start-tracers-test": "npm run start -- --tracer java \"$npm_package_config_java_supplier_test\" --tracer python \"$npm_package_config_python_supplier_test\"",
+        "docker-tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag $npm_package_config_java_docker_image -- ./JavaTracer/",
+        "docker-tracer-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag $npm_package_config_python_docker_image -- ./PythonTracer/",
+        "docker-tracer-server-build": "docker image build --tag npm_package_config_tracer_docker_image -- ./",
         "docker-build": "npm run docker-tracer-java-build && npm run docker-tracer-python-build && npm run docker-tracer-server-build",
-        "docker-start": "docker container run --rm --interactive --tty --publish 8000:8000 -- tracer:server --",
-        "docker-start-tracers": "docker container run --rm --interactive --tty --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock -- tracer:server -- --tracer java 'docker run --rm -i tracer:java {}' --tracer python 'docker run --rm -i tracer:python {}'"
+        "docker-start": "docker container run --rm --interactive --tty --publish 8000:8000 -- $npm_package_config_tracer_docker_image --",
+        "docker-start-tracers": "docker container run --rm --interactive --tty --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock -- tracer:server -- --tracer java \"docker run --rm -i $npm_package_config_java_docker_image {}\" --tracer python \"docker run --rm -i npm_package_config_python_docker_image {}\""
     }
 }

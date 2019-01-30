@@ -24,7 +24,7 @@ const argumentS = parser.argv
 
 const port = argumentS.port
 const suppliers = createTracerSuppliers(argumentS.tracer)
-const server = startServer(port, suppliers)
+startServer(port, suppliers)
 
 
 /**
@@ -47,5 +47,5 @@ export function createTracerSuppliers(tracers: string[]) {
  * Starts the server with the received suppliers and listen to the received port.
  */
 export function startServer(port: number, suppliers: Map<string, (code: string) => Tracer>) {
-    return new Server(port, suppliers).listen()
+    new Server(port, suppliers).listen()
 }
