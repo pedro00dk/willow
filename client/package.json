@@ -17,6 +17,7 @@
         "typescript": "*"
     },
     "dependencies": {
+        "brace": "*",
         "classnames": "*",
         "emotion": "*",
         "react": "next",
