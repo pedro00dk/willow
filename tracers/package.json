@@ -37,7 +37,7 @@
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit $npm_package_config_test",
         "debug": "tsc && node --nolazy --inspect-brk=9229 $npm_package_config_main",
         "debug-tracers": "npm run debug -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
-        "start": "tsc && node ./dist/src/index.js",
+        "start": "tsc && node $npm_package_config_main",
         "start-tracers": "npm run start -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
         "start-tracers-test": "npm run start -- --tracer java \"$npm_package_config_java_supplier_test\" --tracer python \"$npm_package_config_python_supplier_test\"",
         "docker-tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag $npm_package_config_java_docker_image -- ./JavaTracer/",
