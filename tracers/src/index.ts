@@ -4,28 +4,29 @@ import { Tracer } from './tracer/tracer'
 import { TracerProcess } from './tracer/tracer-process'
 
 
-const parser = yargs
-    .usage('Http API for CLI tracers') // not being used as usage, but description
-    .alias('h', 'help')
-    .hide('version')
-    .option('port', { default: 8000, description: 'Set the server port' })
-    .option(
-        'tracer',
-        {
-            // type: 'array', type: 'string'
-            array: true,
-            description: 'Tracer <name> <spawn-cmd{<script>}>',
-            nargs: 2,
-            string: true
-        }
-    )
+function main() {
+    const parser = yargs
+        .usage('Http API for CLI tracers') // not being used as usage, but description
+        .alias('h', 'help')
+        .hide('version')
+        .option('port', { default: 8000, description: 'Set the server port' })
+        .option(
+            'tracer',
+            {
+                // type: 'array', type: 'string'
+                array: true,
+                description: 'Tracer <name> <spawn-cmd{<script>}>',
+                nargs: 2,
+                string: true
+            }
+        )
 
-const argumentS = parser.argv
+    const argumentS = parser.argv
 
-const port = argumentS.port
-const suppliers = createTracerSuppliers(argumentS.tracer)
-startServer(port, suppliers)
-
+    const port = argumentS.port
+    const suppliers = createTracerSuppliers(argumentS.tracer)
+    startServer(port, suppliers)
+}
 
 /**
  * Creates tracers from string args, every pair or elements of the array is a tracer name and its command.
@@ -48,4 +49,10 @@ export function createTracerSuppliers(tracers: string[]) {
  */
 export function startServer(port: number, suppliers: Map<string, (code: string) => Tracer>) {
     new Server(port, suppliers).listen()
+}
+
+
+if (!module.parent) {
+    // called as entry point
+    main()
 }
