@@ -1,4 +1,5 @@
 import * as yargs from 'yargs'
+import { Server } from './server'
 
 
 function main() {
@@ -7,14 +8,23 @@ function main() {
         .alias('h', 'help')
         .hide('version')
         .option('port', { default: 8000, description: 'Set the server port' })
-        .option('tracers', { description: 'Address of the tracer server', type: 'string' })
+        .option('secret', { demandOption: true, description: 'The secret for client sessions', type: 'string' })
+        .option('tracers', { demandOption: true, description: 'Address of the tracer server', type: 'string' })
 
     const argumentS = parser.argv
 
     const port = argumentS.port
+    const secret = argumentS.secret
     const tracerServerAddress = argumentS.tracers
 
-    console.log(port, tracerServerAddress)
+    startServer(port, secret)
+}
+
+/**
+ * Starts the server with the received port and secret.
+ */
+export function startServer(port: number, secret: string) {
+    new Server(port, secret).listen()
 }
 
 

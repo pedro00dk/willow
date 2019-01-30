@@ -8,6 +8,8 @@
     "license": "ISC",
     "main": "./src/index.ts",
     "devDependencies": {
+        "@types/express": "*",
+        "@types/express-session": "*",
         "@types/jest": "*",
         "@types/node": "*",
         "@types/yargs": "*",
@@ -16,6 +18,8 @@
         "typescript": "*"
     },
     "dependencies": {
+        "express": "*",
+        "express-session": "*",
         "yargs": "*"
     },
     "config": {
