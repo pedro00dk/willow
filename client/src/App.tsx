@@ -35,7 +35,10 @@ function Body() {
         <div className='d-flex flex-row flex-fill'>
             <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
                 <div className='d-flex flex-row flex-fill'>
-                    <Editor />
+                    <Editor
+                        mode={'python'}
+                        gutter
+                    />
                 </div>
                 <div className='d-flex flex-row border' />
                 <div className='d-flex flex-row flex-fill'>
