@@ -1,5 +1,5 @@
 import * as yargs from 'yargs'
-import { TracerServer } from './server'
+import { Server } from './server'
 import { Tracer } from './tracer/tracer'
 import { TracerProcess } from './tracer/tracer-process'
 
@@ -15,22 +15,37 @@ const parser = yargs
             // type: 'array', type: 'string'
             array: true,
             description: 'Tracer <name> <spawn-cmd{<script>}>',
-            nargs: 2
+            nargs: 2,
+            string: true
         }
     )
 
 const argumentS = parser.argv
 
-const serverPort = argumentS.port
-const tracerSuppliers = new Map(
-    [...Array(argumentS.tracer ? argumentS.tracer.length / 2 : 0)]
-        .map((_, i) => [argumentS.tracer[i * 2], argumentS.tracer[i * 2 + 1]] as [string, string])
-        .map(([tracer, command]) => {
-            const tracerProvider = command.indexOf('{}') !== -1
-                ? (code: string) => new TracerProcess(command.replace(/{}/, `'${code.replace(/'/g, '\'"\'"\'')}'`))
-                : (code: string) => new TracerProcess(`${command} '${code.replace(/'/g, '\'"\'"\'')}'`)
-            return [tracer, tracerProvider] as [string, (code: string) => Tracer]
-        })
-)
+const port = argumentS.port
+const suppliers = createTracerSuppliers(argumentS.tracer)
+const server = startServer(port, suppliers)
 
-new TracerServer(serverPort, tracerSuppliers).listen()
+
+/**
+ * Creates tracers from string args, every pair or elements of the array is a tracer name and its command.
+ */
+export function createTracerSuppliers(tracers: string[]) {
+    return new Map(
+        [...Array(tracers ? tracers.length / 2 : 0)]
+            .map((_, i) => [tracers[i * 2], tracers[i * 2 + 1]] as [string, string])
+            .map(([tracer, command]) => {
+                const tracerProvider = command.indexOf('{}') !== -1
+                    ? (code: string) => new TracerProcess(command.replace(/{}/, `'${code.replace(/'/g, '\'"\'"\'')}'`))
+                    : (code: string) => new TracerProcess(`${command} '${code.replace(/'/g, '\'"\'"\'')}'`)
+                return [tracer, tracerProvider] as [string, (code: string) => Tracer]
+            })
+    )
+}
+
+/**
+ * Starts the server with the received suppliers and listen to the received port.
+ */
+export function startServer(port: number, suppliers: Map<string, (code: string) => Tracer>) {
+    return new Server(port, suppliers).listen()
+}

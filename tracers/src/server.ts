@@ -7,7 +7,7 @@ import { TracerWrapper } from './tracer/tracer-wrapper'
 /**
  * Server to expose tracers through http.
  */
-export class TracerServer {
+export class Server {
     private server: express.Express
     private port: number
     private suppliers: Map<string, (code: string) => Tracer>
@@ -61,14 +61,14 @@ export class TracerServer {
     /**
      * Lists the available suppliers.
      */
-    private getSuppliers() {
+    getSuppliers() {
         return [...this.suppliers.keys()]
     }
 
     /**
      * Returns the sessions ids and its suppliers.
      */
-    private getSessions() {
+    getSessions() {
         return [...this.sessions.entries()]
             .map(([id, { supplier, tracer }]) => ({ id, supplier, state: tracer.getState() }))
     }
@@ -76,7 +76,7 @@ export class TracerServer {
     /**
      * Creates a new tracer session with the received supplier and code.
      */
-    private createSession(supplier: string, code: string) {
+    createSession(supplier: string, code: string) {
         if (supplier == null) throw new Error('supplier not found or wrong type')
         if (code == null) throw new Error('code not found or wrong type')
         if (!this.suppliers.has(supplier)) throw new Error(`supplier ${supplier} not found`)
@@ -93,7 +93,7 @@ export class TracerServer {
     /**
      * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
      */
-    private async executeOnSession(id: number, action: string, args: any[]) {
+    async executeOnSession(id: number, action: string, args: any[]) {
         if (id == null || !this.sessions.has(id)) throw new Error('session id not found or wrong type')
         if (action == null) throw new Error('action not found or wrong type')
 
