@@ -3,26 +3,25 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [{
+    "configurations": [
+        {
+            "name": "Chrome launch",
             "type": "chrome",
             "request": "launch",
-            "name": "Chrome launch",
             "url": "http://localhost:8000",
+            "runtimeExecutable": "/usr/bin/google-chrome-stable",
             "webRoot": "${workspaceFolder}",
-            "trace": true,
-            "breakOnLoad": true,
             "sourceMapPathOverrides": {
                 "../*": "${webRoot}/*"
             }
         },
         {
+            "name": "Chrome attach",
             "type": "chrome",
             "request": "attach",
-            "name": "Chrome attach",
+            "url": "http://localhost:8000",
             "port": 9222,
             "webRoot": "${workspaceFolder}",
-            "trace": true,
-            "breakOnLoad": true,
             "sourceMapPathOverrides": {
                 "../*": "${webRoot}/*"
             }
