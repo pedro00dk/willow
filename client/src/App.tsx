@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import logo from '../public/logo.svg'
-import { MemoEditor } from './components/Editor'
+import { MemoCodeEditor } from './components/Editor'
 
 
 export function App() {
@@ -35,9 +35,8 @@ function Body() {
         <div className='d-flex flex-row flex-fill'>
             <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
                 <div className='d-flex flex-row flex-fill'>
-                    <MemoEditor
+                    <MemoCodeEditor
                         mode='python'
-                        gutter
                     />
                 </div>
                 <div className='d-flex flex-row border' />

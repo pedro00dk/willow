@@ -55,3 +55,19 @@ export function Editor(props: EditorProps) {
 
     return <div ref={divRef} className='w-100 h-100' />
 }
+
+type CodeEditorProps = {
+    mode: 'java' | 'python' | 'text'
+    font?: number
+}
+
+// tslint:disable-next-line:variable-name
+export const MemoCodeEditor = React.memo(CodeEditor, (prevProps, nextProps) => !equal(prevProps, nextProps))
+export function CodeEditor(props: CodeEditorProps) {
+
+    return <MemoEditor
+        {...props}
+        gutter
+        onChange={console.log}
+    />
+}
