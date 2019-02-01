@@ -36,7 +36,7 @@ function Body() {
             <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
                 <div className='d-flex flex-row flex-fill'>
                     <MemoEditor
-                        mode={'python'}
+                        mode='python'
                         gutter
                     />
                 </div>

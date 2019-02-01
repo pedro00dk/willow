@@ -14,6 +14,7 @@ type EditorProps = {
     mode: 'java' | 'python' | 'text'
     font?: number
     gutter?: boolean
+    onChange?: (text: string) => void
 }
 
 // tslint:disable-next-line:variable-name
@@ -44,7 +45,11 @@ export function Editor(props: EditorProps) {
                 enableLiveAutocompletion: true,
                 enableSnippets: true
             })
-        }
+            const onEditorChange = () => props.onChange ? props.onChange(editor.getValue()) : undefined
+            editor.on('change', onEditorChange)
+            return () => editor.off('change', onEditorChange)
+        },
+        [editor, props.onChange]
     )
 
 
