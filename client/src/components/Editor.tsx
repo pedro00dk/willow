@@ -1,4 +1,5 @@
 import * as ace from 'brace'
+import equal = require('fast-deep-equal')
 import * as React from 'react'
 
 import 'brace/ext/language_tools'
@@ -15,6 +16,8 @@ type EditorProps = {
     gutter?: boolean
 }
 
+// tslint:disable-next-line:variable-name
+export const MemoEditor = React.memo(Editor, (prevProps, nextProps) => !equal(prevProps, nextProps))
 export function Editor(props: EditorProps) {
     const divRef = React.useRef(undefined)
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)

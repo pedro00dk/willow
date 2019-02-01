@@ -20,6 +20,7 @@
         "brace": "*",
         "classnames": "*",
         "emotion": "*",
+        "fast-deep-equal": "*",
         "react": "next",
         "react-dom": "next"
     },
