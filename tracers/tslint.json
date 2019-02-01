@@ -5,20 +5,33 @@
     ],
     "jsRules": {},
     "rules": {
-        "array-type": [true, "array"],
+        "array-type": [
+            true,
+            "array"
+        ],
         "arrow-parens": false,
         "curly": false,
         "interface-name": false,
         "interface-over-type-literal": false,
-        "member-access": [true, "no-public"],
+        "member-access": [
+            true,
+            "no-public"
+        ],
         "member-ordering": false,
         "no-consecutive-blank-lines": false,
         "no-null-keyword": true,
         "no-shadowed-variable": false,
         "no-string-literal": false,
+        "object-literal-sort-keys": false,
         "one-line": false,
-        "quotemark": [true, "single"],
-        "semicolon": [true, "never"],
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "semicolon": [
+            true,
+            "never"
+        ],
         "trailing-comma": [
             true,
             {
@@ -26,7 +39,15 @@
                 "singleline": "never"
             }
         ],
-        "triple-equals": [true, "allow-undefined-check"],
-        "variable-name": [true, "ban-keywords", "check-format", "allow-trailing-underscore"]
+        "triple-equals": [
+            true,
+            "allow-undefined-check"
+        ],
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-trailing-underscore"
+        ]
     }
 }
