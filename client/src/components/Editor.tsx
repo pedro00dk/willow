@@ -61,15 +61,13 @@ export const Editor = React.memo(
     (prevProps, nextProps) => !equal(prevProps, nextProps)
 )
 
-type CodeEditorProps =
-    DispatchProp &
-    {
-        mode: 'java' | 'python' | 'text'
-        font?: number
-    }
+type CodeEditorProps = {
+    mode: 'java' | 'python' | 'text'
+    font?: number
+}
 // tslint:disable-next-line:variable-name
 export const CodeEditor = connect()(
-    (props: CodeEditorProps) => {
+    (props: DispatchProp & CodeEditorProps) => {
         const onChange = (text: string) => props.dispatch<CodeAction>({ type: 'code/setText', payload: { text } })
 
         const onInternalUpdate = (editor: ace.Editor) => {
