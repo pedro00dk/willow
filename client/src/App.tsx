@@ -2,22 +2,25 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import logo from '../public/logo.svg'
-import { MemoCodeEditor } from './components/Editor'
+import { CodeEditor } from './components/Editor'
+import { Store } from './reducers/Store'
 
 
 export function App() {
-    return <div className={cn('d-flex flex-column', css({ width: '100vw', height: '100vh' }))}>
-        <div className='d-flex flex-row'>
-            <div className='d-block flex-fill'>
-                <Header />
+    return <Store>
+        <div className={cn('d-flex flex-column', css({ width: '100vw', height: '100vh' }))}>
+            <div className='d-flex flex-row'>
+                <div className='d-block flex-fill'>
+                    <Header />
+                </div>
+            </div>
+            <div className='d-flex flex-row flex-fill'>
+                <div className='d-flex flex-column flex-fill p-3'>
+                    <Body />
+                </div>
             </div>
         </div>
-        <div className='d-flex flex-row flex-fill'>
-            <div className='d-flex flex-column flex-fill p-3'>
-                <Body />
-            </div>
-        </div>
-    </div>
+    </Store>
 }
 
 function Header() {
@@ -27,26 +30,23 @@ function Header() {
             <span className='ml-2'>Willow</span>
         </a>
     </nav>
-
 }
 
 function Body() {
-    return <>
-        <div className='d-flex flex-row flex-fill'>
-            <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
-                <div className='d-flex flex-row flex-fill'>
-                    <MemoCodeEditor
-                        mode='python'
-                    />
-                </div>
-                <div className='d-flex flex-row border' />
-                <div className='d-flex flex-row flex-fill'>
-                    stdio
-                </div>
+    return <div className='d-flex flex-row flex-fill'>
+        <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
+            <div className='d-flex flex-row flex-fill'>
+                <CodeEditor
+                    mode='python'
+                />
             </div>
-            <div className='d-flex flex-column flex-fill ml-2 border rounded shadow'>
-                graph
+            <div className='d-flex flex-row border' />
+            <div className='d-flex flex-row flex-fill'>
+                stdio
             </div>
         </div>
-    </>
+        <div className='d-flex flex-column flex-fill ml-2 border rounded shadow'>
+            graph
+        </div>
+    </div>
 }
