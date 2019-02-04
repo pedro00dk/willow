@@ -5,7 +5,6 @@ import thunk from 'redux-thunk'
 import { reducer as CodeReducer } from './code'
 
 // export renamed action and state types
-export { DispatchProp } from 'react-redux'
 export { Action as CodeAction, State as CodeState } from './code'
 
 

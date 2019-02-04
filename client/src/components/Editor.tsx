@@ -1,8 +1,8 @@
 import * as ace from 'brace'
 import equal = require('fast-deep-equal')
 import * as React from 'react'
-import { connect } from 'react-redux'
-import { CodeAction, DispatchProp } from '../reducers/Store'
+import { connect, DispatchProp } from 'react-redux'
+import { CodeAction } from '../reducers/Store'
 
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
@@ -17,6 +17,7 @@ type EditorProps = {
     font?: number
     gutter?: boolean
     onChange?: (text: string) => void
+    onInternalUpdate?: (editor: ace.Editor) => void
 }
 // tslint:disable-next-line:variable-name
 export const Editor = React.memo(
@@ -53,6 +54,8 @@ export const Editor = React.memo(
             [editor, props.onChange]
         )
 
+        React.useEffect(() => props.onInternalUpdate ? props.onInternalUpdate(editor) : undefined, [editor])
+
         return <div ref={divRef} className='w-100 h-100' />
     },
     (prevProps, nextProps) => !equal(prevProps, nextProps)
@@ -66,10 +69,32 @@ type CodeEditorProps =
     }
 // tslint:disable-next-line:variable-name
 export const CodeEditor = connect()(
-    (props: CodeEditorProps) => <Editor
-        mode={props.mode}
-        font={props.font}
-        gutter
-        onChange={text => props.dispatch<CodeAction>({ type: 'code/set', text })}
-    />
+    (props: CodeEditorProps) => {
+        const onChange = (text: string) => props.dispatch<CodeAction>({ type: 'code/setText', payload: { text } })
+
+        const onInternalUpdate = (editor: ace.Editor) => {
+            if (!editor) return
+
+            const onGutterMouseDown = event => {
+                const region = editor.renderer['$gutterLayer'].getRegion(event)
+                if (region !== 'markers') return
+                const position = event.getDocumentPosition() as ace.Position
+                props.dispatch<CodeAction>({ type: 'code/setBreakpoint', payload: { line: position.row } })
+                const gutterRowElement = event.domEvent.target as HTMLElement
+                gutterRowElement.style.backgroundColor === ''
+                    ? gutterRowElement.style.backgroundColor = 'salmon'
+                    : gutterRowElement.style.backgroundColor = ''
+            }
+            editor.on('guttermousedown', onGutterMouseDown)
+            return () => editor.off('guttermousedown', onGutterMouseDown)
+        }
+
+        return <Editor
+            mode={props.mode}
+            font={props.font}
+            gutter
+            onChange={onChange}
+            onInternalUpdate={onInternalUpdate}
+        />
+    }
 )
