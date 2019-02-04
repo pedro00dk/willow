@@ -12,6 +12,8 @@
         "@types/node": "*",
         "@types/react": "*",
         "@types/react-dom": "*",
+        "@types/react-redux": "*",
+        "@types/redux-thunk": "*",
         "parcel-bundler": "*",
         "tslint": "*",
         "typescript": "*"
@@ -22,7 +24,10 @@
         "emotion": "*",
         "fast-deep-equal": "*",
         "react": "next",
-        "react-dom": "next"
+        "react-dom": "next",
+        "react-redux": "*",
+        "redux": "*",
+        "redux-thunk": "*"
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
