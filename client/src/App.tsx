@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { connect, DispatchProp } from 'react-redux'
 import logo from '../public/logo.svg'
-import { CodeEditor } from './components/Editor'
+import { CodeEditor } from './components/editor/CodeEditor'
 import { CodeState, Store, StoreState } from './reducers/Store'
 
 
@@ -33,30 +33,21 @@ function Header() {
     </nav>
 }
 
-type ConnectedBodyProps = { code: CodeState }
-type BodyProps = {}
-// tslint:disable-next-line:variable-name
-const Body = connect<ConnectedBodyProps, {}, BodyProps, StoreState>(
-    state => ({ code: state.code })
-)(
-    (props: DispatchProp & ConnectedBodyProps & BodyProps) => {
-        return <div className='d-flex flex-row flex-fill'>
-            <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
-                <div className='d-flex flex-row flex-fill'>
-                    <CodeEditor
-                        mode='python'
-                    />
-                </div>
-                <div className='d-flex flex-row border' />
-                <div className='d-flex flex-row flex-fill'>
-                    stdio
-                </div>
+function Body() {
+    return <div className='d-flex flex-row flex-fill'>
+        <div className='d-flex flex-column flex-fill mr-2 border rounded shadow'>
+            <div className='d-flex flex-row flex-fill'>
+                <CodeEditor
+                    mode='python'
+                />
             </div>
-            <div className='d-flex flex-column flex-fill ml-2 border rounded shadow'>
-                graph
-                {props.code.breakpoints}
-                {props.code.text}
-            </div>
+            <div className='d-flex flex-row border' />
+            <div className='d-flex flex-row flex-fill'>
+                stdio
+                </div>
         </div>
-    }
-)
+        <div className='d-flex flex-column flex-fill ml-2 border rounded shadow'>
+            graph
+        </div>
+    </div>
+}
