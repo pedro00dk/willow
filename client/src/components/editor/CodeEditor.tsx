@@ -52,7 +52,9 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
             editor.session.setMode(`ace/mode/${props.mode}`)
 
             const onChange = (change: ace.EditorChangeEvent) =>
-                props.dispatch<CodeAction>({ type: 'code/setText', payload: { text: editor.getValue() } })
+                props.dispatch<CodeAction>(
+                    { type: 'code/setText', payload: { text: editor.session.doc.getAllLines() } }
+                )
 
             const onGutterMouseDown = (event: EditorMouseEvent) => {
                 const gutterLayer = editor.renderer['$gutterLayer'] as EditorGutterLayer
