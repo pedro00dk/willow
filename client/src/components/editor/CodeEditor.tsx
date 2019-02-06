@@ -67,20 +67,20 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
         [editor]
     )
 
-    const [prevBreakpoints, setPrevBreakpoints] = React.useState(props.code.breakpoints)
     React.useEffect(
         () => {
             if (!editor) return
             const breakpointDecoration = css({ backgroundColor: 'salmon' })
-            prevBreakpoints
-                .forEach(breakpoint => editor.session.removeGutterDecoration(breakpoint, breakpointDecoration))
+
+            const decorations = editor.session['$decorations'] as string[]
+            decorations
+                .forEach((decoration, index) => editor.session.removeGutterDecoration(index, breakpointDecoration))
             props.code.breakpoints
                 .forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, breakpointDecoration))
-
-            setPrevBreakpoints(props.code.breakpoints)
         },
         [props.code.breakpoints]
     )
+
 
     return <TextEditor
         onEditorUpdate={setEditor}
