@@ -1,13 +1,20 @@
 import { Reducer } from 'redux'
 
-export type State = { text: string, breakpoints: Set<number> }
+
+export type State = {
+    readonly text: string
+    readonly breakpoints: ReadonlySet<number>
+    readonly markers: ReadonlySet<{ line: number, type: 'highlight' | 'warning' | 'error' }>
+}
 export type Action =
     { type: 'code/setText', payload: { text: string } } |
-    { type: 'code/setBreakpoint', payload: { line: number } }
+    { type: 'code/setBreakpoint', payload: { line: number } } |
+    { type: 'code/setMarkers', payload: { markers: { line: number, type: 'highlight' | 'warning' | 'error' }[] } }
 
 const initialState: State = {
     text: '',
-    breakpoints: new Set()
+    breakpoints: new Set(),
+    markers: new Set()
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
@@ -21,6 +28,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
                 : breakpoints.add(action.payload.line)
             return { ...state, breakpoints }
         }
+        case 'code/setMarkers': return { ...state, markers: new Set(action.payload.markers) }
     }
     return state
 }

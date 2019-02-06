@@ -6,12 +6,6 @@ import { CodeAction, CodeState, StoreState } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 
-type EditorTextChange = {
-    start: ace.Position
-    end: ace.Position
-    action: 'insert' | 'remove'
-    lines: string[]
-}
 type EditorMouseEvent = {
     [props: string]: unknown
     domEvent: MouseEvent
@@ -24,6 +18,17 @@ type EditorGutterLayer = {
     element: HTMLDivElement
     getRegion: (event: EditorMouseEvent) => 'foldWidgets' | 'markers'
 }
+type EditorMarker = {
+    id: number
+    inFront: boolean
+    clazz: string
+    type: string
+    renderer: unknown
+    range: ace.Range
+}
+
+const { Range } = ace.acequire('ace/range') as
+    { Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range }
 
 type ConnectedCodeEditorProps = { code: CodeState }
 type CodeEditorProps = {
@@ -46,7 +51,7 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
             )
             editor.session.setMode(`ace/mode/${props.mode}`)
 
-            const onChange = (change: EditorTextChange) =>
+            const onChange = (change: ace.EditorChangeEvent) =>
                 props.dispatch<CodeAction>({ type: 'code/setText', payload: { text: editor.getValue() } })
 
             const onGutterMouseDown = (event: EditorMouseEvent) => {
@@ -66,12 +71,10 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
         },
         [editor]
     )
-
     React.useEffect(
         () => {
             if (!editor) return
-            const breakpointDecoration = css({ backgroundColor: 'salmon' })
-
+            const breakpointDecoration = css({ backgroundColor: 'LightCoral' })
             const decorations = editor.session['$decorations'] as string[]
             decorations
                 .forEach((decoration, index) => editor.session.removeGutterDecoration(index, breakpointDecoration))
@@ -79,6 +82,35 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
                 .forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, breakpointDecoration))
         },
         [props.code.breakpoints]
+    )
+    React.useEffect(
+        () => {
+            if (!editor) return
+            const markerHighlightDecoration = css({ position: 'absolute', backgroundColor: 'LightBlue' })
+            const markerWarningDecoration = css({ position: 'absolute', backgroundColor: 'LightYellow' })
+            const markerErrorDecoration = css({ position: 'absolute', backgroundColor: 'LightCoral' })
+            const markers = editor.session.getMarkers(false) as EditorMarker[]
+
+            Object.values(markers)
+                .filter(marker => marker.id > 2)
+                .forEach(marker => editor.session.removeMarker(marker.id))
+
+            props.code.markers
+                .forEach(marker =>
+                    editor.session.addMarker(
+                        new Range(marker.line, 0, marker.line, Infinity),
+                        marker.type === 'highlight'
+                            ? markerHighlightDecoration
+                            : marker.type === 'warning'
+                                ? markerWarningDecoration
+                                : markerErrorDecoration
+                        ,
+                        'fullLine',
+                        false
+                    )
+                )
+        },
+        [props.code.markers]
     )
 
 
