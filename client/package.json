@@ -29,9 +29,12 @@
         "redux": "*",
         "redux-thunk": "*"
     },
+    "config": {
+        "server": "localhost:8001"
+    },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
         "build": "parcel build --no-cache --no-source-maps --public-url ./ --out-dir ./dist/build -- ./public/index.html",
-        "start": "parcel serve --no-cache --port 8000 -- ./public/index.html"
+        "start": "SERVER_ADDRESS=$npm_package_config_server parcel serve --no-cache --port 8000 -- ./public/index.html"
     }
 }
