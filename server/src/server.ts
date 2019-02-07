@@ -19,6 +19,10 @@ export class Server {
         this.server = express()
         this.server.use(express.json())
         this.server.use(session({ resave: false, saveUninitialized: true, secret }))
+        this.server.use((request, response, next) => {
+            response.header('Access-Control-Allow-Origin', '*')
+            next()
+        })
 
         this.port = port
 
@@ -29,7 +33,7 @@ export class Server {
      * Configures server routes.
      */
     private configureRoutes() {
-        this.server.get('/session', (request, response) => response.send(request.session.id))
+        this.server.get('/session', (request, response) => response.send({ session: request.session.id }))
     }
 
     /**
