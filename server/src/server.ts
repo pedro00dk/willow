@@ -20,7 +20,10 @@ export class Server {
         this.server.use(express.json())
         this.server.use(session({ resave: false, saveUninitialized: true, secret }))
         this.server.use((request, response, next) => {
-            response.header('Access-Control-Allow-Origin', '*')
+            // cors support with any origin (wildcard '*' not supported when credentials enabled)
+            const origin = [request.headers.origin].flat()[0] as string
+            response.header('Access-Control-Allow-Origin', origin)
+            response.header('Access-Control-Allow-Credentials', 'true')
             next()
         })
 
