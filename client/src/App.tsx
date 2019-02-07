@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { connect, DispatchProp } from 'react-redux'
 import logo from '../public/logo.svg'
 import { CodeEditor } from './components/editor/CodeEditor'
-import { CodeState, Store, StoreState } from './reducers/Store'
+import { IOEditor } from './components/editor/IOEditor'
+import { Store } from './reducers/Store'
 
 
 export function App() {
@@ -43,8 +43,8 @@ function Body() {
             </div>
             <div className='d-flex flex-row border' />
             <div className='d-flex flex-row flex-fill'>
-                stdio
-                </div>
+                <IOEditor />
+            </div>
         </div>
         <div className='d-flex flex-column flex-fill ml-2 border rounded shadow'>
             graph
