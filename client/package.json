@@ -30,7 +30,7 @@
         "redux-thunk": "*"
     },
     "config": {
-        "server": "localhost:8001"
+        "server": "http://localhost:8001"
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
