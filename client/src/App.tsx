@@ -8,20 +8,18 @@ import { Store } from './reducers/Store'
 
 
 export function App() {
-    return <Store>
-        <div className={cn('d-flex flex-column', css({ width: '100vw', height: '100vh' }))}>
-            <div className='d-flex flex-row'>
-                <div className='d-block flex-fill'>
-                    <Header />
-                </div>
-            </div>
-            <div className='d-flex flex-row flex-fill'>
-                <div className='d-flex flex-column flex-fill p-3'>
-                    <Body />
-                </div>
+    return <div className={cn('d-flex flex-column', css({ width: '100vw', height: '100vh' }))}>
+        <div className='d-flex flex-row'>
+            <div className='d-block flex-fill'>
+                <Header />
             </div>
         </div>
-    </Store>
+        <div className='d-flex flex-row flex-fill'>
+            <div className='d-flex flex-column flex-fill p-3'>
+                <Body />
+            </div>
+        </div>
+    </div>
 }
 
 function Header() {
