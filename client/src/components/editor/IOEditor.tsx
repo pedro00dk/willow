@@ -1,7 +1,7 @@
 import * as ace from 'brace'
 import * as React from 'react'
-import { connect, DispatchProp } from 'react-redux'
-import { IOState, StoreState } from '../../reducers/Store'
+import { connect } from 'react-redux'
+import { IOState, StoreState, ThunkDispatchProp } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 
@@ -19,7 +19,7 @@ type IOEditorProps = {}
 // tslint:disable-next-line:variable-name
 export const IOEditor = connect<ConnectedIOEditorProps, {}, IOEditorProps, StoreState>(
     state => ({ io: state.io })
-)((props: DispatchProp & ConnectedIOEditorProps & IOEditorProps) => {
+)((props: ThunkDispatchProp & ConnectedIOEditorProps & IOEditorProps) => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(
         () => {

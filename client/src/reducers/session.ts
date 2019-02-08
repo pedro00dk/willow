@@ -32,12 +32,12 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 
 export function fetch() {
     return async (dispatch: ThunkDispatch) => {
-        dispatch({ type: 'session/fetch' })
+        dispatch<Action>({ type: 'session/fetch' })
         try {
             const session = (await axios.get(`${serverAddress}/session`, { withCredentials: true }))
-            dispatch({ type: 'session/fetch', payload: { session: session.data.session } })
+            dispatch<Action>({ type: 'session/fetch', payload: { session: session.data.session } })
         } catch (error) {
-            dispatch({ type: 'session/fetch', error: error.message })
+            dispatch<Action>({ type: 'session/fetch', error: error.message })
         }
     }
 }
