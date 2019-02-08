@@ -51,7 +51,7 @@ export class Server {
             async (request, response) => {
                 const id = request.body['id'] as number
                 const action = request.body['action'] as string
-                const args = request.body['args'] as any[]
+                const args = request.body['args'] as unknown[]
                 try { response.send(await this.executeOnSession(id, action, args)) }
                 catch (error) { response.status(400).send(error.stack) }
             }
@@ -93,12 +93,12 @@ export class Server {
     /**
      * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
      */
-    async executeOnSession(id: number, action: string, args: any[]) {
+    async executeOnSession(id: number, action: string, args: unknown[]) {
         if (id == undefined || !this.sessions.has(id)) throw new Error('session id not found or wrong type')
         if (action == undefined) throw new Error('action not found or wrong type')
 
         const tracer = this.sessions.get(id).tracer
-        let result: any
+        let result: unknown
         try {
             if (action === 'getState') result = tracer.getState()
             else if (action === 'start') result = await tracer.start()

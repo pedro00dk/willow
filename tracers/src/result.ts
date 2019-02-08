@@ -23,7 +23,7 @@ export type Event = {
 export type EventType = 'call' | 'line' | 'exception' | 'return'
 
 export type ArgsType = null | ArgsExceptionType
-export type ArgsExceptionType = { type: string, args: any, traceback: string }
+export type ArgsExceptionType = { type: string, args: unknown, traceback: string }
 
 export type LineType = number
 
