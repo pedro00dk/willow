@@ -19,6 +19,7 @@
         "typescript": "*"
     },
     "dependencies": {
+        "axios": "*",
         "brace": "*",
         "classnames": "*",
         "emotion": "*",
