@@ -4,6 +4,7 @@ import * as React from 'react'
 import { Responsive } from 'react-grid-layout'
 import { connect } from 'react-redux'
 import logo from '../public/logo.svg'
+import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { IOEditor } from './components/editor/IOEditor'
 import { fetch } from './reducers/session'
@@ -56,15 +57,20 @@ function Body() {
         rowHeight={(size.height - 190) / 12}
         draggableCancel='.ace_content, input, textarea'
     >
+        <div key='Debugger' className='border shadow-sm'
+            data-grid={{ x: 0, y: 0, w: 4, h: 1, minW: 4, minH: 1, maxW: 4, maxH: 1 }}
+        >
+            <Debugger />
+        </div>
         <div key='CodeEditor' className='border shadow-sm'
-            data-grid={{ x: 0, y: 0, w: 4, h: 8 }}
+            data-grid={{ x: 0, y: 1, w: 4, h: 7 }}
         >
             <CodeEditor
                 mode='python'
             />
         </div>
         <div key='IOEditor' className='border shadow-sm'
-            data-grid={{ x: 0, y: 0, w: 4, h: 4 }}
+            data-grid={{ x: 0, y: 8, w: 4, h: 4 }}
         >
             <IOEditor />
         </div>
