@@ -12,6 +12,7 @@
         "@types/node": "*",
         "@types/react": "*",
         "@types/react-dom": "*",
+        "@types/react-grid-layout": "*",
         "@types/react-redux": "*",
         "@types/redux-thunk": "*",
         "parcel-bundler": "*",
@@ -26,6 +27,7 @@
         "fast-deep-equal": "*",
         "react": "next",
         "react-dom": "next",
+        "react-grid-layout": "*",
         "react-redux": "*",
         "redux": "*",
         "redux-thunk": "*"
