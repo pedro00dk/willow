@@ -13,18 +13,14 @@ function main() {
 
     const argumentS = parser.argv
 
-    const port = argumentS.port
-    const secret = argumentS.secret
-    const tracerServerAddress = argumentS.tracers
-
-    startServer(port, secret)
+    startServer(argumentS.port, argumentS.secret, argumentS.tracers)
 }
 
 /**
  * Starts the server with the received port and secret.
  */
-export function startServer(port: number, secret: string) {
-    new Server(port, secret).listen()
+export function startServer(port: number, secret: string, tracerServerAddress: string) {
+    new Server(port, secret, tracerServerAddress).listen()
 }
 
 
