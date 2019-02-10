@@ -25,7 +25,6 @@ export const IOEditor = connect<ConnectedIOEditorProps, {}, IOEditorProps, Store
         () => {
             if (!editor) return
             editor.$blockScrolling = Infinity
-            editor.renderer.setShowGutter(false)
 
             const onExec = (event: EditorExecEvent, commandManager: ace.CommandManager) => {
                 const command = event.command.name
