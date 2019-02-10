@@ -11,6 +11,7 @@ export class Client {
      * Creates the client with the received server address.
      */
     constructor(address: string) {
+
         this.address = address
     }
 
@@ -39,6 +40,7 @@ export class Client {
      * Executes a command in the tracer refereed by the received id and returns the result.
      */
     async execute(id: number, action: string, args: unknown[]) {
-        return (await axios.post(`${this.address}/execute`, { id, action, args })).data as unknown
+        return (await axios.post(`${this.address}/execute`, { id, action, args }, { transformResponse: [] }))
+            .data as string
     }
 }
