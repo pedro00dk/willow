@@ -23,7 +23,6 @@
         "no-shadowed-variable": false,
         "no-string-literal": false,
         "object-literal-sort-keys": false,
-        "one-line": false,
         "quotemark": [
             true,
             "single"
