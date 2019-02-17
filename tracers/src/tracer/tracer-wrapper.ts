@@ -106,17 +106,12 @@ export class TracerWrapper implements Tracer {
 
     getBreakpoints() {
         log.info(TracerWrapper.name, 'get breakpoints')
-        return new Set(this.breakpoints)
+        return [...this.breakpoints]
     }
 
-    setBreakpoint(line: number) {
-        if (line < 0) {
-            const error = 'breakpoint line is negative'
-            log.warn(TracerWrapper.name, error, { line })
-            throw new Error(error)
-        }
-        log.info(TracerWrapper.name, 'set breakpoint', { line })
-        this.breakpoints.add(line)
+    setBreakpoints(lines: number[]) {
+        log.info(TracerWrapper.name, 'set breakpoints', { lines })
+        this.breakpoints = new Set(lines)
     }
 
     addStepProcessor(processor: StepProcessor) {

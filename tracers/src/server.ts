@@ -149,7 +149,7 @@ export class Server {
             else if (action === 'stepOut') result = await tracer.stepOut()
             else if (action === 'continue') result = await tracer.continue()
             else if (action === 'getBreakpoints') result = tracer.getBreakpoints()
-            else if (action === 'setBreakpoints') result = tracer.setBreakpoint(args[0] as number)
+            else if (action === 'setBreakpoints') result = tracer.setBreakpoints(args[0] as number[])
             else {
                 const error = 'action not found'
                 log.warn(Server.name, error, { action })

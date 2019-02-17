@@ -50,12 +50,12 @@ export interface Tracer {
     /**
      * Gets the set of breakpoints.
      */
-    getBreakpoints?(): Set<number>
+    getBreakpoints?(): number[]
 
     /**
-     * Sets a breakpoint in a line.
+     * Sets the received breakpoints, removing the previous ones.
      */
-    setBreakpoint?(line: number): void
+    setBreakpoints?(line: number[]): void
 
     /**
      * Adds a step processor to the step call.
