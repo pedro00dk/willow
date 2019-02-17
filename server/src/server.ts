@@ -28,6 +28,7 @@ export class Server {
             const origin = [request.headers.origin].flat()[0] as string
             response.header('Access-Control-Allow-Origin', origin)
             response.header('Access-Control-Allow-Credentials', 'true')
+            response.header('Access-Control-Allow-Headers', 'Content-Type')
             next()
         })
 
