@@ -49,12 +49,12 @@ function Body() {
     )
 
     return <Responsive
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 12, md: 12, sm: 12, xs: 8, xxs: 4 }}
-        autoSize={false}
-        compactType='vertical'
         width={size.width}
         rowHeight={(size.height - 190) / 12}
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+        cols={{ lg: 12, md: 12, sm: 12, xs: 8, xxs: 4 }}
+        autoSize={true}
+        compactType='horizontal'
         draggableCancel='.ace_content, input, textarea'
     >
         <div key='Debugger' className='border shadow-sm'
@@ -63,14 +63,14 @@ function Body() {
             <Debugger />
         </div>
         <div key='CodeEditor' className='border shadow-sm'
-            data-grid={{ x: 0, y: 1, w: 4, h: 7 }}
+            data-grid={{ x: 0, y: 1, w: 4, h: 8 }}
         >
             <CodeEditor
                 mode='python'
             />
         </div>
         <div key='IOEditor' className='border shadow-sm'
-            data-grid={{ x: 0, y: 8, w: 4, h: 4 }}
+            data-grid={{ x: 0, y: 9, w: 4, h: 3 }}
         >
             <IOEditor />
         </div>
