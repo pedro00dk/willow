@@ -1,10 +1,15 @@
+import * as log from 'npmlog'
 import * as yargs from 'yargs'
 import { Server } from './server'
 import { Tracer } from './tracer/tracer'
 import { TracerProcess } from './tracer/tracer-process'
 
 
+/**
+ * The main function.
+ */
 function main() {
+    log.info(main.name, '')
     const parser = yargs
         .usage('Http API for CLI tracers') // not being used as usage, but description
         .alias('h', 'help')
@@ -20,11 +25,10 @@ function main() {
                 string: true
             }
         )
-
     const argumentS = parser.argv
-
     const port = argumentS.port
     const suppliers = createTracerSuppliers(argumentS.tracer)
+    log.info(main.name, 'cli', { port, suppliers: [...suppliers.keys()] })
     startServer(port, suppliers)
 }
 
@@ -51,8 +55,7 @@ export function startServer(port: number, suppliers: Map<string, (code: string) 
     new Server(port, suppliers).listen()
 }
 
-
+// runs when called as entry point
 if (!module.parent) {
-    // called as entry point
     main()
 }

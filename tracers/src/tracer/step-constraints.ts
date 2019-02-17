@@ -1,3 +1,4 @@
+import * as log from 'npmlog'
 import { Event, HeapObjectType, queryReferenceTypes, queryValueTypes, Result } from '../result'
 import { StepProcessor } from './tracer'
 
@@ -21,12 +22,36 @@ export class StepConstraints implements StepProcessor {
         steps: number, stackSize: number, heapSize: number, stringLength: number, iterableLength: number,
         objectProperties: number
     ) {
-        if (steps < 1) throw new Error('steps smaller than 1')
-        if (stackSize < 1) throw new Error('stackSize smaller than 1')
-        if (heapSize < 1) throw new Error('heapSize smaller than 1')
-        if (stringLength < 1) throw new Error('stringLength smaller than 1')
-        if (iterableLength < 1) throw new Error('iterableLength smaller than 1')
-        if (objectProperties < 1) throw new Error('objectProperties smaller than 1')
+        if (steps < 1) {
+            const error = 'steps smaller than 1'
+            log.error(StepConstraints.name, error, { steps })
+            throw new Error(error)
+        }
+        if (stackSize < 1) {
+            const error = 'stackSize smaller than 1'
+            log.error(StepConstraints.name, error, { stackSize })
+            throw new Error(error)
+        }
+        if (heapSize < 1) {
+            const error = 'heapSize smaller than 1'
+            log.error(StepConstraints.name, error, { heapSize })
+            throw new Error(error)
+        }
+        if (stringLength < 1) {
+            const error = 'stringLength smaller than 1'
+            log.error(StepConstraints.name, error, { stringLength })
+            throw new Error(error)
+        }
+        if (iterableLength < 1) {
+            const error = 'iterableLength smaller than 1'
+            log.error(StepConstraints.name, error, { iterableLength })
+            throw new Error(error)
+        }
+        if (objectProperties < 1) {
+            const error = 'objectProperties smaller than 1'
+            log.error(StepConstraints.name, error, { objectProperties })
+            throw new Error(error)
+        }
         this.steps = steps
         this.stackSize = stackSize
         this.heapSize = heapSize
@@ -41,33 +66,44 @@ export class StepConstraints implements StepProcessor {
      */
     private check(result: Result) {
         if (result.name !== 'data') return
-
         const event = result.value as Event
         this.currentStep++
-
-        if (this.currentStep > this.steps)
-            throw new Error(`tracer constraint: max steps exceeded ${this.steps}`)
-
-        if (event.stackLines.length > this.stackSize)
-            throw new Error(`tracer constraint: max stack size exceeded ${this.stackSize}`)
-
-        if (Object.keys(event.heapGraph).length > this.heapSize)
-            throw new Error(`tracer constraint: max heap size exceeded ${this.heapSize}`)
-
+        if (this.currentStep > this.steps) {
+            const error = `tracer constraint: max steps exceeded ${this.steps}`
+            log.warn(StepConstraints.name, error)
+            throw new Error(error)
+        }
+        if (event.stackLines.length > this.stackSize) {
+            const error = `tracer constraint: max stack size exceeded ${this.stackSize}`
+            log.warn(StepConstraints.name, error)
+            throw new Error(error)
+        }
+        if (Object.keys(event.heapGraph).length > this.heapSize) {
+            const error = `tracer constraint: max heap size exceeded ${this.heapSize}`
+            log.warn(StepConstraints.name, error)
+            throw new Error(error)
+        }
         for (const value of queryValueTypes(event, 'string')) {
             const stringValue = value as string
             if ((stringValue.startsWith('\'') || stringValue.startsWith('"')) &&
-                stringValue.length > this.stringLength + 2)
-                throw new Error(`tracer constraint: max string length exceeded ${this.stringLength}`)
+                stringValue.length > this.stringLength + 2) {
+                const error = `tracer constraint: max string length exceeded ${this.stringLength}`
+                log.warn(StepConstraints.name, error)
+                throw new Error(error)
+            }
         }
-
         for (const value of queryReferenceTypes(event, 'list', 'map', 'set'))
-            if ((value as HeapObjectType).members.length > this.iterableLength)
-                throw new Error(`tracer constraint: max iterable length exceeded ${this.iterableLength}`)
-
+            if ((value as HeapObjectType).members.length > this.iterableLength) {
+                const error = `tracer constraint: max iterable length exceeded ${this.iterableLength}`
+                log.warn(StepConstraints.name, error)
+                throw new Error(error)
+            }
         for (const value of queryReferenceTypes(event, 'udo'))
-            if ((value as HeapObjectType).members.length > this.objectProperties)
-                throw new Error(`tracer constraint: max object properties exceeded ${this.objectProperties}`)
+            if ((value as HeapObjectType).members.length > this.objectProperties) {
+                const error = `tracer constraint: max object properties exceeded ${this.objectProperties}`
+                log.warn(StepConstraints.name, error, {})
+                throw new Error(error)
+            }
     }
 
     async consume(step: () => Promise<Result[]>) {

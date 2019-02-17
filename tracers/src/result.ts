@@ -7,7 +7,6 @@ export type Result = {
 export type ResultNameType = 'started' | 'error' | 'data' | 'product' | 'print' | 'prompt' | 'locked'
 export type ResultValueType = null | string | Event
 
-
 // Event fields
 export type Event = {
     name: EventType
@@ -46,7 +45,6 @@ export type ReferenceType = [number]
 export type UserClassesType = string[]
 
 export type FinishType = boolean
-
 
 // Results utility functions
 

@@ -1,3 +1,4 @@
+import * as log from 'npmlog'
 import { Event, Result } from '../result'
 import { applyStepPreprocessorStack, StepProcessor, Tracer } from './tracer'
 
@@ -15,6 +16,11 @@ export class TracerWrapper implements Tracer {
      * Starts the tracer with the internal tracer to implement methods.
      */
     constructor(internalTracer: Tracer) {
+        if (!internalTracer) {
+            const error = 'internal tracer not provided'
+            log.error(TracerWrapper.name, error)
+            throw new Error(error)
+        }
         this.internalTracer = internalTracer
         this.processors = []
         this.breakpoints = new Set()
@@ -33,24 +39,29 @@ export class TracerWrapper implements Tracer {
     }
 
     start() {
+        log.info(TracerWrapper.name, 'start')
         return this.internalTracer.start()
     }
 
     stop() {
+        log.info(TracerWrapper.name, 'stop')
         return this.internalTracer.stop()
     }
 
     input(data: string) {
+        log.verbose(TracerWrapper.name, 'input', { data })
         this.internalTracer.input(data)
     }
 
     async step() {
+        log.verbose(TracerWrapper.name, 'step')
         const results = await applyStepPreprocessorStack(this.processors, () => this.internalTracer.step())
         this.updateLastDataResult(results)
         return results
     }
 
     async stepOver() {
+        log.info(TracerWrapper.name, 'step over')
         const results: Result[] = []
         const stackLength = this.lastDataResult ? (this.lastDataResult.value as Event).stackLines.length : 1
         while (true) {
@@ -65,6 +76,7 @@ export class TracerWrapper implements Tracer {
     }
 
     async stepOut() {
+        log.info(TracerWrapper.name, 'step out')
         const results: Result[] = []
         const stackLength = this.lastDataResult ? (this.lastDataResult.value as Event).stackLines.length : 1
         while (true) {
@@ -77,7 +89,9 @@ export class TracerWrapper implements Tracer {
         }
         return results
     }
+
     async continue() {
+        log.info(TracerWrapper.name, 'continue')
         const results: Result[] = []
         while (true) {
             const stepResults = await this.step()
@@ -91,16 +105,27 @@ export class TracerWrapper implements Tracer {
     }
 
     getBreakpoints() {
+        log.info(TracerWrapper.name, 'get breakpoints')
         return new Set(this.breakpoints)
     }
 
     setBreakpoint(line: number) {
-        if (line < 0) throw new Error('line is negative')
-
+        if (line < 0) {
+            const error = 'breakpoint line is negative'
+            log.warn(TracerWrapper.name, error, { line })
+            throw new Error(error)
+        }
+        log.info(TracerWrapper.name, 'set breakpoint', { line })
         this.breakpoints.add(line)
     }
 
     addStepProcessor(processor: StepProcessor) {
+        if (!processor) {
+            const error = 'step processor not provided'
+            log.error(TracerWrapper.name, error)
+            throw new Error(error)
+        }
+        log.info(TracerWrapper.name, 'add step processor')
         this.processors.push(processor)
     }
 }
