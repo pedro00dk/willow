@@ -39,8 +39,11 @@ export class TracerProcess implements Tracer {
                 rxOps.map(streamLine => {
                     if (streamLine.source === 'stderr') throw new Error(`process stderr: ${streamLine.line}`)
                     if (!streamLine.line.startsWith('[')) throw new Error(`process stdout: ${streamLine.line}`)
-                    try { return JSON.parse(streamLine.line) as Result[] }
-                    catch (error) { throw new SyntaxError(`process stdout: ${error.message}`) }
+                    try {
+                        return JSON.parse(streamLine.line) as Result[]
+                    } catch (error) {
+                        throw new SyntaxError(`process stdout: ${error.message}`)
+                    }
                 })
             )
         this.results
