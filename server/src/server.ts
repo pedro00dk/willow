@@ -50,8 +50,11 @@ export class Server {
                 const userId = request.session.id
                 const supplier = request.body['supplier'] as string
                 const code = request.body['code'] as string
-                try { response.send(this.createSession(userId, supplier, code)) }
-                catch (error) { response.status(400).send(error.stack) }
+                try {
+                    response.send(this.createSession(userId, supplier, code))
+                } catch (error) {
+                    response.status(400).send(error.stack)
+                }
             }
         )
         this.server.post(
@@ -60,8 +63,11 @@ export class Server {
                 const userId = request.session.id
                 const action = request.body['action'] as string
                 const args = request.body['args'] as unknown[]
-                try { response.send(await this.executeOnSession(userId, action, args)) }
-                catch (error) { response.status(400).send(error.stack) }
+                try {
+                    response.send(await this.executeOnSession(userId, action, args))
+                } catch (error) {
+                    response.status(400).send(error.stack)
+                }
             }
         )
     }
