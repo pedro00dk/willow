@@ -60,7 +60,7 @@ export class Server {
                 try {
                     response.send(this.createSession(supplier, code))
                 } catch (error) {
-                    response.status(400).send(error.stack)
+                    response.status(400).send(error.message)
                 }
             }
         )
@@ -74,7 +74,7 @@ export class Server {
                 try {
                     response.send(await this.executeOnSession(id, action, args))
                 } catch (error) {
-                    response.status(400).send(error.stack)
+                    response.status(400).send(error.message)
                 }
             }
         )
