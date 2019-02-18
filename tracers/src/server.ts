@@ -101,12 +101,12 @@ export class Server {
     createSession(supplier: string, code: string) {
         if (code == undefined) {
             const error = 'code not found'
-            log.warn(Server.name, error, code)
+            log.warn(Server.name, error, { code })
             throw new Error(error)
         }
         if (!this.suppliers.has(supplier)) {
             const error = `supplier not found`
-            log.warn(Server.name, error, supplier)
+            log.warn(Server.name, error, { supplier })
             throw new Error(error)
         }
         const id = this.sessionIdGenerator++
@@ -171,7 +171,7 @@ export class Server {
      * Starts the server.
      */
     listen() {
-        log.info('server', 'start listening', this.port)
+        log.info('server', 'start listening', { port: this.port })
         this.server.listen(this.port)
     }
 }
