@@ -21,7 +21,7 @@ export class Server {
     constructor(port: number, suppliers: Map<string, (code: string) => Tracer>) {
         if (port < 0 || port > 65355) {
             const error = 'illegal port number'
-            log.error(Server.name, error)
+            log.error(Server.name, error, { port })
             throw new Error(error)
         }
         this.server = express()
@@ -174,7 +174,7 @@ export class Server {
      * Starts the server.
      */
     listen() {
-        log.info('server', 'start listening', { port: this.port })
+        log.info(Server.name, 'start listening', { port: this.port })
         this.server.listen(this.port)
     }
 }
