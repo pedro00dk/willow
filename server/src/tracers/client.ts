@@ -1,4 +1,5 @@
 import axios from 'axios'
+import * as log from 'npmlog'
 
 
 /**
@@ -20,9 +21,12 @@ export class Client {
     async getSuppliers() {
         try {
             const response = await axios.get(`${this.address}/suppliers`)
+            log.info(Client.name, 'get suppliers', { status: response.status })
             return response.data as string[]
         } catch (error) {
-            throw new Error(error.response ? error.response.data : error.toString())
+            const error_ = error.response ? error.response.data : error.toString()
+            log.info(Client.name, 'get suppliers', error_)
+            throw new Error(error_)
         }
     }
 
@@ -32,9 +36,12 @@ export class Client {
     async getSessions() {
         try {
             const response = await axios.get(`${this.address}/sessions`)
+            log.info(Client.name, 'get sessions', { status: response.status })
             return response.data as { id: number, supplier: string, state: string }[]
         } catch (error) {
-            throw new Error(error.response ? error.response.data : error.toString())
+            const error_ = error.response ? error.response.data : error.toString()
+            log.info(Client.name, 'get suppliers', error_)
+            throw new Error(error_)
         }
     }
 
@@ -44,9 +51,12 @@ export class Client {
     async create(supplier: string, code: string) {
         try {
             const response = await axios.post(`${this.address}/create`, { supplier, code })
+            log.info(Client.name, 'create', { status: response.status })
             return response.data as { id: number, supplier: string }
         } catch (error) {
-            throw new Error(error.response ? error.response.data : error.toString())
+            const error_ = error.response ? error.response.data : error.toString()
+            log.info(Client.name, 'get suppliers', error_)
+            throw new Error(error_)
         }
     }
 
@@ -58,9 +68,12 @@ export class Client {
             const response = await axios.post(
                 `${this.address}/execute`, { id, action, args }, { transformResponse: res => res }
             )
+            log.info(Client.name, 'execute', { status: response.status })
             return { data: response.data as string, finished: response.headers.finished === 'true' }
         } catch (error) {
-            throw new Error(error.response ? error.response.data : error.toString())
+            const error_ = error.response ? error.response.data : error.toString()
+            log.info(Client.name, 'get suppliers', error_)
+            throw new Error(error_)
         }
     }
 }
