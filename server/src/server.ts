@@ -43,18 +43,32 @@ export class Server {
      * Configures server routes.
      */
     private configureRoutes() {
-        this.server.get('/session', (request, response) => response.send({ session: request.session.id }))
-        this.server.get('/tracers/suppliers', (request, response) => response.send(this.getSuppliers()))
+        this.server.get(
+            '/session',
+            (request, response) => {
+                response.send({ session: request.session.id })
+            }
+        )
+        this.server.get(
+            '/tracers/suppliers',
+            (request, response) => {
+                try {
+                    response.send(this.getSuppliers())
+                } catch (error) {
+                    response.status(400).send(error.message)
+                }
+            }
+        )
         this.server.post(
             '/tracers/create',
-            (request, response) => {
+            async (request, response) => {
                 const userId = request.session.id
                 const supplier = request.body['supplier'] as string
                 const code = request.body['code'] as string
                 try {
-                    response.send(this.createSession(userId, supplier, code))
+                    response.send(await this.createSession(userId, supplier, code))
                 } catch (error) {
-                    response.status(400).send(error.stack)
+                    response.status(400).send(error.message)
                 }
             }
         )
@@ -67,7 +81,7 @@ export class Server {
                 try {
                     response.send(await this.executeOnSession(userId, action, args))
                 } catch (error) {
-                    response.status(400).send(error.stack)
+                    response.status(400).send(error.message)
                 }
             }
         )
@@ -86,7 +100,7 @@ export class Server {
     async createSession(userId: string, supplier: string, code: string) {
         if (this.usersTracers.has(userId)) {
             const tracerId = this.usersTracers.get(userId)
-            await this.tracersClient.execute(tracerId, 'stop', undefined)
+            await this.tracersClient.execute(tracerId, 'stop', [])
         }
         const { id } = await this.tracersClient.create(supplier, code)
         this.usersTracers.set(userId, id)
@@ -96,9 +110,11 @@ export class Server {
      * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
      */
     async executeOnSession(userId: string, action: string, args: unknown[]) {
-        if (!this.usersTracers.has(userId)) throw new Error('user has not tracer associated')
+        if (!this.usersTracers.has(userId)) throw new Error('user has no tracer associated')
         const tracerId = this.usersTracers.get(userId)
-        return await this.tracersClient.execute(tracerId, action, args)
+        const { data, finished } = await this.tracersClient.execute(tracerId, action, args)
+        if (finished) this.usersTracers.delete(userId)
+        return data
     }
 
     /**
