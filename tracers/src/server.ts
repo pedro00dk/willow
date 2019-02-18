@@ -72,7 +72,10 @@ export class Server {
                 const args = request.body['args'] as unknown[]
                 log.http(Server.name, request.path, { id, action })
                 try {
-                    response.send(await this.executeOnSession(id, action, args))
+                    const results = await this.executeOnSession(id, action, args)
+                    const finished = !this.sessions.has(id)
+                    response.setHeader('finished', finished.toString())
+                    response.send(results)
                 } catch (error) {
                     response.status(400).send(error.message)
                 }
