@@ -18,7 +18,6 @@ class Result:
     STARTED = 'started'
     ERROR = 'error'
     DATA = 'data'
-    PRODUCT = 'product'
     PRINT = 'print'
     PROMPT = 'prompt'
     LOCKED = 'locked'
