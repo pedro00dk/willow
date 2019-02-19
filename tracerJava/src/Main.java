@@ -71,15 +71,15 @@ public class Main {
             var value = spaceIndex != -1 ? actionData.substring(spaceIndex + 1) : "";
             try {
                 if (action.equals("start")) printResults(tracerBroker.start());
-                else if (action.equals("step")) printResults(tracerBroker.step());
-                else if (action.equals("input")) tracerBroker.input(value);
                 else if (action.equals("stop")) {
                     try {
                         tracerBroker.stop();
                     } catch (Exception e) { // ignore
                     }
                     break;
-                } else {
+                } else if (action.equals("input")) tracerBroker.input(value);
+                else if (action.equals("step")) printResults(tracerBroker.step());
+                else {
                     throw new Exception("action not found");
                 }
                 if (!tracerBroker.isTracerRunning()) break;

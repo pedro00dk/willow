@@ -77,6 +77,16 @@ public class TracerBroker {
     }
 
     /**
+     * Sends a input string to program. Inputs have no response.
+     */
+    public void input(String data) throws InterruptedException {
+        if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
+        if (data == null) throw new NullPointerException("data cannot be null");
+
+        actionQueue.put(new ActionMessage(ActionMessage.Action.input, data));
+    }
+
+    /**
      * Steps into the script.
      */
     public List<ResultMessage> step() {
@@ -107,15 +117,5 @@ public class TracerBroker {
             stop();
 
         return results;
-    }
-
-    /**
-     * Sends a input string to program. Inputs have no response.
-     */
-    public void input(String data) throws InterruptedException {
-        if (!isTracerRunning()) throw new IllegalStateException("tracer not running");
-        if (data == null) throw new NullPointerException("data cannot be null");
-
-        actionQueue.put(new ActionMessage(ActionMessage.Action.input, data));
     }
 }
