@@ -58,22 +58,20 @@ def run_controlled(tracer_broker: broker.TracerBroker):
         try:
             if action == 'start':
                 print_results(tracer_broker.start())
-            elif action == 'step':
-                results = tracer_broker.step()
-                print_results(results)
-            elif action == 'input':
-                tracer_broker.input(value)
             elif action == 'stop':
                 try:
                     tracer_broker.stop()
                 except Exception:
                     pass
+            elif action == 'input':
+                tracer_broker.input(value)
+            elif action == 'step':
+                results = tracer_broker.step()
+                print_results(results)
             else:
                 raise Exception('action not found')
-
             if not tracer_broker.is_tracer_running():
                 break
-
         except Exception as e:
             print_error(str(e))
 

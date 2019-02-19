@@ -68,6 +68,17 @@ class TracerBroker:
         self._action_queue = None
         self._result_queue = None
 
+    def input(self, data: str):
+        """
+        Sends a input string to the code. Inputs have no response.
+        """
+        if not self.is_tracer_running():
+            raise AssertionError('tracer not running')
+        if data is None:
+            raise AttributeError('data cannot be None')
+
+        self._action_queue.put(message.Message(message.Action.INPUT, data))
+
     def step(self):
         """
         Steps into the code.
@@ -87,14 +98,3 @@ class TracerBroker:
             self.stop()
 
         return results
-
-    def input(self, data: str):
-        """
-        Sends a input string to the code. Inputs have no response.
-        """
-        if not self.is_tracer_running():
-            raise AssertionError('tracer not running')
-        if data is None:
-            raise AttributeError('data cannot be None')
-
-        self._action_queue.put(message.Message(message.Action.INPUT, data))
