@@ -22,7 +22,6 @@ public class ResultMessage extends Message {
         started,
         error,
         data,
-        product,
         print,
         prompt,
         locked
