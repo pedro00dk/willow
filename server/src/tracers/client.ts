@@ -40,7 +40,7 @@ export class Client {
             return response.data as { id: number, supplier: string, state: string }[]
         } catch (error) {
             const error_ = error.response ? error.response.data : error.toString()
-            log.info(Client.name, 'get suppliers', error_)
+            log.info(Client.name, 'get sessions', error_)
             throw new Error(error_)
         }
     }
@@ -55,7 +55,7 @@ export class Client {
             return response.data as { id: number, supplier: string }
         } catch (error) {
             const error_ = error.response ? error.response.data : error.toString()
-            log.info(Client.name, 'get suppliers', error_)
+            log.info(Client.name, 'create', error_)
             throw new Error(error_)
         }
     }
@@ -72,7 +72,7 @@ export class Client {
             return { data: response.data as string, finished: response.headers.finished === 'true' }
         } catch (error) {
             const error_ = error.response ? error.response.data : error.toString()
-            log.info(Client.name, 'get suppliers', error_)
+            log.info(Client.name, 'execute', error_)
             throw new Error(error_)
         }
     }
