@@ -1,50 +1,50 @@
-// Result fields
-export type Result = {
-    name: ResultNameType
-    value: ResultValueType
+
+/**
+ * Specification for result objects from tracers.
+ */
+export type Result =
+    { name: 'started', value: null } |
+    { name: 'error', value: Exception } |
+    { name: 'data', value: Event } |
+    { name: 'print' | 'prompt' | 'locked', value: string }
+
+/**
+ * Specification for exception objects.
+ */
+export type Exception = {
+    type: string
+    args: unknown[]
+    traceback: string[]
 }
 
-export type ResultNameType = 'started' | 'error' | 'data' | 'product' | 'print' | 'prompt' | 'locked'
-export type ResultValueType = null | string | Event
-
-// Event fields
+/**
+ * Specification for event values from a data result.
+ */
 export type Event = {
-    name: EventType
-    args: ArgsType
+    name: 'call' | 'line' | 'exception' | 'return'
+    args: null | Exception
     line: number
-    stackLines: StackLinesType
-    stackReferences: StackReferencesType
-    heapGraph: HeapGraphType
-    userClasses: UserClassesType
-    finish: FinishType
+    stackLines: StackInfo
+    stackReferences: StackReferences
+    heapGraph: HeapGraph
+    userClasses: string[]
+    finish: boolean
 }
 
-export type EventType = 'call' | 'line' | 'exception' | 'return'
+export type StackInfo = ScopeInfo[]
+export type ScopeInfo = { name: string, line: number }
 
-export type ArgsType = null | ArgsExceptionType
-export type ArgsExceptionType = { type: string, args: unknown, traceback: string }
+export type StackReferences = ScopeReferences[]
+export type ScopeReferences = [string, AnyType][]
 
-export type LineType = number
-
-export type StackLinesType = ScopeLineType[]
-export type ScopeLineType = { name: string, line: number }
-
-export type StackReferencesType = ScopeReferencesType[]
-export type ScopeReferencesType = ScopeReferenceType[]
-export type ScopeReferenceType = [string, AnyType]
-
-export type HeapGraphType = { [reference: string]: HeapObjectType }
-export type HeapObjectType = { type: string, languageType: string, members: HeapObjectMemberType[] }
+export type HeapGraph = { [reference: string]: HeapObject }
+export type HeapObject = { type: GenericType, languageType: string, members: HeapObjectMemberType[] }
 export type GenericType = 'list' | 'set' | 'map' | 'udo' // udo => user defined object
 export type HeapObjectMemberType = [AnyType, AnyType]
 
 export type AnyType = ValueType | ReferenceType
 export type ValueType = boolean | number | string // strings are better represented as value types
 export type ReferenceType = [number]
-
-export type UserClassesType = string[]
-
-export type FinishType = boolean
 
 // Results utility functions
 

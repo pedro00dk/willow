@@ -1,5 +1,5 @@
 import * as log from 'npmlog'
-import { Event, Result } from '../result'
+import { Event, Result } from '../types/result'
 import { applyStepPreprocessorStack, StepProcessor, Tracer } from './tracer'
 
 

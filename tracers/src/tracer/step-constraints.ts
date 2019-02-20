@@ -1,5 +1,5 @@
 import * as log from 'npmlog'
-import { Event, HeapObjectType, queryReferenceTypes, queryValueTypes, Result } from '../result'
+import { Event, HeapObject, queryReferenceTypes, queryValueTypes, Result } from '../types/result'
 import { StepProcessor } from './tracer'
 
 
@@ -93,13 +93,13 @@ export class StepConstraints implements StepProcessor {
             }
         }
         for (const value of queryReferenceTypes(event, 'list', 'map', 'set'))
-            if ((value as HeapObjectType).members.length > this.iterableLength) {
+            if ((value as HeapObject).members.length > this.iterableLength) {
                 const error = `tracer constraint: max iterable length exceeded ${this.iterableLength}`
                 log.warn(StepConstraints.name, error)
                 throw new Error(error)
             }
         for (const value of queryReferenceTypes(event, 'udo'))
-            if ((value as HeapObjectType).members.length > this.objectProperties) {
+            if ((value as HeapObject).members.length > this.objectProperties) {
                 const error = `tracer constraint: max object properties exceeded ${this.objectProperties}`
                 log.warn(StepConstraints.name, error, {})
                 throw new Error(error)
