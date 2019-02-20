@@ -12,10 +12,10 @@ export type StreamLine = { source: 'stdout' | 'stderr', line: string }
 /**
  * Creates and connects to a process providing easy access to multiplexed formatted streams.
  */
-export class ObservableProcess {
+export class ObservableProcess<T extends string = string> {
     private command: string
     private instance: cp.ChildProcess
-    private stdin_: rx.Subject<string>
+    private stdin_: rx.Subject<T>
     private stdout_: rx.Observable<string>
     private stderr_: rx.Observable<string>
     private stdMux_: rx.Observable<StreamLine>

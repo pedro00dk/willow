@@ -2,7 +2,7 @@ import * as log from 'npmlog'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 import { ObservableProcess } from '../process/observable-process'
-import { isErrorResult, isLastResult, Result } from '../types/tracers'
+import { Action, isErrorResult, isLastResult, Result } from '../types/tracers'
 import { Tracer } from './tracer'
 
 
@@ -10,7 +10,7 @@ import { Tracer } from './tracer'
  * Connects to a tracer process.
  */
 export class TracerProcess implements Tracer {
-    private process: ObservableProcess
+    private process: ObservableProcess<Action | string>
     private results: rx.Observable<Result[]>
     private state: 'created' | 'started' | 'stopped'
 
@@ -73,7 +73,7 @@ export class TracerProcess implements Tracer {
                     this.stop()
                 },
                 error => {
-                    log.info(TracerProcess.name, 'received error or last result')
+                    log.info(TracerProcess.name, `received process error: ${error.message}`)
                     this.stop()
                 }
             )
