@@ -21,8 +21,7 @@ public class ActionMessage extends Message {
     public enum Action {
         start,
         stop,
-        step,
-        eval,
-        input
+        input,
+        step
     }
 }

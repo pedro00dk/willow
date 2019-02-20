@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import core.TracerBroker;
+import message.ActionMessage;
 import message.ResultMessage;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -70,15 +71,15 @@ public class Main {
             var action = spaceIndex != -1 ? actionData.substring(0, spaceIndex) : actionData;
             var value = spaceIndex != -1 ? actionData.substring(spaceIndex + 1) : "";
             try {
-                if (action.equals("start")) printResults(tracerBroker.start());
-                else if (action.equals("stop")) {
+                if (action.equals(ActionMessage.Action.start.name())) printResults(tracerBroker.start());
+                else if (action.equals(ActionMessage.Action.stop.name())) {
                     try {
                         tracerBroker.stop();
                     } catch (Exception e) { // ignore
                     }
                     break;
-                } else if (action.equals("input")) tracerBroker.input(value);
-                else if (action.equals("step")) printResults(tracerBroker.step());
+                } else if (action.equals(ActionMessage.Action.input.name())) tracerBroker.input(value);
+                else if (action.equals(ActionMessage.Action.step.name())) printResults(tracerBroker.step());
                 else {
                     throw new Exception("action not found");
                 }
