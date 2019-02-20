@@ -1,4 +1,4 @@
-import { Result } from '../types/result'
+import { Result } from '../types/tracers'
 import { Tracer } from './tracer'
 
 

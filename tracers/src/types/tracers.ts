@@ -1,3 +1,7 @@
+/**
+ * Specification for actions acceptable by tracers, input action shall be followed by the input value.
+ */
+export type Action = 'start' | 'stop' | 'input' | 'step'
 
 /**
  * Specification for result objects from tracers.
@@ -59,7 +63,7 @@ export function isErrorResult(result: Result) {
  * Returns true if a result is the last emitted by the tracer.
  */
 export function isLastResult(result: Result) {
-    return result.name === 'data' && (result.value as Event).finish
+    return result.name === 'data' && result.value.finish
 }
 
 /**

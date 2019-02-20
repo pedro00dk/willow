@@ -1,8 +1,8 @@
 import * as log from 'npmlog'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
-import { ObservableProcess, StreamLine } from '../process/observable-process'
-import { isErrorResult, isLastResult, Result } from '../types/result'
+import { ObservableProcess } from '../process/observable-process'
+import { isErrorResult, isLastResult, Result } from '../types/tracers'
 import { Tracer } from './tracer'
 
 

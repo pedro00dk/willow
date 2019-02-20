@@ -1,5 +1,5 @@
 import * as log from 'npmlog'
-import { Event, HeapObject, queryReferenceTypes, queryValueTypes, Result } from '../types/result'
+import { Event, HeapObject, queryReferenceTypes, queryValueTypes, Result } from '../types/tracers'
 import { StepProcessor } from './tracer'
 
 
