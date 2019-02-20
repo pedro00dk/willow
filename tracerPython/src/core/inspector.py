@@ -96,7 +96,7 @@ class Inspector:
             return obj.__name__
 
         # known type
-        generic_type = None
+        generic_type = ''
 
         if isinstance(obj, (list, tuple, set)):
             members = [*enumerate(obj)]
