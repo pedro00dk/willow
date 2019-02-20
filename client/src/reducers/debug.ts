@@ -15,10 +15,7 @@ export type Action =
     { type: 'debug/stop', payload?: {}, error?: string } |
     { type: 'debug/input', payload?: {}, error?: string } |
     { type: 'debug/breakpoints', payload?: {}, error?: string } |
-    { type: 'debug/step', payload: { results: unknown[] }, error?: string } |
-    { type: 'debug/stepOver', payload: { results: unknown[] }, error?: string } |
-    { type: 'debug/stepOut', payload: { results: unknown[] }, error?: string } |
-    { type: 'debug/continue', payload: { results: unknown[] }, error?: string }
+    { type: 'debug/step', payload?: { results: unknown[] }, error?: string }
 
 const initialState: State = {
     debugging: false,
@@ -43,11 +40,17 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
                     ? { ...state, debugging: false, fetching: false }
                     : { ...state, debugging: false, fetching: false, error: action.error }
         case 'debug/input':
-        case 'debug/breakpoints':
+            break
         case 'debug/step':
-        case 'debug/stepOver':
-        case 'debug/stepOut':
-        case 'debug/continue':
+        // TODO check when debug ends
+            return !action.payload && !action.error
+                ? { ...state, fetching: true }
+                : action.payload
+                    ? { ...state, fetching: false, results: [...state.results, ...action.payload.results] }
+                    : { ...state, debugging: false, fetching: false, error: action.error }
+
+        case 'debug/breakpoints':
+            break
     }
     return state
 }
@@ -57,10 +60,10 @@ export function start(supplier: string, code: string) {
         dispatch<Action>({ type: 'debug/start' })
         try {
             await axios.post(`${serverAddress}/tracers/create`, { supplier, code }, { withCredentials: true })
-            const startResult = await axios.post(
+            const response = await axios.post(
                 `${serverAddress}/tracers/execute`, { action: 'start', args: [] }, { withCredentials: true }
             )
-            dispatch<Action>({ type: 'debug/start', payload: { results: startResult.data } })
+            dispatch<Action>({ type: 'debug/start', payload: { results: response.data } })
         } catch (error) {
             dispatch<Action>({ type: 'debug/start', error: error.response ? error.response.data : error.toString() })
         }
@@ -80,3 +83,22 @@ export function stop() {
         }
     }
 }
+
+export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue') {
+    return async (dispatch: ThunkDispatch) => {
+        dispatch<Action>({ type: 'debug/step' })
+        try {
+            const response = await axios.post(
+                `${serverAddress}/tracers/execute`, { action, args: [] }, { withCredentials: true }
+            )
+            dispatch<Action>({ type: 'debug/step', payload: { results: response.data } })
+        } catch (error) {
+            dispatch<Action>({ type: 'debug/step', error: error.response ? error.response.data : error.toString() })
+        }
+
+    }
+}
+
+// 'input'
+// 'getBreakpoints'
+// 'setBreakpoints'
