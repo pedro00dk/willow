@@ -56,16 +56,16 @@ def run_controlled(tracer_broker: broker.TracerBroker):
         action = action_data[:split_index if split_index != -1 else None]
         value = action_data[split_index + 1: 0 if split_index == -1 else None]
         try:
-            if action == 'start':
+            if action == message.Action.START:
                 print_results(tracer_broker.start())
-            elif action == 'stop':
+            elif action == message.Action.STOP:
                 try:
                     tracer_broker.stop()
                 except Exception:
                     pass
-            elif action == 'input':
+            elif action == message.Action.INPUT:
                 tracer_broker.input(value)
-            elif action == 'step':
+            elif action == message.Action.STEP:
                 results = tracer_broker.step()
                 print_results(results)
             else:

@@ -5,9 +5,8 @@ class Action:
 
     START = 'start'
     STOP = 'stop'
-    STEP = 'step'
-    EVAL = 'eval'
     INPUT = 'input'
+    STEP = 'step'
 
 
 class Result:
