@@ -74,6 +74,10 @@ export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps,
         [editor]
     )
     React.useEffect(
+        () => { props.dispatch<CodeAction>({ type: 'code/setLanguage', payload: { language: props.mode } }) },
+        [props.mode]
+    )
+    React.useEffect(
         () => {
             if (!editor) return
             const breakpointDecoration = css({ backgroundColor: 'LightCoral' })
