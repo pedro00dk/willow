@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Reducer } from 'redux'
 import { serverAddress } from '../server'
-import { ThunkAction, ThunkDispatch } from './Store'
+import { StoreAction } from './Store'
 
 
 export type State = {
@@ -55,7 +55,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function start(): ThunkAction {
+export function start(): StoreAction {
     return async (dispatch, getState) => {
         dispatch<Action>({ type: 'debug/start' })
         try {
@@ -75,7 +75,7 @@ export function start(): ThunkAction {
     }
 }
 
-export function stop(): ThunkAction {
+export function stop(): StoreAction {
     return async dispatch => {
         dispatch<Action>({ type: 'debug/stop' })
         try {
@@ -89,7 +89,7 @@ export function stop(): ThunkAction {
     }
 }
 
-export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): ThunkAction {
+export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): StoreAction {
     return async dispatch => {
         dispatch<Action>({ type: 'debug/step' })
         try {

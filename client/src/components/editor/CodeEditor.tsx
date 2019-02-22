@@ -2,7 +2,7 @@ import * as ace from 'brace'
 import { css } from 'emotion'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { CodeAction, CodeState, StoreState, ThunkDispatchProp } from '../../reducers/Store'
+import { CodeAction, CodeState, StoreDispatchProp, StoreState } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 
@@ -38,7 +38,7 @@ type CodeEditorProps = {
 // tslint:disable-next-line:variable-name
 export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps, StoreState>(
     state => ({ code: state.code })
-)((props: ThunkDispatchProp & ConnectedCodeEditorProps & CodeEditorProps) => {
+)((props: StoreDispatchProp & ConnectedCodeEditorProps & CodeEditorProps) => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(
         () => {

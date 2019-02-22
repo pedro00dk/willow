@@ -8,11 +8,11 @@ import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { IOEditor } from './components/editor/IOEditor'
 import { fetch } from './reducers/session'
-import { ThunkDispatchProp } from './reducers/Store'
+import { StoreDispatchProp } from './reducers/Store'
 
 
 // tslint:disable-next-line:variable-name
-export const App = connect()((props: ThunkDispatchProp) => {
+export const App = connect()((props: StoreDispatchProp) => {
     React.useEffect(() => { props.dispatch(fetch()) })
     return <div className={cn('container-fluid', css({ height: '100vh' }))}>
         <div className='row'>

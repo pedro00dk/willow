@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Reducer } from 'redux'
 import { serverAddress } from '../server'
-import { ThunkAction, ThunkDispatch } from './Store'
+import { StoreAction } from './Store'
 
 
 export type State = {
@@ -30,7 +30,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function fetch(): ThunkAction {
+export function fetch(): StoreAction {
     return async dispatch => {
         dispatch<Action>({ type: 'session/fetch' })
         try {

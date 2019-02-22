@@ -1,9 +1,7 @@
 import * as React from 'react'
 import { Provider } from 'react-redux'
 import * as Redux from 'redux'
-import {
-    default as thunk, ThunkAction as ReduxThunkThunkAction, ThunkDispatch as ReduxThunkThunkDispatch, ThunkMiddleware
-} from 'redux-thunk'
+import { default as thunk, ThunkAction, ThunkDispatch, ThunkMiddleware } from 'redux-thunk'
 import { reducer as CodeReducer } from './code'
 import { reducer as DebugReducer } from './debug'
 import { reducer as IOReducer } from './io'
@@ -23,9 +21,8 @@ export type StoreState = ReturnType<typeof reduxStore.getState>
 
 // export thunk action and dispatch with resolved generics and its prop form
 // they shall be used instead of redux Action, Dispatch and react-redux DispatchProp
-export type ThunkAction<R = void> = ReduxThunkThunkAction<R, StoreState, void, Redux.AnyAction>
-export type ThunkDispatch = ReduxThunkThunkDispatch<StoreState, void, Redux.AnyAction>
-export type ThunkDispatchProp = { dispatch: ThunkDispatch }
+export type StoreAction<R = void> = ThunkAction<R, StoreState, void, Redux.AnyAction>
+export type StoreDispatchProp = { dispatch: ThunkDispatch<StoreState, void, Redux.AnyAction> }
 
 // export renamed action and state types
 export { Action as CodeAction, State as CodeState } from './code'
