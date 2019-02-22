@@ -18,6 +18,10 @@ const reduxStore = reduxStoreCreator(Redux.combineReducers({
 }))
 
 export type StoreState = ReturnType<typeof reduxStore.getState>
+export type CodeStateProp = { code: StoreState['code'] }
+export type DebugStateProp = { debug: StoreState['debug'] }
+export type IOStateProp = { io: StoreState['io'] }
+export type SessionStateProp = { session: StoreState['session'] }
 
 // export thunk action and dispatch with resolved generics and its prop form
 // they shall be used instead of redux Action, Dispatch and react-redux DispatchProp
@@ -25,10 +29,10 @@ export type StoreAction<R = void> = ThunkAction<R, StoreState, void, Redux.AnyAc
 export type StoreDispatchProp = { dispatch: ThunkDispatch<StoreState, void, Redux.AnyAction> }
 
 // export renamed action and state types
-export { Action as CodeAction, State as CodeState } from './code'
-export { Action as DebugAction, State as DebugState } from './debug'
-export { Action as IOAction, State as IOState } from './io'
-export { Action as SessionAction, State as SessionState } from './session'
+export { Action as CodeAction } from './code'
+export { Action as DebugAction } from './debug'
+export { Action as IOAction } from './io'
+export { Action as SessionAction } from './session'
 
 
 export function Store(props: { children?: any }) {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { start, step, stop } from '../reducers/debug'
-import { CodeState, DebugState, StoreDispatchProp, StoreState } from '../reducers/Store'
+import { CodeStateProp, DebugStateProp, StoreDispatchProp, StoreState } from '../reducers/Store'
 
 import playImg from '../../public/buttons/play.png'
 import restartImg from '../../public/buttons/restart.png'
@@ -11,12 +11,11 @@ import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 
 
-type ConnectedDebuggerProps = { code: CodeState, debug: DebugState }
 type DebuggerProps = {}
 // tslint:disable-next-line:variable-name
-export const Debugger = connect<ConnectedDebuggerProps, {}, DebuggerProps, StoreState>(
+export const Debugger = connect<CodeStateProp & DebugStateProp, {}, DebuggerProps, StoreState>(
     state => ({ code: state.code, debug: state.debug })
-)((props: StoreDispatchProp & ConnectedDebuggerProps & DebuggerProps) => {
+)((props: StoreDispatchProp & CodeStateProp & DebugStateProp & DebuggerProps) => {
     return <>
         <img src={playImg} className='h-100'
             onClick={

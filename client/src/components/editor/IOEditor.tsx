@@ -1,7 +1,7 @@
 import * as ace from 'brace'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { IOState, StoreDispatchProp, StoreState } from '../../reducers/Store'
+import { IOStateProp, StoreDispatchProp, StoreState } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 
@@ -14,12 +14,11 @@ type EditorExecEvent = {
     stopPropagation: () => void
 }
 
-type ConnectedIOEditorProps = { io: IOState }
 type IOEditorProps = {}
 // tslint:disable-next-line:variable-name
-export const IOEditor = connect<ConnectedIOEditorProps, {}, IOEditorProps, StoreState>(
+export const IOEditor = connect<IOStateProp, {}, IOEditorProps, StoreState>(
     state => ({ io: state.io })
-)((props: StoreDispatchProp & ConnectedIOEditorProps & IOEditorProps) => {
+)((props: StoreDispatchProp & IOStateProp & IOEditorProps) => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(
         () => {

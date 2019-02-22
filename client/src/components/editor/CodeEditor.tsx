@@ -2,7 +2,7 @@ import * as ace from 'brace'
 import { css } from 'emotion'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { CodeAction, CodeState, StoreDispatchProp, StoreState } from '../../reducers/Store'
+import { CodeAction, CodeStateProp, StoreDispatchProp, StoreState } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 
@@ -30,15 +30,14 @@ type EditorMarker = {
 const { Range } = ace.acequire('ace/range') as
     { Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range }
 
-type ConnectedCodeEditorProps = { code: CodeState }
 type CodeEditorProps = {
     mode: 'java' | 'python'
     font?: number
 }
 // tslint:disable-next-line:variable-name
-export const CodeEditor = connect<ConnectedCodeEditorProps, {}, CodeEditorProps, StoreState>(
+export const CodeEditor = connect<CodeStateProp, {}, CodeEditorProps, StoreState>(
     state => ({ code: state.code })
-)((props: StoreDispatchProp & ConnectedCodeEditorProps & CodeEditorProps) => {
+)((props: StoreDispatchProp & CodeStateProp & CodeEditorProps) => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(
         () => {
