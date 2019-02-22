@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Reducer } from 'redux'
 import { serverAddress } from '../server'
-import { ThunkDispatch } from './Store'
+import { ThunkAction, ThunkDispatch } from './Store'
 
 
 export type State = {
@@ -30,8 +30,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function fetch() {
-    return async (dispatch: ThunkDispatch) => {
+export function fetch(): ThunkAction {
+    return async dispatch => {
         dispatch<Action>({ type: 'session/fetch' })
         try {
             const session = (await axios.get(`${serverAddress}/session`, { withCredentials: true }))

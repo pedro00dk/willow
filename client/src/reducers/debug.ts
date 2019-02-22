@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Reducer } from 'redux'
 import { serverAddress } from '../server'
-import { ThunkDispatch } from './Store'
+import { ThunkAction, ThunkDispatch } from './Store'
 
 
 export type State = {
@@ -42,7 +42,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
         case 'debug/input':
             break
         case 'debug/step':
-        // TODO check when debug ends
+            // TODO check when debug ends
             return !action.payload && !action.error
                 ? { ...state, fetching: true }
                 : action.payload
@@ -55,11 +55,16 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function start(supplier: string, code: string) {
-    return async (dispatch: ThunkDispatch) => {
+export function start(): ThunkAction {
+    return async (dispatch, getState) => {
         dispatch<Action>({ type: 'debug/start' })
         try {
-            await axios.post(`${serverAddress}/tracers/create`, { supplier, code }, { withCredentials: true })
+            const codeState = getState().code
+            await axios.post(
+                `${serverAddress}/tracers/create`,
+                { supplier: codeState.language, code: codeState.text.join('\n') },
+                { withCredentials: true }
+            )
             const response = await axios.post(
                 `${serverAddress}/tracers/execute`, { action: 'start', args: [] }, { withCredentials: true }
             )
@@ -70,8 +75,8 @@ export function start(supplier: string, code: string) {
     }
 }
 
-export function stop() {
-    return async (dispatch: ThunkDispatch) => {
+export function stop(): ThunkAction {
+    return async dispatch => {
         dispatch<Action>({ type: 'debug/stop' })
         try {
             await axios.post(
@@ -84,8 +89,8 @@ export function stop() {
     }
 }
 
-export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue') {
-    return async (dispatch: ThunkDispatch) => {
+export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): ThunkAction {
+    return async dispatch => {
         dispatch<Action>({ type: 'debug/step' })
         try {
             const response = await axios.post(
