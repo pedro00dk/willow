@@ -1,11 +1,11 @@
 import { Reducer } from 'redux'
 
 
-export type State = {
+type State = {
     readonly output: ReadonlyArray<string>
     readonly input: ReadonlyArray<string>
 }
-export type Action =
+type Action =
     { type: 'io/reset' } |
     { type: 'io/appendOutput', payload: { output: string } } |
     { type: 'io/commitInput' } |

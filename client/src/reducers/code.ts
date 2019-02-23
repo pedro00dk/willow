@@ -1,13 +1,13 @@
 import { Reducer } from 'redux'
 
 
-export type State = {
+type State = {
     readonly language: string,
     readonly text: string[]
     readonly breakpoints: ReadonlySet<number>
     readonly markers: ReadonlySet<{ line: number, type: 'highlight' | 'warning' | 'error' }>
 }
-export type Action =
+type Action =
     { type: 'code/setLanguage', payload: { language: string } } |
     { type: 'code/setText', payload: { text: string[] } } |
     { type: 'code/setBreakpoint', payload: { line: number } } |

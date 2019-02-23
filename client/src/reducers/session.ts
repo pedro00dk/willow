@@ -1,15 +1,15 @@
 import axios from 'axios'
 import { Reducer } from 'redux'
 import { serverAddress } from '../server'
-import { StoreAction } from './Store'
+import { ThunkAction } from './Store'
 
 
-export type State = {
+type State = {
     readonly session: string
     readonly fetching: boolean
     readonly failed: boolean
 }
-export type Action = { type: 'session/fetch', payload?: { session: string }, error?: string }
+type Action = { type: 'session/fetch', payload?: { session: string }, error?: string }
 
 const initialState: State = {
     session: undefined,
@@ -30,14 +30,14 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function fetch(): StoreAction {
+export function fetch(): ThunkAction {
     return async dispatch => {
-        dispatch<Action>({ type: 'session/fetch' })
+        dispatch({ type: 'session/fetch' })
         try {
             const session = (await axios.get(`${serverAddress}/session`, { withCredentials: true }))
-            dispatch<Action>({ type: 'session/fetch', payload: { session: session.data.session } })
+            dispatch({ type: 'session/fetch', payload: { session: session.data.session } })
         } catch (error) {
-            dispatch<Action>({ type: 'session/fetch', error: error.message })
+            dispatch({ type: 'session/fetch', error: error.message })
         }
     }
 }

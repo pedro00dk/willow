@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { Provider } from 'react-redux'
 import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkDispatch, ThunkMiddleware } from 'redux-thunk'
 import { reducer as CodeReducer } from './code'
@@ -7,36 +6,86 @@ import { reducer as DebugReducer } from './debug'
 import { reducer as IOReducer } from './io'
 import { reducer as SessionReducer } from './session'
 
+type State = {
+    code: Parameters<typeof CodeReducer>[0]
+    debug: Parameters<typeof DebugReducer>[0]
+    io: Parameters<typeof IOReducer>[0]
+    session: Parameters<typeof SessionReducer>[0]
+}
+type Action = Parameters<typeof CodeReducer>[1] |
+    Parameters<typeof DebugReducer>[1] |
+    Parameters<typeof IOReducer>[1] |
+    Parameters<typeof SessionReducer>[1]
+type SubState = Pick<State, 'code'> |
+    Pick<State, 'debug'> |
+    Pick<State, 'io'> |
+    Pick<State, 'session'>
+export type ThunkAction<R = void> = ThunkAction<R, State, void, Action>
 
-const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware))
+const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware<State, Action, void>))
 const reduxStoreCreator = reduxStoreEnhancer(Redux.createStore)
-const reduxStore = reduxStoreCreator(Redux.combineReducers({
+const reduxStore = reduxStoreCreator(Redux.combineReducers<State, Action>({
     code: CodeReducer,
     debug: DebugReducer,
     io: IOReducer,
     session: SessionReducer
 }))
+const storeContext = React.createContext<typeof reduxStore>(undefined)
 
-export type StoreState = ReturnType<typeof reduxStore.getState>
-export type CodeStateProp = { code: StoreState['code'] }
-export type DebugStateProp = { debug: StoreState['debug'] }
-export type IOStateProp = { io: StoreState['io'] }
-export type SessionStateProp = { session: StoreState['session'] }
-
-// export thunk action and dispatch with resolved generics and its prop form
-// they shall be used instead of redux Action, Dispatch and react-redux DispatchProp
-export type StoreAction<R = void> = ThunkAction<R, StoreState, void, Redux.AnyAction>
-export type StoreDispatchProp = { dispatch: ThunkDispatch<StoreState, void, Redux.AnyAction> }
-
-// export renamed action and state types
-export { Action as CodeAction } from './code'
-export { Action as DebugAction } from './debug'
-export { Action as IOAction } from './io'
-export { Action as SessionAction } from './session'
-
-
-export function Store(props: { children?: any }) {
-    return <Provider store={reduxStore}>
+export function Store(props: { children?}) {
+    return <storeContext.Provider value={reduxStore}>
         {props.children}
-    </Provider>
+    </storeContext.Provider>
+}
+
+function compareStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
+    if (Object.is(prev, next)) return true
+    const prevKeys = Object.keys(prev)
+    const nextKeys = Object.keys(prev)
+    return prevKeys.length === nextKeys.length && nextKeys.reduce((acc, key) => acc && prev[key] === next[key], true)
+}
+
+export function useDispatch() {
+    const store = React.useContext(storeContext)
+    if (!store) throw new Error('Store context not found')
+    return store.dispatch
+}
+
+export function useRedux<T extends SubState>(selector: (state: State) => T) {
+    const store = React.useContext(storeContext)
+    if (!store) throw new Error('Store context not found')
+
+    const firstSelector = React.useCallback(selector, [])
+    const storeReference = React.useRef(store)
+
+    const [selection, setSelection] = React.useState(() => firstSelector(store.getState()))
+    const previousSelection = React.useRef(selection)
+
+    const checkAndSetSelection = () => {
+        const newSubState = selector(store.getState())
+        if (compareStoreSubStates(newSubState, previousSelection.current)) return
+        setSelection(newSubState)
+        previousSelection.current = newSubState
+    }
+
+    if (storeReference.current !== store) {
+        storeReference.current = store
+        checkAndSetSelection()
+    }
+
+    React.useEffect(
+        () => {
+            let didUnsubscribe = false
+            const checkForUpdates = () => !didUnsubscribe ? checkAndSetSelection() : undefined
+            checkForUpdates()
+            const unsubscribe = store.subscribe(checkForUpdates)
+            return () => {
+                didUnsubscribe = true
+                unsubscribe()
+            }
+        },
+        [store, selector]
+    )
+
+    return selection
 }

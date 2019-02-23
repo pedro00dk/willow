@@ -2,18 +2,18 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { Responsive } from 'react-grid-layout'
-import { connect } from 'react-redux'
 import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { IOEditor } from './components/editor/IOEditor'
 import { fetch } from './reducers/session'
-import { StoreDispatchProp } from './reducers/Store'
+import { useDispatch, useRedux } from './reducers/Store'
 
 
-// tslint:disable-next-line:variable-name
-export const App = connect()((props: StoreDispatchProp) => {
-    React.useEffect(() => { props.dispatch(fetch()) })
+export function App() {
+    const dispatch = useDispatch()
+    const session = useRedux(state => ({ session: state.session })).session
+    React.useEffect(() => { dispatch(fetch()) }, [])
     return <div className={cn('container-fluid', css({ height: '100vh' }))}>
         <div className='row'>
             <div className='col p-0'>
@@ -26,7 +26,7 @@ export const App = connect()((props: StoreDispatchProp) => {
             </div>
         </div>
     </div>
-})
+}
 
 function Header() {
     return <nav className='navbar navbar-expand static-top navbar-dark bg-dark shadow'>

@@ -9,11 +9,12 @@ import 'brace/mode/text'
 import 'brace/theme/chrome'
 
 
-type EditorProps = {
+type Props = {
     onEditorUpdate?: (editor: ace.Editor) => void
 }
-// tslint:disable-next-line:variable-name
-export const TextEditor = React.memo((props: EditorProps) => {
+// tslint:disable-next-line: variable-name
+export const MemoTextEditor = React.memo(TextEditor)
+export function TextEditor(props: Props) {
     const editorRef = React.useRef<HTMLDivElement>(undefined)
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(
@@ -45,4 +46,4 @@ export const TextEditor = React.memo((props: EditorProps) => {
     )
 
     return <div ref={editorRef} className='w-100 h-100' />
-})
+}
