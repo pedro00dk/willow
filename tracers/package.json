@@ -26,10 +26,10 @@
     "config": {
         "main": "./dist/src/index.js",
         "test": "./dist/test",
-        "java-supplier": "cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main {}",
-        "java-supplier-test": "cd ./JavaTracer/ && javac -cp src:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out src/Main.java &> /dev/null && java -cp out:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main --test {}",
-        "python-supplier": "cd ./PythonTracer/ && python -OO ./src/main.py {}",
-        "python-supplier-test": "cd ./PythonTracer/ && python -OO ./src/main.py --test {}",
+        "java-supplier": "cd ./JavaTracer/ && source './run.sh' {}",
+        "python-supplier": "cd ./PythonTracer/ && source './run.sh' {}",
+        "java-supplier-test": "cd ./JavaTracer/ && source './run.sh' --test {}",
+        "python-supplier-test": "cd ./PythonTracer/ && source './run.sh' --test {}",
         "java-docker-image": "tracer:java",
         "python-docker-image": "tracer:python",
         "tracer-docker-image": "tracer:server"
