@@ -7,8 +7,8 @@ jobs:
       - run: apt update
       - run: apt install -y curl git gnupg2 software-properties-common
       - run: curl -sL https://deb.nodesource.com/setup_11.x | bash -
-      - run: add-apt-repository ppa:openjdk-r/ppa
-      - run: apt install -y nodejs python openjdk-11-jdk
+      - run: add-apt-repository -y ppa:openjdk-r/ppa
+      - run: apt install -y nodejs openjdk-11-jdk python
       - run: rm /usr/bin/python
       - run: ln /usr/bin/python3 /usr/bin/python
       - checkout
