@@ -105,7 +105,6 @@ describe(
                     expect(await server.executeOnSession(session.id, 'start', [])).toMatchObject([{ name: 'started' }])
                     expect(await server.executeOnSession(session.id, 'step', [])).toMatchObject([{ name: 'data' }])
                     expect(await server.executeOnSession(session.id, 'stop', [])).toBeUndefined()
-                    expect(server.getSessions()).toEqual([])
                 }
             )
         }
