@@ -1,0 +1,18 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: ubuntu:latest
+    steps:
+      - run: apt update
+      - run: apt install -y curl git gnupg2 software-properties-common
+      - run: curl -sL https://deb.nodesource.com/setup_11.x | bash -
+      - run: add-apt-repository ppa:openjdk-r/ppa
+      - run: apt install -y nodejs python openjdk-11-jdk
+      - run: rm /usr/bin/python
+      - run: ln /usr/bin/python3 /usr/bin/python
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: npm install
+      - run: npm run test
