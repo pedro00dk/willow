@@ -2,13 +2,12 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: ubuntu:latest
+      - image: adoptopenjdk/openjdk11:slim # ubuntu:18.04 + curl + openjdk 11 (heavy to install in steps)
     steps:
       - run: apt update
-      - run: apt install -y curl git gnupg2 software-properties-common
+      - run: apt install -y git gnupg2 python
       - run: curl -sL https://deb.nodesource.com/setup_11.x | bash -
-      - run: add-apt-repository -y ppa:openjdk-r/ppa
-      - run: apt install -y nodejs openjdk-11-jdk python
+      - run: apt install -y nodejs
       - run: rm /usr/bin/python
       - run: ln /usr/bin/python3 /usr/bin/python
       - checkout
