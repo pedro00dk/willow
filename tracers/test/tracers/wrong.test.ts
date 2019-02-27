@@ -32,7 +32,7 @@ describe(
 describe(
     'existent invalid command',
     () => {
-        const command = 'sh {}'
+        const command = '/bin/bash {}'
         const code = ''
         const wrongCommandWithCode = createCommandWithCommand(command, code)
         test(
