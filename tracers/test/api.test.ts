@@ -103,7 +103,6 @@ describe(
                     const session = server.createSession(supplier, '!@#$% ignored code %$#@!')
                     expect(session.supplier).toEqual(supplier)
                     expect(await server.executeOnSession(session.id, 'start', [])).toMatchObject([{ name: 'started' }])
-                    expect(await server.executeOnSession(session.id, 'step', [])).toMatchObject([{ name: 'data' }])
                     expect(await server.executeOnSession(session.id, 'stop', [])).toBeUndefined()
                 }
             )
