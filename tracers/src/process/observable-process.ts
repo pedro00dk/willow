@@ -49,7 +49,7 @@ export class ObservableProcess<T extends string = string> {
             log.error(ObservableProcess.name, error)
             throw new Error(error)
         }
-        this.instance = cp.spawn(this.command, { shell: true })
+        this.instance = cp.spawn(this.command, { shell: '/bin/bash' })
         log.info(ObservableProcess.name, 'process started')
         const stopObservable = rx.merge(rx.fromEvent(this.instance, 'error'), rx.fromEvent(this.instance, 'exit'))
             .pipe(rxOps.take(1))
