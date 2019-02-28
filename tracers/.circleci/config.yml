@@ -30,29 +30,27 @@ jobs:
       - image: google/cloud-sdk:alpine
     steps:
       - run: |
-          # GCLOUD_SERVICE_KEY, GCLOUD_PROJECT_ID and GCLOUD_COMPUTE_ZONE must be stored in circleci variables
+          # GCLOUD_SERVICE_ACCOUNT_KEY_FILE, GCLOUD_PROJECT_ID and GCLOUD_COMPUTE_ZONE must be stored in circleci
           INSTANCE_NAME='tracer-server'
 
-          echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
-          # gcloud --quiet config set project $GCLOUD_PROJECT_ID
-          # gcloud config set compute/zone $GCLOUD_COMPUTE_ZONE
+          echo $GCLOUD_SERVICE_ACCOUNT_KEY_FILE | gcloud auth activate-service-account --key-file=-
+          gcloud --quiet config set project $GCLOUD_PROJECT_ID
+          gcloud config set compute/zone $GCLOUD_COMPUTE_ZONE
 
-          INSTANCE_STATE=$(gcloud compute instances list --filter='name:instance-2' --format='value(status())')
+          INSTANCE_STATE=$(gcloud compute instances list --filter="name:$INSTANCE_NAME" --format='value(status())')
           if [ -z "$INSTANCE_STATE" ]; then # Instance does not exist (create one)
-              gcloud compute --project=$GCLOUD_PROJECT_ID instances create $INSTANCE_NAME --zone=$GCLOUD_COMPUTE_ZONE \
+              gcloud compute instances create $INSTANCE_NAME \
                   --machine-type=f1-micro --subnet=default --network-tier=PREMIUM --maintenance-policy=MIGRATE \
-                  --service-account=309861559258-compute@developer.gserviceaccount.com \
-                  --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append
                   --tags=http-server,https-server --image=ubuntu-minimal-1804-bionic-v20190218 \
                   --image-project=ubuntu-os-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard \
                   --boot-disk-device-name=$INSTANCE_NAME
               # create and configure firewalls (ignore if already created)
-              gcloud compute --project=$GCLOUD_PROJECT_ID firewall-rules create default-allow-http --direction=INGRESS \
-                  --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 \
-                  --target-tags=http-server 2>&1
-              gcloud compute --project=$GCLOUD_PROJECT_ID firewall-rules create default-allow-https --direction=INGRESS \
-                  --priority=1000 --network=default --action=ALLOW --rules=tcp:443 --source-ranges=0.0.0.0/0 \
-                  --target-tags=https-server 2>&1
+              (gcloud compute firewall-rules create default-allow-http \
+                  --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 \
+                  --source-ranges=0.0.0.0/0 --target-tags=http-server) 2>&1
+              (gcloud compute firewall-rules create default-allow-https \
+                  --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:443 \
+                  --source-ranges=0.0.0.0/0 --target-tags=https-server) 2>&1
           fi
 
 workflows:
