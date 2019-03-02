@@ -5,22 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Chrome launch",
+            "name": "Launch",
             "type": "chrome",
             "request": "launch",
             "url": "http://localhost:8000",
             "runtimeExecutable": "/usr/bin/google-chrome-stable",
-            "webRoot": "${workspaceFolder}",
-            "sourceMapPathOverrides": {
-                "../*": "${webRoot}/*"
-            }
-        },
-        {
-            "name": "Chrome attach",
-            "type": "chrome",
-            "request": "attach",
-            "url": "http://localhost:8000",
-            "port": 9222,
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
                 "../*": "${webRoot}/*"

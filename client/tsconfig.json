@@ -6,6 +6,6 @@
             "esnext"
         ],
         "jsx": "react",
-        "outDir": "../dist/client/"
+        "outDir": "./dist/"
     }
 }
