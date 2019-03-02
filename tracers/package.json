@@ -20,9 +20,9 @@
         "main": "./dist/src/index.js",
         "test": "./dist/test",
         "java_supplier": "cd ../tracerJava/ && source './run.sh' {}",
-        "python_supplier": "cd ../tracerPython/ && source './run.sh' {}",
+        "python_supplier": "cd ../tracerPython/ && source ./package.sh start {}",
         "java_supplier_test": "cd ../tracerJava/ && source './run.sh' --test {}",
-        "python_supplier_test": "cd ../tracerPython/ && source './run.sh' --test {}"
+        "python_supplier_test": "cd ../tracerPython/ && source ./package.sh start --test {}"
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
