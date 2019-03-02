@@ -34,7 +34,7 @@
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
-        "build": "parcel build --no-cache --no-source-maps --public-url ./ --out-dir ./dist/build -- ./public/index.html",
-        "start": "SERVER_ADDRESS=$npm_package_config_server parcel serve --no-cache --port 8000 -- ./public/index.html"
+        "build": "parcel build --no-cache --no-source-maps --public-url ./ --out-dir ../dist/client/build -- ./public/index.html",
+        "start": "SERVER_ADDRESS=$npm_package_config_server parcel serve --no-cache --public-url ./ --out-dir ../dist/client/serve --port 8000 -- ./public/index.html"
     }
 }

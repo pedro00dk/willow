@@ -1,9 +1,6 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "target": "es5",
-        "lib": ["esnext"],
-        "downlevelIteration": true,
-        "sourceMap": true,
-        "outDir": "./dist/"
+        "outDir": "../dist/server/"
     }
 }
