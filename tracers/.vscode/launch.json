@@ -5,26 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "NPM debug",
+            "name": "Launch",
             "type": "node",
             "request": "launch",
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
-                "run-script",
-                "debug"
-            ],
-            "port": 9229
-        },
-        {
-            "name": "NPM debug-tracers",
-            "type": "node",
-            "request": "launch",
-            "console": "integratedTerminal",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run-script",
+                "run",
                 "debug-tracers"
+            ],
+            "args": [
+                "--",
+                "--port",
+                "${input:port}"
             ],
             "port": 9229
         },
@@ -34,6 +27,14 @@
             "request": "attach",
             "cwd": "${workspaceFolder}",
             "processId": "${command:PickProcess}"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "port",
+            "type": "promptString",
+            "default": "8001",
+            "description": "port",
         }
     ]
 }

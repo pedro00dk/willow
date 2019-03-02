@@ -1,11 +1,4 @@
 {
-    "name": "tracer_server",
-    "version": "0.0.1",
-    "author": {
-        "name": "Pedro Henrique",
-        "email": "pedro00dk@gmail.com"
-    },
-    "license": "ISC",
     "main": "./src/index.ts",
     "devDependencies": {
         "@types/express": "^4.16.1",
@@ -26,27 +19,18 @@
     "config": {
         "main": "./dist/src/index.js",
         "test": "./dist/test",
-        "java-supplier": "cd ./JavaTracer/ && source './run.sh' {}",
-        "python-supplier": "cd ./PythonTracer/ && source './run.sh' {}",
-        "java-supplier-test": "cd ./JavaTracer/ && source './run.sh' --test {}",
-        "python-supplier-test": "cd ./PythonTracer/ && source './run.sh' --test {}",
-        "java-docker-image": "tracer:java",
-        "python-docker-image": "tracer:python",
-        "tracer-docker-image": "tracer:server"
+        "java_supplier": "cd ../tracerJava/ && source './run.sh' {}",
+        "python_supplier": "cd ../tracerPython/ && source './run.sh' {}",
+        "java_supplier_test": "cd ../tracerJava/ && source './run.sh' --test {}",
+        "python_supplier_test": "cd ../tracerPython/ && source './run.sh' --test {}"
     },
     "scripts": {
         "lint": "tslint --config ./tslint.json --project ./package.json",
-        "test": "tsc && jest --coverage --detectOpenHandles --forceExit $npm_package_config_test",
-        "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk=9229 $npm_package_config_main",
+        "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- $npm_package_config_test",
+        "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- $npm_package_config_main",
         "debug-tracers": "npm run debug -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
-        "start": "tsc && node --require source-map-support/register $npm_package_config_main",
+        "start": "tsc && node --require source-map-support/register -- $npm_package_config_main",
         "start-tracers": "npm run start -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
-        "start-tracers-test": "npm run start -- --tracer java \"$npm_package_config_java_supplier_test\" --tracer python \"$npm_package_config_python_supplier_test\"",
-        "docker-tracer-java-build": "docker image build --file ./JavaTracer/Dockerfile --tag $npm_package_config_java_docker_image -- ./JavaTracer/",
-        "docker-tracer-python-build": "docker image build --file ./PythonTracer/Dockerfile --tag $npm_package_config_python_docker_image -- ./PythonTracer/",
-        "docker-server-build": "docker image build --tag $npm_package_config_tracer_docker_image -- ./",
-        "docker-build": "npm run docker-tracer-java-build && npm run docker-tracer-python-build && npm run docker-server-build",
-        "docker-start": "docker container run --rm --interactive --tty --publish 8000:8000 -- $npm_package_config_tracer_docker_image --",
-        "docker-start-tracers": "docker container run --rm --interactive --tty --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock -- $npm_package_config_tracer_docker_image -- --tracer java \"docker run --rm -i $npm_package_config_java_docker_image {}\" --tracer python \"docker run --rm -i $npm_package_config_python_docker_image {}\""
+        "start-tracers-test": "npm run start -- --tracer java \"$npm_package_config_java_supplier_test\" --tracer python \"$npm_package_config_python_supplier_test\""
     }
 }
