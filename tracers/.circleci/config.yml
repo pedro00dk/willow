@@ -1,0 +1,63 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: adoptopenjdk/openjdk11:slim # ubuntu:18.04 + curl + openjdk 11 (heavy to install in steps)
+    steps:
+      - run:
+          name: configure environment
+          command: |
+            apt update
+            apt install -y git gnupg2 python
+            curl -sL https://deb.nodesource.com/setup_11.x | bash -
+            apt install -y nodejs
+            rm /usr/bin/python
+            ln /usr/bin/python3 /usr/bin/python
+      - checkout
+      - run:
+          name: fetch git submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
+          name: download dependencies
+          command: npm install
+      - run:
+          name: test
+          command: npm run test
+  deploy:
+    docker:
+      - image: google/cloud-sdk:alpine
+    steps:
+      - run: |
+          # GCLOUD_SERVICE_ACCOUNT_KEY_FILE, GCLOUD_PROJECT_ID and GCLOUD_COMPUTE_ZONE must be stored in circleci
+          INSTANCE_NAME='tracer-server'
+
+          echo $GCLOUD_SERVICE_ACCOUNT_KEY_FILE | gcloud auth activate-service-account --key-file=-
+          gcloud --quiet config set project $GCLOUD_PROJECT_ID
+          gcloud config set compute/zone $GCLOUD_COMPUTE_ZONE
+
+          INSTANCE_STATE=$(gcloud compute instances list --filter="name:$INSTANCE_NAME" --format='value(status())')
+          if [ -z "$INSTANCE_STATE" ]; then # Instance does not exist (create one)
+              gcloud compute instances create $INSTANCE_NAME \
+                  --machine-type=f1-micro --subnet=default --network-tier=PREMIUM --maintenance-policy=MIGRATE \
+                  --tags=http-server,https-server --image=ubuntu-minimal-1804-bionic-v20190218 \
+                  --image-project=ubuntu-os-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard \
+                  --boot-disk-device-name=$INSTANCE_NAME
+              # create and configure firewalls (ignore if already created)
+              (gcloud compute firewall-rules create default-allow-http \
+                  --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 \
+                  --source-ranges=0.0.0.0/0 --target-tags=http-server) 2>&1
+              (gcloud compute firewall-rules create default-allow-https \
+                  --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:443 \
+                  --source-ranges=0.0.0.0/0 --target-tags=https-server) 2>&1
+          fi
+
+workflows:
+  version: 2
+  test_deploy:
+    jobs:
+      - test
+      # - deploy:
+      #     requires:
+      #       - test
