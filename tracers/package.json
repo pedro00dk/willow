@@ -19,9 +19,9 @@
     "config": {
         "main": "./dist/src/index.js",
         "test": "./dist/test",
-        "java_supplier": "cd ../tracerJava/ && source './run.sh' {}",
+        "java_supplier": "cd ../tracerJava/ && source ./package.sh build && source ./package.sh start {}",
         "python_supplier": "cd ../tracerPython/ && source ./package.sh start {}",
-        "java_supplier_test": "cd ../tracerJava/ && source './run.sh' --test {}",
+        "java_supplier_test": "cd ../tracerJava/ && source ./package.sh build && source ./package.sh start --test {}",
         "python_supplier_test": "cd ../tracerPython/ && source ./package.sh start --test {}"
     },
     "scripts": {

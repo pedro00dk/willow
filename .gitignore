@@ -24,7 +24,6 @@ coverage
 
 
 ### Java
-
 *.class
 *.log
 #*.jar
