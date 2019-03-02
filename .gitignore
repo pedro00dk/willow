@@ -1,0 +1,43 @@
+### Visual Studio Code
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+#!.vscode/settings.json
+#!.vscode/extensions.json
+
+### JetBrains
+.idea/
+.idea_modules/
+*.iws
+out/
+bin/
+
+### NodeJS
+node_modules/
+package-lock.json
+# parcel
+.cache
+dist/
+#
+coverage
+.npm
+
+
+### Java
+
+*.class
+*.log
+#*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+### Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv
