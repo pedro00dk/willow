@@ -13,6 +13,7 @@
     "dependencies": {
         "express": "^4.16.4",
         "npmlog": "^4.1.2",
+        "protobufjs": "^6.8.8",
         "rxjs": "^6.4.0",
         "yargs": "^12.0.5"
     },
@@ -25,6 +26,7 @@
         "python_supplier_test": "cd ../tracerPython/ && source ./package.sh start --test {}"
     },
     "scripts": {
+        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/* && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
         "lint": "tslint --config ./tslint.json --project ./package.json",
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- $npm_package_config_test",
         "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- $npm_package_config_main",
