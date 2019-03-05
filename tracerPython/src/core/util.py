@@ -80,10 +80,6 @@ class ExceptionUtil:
     """
 
     def dump(exception: Exception, with_traceback: types.TracebackType = None, remove_lines: tuple = ()):
-        """
-        Raised exception cannot be pickled because of their traceback objects.
-        This method transforms the exception in a dict with all data.
-        """
         formatted_traceback = traceback.format_exception(
             type(exception),
             exception,
@@ -91,6 +87,6 @@ class ExceptionUtil:
         )
         return {
             'type': type(exception).__name__,
-            'args': exception.args,
+            'args': [str(arg) for arg in exception.args],
             'traceback': [line for i, line in enumerate(formatted_traceback) if i not in remove_lines]
         }
