@@ -1,10 +1,8 @@
 import collections
+import message
 import multiprocessing as mp
 import sys
 import types
-
-import message
-
 from . import scope
 from .inspector import Inspector
 from .io import HookedInput, HookedPrint
@@ -18,15 +16,9 @@ class Tracer:
 
     @staticmethod
     def init_run(name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
-        """
-        Initializes the tracer and run it in a single function, useful to start the tracer in a separated process.
-        """
         Tracer(name, code, sandbox, action_queue, result_queue).run()
 
     def __init__(self, name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
-        """
-        Initializes the tracer with the code name, python code and sandbox flag.
-        """
         self._name = name
         self._code = code
         self._sandbox = sandbox
@@ -34,9 +26,6 @@ class Tracer:
         self._result_queue = result_queue
 
     def run(self):
-        """
-        Configures the scope and runs the tracer, giving the tracing control to the frame processor.
-        """
         frame_processor = FrameProcessor(self._name, self._action_queue, self._result_queue)
 
         globals_builder, modules_halter = scope.default_scope_composers(self._name)\
@@ -47,7 +36,7 @@ class Tracer:
         scope_instance = modules_halter.apply(globals_builder.build())
 
         try:
-            self._action_queue.get()  # sync
+            self._action_queue.get()
             compiled = compile(self._code, scope_instance[scope.Globals.FILE], 'exec')
             self._result_queue.put(message.Message(message.Result.STARTED))
             sys.settrace(frame_processor.trace)
@@ -65,13 +54,9 @@ class FrameProcessor:
     """
 
     def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
-        """
-        Initializes the frame processor with the code name and queues.
-        """
         self._name = name
         self._action_queue = action_queue
         self._result_queue = result_queue
-
         self._inspector = Inspector()
 
         # frame common info
@@ -82,9 +67,6 @@ class FrameProcessor:
         self._input_cache = collections.deque()
 
     def trace(self, frame: types.FrameType, event: str, args):
-        """
-        The code trace function.
-        """
         if not FrameUtil.is_file(frame, self._name) or not FrameUtil.is_traceable(event):
             return self.trace
 
@@ -111,10 +93,7 @@ class FrameProcessor:
         return self.trace
 
     def input_hook(self, prompt: str):
-        """
-        Hook action for input implementations.
-        """
-        self._result_queue.put(message.Message(message.Result.PROMPT, prompt))
+        self._result_queue.put(message.Message(message.Result.PRINT, prompt))
 
         # cached input
         if len(self._input_cache) > 0:
@@ -132,7 +111,4 @@ class FrameProcessor:
             self._result_queue.put(message.Message(message.Result.LOCKED, 'input locked, skipping action'))
 
     def print_hook(self, text: str):
-        """
-        Hook action for input implementations.
-        """
         self._result_queue.put(message.Message(message.Result.PRINT, text))

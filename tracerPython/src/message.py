@@ -28,8 +28,5 @@ class Message:
     """
 
     def __init__(self, name: str, value=None):
-        """
-        Crates the message with its name and value.
-        """
         self.name = name
         self.value = value

@@ -1,8 +1,6 @@
-import multiprocessing as mp
-
-import message
-
 from core import tracer
+import message
+import multiprocessing as mp
 
 
 class TracerBroker:
@@ -11,9 +9,6 @@ class TracerBroker:
     """
 
     def __init__(self, name: str, code: str, sandbox: bool):
-        """
-        Stores the Tracer parameters for posterior usage when starting the Tracer.
-        """
         self._name = name
         self._code = code
         self._sandbox = sandbox
@@ -23,15 +18,9 @@ class TracerBroker:
         self._tracer_process = None
 
     def is_tracer_running(self):
-        """
-        Returns true if the tracer is running.
-        """
         return self._tracer_process is not None
 
     def start(self):
-        """
-        Starts the tracer in a new process.
-        """
         if self.is_tracer_running():
             raise AssertionError('tracer already running')
 
@@ -53,14 +42,10 @@ class TracerBroker:
         return [result]
 
     def stop(self):
-        """
-        Stops the tracer process and queues.
-        """
         if not self.is_tracer_running():
             raise AssertionError('tracer already stopped')
 
         self._action_queue.put(message.Message(message.Action.STOP))
-
         self._tracer_process.terminate()
         self._tracer_process.join()
         self._tracer_process = None
@@ -68,21 +53,7 @@ class TracerBroker:
         self._action_queue = None
         self._result_queue = None
 
-    def input(self, data: str):
-        """
-        Sends a input string to the code. Inputs have no response.
-        """
-        if not self.is_tracer_running():
-            raise AssertionError('tracer not running')
-        if data is None:
-            raise AttributeError('data cannot be None')
-
-        self._action_queue.put(message.Message(message.Action.INPUT, data))
-
     def step(self):
-        """
-        Steps into the code.
-        """
         if not self.is_tracer_running():
             raise AssertionError('tracer not running')
 
@@ -98,3 +69,11 @@ class TracerBroker:
             self.stop()
 
         return results
+
+    def input(self, data: str):
+        if not self.is_tracer_running():
+            raise AssertionError('tracer not running')
+        if data is None:
+            raise AttributeError('data cannot be None')
+
+        self._action_queue.put(message.Message(message.Action.INPUT, data))

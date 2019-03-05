@@ -69,25 +69,15 @@ class Globals:
     NAME = '__name__'
 
     def __init__(self):
-        """
-        Initializes the default global scope.
-        """
         host_builtins = globals()[Globals.BUILTINS]
         builtins = host_builtins.copy() if isinstance(host_builtins, dict) else vars(host_builtins).copy()
         self._globals = {Globals.BUILTINS: builtins, Globals.FILE: None, Globals.NAME: '__main__'}
 
     def property(self, name: str, value):
-        """
-        Sets a scope property, creating a new one if it does not exist.
-        """
         self._globals[name] = value
         return self
 
     def builtin(self, name: str, value):
-        """
-        Sets a builtin property, creating anew one if it does not exist.
-        Builtins should not be None, if None is set, the builtin is removed.
-        """
         if not isinstance(self._globals[Globals.BUILTINS], dict):
             raise AttributeError('global __builtins__ attribute was modified')
 
@@ -99,9 +89,6 @@ class Globals:
         return self
 
     def build(self) -> dict:
-        """
-        Returns the built globals.
-        """
         return copy.copy(self._globals)
 
 
@@ -114,22 +101,13 @@ class Modules:
     IMPORT = '__import__'
 
     def __init__(self):
-        """
-        Initializes without any halted module.
-        """
         self._halted = []
 
     def halt(self, module: str):
-        """
-        Adds a module to halted list.
-        """
         self._halted.append(module)
         return self
 
     def apply(self, scope: dict, full: bool = False):
-        """
-        Halts modules from the received scope.
-        """
         if not isinstance(scope[Globals.BUILTINS], dict):
             raise TypeError('__builtins__ is not a dict')
         if Modules.IMPORT not in scope[Globals.BUILTINS]:
@@ -148,9 +126,6 @@ class Modules:
 
     @staticmethod
     def _halt_import(default_import: types.BuiltinFunctionType, halted: list):
-        """
-        Creates a function that blocks imports.
-        """
         def halt_import(module, global_scope, local_scope, attributes, level):
             if module in halted:
                 raise ModuleNotFoundError(f'No module named {repr(module)}')
