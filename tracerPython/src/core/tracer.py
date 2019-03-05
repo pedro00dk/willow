@@ -15,18 +15,18 @@ class Tracer:
     """
 
     @staticmethod
-    def init_run(name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
-        Tracer(name, code, sandbox, action_queue, result_queue).run()
+    def init_run(name: str, code: str, sandbox: bool, action_queue: mp.Queue, event_queue: mp.Queue):
+        Tracer(name, code, sandbox, action_queue, event_queue).run()
 
-    def __init__(self, name: str, code: str, sandbox: bool, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, code: str, sandbox: bool, action_queue: mp.Queue, event_queue: mp.Queue):
         self._name = name
         self._code = code
         self._sandbox = sandbox
         self._action_queue = action_queue
-        self._result_queue = result_queue
+        self._event_queue = event_queue
 
     def run(self):
-        frame_processor = FrameProcessor(self._name, self._action_queue, self._result_queue)
+        frame_processor = FrameProcessor(self._name, self._action_queue, self._event_queue)
 
         globals_builder, modules_halter = scope.default_scope_composers(self._name)\
             if not self._sandbox\
@@ -38,25 +38,25 @@ class Tracer:
         try:
             self._action_queue.get()
             compiled = compile(self._code, scope_instance[scope.Globals.FILE], 'exec')
-            self._result_queue.put(message.Message(message.Result.STARTED))
+            self._event_queue.put(message.Message(message.Event.STARTED))
             sys.settrace(frame_processor.trace)
             exec(compiled, scope_instance)
         except Exception as e:
             exception_dump = ExceptionUtil.dump(e, remove_lines=(1,))
-            self._result_queue.put(message.Message(message.Result.ERROR, exception_dump))
+            self._event_queue.put(message.Message(message.Event.THREW, exception_dump))
         finally:
             sys.settrace(None)
 
 
 class FrameProcessor:
     """
-    Read action queue waiting for actions, process the frames and write the results in the queue.
+    Read action queue waiting for actions, process the frames and write the events in the queue.
     """
 
-    def __init__(self, name: str, action_queue: mp.Queue, result_queue: mp.Queue):
+    def __init__(self, name: str, action_queue: mp.Queue, event_queue: mp.Queue):
         self._name = name
         self._action_queue = action_queue
-        self._result_queue = result_queue
+        self._event_queue = event_queue
         self._inspector = Inspector()
 
         # frame common info
@@ -84,16 +84,16 @@ class FrameProcessor:
             # progressive actions
             if action.name == message.Action.STEP:
                 data = self._inspector.inspect(frame, event, args, self._exec_call_frame)
-                self._result_queue.put(message.Message(message.Result.DATA, data))
+                self._event_queue.put(message.Message(message.Event.INSPECTED, data))
             elif action.name == message.Action.STOP:
-                self._result_queue.put(message.Message(message.Result.DATA, None))
+                self._event_queue.put(message.Message(message.Event.INSPECTED, None))
                 return None
             break
 
         return self.trace
 
     def input_hook(self, prompt: str):
-        self._result_queue.put(message.Message(message.Result.PRINT, prompt))
+        self._event_queue.put(message.Message(message.Event.PRINTED, prompt))
 
         # cached input
         if len(self._input_cache) > 0:
@@ -108,7 +108,7 @@ class FrameProcessor:
                 # add stop message in the queue again for stacked inputs until reach frame tracer
                 self._action_queue.put(action)
                 return ''
-            self._result_queue.put(message.Message(message.Result.LOCKED, 'input locked, skipping action'))
+            self._event_queue.put(message.Message(message.Event.LOCKED, 'input'))
 
     def print_hook(self, text: str):
-        self._result_queue.put(message.Message(message.Result.PRINT, text))
+        self._event_queue.put(message.Message(message.Event.PRINT, text))

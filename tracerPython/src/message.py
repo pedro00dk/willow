@@ -1,31 +1,21 @@
 class Action:
-    """
-    List of available actions that can be sent to the tracer.
-    """
-
-    START = 'start'
-    STOP = 'stop'
-    INPUT = 'input'
-    STEP = 'step'
+    CREATE = 0
+    START = 1
+    STOP = 2
+    STEP = 3
+    INPUT = 4
 
 
-class Result:
-    """
-    List of results of the tracer.
-    """
-
-    STARTED = 'started'
-    ERROR = 'error'
-    DATA = 'data'
-    PRINT = 'print'
-    PROMPT = 'prompt'
-    LOCKED = 'locked'
+class Event:
+    CREATED = 0
+    STARTED = 1
+    INSPECTED = 2
+    PRINTED = 3
+    LOCKED = 4
+    THREW = 5
 
 
 class Message:
-    """
-    Stores message data.
-    """
 
     def __init__(self, name: str, value=None):
         self.name = name

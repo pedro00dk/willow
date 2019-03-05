@@ -5,6 +5,7 @@ import sys
 
 import broker
 import message
+from protobuf import *
 
 
 def main():
@@ -25,7 +26,7 @@ def main():
         return 1
 
     tracer_broker = broker.TracerBroker(arguments.name, code, arguments.sandbox)
-    print_results([])
+    print_events([])
     if arguments.uncontrolled:
         run_uncontrolled(tracer_broker)
     else:
@@ -33,16 +34,16 @@ def main():
 
 
 def run_uncontrolled(tracer_broker: broker.TracerBroker):
-    print_results(tracer_broker.start())
+    print_events(tracer_broker.start())
 
     if not tracer_broker.is_tracer_running():
         return
 
     while True:
-        results = tracer_broker.step()
-        print_results(results)
+        events = tracer_broker.step()
+        print_events(events)
 
-        if results[-1].name == message.Result.LOCKED:
+        if events[-1].name == message.Event.LOCKED:
             tracer_broker.input('')
 
         if not tracer_broker.is_tracer_running():
@@ -57,7 +58,7 @@ def run_controlled(tracer_broker: broker.TracerBroker):
         value = action_data[split_index + 1: 0 if split_index == -1 else None]
         try:
             if action == message.Action.START:
-                print_results(tracer_broker.start())
+                print_events(tracer_broker.start())
             elif action == message.Action.STOP:
                 try:
                     tracer_broker.stop()
@@ -66,8 +67,8 @@ def run_controlled(tracer_broker: broker.TracerBroker):
             elif action == message.Action.INPUT:
                 tracer_broker.input(value)
             elif action == message.Action.STEP:
-                results = tracer_broker.step()
-                print_results(results)
+                events = tracer_broker.step()
+                print_events(events)
             else:
                 raise Exception('action not found')
             if not tracer_broker.is_tracer_running():
@@ -76,8 +77,8 @@ def run_controlled(tracer_broker: broker.TracerBroker):
             print_error(str(e))
 
 
-def print_results(results: list):
-    print(json.dumps([r.__dict__ for r in results]))
+def print_events(events: list):
+    print(json.dumps([r.__dict__ for r in events]))
 
 
 def print_error(error: str):
