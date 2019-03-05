@@ -1,3 +1,3 @@
 [flake8]
-exclude = .git,.venv,__pycache__
+exclude = .git,.venv,__pycache__,**/protobuf
 max-line-length = 120
