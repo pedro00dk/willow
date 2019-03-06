@@ -12,8 +12,12 @@
             "cwd": "${workspaceFolder}/",
             "program": "${workspaceFolder}/src/main.py",
             "args": [
-                "--test",
-                "--uncontrolled"
+                "--auto",
+                "--in-mode",
+                "text",
+                "--out-mode",
+                "text",
+                "--test"
             ]
         }
     ]
