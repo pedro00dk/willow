@@ -1,18 +1,16 @@
 class Action:
-    CREATE = 0
-    START = 1
-    STOP = 2
-    STEP = 3
-    INPUT = 4
+    START = 0
+    STOP = 1
+    STEP = 2
+    INPUT = 3
 
 
 class Event:
-    CREATED = 0
-    STARTED = 1
-    INSPECTED = 2
-    PRINTED = 3
-    LOCKED = 4
-    THREW = 5
+    STARTED = 0
+    INSPECTED = 1
+    PRINTED = 2
+    LOCKED = 3
+    THREW = 4
 
 
 class Message:
