@@ -95,21 +95,23 @@ class FrameProcessor:
             if len(self._input_cache) > 0:
                 return self._input_cache.popleft()
 
-            self._event_queue.put(message.Message(message.Event.LOCKED, 'input'))
             action = self._action_queue.get()
+            print(action.__dict__)
             if action.name == message.Action.STOP:
                 # add stop message in the queue again for stacked inputs until reach trace
                 self._action_queue.put(action)
-                return ''
+                self._input_cache.append('')
             elif action.name == message.Action.INPUT:
                 self._input_cache.extend(action.value)
+                sys.stdout.write(str(len(self._input_cache)))
                 # read next action without breaking the loop
-                continue
             elif action.name == message.Action.STEP:
                 # do not throw exception (will send LOCKED event)
-                continue
             else: # stack action or unknown actions
                 raise Exception('unexpected action')
+            
+            if len(self._input_cache) == 0:
+                self._event_queue.put(message.Message(message.Event.LOCKED, 'input'))
 
     def print_hook(self, text: str):
         self._event_queue.put(message.Message(message.Event.PRINTED, text))
