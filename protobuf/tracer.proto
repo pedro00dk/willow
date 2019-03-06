@@ -7,25 +7,23 @@ message TracerRequest { repeated Action actions = 1; }
 
 // Actions to be executed by tracer processes.
 message Action {
-  message Create { // Creates the project to be traced.
+  message Start { // Starts the compilation and tracing of the project.
     string main = 1;
     oneof source {
       string code = 2;
       bytes tar = 3;
     }
   }
-  message Start {} // Starts the compilation and tracing of the project.
   message Stop {}  // Stops the tracer process at any moment.
   message Step {}  // Sends a step request to the tracer.
   message Input {  // Sends input to the tracer process.
     repeated string lines = 1;
   }
   oneof action {
-    Action.Create create = 1;
-    Action.Start start = 2;
-    Action.Stop stop = 3;
-    Action.Stop step = 4;
-    Action.Input input = 5;
+    Action.Start start = 1;
+    Action.Stop stop = 2;
+    Action.Stop step = 3;
+    Action.Input input = 4;
   }
 }
 
