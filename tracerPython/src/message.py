@@ -15,6 +15,6 @@ class Event:
 
 class Message:
 
-    def __init__(self, name: str, value=None):
+    def __init__(self, name: int, value=None):
         self.name = name
         self.value = value
