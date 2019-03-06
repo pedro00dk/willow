@@ -57,12 +57,11 @@ class Inspector:
         reference = id(obj)
         if reference in heap:
             return reference,
-
-        if isinstance(obj, (bool, int, float, type(None))):
+        elif isinstance(obj, (bool, int, float, type(None))):
             return obj
-        if isinstance(obj, (complex, str)):
+        elif isinstance(obj, (complex, str)):
             return repr(obj)
-        if isinstance(obj, type):
+        elif isinstance(obj, type):
             if obj.__module__ == module:
                 classes.add(obj)
             return obj.__name__

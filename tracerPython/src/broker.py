@@ -8,10 +8,7 @@ class TracerBroker:
     Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
 
-    def __init__(self, name: str, code: str, sandbox: bool):
-        self._name = name
-        self._code = code
-        self._sandbox = sandbox
+    def __init__(self):
         self._manager = None
         self._action_queue = None
         self._event_queue = None
@@ -20,20 +17,17 @@ class TracerBroker:
     def is_tracer_running(self):
         return self._tracer_process is not None
 
-    def start(self):
+    def start(self, main: str, code: str):
         if self.is_tracer_running():
             raise AssertionError('tracer running')
 
         self._manager = mp.Manager()
         self._action_queue = self._manager.Queue()
         self._event_queue = self._manager.Queue()
-        self._tracer_process = mp.Process(
-            target=tracer.Tracer.init_run,
-            args=(self._name, self._code, self._sandbox, self._action_queue, self._event_queue)
-        )
+        self._tracer_process = mp.Process(target=tracer.Tracer.init_run, args=(self._action_queue, self._event_queue))
         self._tracer_process.start()
 
-        self._action_queue.put(message.Message(message.Action.START))
+        self._action_queue.put(message.Message(message.Action.START, {'main': main, 'code': code}))
         event = self._event_queue.get()
 
         if event.name == message.Event.THREW:
