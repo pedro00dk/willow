@@ -1,82 +1,59 @@
-import { Result } from '../types/tracers'
-import { Tracer } from './tracer'
+import * as protocol from '../protobuf/protocol'
 
 
 /**
- * Interface for tracer objects.
+ * Interface for tracer objects. All required functions are operations that shall be implemented by tracer processes,
+ * other functions may be implemented using the required functions.
  */
 export interface Tracer {
-
-    /**
-     * Returns the current state of the tracer
-     */
-    getState(): 'created' | 'started' | 'stopped'
-
-    /**
-     * Starts the tracer process.
-     */
-    start(): Promise<Result[]>
-
-    /**
-     * Forces the tracer to stop.
-     */
+    getState(): 'initialized' | 'started' | 'stopped'
+    start(main: string, code: string): Promise<protocol.Event[]>
     stop(): void
-
-    /**
-     * Sends text as input to the traced code.
-     */
-    input(data: string): void
-
-    /**
-     * Steps into the traced code.
-     */
-    step(): Promise<Result[]>
-
-    /**
-     * Steps over the traced code.
-     */
-    stepOver?(): Promise<Result[]>
-
-    /**
-     * Steps out the traced code.
-     */
-    stepOut?(): Promise<Result[]>
-
-    /**
-     * Steps until next breakpoint or de code ends.
-     */
-    continue?(): Promise<Result[]>
-
-    /**
-     * Gets the set of breakpoints.
-     */
-    getBreakpoints?(): number[]
-
-    /**
-     * Sets the received breakpoints, removing the previous ones.
-     */
-    setBreakpoints?(line: number[]): void
-
-    /**
-     * Adds a step processor to the step call.
-     */
-    addStepProcessor?(processor: StepProcessor): void
+    step(): Promise<protocol.Event[]>
+    stepOver?(): Promise<protocol.Event[]>
+    stepOut?(): Promise<protocol.Event[]>
+    continue?(): Promise<protocol.Event[]>
+    input(lines: string[]): void
+    getBreakpoints?(): ReadonlySet<number>
+    setBreakpoints?(breakpoints: ReadonlySet<number>): void
+    addStepProcessor?(stepProcessor: StepProcessor): void
 }
 
 /**
- * Interface for step processor objects.
+ * Interface for step processor objects. Step processors can buffer, filter, change or restrict the generated events.
  */
 export interface StepProcessor {
-
-    /**
-     * Consumes the base step function to make any type of processes with the function results.
-     */
-    consume(step: () => Promise<Result[]>): Promise<Result[]>
+    consume(step: () => Promise<protocol.Event[]>): Promise<protocol.Event[]>
 }
 
 /**
- * Applies to all processors the received step function.
+ * Applies to all step processors to the received step function.
  */
-export function applyStepPreprocessorStack(processors: StepProcessor[], step: () => Promise<Result[]>) {
-    return processors.reduceRight((acc, processor) => () => processor.consume(acc), step)()
+export function applyStepProcessorStack(stepProcessors: StepProcessor[], step: () => Promise<protocol.Event[]>) {
+    return stepProcessors.reduceRight((acc, processor) => () => processor.consume(acc), step)()
+}
+
+// Event processing helper functions
+
+/**
+ * Queries through a generator all objects of the received types from a frame.
+ */
+export function* queryObjectTypes(frame: protocol.Frame, ...types: protocol.Frame.Heap.Obj.Type[]) {
+    const typeSet = new Set(types)
+    for (const obj of Object.values(frame.heap.references))
+        if (typeSet.has(obj.type)) yield obj
+}
+
+/**
+ * Queries through a generator all values of a set of types from a frame.
+ */
+export function* queryValueTypes(frame: protocol.Frame, ...types: protocol.Frame.Value['value'][]) {
+    const typeSet = new Set<string>(types)
+    for (const scope of frame.stack.scopes) for (const variable of Object.values(scope.variables))
+        if (typeSet.has(variable.value.value)) yield variable[variable.value.value]
+
+    for (const obj of Object.values(frame.heap.references)) for (const member of obj.members) {
+        if (typeSet.has(member.key.value)) yield member.key[member.key.value]
+        if (typeSet.has(member.value.value)) yield member.value[member.value.value]
+    }
 }
