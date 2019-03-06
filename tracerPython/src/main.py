@@ -22,11 +22,14 @@ def main():
 def run(auto: bool, in_mode: str, out_mode: str, test: bool):
     tracer = client.Client()
 
-    start_str = read_input(in_mode, 'start {json(["main", "code"])}:\n')
     if in_mode == 'proto':
-        pass
+        request = read_input(in_mode)
+        if not request.actions[0].HasField('start'):
+            raise Exception('unexpected action')
+        main = request.actions[0].start.main
+        code = request.actions[0].start.code
     else:
-        start_data = json.loads(start_str)
+        start_data = json.loads(read_input(in_mode, 'start {json(["main", "code"])}:\n'))
         main = start_data[0]
         code = start_data[1]
 
@@ -47,10 +50,12 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
             if events[-1].name == message.Event.LOCKED:
                 tracer.input(['input'])
         else:
-            action_data = read_input(in_mode, 'action {"stop", "step", "input" json(["line"*])}:\n')
             if in_mode == 'proto':
-                pass
+                request = read_input(in_mode)
+                action = request.actions[0].WhichOneof('action')
+                value = [*request.actions[0].input.lines] if action == 'input' else ''
             else:
+                action_data = read_input(in_mode, 'action {"stop", "step", "input" json(["line"*])}:\n')
                 split_index = action_data.find(' ')
                 action = action_data[:split_index if split_index != -1 else None]
                 value = action_data[split_index + 1: 0 if split_index == -1 else None]
@@ -64,14 +69,16 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
                 events = tracer.step()
                 write_output(out_mode, events)
             elif action == 'input':
-                tracer.input(json.loads(value) if len(value) > 0 else [])
+                tracer.input(value if isinstance(value, list) else json.loads(value) if len(value) > 0 else [])
             else:
                 raise Exception('unexpected action')
 
 
 def read_input(mode: str, prompt: str = ''):
     if mode == 'proto':
-        return [b'']
+        request = tracer_pb2.TracerRequest()
+        request.ParseFromString(sys.stdin.buffer.read(int.from_bytes(sys.stdin.buffer.read(4), sys.byteorder)))
+        return request
     elif mode == 'text':
         return input(prompt)
     else:
@@ -83,7 +90,7 @@ def write_output(mode: str, event_messages: list):
     if mode == 'json':
         print(json_format.MessageToJson(response, including_default_value_fields=True))
     elif mode == 'proto':
-        serialized_message = response.SerializePartialToString()
+        serialized_message = response.SerializeToString()
         sys.stdout.buffer.write(len(serialized_message).to_bytes(4, sys.byteorder))
         sys.stdout.buffer.write(serialized_message)
     elif mode == 'text':
@@ -159,7 +166,6 @@ def event_message_to_event_protocol(event_message: message.Message):
             ))
             for reference, obj in event_message.value['heap'].items()
         ]
-        print()
     elif event_message.name == message.Event.PRINTED:
         event.printed.value = event_message.value
     elif event_message.name == message.Event.LOCKED:

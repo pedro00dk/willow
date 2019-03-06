@@ -14,3 +14,8 @@ optional arguments:
                         The output mode
   --test                Run the test code ignoring the provided
 ```
+
+### Current protocol restrictions (missing implementation)
+
+* Receive TracerRequest with multiple actions
+* Start action tar binary support
