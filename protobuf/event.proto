@@ -48,12 +48,16 @@ message Frame {
       int64 reference = 5;
     }
   }
-  message Stack {   // The stack information scopes.
-    message Scope { // Scopes call lines, names and references.
+  message Stack {        // The stack information scopes.
+    message Scope {      // Scopes call lines, names and references.
+      message Variable { // Stack variable name and its value.
+        string name = 1;
+        Frame.Value value = 2;
+      }
       int32 line = 1;
       string name = 2;
       repeated string order = 3;
-      map<string, Frame.Value> references = 4;
+      repeated Frame.Stack.Scope.Variable variables = 4;
     }
     repeated Frame.Stack.Scope scopes = 1;
   }
