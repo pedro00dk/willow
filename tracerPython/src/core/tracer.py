@@ -109,4 +109,4 @@ class FrameProcessor:
                 raise Exception('unexpected action')
 
     def print_hook(self, text: str):
-        self._event_queue.put(message.Message(message.Event.PRINT, text))
+        self._event_queue.put(message.Message(message.Event.PRINTED, text))
