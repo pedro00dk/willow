@@ -81,7 +81,7 @@ message Frame {
       bool userDefined = 3;
       repeated Frame.Heap.Obj.Member members = 4;
     }
-    map<int64, Frame.Heap.Obj> references = 3;
+    map<int64, Frame.Heap.Obj> references = 1;
   }
   Frame.Type type = 1;
   int32 line = 2;
