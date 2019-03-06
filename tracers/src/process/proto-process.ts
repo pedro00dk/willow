@@ -11,8 +11,8 @@ import * as rxOps from 'rxjs/operators'
  */
 export class ProtoProcess {
     private instance: cp.ChildProcess
-    private stdin$_: rx.Subject<protobuf.Writer>
-    private stdout$_: rx.Observable<protobuf.Reader>
+    private stdin$_: rx.Subject<protobuf.BufferWriter>
+    private stdout$_: rx.Observable<protobuf.BufferReader>
     private stderr$_: rx.Observable<string>
 
     get stdin$() { return this.stdin$_ }
