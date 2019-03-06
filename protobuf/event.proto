@@ -19,7 +19,7 @@ message Event {
     }
     Source source = 1;
     bool terminal = 2;
-    Exception excetiion = 3;
+    Exception exception = 3;
   }
   oneof event {
     Event.Started started = 1;
