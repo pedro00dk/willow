@@ -22,7 +22,7 @@ message Action {
   oneof action {
     Action.Start start = 1;
     Action.Stop stop = 2;
-    Action.Stop step = 3;
+    Action.Step step = 3;
     Action.Input input = 4;
   }
 }
