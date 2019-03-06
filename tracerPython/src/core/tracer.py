@@ -78,13 +78,13 @@ class FrameProcessor:
 
             # hold action (does not consume the frame)
             if action.name == message.Action.INPUT:
-                self._input_cache.append(action.value)
+                self._input_cache.extend(action.value)
                 continue
 
             # progressive actions
             if action.name == message.Action.STEP:
-                data = self._inspector.inspect(frame, event, args, self._exec_call_frame)
-                self._event_queue.put(message.Message(message.Event.INSPECTED, data))
+                frame = self._inspector.inspect(frame, event, args, self._exec_call_frame)
+                self._event_queue.put(message.Message(message.Event.INSPECTED, frame))
             elif action.name == message.Action.STOP:
                 self._event_queue.put(message.Message(message.Event.INSPECTED, None))
                 return None
@@ -103,7 +103,10 @@ class FrameProcessor:
         while True:
             action = self._action_queue.get()
             if action.name == message.Action.INPUT:
-                return action.value
+                self._input_cache.extend(action.value)
+                if len(self._input_cache) > 0:
+                    return self._input_cache.popleft()
+                continue
             if action.name == message.Action.STOP:
                 # add stop message in the queue again for stacked inputs until reach frame tracer
                 self._action_queue.put(action)

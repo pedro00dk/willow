@@ -22,7 +22,7 @@ class TracerBroker:
 
     def start(self):
         if self.is_tracer_running():
-            raise AssertionError('tracer already running')
+            raise AssertionError('tracer running')
 
         self._manager = mp.Manager()
         self._action_queue = self._manager.Queue()
@@ -43,7 +43,7 @@ class TracerBroker:
 
     def stop(self):
         if not self.is_tracer_running():
-            raise AssertionError('tracer already stopped')
+            raise AssertionError('tracer stopped')
 
         self._action_queue.put(message.Message(message.Action.STOP))
         self._tracer_process.terminate()
@@ -55,7 +55,7 @@ class TracerBroker:
 
     def step(self):
         if not self.is_tracer_running():
-            raise AssertionError('tracer not running')
+            raise AssertionError('tracer stopped')
 
         self._action_queue.put(message.Message(message.Action.STEP))
         events = []
@@ -70,10 +70,10 @@ class TracerBroker:
 
         return events
 
-    def input(self, data: str):
+    def input(self, lines: list):
         if not self.is_tracer_running():
-            raise AssertionError('tracer not running')
-        if data is None:
-            raise AttributeError('data cannot be None')
+            raise AssertionError('tracer stopped')
+        if lines is None:
+            raise AttributeError('lines is None')
 
-        self._action_queue.put(message.Message(message.Action.INPUT, data))
+        self._action_queue.put(message.Message(message.Action.INPUT, lines))
