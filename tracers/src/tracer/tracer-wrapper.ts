@@ -1,46 +1,32 @@
 import * as log from 'npmlog'
-import { Event, Result } from '../types/tracers'
-import { applyStepPreprocessorStack, StepProcessor, Tracer } from './tracer'
+import * as protocol from '../protobuf/protocol'
+import { applyStepProcessorStack, StepProcessor, Tracer } from './tracer'
 
 
 /**
  * Implements any missing optional methods from other Tracer implementations using only the required methods.
  */
 export class TracerWrapper implements Tracer {
-    private internalTracer: Tracer
-    private processors: StepProcessor[]
-    private breakpoints: Set<number>
-    private lastDataResult: Result
+    private processors: StepProcessor[] = []
+    private breakpoints: ReadonlySet<number> = new Set()
+    private previousInspectedEvent: protocol.Event.Inspected
 
-    /**
-     * Starts the tracer with the internal tracer to implement methods.
-     */
-    constructor(internalTracer: Tracer) {
-        if (!internalTracer) {
-            const error = 'internal tracer not provided'
-            log.error(TracerWrapper.name, error)
-            throw new Error(error)
-        }
-        this.internalTracer = internalTracer
-        this.processors = []
-        this.breakpoints = new Set()
+    constructor(private internalTracer: Tracer) {
+        if (!internalTracer) throw new Error('undefined internal tracer')
     }
 
-    /**
-     * Updates the last found data result.
-     */
-    private updateLastDataResult(results: Result[]) {
-        const dataResults = results.filter(result => result.name === 'data')
-        if (dataResults.length !== 0) this.lastDataResult = dataResults[dataResults.length - 1]
+    private updatePreviousInspectedEvent(events: protocol.Event[]) {
+        const inspectedEvents = events.filter(event => event.inspected != undefined)
+        if (inspectedEvents.length !== 0) this.previousInspectedEvent = inspectedEvents[inspectedEvents.length - 1]
     }
 
     getState() {
         return this.internalTracer.getState()
     }
 
-    start() {
+    start(main: string, code: string) {
         log.info(TracerWrapper.name, 'start')
-        return this.internalTracer.start()
+        return this.internalTracer.start(main, code)
     }
 
     stop() {
@@ -48,28 +34,22 @@ export class TracerWrapper implements Tracer {
         return this.internalTracer.stop()
     }
 
-    input(data: string) {
-        log.verbose(TracerWrapper.name, 'input', { data })
-        this.internalTracer.input(data)
-    }
-
     async step() {
         log.verbose(TracerWrapper.name, 'step')
-        const results = await applyStepPreprocessorStack(this.processors, () => this.internalTracer.step())
-        this.updateLastDataResult(results)
+        const results = await applyStepProcessorStack(this.processors, () => this.internalTracer.step())
+        this.updatePreviousInspectedEvent(results)
         return results
     }
 
     async stepOver() {
         log.info(TracerWrapper.name, 'step over')
-        const results: Result[] = []
-        const stackLength = this.lastDataResult ? (this.lastDataResult.value as Event).stackLines.length : 1
+        const results: protocol.Event[] = []
+        const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
-            const stepResults = await this.step()
-            results.push(...stepResults)
+            results.push(...await this.step())
             if (this.getState() === 'stopped' ||
-                this.lastDataResult && (this.lastDataResult.value as Event).stackLines.length <= stackLength ||
-                results[results.length - 1].name === 'locked')
+                this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length <= stackLength ||
+                results[results.length - 1].locked != undefined)
                 break
         }
         return results
@@ -77,14 +57,13 @@ export class TracerWrapper implements Tracer {
 
     async stepOut() {
         log.info(TracerWrapper.name, 'step out')
-        const results: Result[] = []
-        const stackLength = this.lastDataResult ? (this.lastDataResult.value as Event).stackLines.length : 1
+        const results: protocol.Event[] = []
+        const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
-            const stepResults = await this.step()
-            results.push(...stepResults)
+            results.push(...await this.step())
             if (this.getState() === 'stopped' ||
-                this.lastDataResult && (this.lastDataResult.value as Event).stackLines.length < stackLength ||
-                results[results.length - 1].name === 'locked')
+                this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length < stackLength ||
+                results[results.length - 1].locked != undefined)
                 break
         }
         return results
@@ -92,35 +71,36 @@ export class TracerWrapper implements Tracer {
 
     async continue() {
         log.info(TracerWrapper.name, 'continue')
-        const results: Result[] = []
+        const results: protocol.Event[] = []
         while (true) {
             const stepResults = await this.step()
             results.push(...stepResults)
-            const currentLine = this.lastDataResult ? (this.lastDataResult.value as Event).line : undefined
+            const currentLine = this.previousInspectedEvent ? this.previousInspectedEvent.frame.line : undefined
             if (this.getState() === 'stopped' || this.breakpoints.has(currentLine) ||
-                results[results.length - 1].name === 'locked')
+                results[results.length - 1].locked != undefined)
                 break
         }
         return results
     }
 
+    input(lines: string[]) {
+        log.verbose(TracerWrapper.name, 'input')
+        return this.internalTracer.input(lines)
+    }
+
     getBreakpoints() {
         log.info(TracerWrapper.name, 'get breakpoints')
-        return [...this.breakpoints]
+        return this.breakpoints
     }
 
-    setBreakpoints(lines: number[]) {
-        log.info(TracerWrapper.name, 'set breakpoints', { lines })
-        this.breakpoints = new Set(lines)
+    setBreakpoints(breakpoints: ReadonlySet<number>) {
+        log.info(TracerWrapper.name, 'set breakpoints', { breakpoints: [...breakpoints] })
+        this.breakpoints = breakpoints
     }
 
-    addStepProcessor(processor: StepProcessor) {
-        if (!processor) {
-            const error = 'step processor not provided'
-            log.error(TracerWrapper.name, error)
-            throw new Error(error)
-        }
-        log.info(TracerWrapper.name, 'add step processor')
-        this.processors.push(processor)
+    addStepProcessor(stepProcessor: StepProcessor) {
+        log.info(TracerWrapper.name, 'add step processor', {stepProcessor})
+        if (!stepProcessor) throw new Error('undefined step processor')
+        this.processors.push(stepProcessor)
     }
 }
