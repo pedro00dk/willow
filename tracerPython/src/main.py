@@ -83,7 +83,9 @@ def write_output(mode: str, event_messages: list):
     if mode == 'json':
         print(json_format.MessageToJson(response, including_default_value_fields=True))
     elif mode == 'proto':
-        pass
+        serialized_message = response.SerializePartialToString()
+        sys.stdout.buffer.write(len(serialized_message).to_bytes(4, sys.byteorder))
+        sys.stdout.buffer.write(serialized_message)
     elif mode == 'text':
         print(text_format.MessageToString(response, as_utf8=True, as_one_line=False))
     elif mode == 'text1':
