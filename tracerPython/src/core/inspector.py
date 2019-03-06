@@ -11,7 +11,7 @@ class Inspector:
         stack, frames = self.inspect_stack(frame, exec_call_frame, True)
         heap, stack_references = self.inspect_heap(frames)
         return {
-            'name': event,
+            'type': event,
             'finish': event == 'return' and len(frames) == 1,
             'exception': ExceptionUtil.dump(args[1], args[2]) if event == 'exception' else None,
             'stack': stack,
