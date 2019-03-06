@@ -102,11 +102,12 @@ class FrameProcessor:
                 self._action_queue.put(action)
                 self._input_cache.append('')
             elif action.name == message.Action.INPUT:
+                # read next action without breaking the loop
                 self._input_cache.extend(action.value)
                 sys.stdout.write(str(len(self._input_cache)))
-                # read next action without breaking the loop
             elif action.name == message.Action.STEP:
                 # do not throw exception (will send LOCKED event)
+                pass
             else: # stack action or unknown actions
                 raise Exception('unexpected action')
             

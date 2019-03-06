@@ -3,17 +3,14 @@
 A tool to inspect python code, analyzing it line by line and returning its state (stack and heap data).
 
 ```
-usage: main.py [-h] [--name NAME] [--test] [--uncontrolled] [--sandbox] [code]
-
-Tracer CLI parser
-
-positional arguments:
-  code            The python code to parse
+Python tracer CLI
 
 optional arguments:
-  -h, --help      show this help message and exit
-  --name NAME     The code name
-  --test          Run the test code, ignore any provided
-  --uncontrolled  Run without stopping
-  --sandbox       Run in a restricted scope
+  -h, --help            show this help message and exit
+  --auto                Run without stopping
+  --in-mode {proto,text}
+                        The input mode
+  --out-mode {json,proto,text,text1}
+                        The output mode
+  --test                Run the test code ignoring the provided
 ```
