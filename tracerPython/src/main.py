@@ -77,7 +77,7 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
 def read_input(mode: str, prompt: str = ''):
     if mode == 'proto':
         request = tracer_pb2.TracerRequest()
-        request.ParseFromString(sys.stdin.buffer.read(int.from_bytes(sys.stdin.buffer.read(4), sys.byteorder)))
+        request.ParseFromString(sys.stdin.buffer.read(int.from_bytes(sys.stdin.buffer.read(4), 'little')))
         return request
     elif mode == 'text':
         return input(prompt)
@@ -91,7 +91,7 @@ def write_output(mode: str, event_messages: list):
         print(json_format.MessageToJson(response, including_default_value_fields=True))
     elif mode == 'proto':
         serialized_message = response.SerializeToString()
-        sys.stdout.buffer.write(len(serialized_message).to_bytes(4, sys.byteorder))
+        sys.stdout.buffer.write(len(serialized_message).to_bytes(4, 'little'))
         sys.stdout.buffer.write(serialized_message)
     elif mode == 'text':
         print(text_format.MessageToString(response, as_utf8=True, as_one_line=False))
