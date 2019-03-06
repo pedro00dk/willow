@@ -56,7 +56,6 @@ message Frame {
       }
       int32 line = 1;
       string name = 2;
-      repeated string order = 3;
       repeated Frame.Stack.Scope.Variable variables = 4;
     }
     repeated Frame.Stack.Scope scopes = 1;

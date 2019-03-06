@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0b\x65vent.proto\"\xc7\x02\n\x05\x45vent\x12!\n\x07started\x18\x01 \x01(\x0b\x32\x0e.Event.StartedH\x00\x12%\n\tinspected\x18\x02 \x01(\x0b\x32\x10.Event.InspectedH\x00\x12!\n\x07printed\x18\x03 \x01(\x0b\x32\x0e.Event.PrintedH\x00\x12\x1f\n\x06locked\x18\x04 \x01(\x0b\x32\r.Event.LockedH\x00\x12\x1d\n\x05threw\x18\x05 \x01(\x0b\x32\x0c.Event.ThrewH\x00\x1a\t\n\x07Started\x1a\"\n\tInspected\x12\x15\n\x05\x66rame\x18\x01 \x01(\x0b\x32\x06.Frame\x1a\x18\n\x07Printed\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x17\n\x06Locked\x12\r\n\x05\x63\x61use\x18\x01 \x01(\t\x1a&\n\x05Threw\x12\x1d\n\texception\x18\x01 \x01(\x0b\x32\n.ExceptionB\x07\n\x05\x65vent\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"\xb2\x07\n\x05\x46rame\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.Frame.Type\x12\x0c\n\x04line\x18\x02 \x01(\x05\x12\x0e\n\x06\x66inish\x18\x03 \x01(\x08\x12\x1d\n\texception\x18\x04 \x01(\x0b\x32\n.Exception\x12\x1b\n\x05stack\x18\x05 \x01(\x0b\x32\x0c.Frame.Stack\x12\x19\n\x04heap\x18\x06 \x01(\x0b\x32\x0b.Frame.Heap\x1a\x82\x01\n\x05Value\x12\x16\n\x0c\x62ooleanValue\x18\x01 \x01(\x08H\x00\x12\x16\n\x0cintegerValue\x18\x02 \x01(\x03H\x00\x12\x14\n\nfloatValue\x18\x03 \x01(\x01H\x00\x12\x15\n\x0bstringValue\x18\x04 \x01(\tH\x00\x12\x13\n\treference\x18\x05 \x01(\x03H\x00\x42\x07\n\x05value\x1a\xc7\x01\n\x05Stack\x12\"\n\x06scopes\x18\x01 \x03(\x0b\x32\x12.Frame.Stack.Scope\x1a\x99\x01\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05order\x18\x03 \x03(\t\x12.\n\tvariables\x18\x04 \x03(\x0b\x32\x1b.Frame.Stack.Scope.Variable\x1a\x35\n\x08Variable\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\x1a\x92\x03\n\x04Heap\x12/\n\nreferences\x18\x03 \x03(\x0b\x32\x1b.Frame.Heap.ReferencesEntry\x1a\x94\x02\n\x03Obj\x12\"\n\x04type\x18\x01 \x01(\x0e\x32\x14.Frame.Heap.Obj.Type\x12\r\n\x05lType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\'\n\x07members\x18\x04 \x03(\x0b\x32\x16.Frame.Heap.Obj.Member\x1a@\n\x06Member\x12\x19\n\x03key\x18\x01 \x01(\x0b\x32\x0c.Frame.Value\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\x1a\x42\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.Frame.Heap.Obj:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\n\x0b\x65vent.proto\"\xc7\x02\n\x05\x45vent\x12!\n\x07started\x18\x01 \x01(\x0b\x32\x0e.Event.StartedH\x00\x12%\n\tinspected\x18\x02 \x01(\x0b\x32\x10.Event.InspectedH\x00\x12!\n\x07printed\x18\x03 \x01(\x0b\x32\x0e.Event.PrintedH\x00\x12\x1f\n\x06locked\x18\x04 \x01(\x0b\x32\r.Event.LockedH\x00\x12\x1d\n\x05threw\x18\x05 \x01(\x0b\x32\x0c.Event.ThrewH\x00\x1a\t\n\x07Started\x1a\"\n\tInspected\x12\x15\n\x05\x66rame\x18\x01 \x01(\x0b\x32\x06.Frame\x1a\x18\n\x07Printed\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x17\n\x06Locked\x12\r\n\x05\x63\x61use\x18\x01 \x01(\t\x1a&\n\x05Threw\x12\x1d\n\texception\x18\x01 \x01(\x0b\x32\n.ExceptionB\x07\n\x05\x65vent\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"\xa3\x07\n\x05\x46rame\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.Frame.Type\x12\x0c\n\x04line\x18\x02 \x01(\x05\x12\x0e\n\x06\x66inish\x18\x03 \x01(\x08\x12\x1d\n\texception\x18\x04 \x01(\x0b\x32\n.Exception\x12\x1b\n\x05stack\x18\x05 \x01(\x0b\x32\x0c.Frame.Stack\x12\x19\n\x04heap\x18\x06 \x01(\x0b\x32\x0b.Frame.Heap\x1a\x82\x01\n\x05Value\x12\x16\n\x0c\x62ooleanValue\x18\x01 \x01(\x08H\x00\x12\x16\n\x0cintegerValue\x18\x02 \x01(\x03H\x00\x12\x14\n\nfloatValue\x18\x03 \x01(\x01H\x00\x12\x15\n\x0bstringValue\x18\x04 \x01(\tH\x00\x12\x13\n\treference\x18\x05 \x01(\x03H\x00\x42\x07\n\x05value\x1a\xb8\x01\n\x05Stack\x12\"\n\x06scopes\x18\x01 \x03(\x0b\x32\x12.Frame.Stack.Scope\x1a\x8a\x01\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12.\n\tvariables\x18\x04 \x03(\x0b\x32\x1b.Frame.Stack.Scope.Variable\x1a\x35\n\x08Variable\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\x1a\x92\x03\n\x04Heap\x12/\n\nreferences\x18\x03 \x03(\x0b\x32\x1b.Frame.Heap.ReferencesEntry\x1a\x94\x02\n\x03Obj\x12\"\n\x04type\x18\x01 \x01(\x0e\x32\x14.Frame.Heap.Obj.Type\x12\r\n\x05lType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\'\n\x07members\x18\x04 \x03(\x0b\x32\x16.Frame.Heap.Obj.Member\x1a@\n\x06Member\x12\x19\n\x03key\x18\x01 \x01(\x0b\x32\x0c.Frame.Value\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\x1a\x42\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.Frame.Heap.Obj:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\x62\x06proto3')
 )
 
 
@@ -65,8 +65,8 @@ _FRAME_HEAP_OBJ_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1139,
-  serialized_end=1229,
+  serialized_start=1124,
+  serialized_end=1214,
 )
 _sym_db.RegisterEnumDescriptor(_FRAME_HEAP_OBJ_TYPE)
 
@@ -95,8 +95,8 @@ _FRAME_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1299,
-  serialized_end=1352,
+  serialized_start=1284,
+  serialized_end=1337,
 )
 _sym_db.RegisterEnumDescriptor(_FRAME_TYPE)
 
@@ -445,8 +445,8 @@ _FRAME_STACK_SCOPE_VARIABLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=839,
-  serialized_end=892,
+  serialized_start=824,
+  serialized_end=877,
 )
 
 _FRAME_STACK_SCOPE = _descriptor.Descriptor(
@@ -471,14 +471,7 @@ _FRAME_STACK_SCOPE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='order', full_name='Frame.Stack.Scope.order', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='variables', full_name='Frame.Stack.Scope.variables', index=3,
+      name='variables', full_name='Frame.Stack.Scope.variables', index=2,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -497,7 +490,7 @@ _FRAME_STACK_SCOPE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=739,
-  serialized_end=892,
+  serialized_end=877,
 )
 
 _FRAME_STACK = _descriptor.Descriptor(
@@ -527,7 +520,7 @@ _FRAME_STACK = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=693,
-  serialized_end=892,
+  serialized_end=877,
 )
 
 _FRAME_HEAP_OBJ_MEMBER = _descriptor.Descriptor(
@@ -563,8 +556,8 @@ _FRAME_HEAP_OBJ_MEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1073,
-  serialized_end=1137,
+  serialized_start=1058,
+  serialized_end=1122,
 )
 
 _FRAME_HEAP_OBJ = _descriptor.Descriptor(
@@ -615,8 +608,8 @@ _FRAME_HEAP_OBJ = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=953,
-  serialized_end=1229,
+  serialized_start=938,
+  serialized_end=1214,
 )
 
 _FRAME_HEAP_REFERENCESENTRY = _descriptor.Descriptor(
@@ -652,8 +645,8 @@ _FRAME_HEAP_REFERENCESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1231,
-  serialized_end=1297,
+  serialized_start=1216,
+  serialized_end=1282,
 )
 
 _FRAME_HEAP = _descriptor.Descriptor(
@@ -682,8 +675,8 @@ _FRAME_HEAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=895,
-  serialized_end=1297,
+  serialized_start=880,
+  serialized_end=1282,
 )
 
 _FRAME = _descriptor.Descriptor(
@@ -749,7 +742,7 @@ _FRAME = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=406,
-  serialized_end=1352,
+  serialized_end=1337,
 )
 
 _EVENT_STARTED.containing_type = _EVENT
