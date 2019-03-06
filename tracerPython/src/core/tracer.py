@@ -105,7 +105,10 @@ class FrameProcessor:
                 self._input_cache.extend(action.value)
                 # read next action without breaking the loop
                 continue
-            else:
+            elif action.name == message.Action.STEP:
+                # do not throw exception (will send LOCKED event)
+                continue
+            else: # stack action or unknown actions
                 raise Exception('unexpected action')
 
     def print_hook(self, text: str):
