@@ -3,7 +3,7 @@ import message
 import multiprocessing as mp
 
 
-class TracerBroker:
+class Client:
     """
     Provides an easy interface for communication with the Tracer as it has to run in another process.
     """
