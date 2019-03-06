@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0b\x65vent.proto\"\xce\x03\n\x05\x45vent\x12!\n\x07\x63reated\x18\x01 \x01(\x0b\x32\x0e.Event.CreatedH\x00\x12!\n\x07started\x18\x02 \x01(\x0b\x32\x0e.Event.StartedH\x00\x12%\n\tinspected\x18\x03 \x01(\x0b\x32\x10.Event.InspectedH\x00\x12!\n\x07printed\x18\x04 \x01(\x0b\x32\x0e.Event.PrintedH\x00\x12\x1f\n\x06locked\x18\x05 \x01(\x0b\x32\r.Event.LockedH\x00\x12\x1d\n\x05threw\x18\x06 \x01(\x0b\x32\x0c.Event.ThrewH\x00\x1a\t\n\x07\x43reated\x1a\t\n\x07Started\x1a\"\n\tInspected\x12\x15\n\x05\x66rame\x18\x01 \x01(\x0b\x32\x06.Frame\x1a\x18\n\x07Printed\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x17\n\x06Locked\x12\r\n\x05\x63\x61use\x18\x01 \x01(\t\x1a\x7f\n\x05Threw\x12#\n\x06source\x18\x01 \x01(\x0e\x32\x13.Event.Threw.Source\x12\x10\n\x08terminal\x18\x02 \x01(\x08\x12\x1d\n\texcetiion\x18\x03 \x01(\x0b\x32\n.Exception\" \n\x06Source\x12\n\n\x06TRACER\x10\x00\x12\n\n\x06TRACED\x10\x01\x42\x07\n\x05\x65vent\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"\xce\x07\n\x05\x46rame\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.Frame.Type\x12\x0c\n\x04line\x18\x02 \x01(\x05\x12\x0e\n\x06\x66inish\x18\x03 \x01(\x08\x12\x1d\n\texception\x18\x04 \x01(\x0b\x32\n.Exception\x12\x1b\n\x05stack\x18\x05 \x01(\x0b\x32\x0c.Frame.Stack\x12\x19\n\x04heap\x18\x06 \x01(\x0b\x32\x0b.Frame.Heap\x1a\x82\x01\n\x05Value\x12\x16\n\x0c\x62ooleanValue\x18\x01 \x01(\x08H\x00\x12\x16\n\x0cintegerValue\x18\x02 \x01(\x03H\x00\x12\x14\n\nfloatValue\x18\x03 \x01(\x01H\x00\x12\x15\n\x0bstringValue\x18\x04 \x01(\tH\x00\x12\x13\n\treference\x18\x05 \x01(\x03H\x00\x42\x07\n\x05value\x1a\xe3\x01\n\x05Stack\x12\"\n\x06scopes\x18\x01 \x03(\x0b\x32\x12.Frame.Stack.Scope\x1a\xb5\x01\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x17\n\x0freferencesOrder\x18\x03 \x03(\t\x12\x36\n\nreferences\x18\x04 \x03(\x0b\x32\".Frame.Stack.Scope.ReferencesEntry\x1a?\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value:\x02\x38\x01\x1a\x92\x03\n\x04Heap\x12/\n\nreferences\x18\x03 \x03(\x0b\x32\x1b.Frame.Heap.ReferencesEntry\x1a\x94\x02\n\x03Obj\x12\"\n\x04type\x18\x01 \x01(\x0e\x32\x14.Frame.Heap.Obj.Type\x12\r\n\x05lType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\'\n\x07members\x18\x04 \x03(\x0b\x32\x16.Frame.Heap.Obj.Member\x1a@\n\x06Member\x12\x19\n\x03key\x18\x01 \x01(\x0b\x32\x0c.Frame.Value\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\x1a\x42\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.Frame.Heap.Obj:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\n\x0b\x65vent.proto\"\xa0\x03\n\x05\x45vent\x12!\n\x07started\x18\x01 \x01(\x0b\x32\x0e.Event.StartedH\x00\x12%\n\tinspected\x18\x02 \x01(\x0b\x32\x10.Event.InspectedH\x00\x12!\n\x07printed\x18\x03 \x01(\x0b\x32\x0e.Event.PrintedH\x00\x12\x1f\n\x06locked\x18\x04 \x01(\x0b\x32\r.Event.LockedH\x00\x12\x1d\n\x05threw\x18\x05 \x01(\x0b\x32\x0c.Event.ThrewH\x00\x1a\t\n\x07Started\x1a\"\n\tInspected\x12\x15\n\x05\x66rame\x18\x01 \x01(\x0b\x32\x06.Frame\x1a\x18\n\x07Printed\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x17\n\x06Locked\x12\r\n\x05\x63\x61use\x18\x01 \x01(\t\x1a\x7f\n\x05Threw\x12#\n\x06source\x18\x01 \x01(\x0e\x32\x13.Event.Threw.Source\x12\x10\n\x08terminal\x18\x02 \x01(\x08\x12\x1d\n\texcetiion\x18\x03 \x01(\x0b\x32\n.Exception\" \n\x06Source\x12\n\n\x06TRACER\x10\x00\x12\n\n\x06TRACED\x10\x01\x42\x07\n\x05\x65vent\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"\xce\x07\n\x05\x46rame\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.Frame.Type\x12\x0c\n\x04line\x18\x02 \x01(\x05\x12\x0e\n\x06\x66inish\x18\x03 \x01(\x08\x12\x1d\n\texception\x18\x04 \x01(\x0b\x32\n.Exception\x12\x1b\n\x05stack\x18\x05 \x01(\x0b\x32\x0c.Frame.Stack\x12\x19\n\x04heap\x18\x06 \x01(\x0b\x32\x0b.Frame.Heap\x1a\x82\x01\n\x05Value\x12\x16\n\x0c\x62ooleanValue\x18\x01 \x01(\x08H\x00\x12\x16\n\x0cintegerValue\x18\x02 \x01(\x03H\x00\x12\x14\n\nfloatValue\x18\x03 \x01(\x01H\x00\x12\x15\n\x0bstringValue\x18\x04 \x01(\tH\x00\x12\x13\n\treference\x18\x05 \x01(\x03H\x00\x42\x07\n\x05value\x1a\xe3\x01\n\x05Stack\x12\"\n\x06scopes\x18\x01 \x03(\x0b\x32\x12.Frame.Stack.Scope\x1a\xb5\x01\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x17\n\x0freferencesOrder\x18\x03 \x03(\t\x12\x36\n\nreferences\x18\x04 \x03(\x0b\x32\".Frame.Stack.Scope.ReferencesEntry\x1a?\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value:\x02\x38\x01\x1a\x92\x03\n\x04Heap\x12/\n\nreferences\x18\x03 \x03(\x0b\x32\x1b.Frame.Heap.ReferencesEntry\x1a\x94\x02\n\x03Obj\x12\"\n\x04type\x18\x01 \x01(\x0e\x32\x14.Frame.Heap.Obj.Type\x12\r\n\x05lType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\'\n\x07members\x18\x04 \x03(\x0b\x32\x16.Frame.Heap.Obj.Member\x1a@\n\x06Member\x12\x19\n\x03key\x18\x01 \x01(\x0b\x32\x0c.Frame.Value\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.Frame.Value\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\x1a\x42\n\x0fReferencesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x1e\n\x05value\x18\x02 \x01(\x0b\x32\x0f.Frame.Heap.Obj:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\x62\x06proto3')
 )
 
 
@@ -41,8 +41,8 @@ _EVENT_THREW_SOURCE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=437,
-  serialized_end=469,
+  serialized_start=391,
+  serialized_end=423,
 )
 _sym_db.RegisterEnumDescriptor(_EVENT_THREW_SOURCE)
 
@@ -87,8 +87,8 @@ _FRAME_HEAP_OBJ_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1302,
-  serialized_end=1392,
+  serialized_start=1256,
+  serialized_end=1346,
 )
 _sym_db.RegisterEnumDescriptor(_FRAME_HEAP_OBJ_TYPE)
 
@@ -117,34 +117,11 @@ _FRAME_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1462,
-  serialized_end=1515,
+  serialized_start=1416,
+  serialized_end=1469,
 )
 _sym_db.RegisterEnumDescriptor(_FRAME_TYPE)
 
-
-_EVENT_CREATED = _descriptor.Descriptor(
-  name='Created',
-  full_name='Event.Created',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=233,
-  serialized_end=242,
-)
 
 _EVENT_STARTED = _descriptor.Descriptor(
   name='Started',
@@ -165,8 +142,8 @@ _EVENT_STARTED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=244,
-  serialized_end=253,
+  serialized_start=198,
+  serialized_end=207,
 )
 
 _EVENT_INSPECTED = _descriptor.Descriptor(
@@ -195,8 +172,8 @@ _EVENT_INSPECTED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=255,
-  serialized_end=289,
+  serialized_start=209,
+  serialized_end=243,
 )
 
 _EVENT_PRINTED = _descriptor.Descriptor(
@@ -225,8 +202,8 @@ _EVENT_PRINTED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=291,
-  serialized_end=315,
+  serialized_start=245,
+  serialized_end=269,
 )
 
 _EVENT_LOCKED = _descriptor.Descriptor(
@@ -255,8 +232,8 @@ _EVENT_LOCKED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=317,
-  serialized_end=340,
+  serialized_start=271,
+  serialized_end=294,
 )
 
 _EVENT_THREW = _descriptor.Descriptor(
@@ -300,8 +277,8 @@ _EVENT_THREW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=342,
-  serialized_end=469,
+  serialized_start=296,
+  serialized_end=423,
 )
 
 _EVENT = _descriptor.Descriptor(
@@ -312,43 +289,36 @@ _EVENT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='created', full_name='Event.created', index=0,
+      name='started', full_name='Event.started', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='started', full_name='Event.started', index=1,
+      name='inspected', full_name='Event.inspected', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='inspected', full_name='Event.inspected', index=2,
+      name='printed', full_name='Event.printed', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='printed', full_name='Event.printed', index=3,
+      name='locked', full_name='Event.locked', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='locked', full_name='Event.locked', index=4,
+      name='threw', full_name='Event.threw', index=4,
       number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='threw', full_name='Event.threw', index=5,
-      number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -356,7 +326,7 @@ _EVENT = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_EVENT_CREATED, _EVENT_STARTED, _EVENT_INSPECTED, _EVENT_PRINTED, _EVENT_LOCKED, _EVENT_THREW, ],
+  nested_types=[_EVENT_STARTED, _EVENT_INSPECTED, _EVENT_PRINTED, _EVENT_LOCKED, _EVENT_THREW, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -369,7 +339,7 @@ _EVENT = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=16,
-  serialized_end=478,
+  serialized_end=432,
 )
 
 
@@ -413,8 +383,8 @@ _EXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=480,
-  serialized_end=538,
+  serialized_start=434,
+  serialized_end=492,
 )
 
 
@@ -475,8 +445,8 @@ _FRAME_VALUE = _descriptor.Descriptor(
       name='value', full_name='Frame.Value.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=695,
-  serialized_end=825,
+  serialized_start=649,
+  serialized_end=779,
 )
 
 _FRAME_STACK_SCOPE_REFERENCESENTRY = _descriptor.Descriptor(
@@ -512,8 +482,8 @@ _FRAME_STACK_SCOPE_REFERENCESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=992,
-  serialized_end=1055,
+  serialized_start=946,
+  serialized_end=1009,
 )
 
 _FRAME_STACK_SCOPE = _descriptor.Descriptor(
@@ -563,8 +533,8 @@ _FRAME_STACK_SCOPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=874,
-  serialized_end=1055,
+  serialized_start=828,
+  serialized_end=1009,
 )
 
 _FRAME_STACK = _descriptor.Descriptor(
@@ -593,8 +563,8 @@ _FRAME_STACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=828,
-  serialized_end=1055,
+  serialized_start=782,
+  serialized_end=1009,
 )
 
 _FRAME_HEAP_OBJ_MEMBER = _descriptor.Descriptor(
@@ -630,8 +600,8 @@ _FRAME_HEAP_OBJ_MEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1236,
-  serialized_end=1300,
+  serialized_start=1190,
+  serialized_end=1254,
 )
 
 _FRAME_HEAP_OBJ = _descriptor.Descriptor(
@@ -682,8 +652,8 @@ _FRAME_HEAP_OBJ = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1116,
-  serialized_end=1392,
+  serialized_start=1070,
+  serialized_end=1346,
 )
 
 _FRAME_HEAP_REFERENCESENTRY = _descriptor.Descriptor(
@@ -719,8 +689,8 @@ _FRAME_HEAP_REFERENCESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1394,
-  serialized_end=1460,
+  serialized_start=1348,
+  serialized_end=1414,
 )
 
 _FRAME_HEAP = _descriptor.Descriptor(
@@ -749,8 +719,8 @@ _FRAME_HEAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1058,
-  serialized_end=1460,
+  serialized_start=1012,
+  serialized_end=1414,
 )
 
 _FRAME = _descriptor.Descriptor(
@@ -815,11 +785,10 @@ _FRAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=541,
-  serialized_end=1515,
+  serialized_start=495,
+  serialized_end=1469,
 )
 
-_EVENT_CREATED.containing_type = _EVENT
 _EVENT_STARTED.containing_type = _EVENT
 _EVENT_INSPECTED.fields_by_name['frame'].message_type = _FRAME
 _EVENT_INSPECTED.containing_type = _EVENT
@@ -829,15 +798,11 @@ _EVENT_THREW.fields_by_name['source'].enum_type = _EVENT_THREW_SOURCE
 _EVENT_THREW.fields_by_name['excetiion'].message_type = _EXCEPTION
 _EVENT_THREW.containing_type = _EVENT
 _EVENT_THREW_SOURCE.containing_type = _EVENT_THREW
-_EVENT.fields_by_name['created'].message_type = _EVENT_CREATED
 _EVENT.fields_by_name['started'].message_type = _EVENT_STARTED
 _EVENT.fields_by_name['inspected'].message_type = _EVENT_INSPECTED
 _EVENT.fields_by_name['printed'].message_type = _EVENT_PRINTED
 _EVENT.fields_by_name['locked'].message_type = _EVENT_LOCKED
 _EVENT.fields_by_name['threw'].message_type = _EVENT_THREW
-_EVENT.oneofs_by_name['event'].fields.append(
-  _EVENT.fields_by_name['created'])
-_EVENT.fields_by_name['created'].containing_oneof = _EVENT.oneofs_by_name['event']
 _EVENT.oneofs_by_name['event'].fields.append(
   _EVENT.fields_by_name['started'])
 _EVENT.fields_by_name['started'].containing_oneof = _EVENT.oneofs_by_name['event']
@@ -898,13 +863,6 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), dict(
 
-  Created = _reflection.GeneratedProtocolMessageType('Created', (_message.Message,), dict(
-    DESCRIPTOR = _EVENT_CREATED,
-    __module__ = 'event_pb2'
-    # @@protoc_insertion_point(class_scope:Event.Created)
-    ))
-  ,
-
   Started = _reflection.GeneratedProtocolMessageType('Started', (_message.Message,), dict(
     DESCRIPTOR = _EVENT_STARTED,
     __module__ = 'event_pb2'
@@ -944,7 +902,6 @@ Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), d
   # @@protoc_insertion_point(class_scope:Event)
   ))
 _sym_db.RegisterMessage(Event)
-_sym_db.RegisterMessage(Event.Created)
 _sym_db.RegisterMessage(Event.Started)
 _sym_db.RegisterMessage(Event.Inspected)
 _sym_db.RegisterMessage(Event.Printed)

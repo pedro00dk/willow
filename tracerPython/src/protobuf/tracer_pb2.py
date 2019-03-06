@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0ctracer.proto\x1a\x0b\x65vent.proto\")\n\rTracerRequest\x12\x18\n\x07\x61\x63tions\x18\x01 \x03(\x0b\x32\x07.Action\"\xa2\x02\n\x06\x41\x63tion\x12 \n\x06\x63reate\x18\x01 \x01(\x0b\x32\x0e.Action.CreateH\x00\x12\x1e\n\x05start\x18\x02 \x01(\x0b\x32\r.Action.StartH\x00\x12\x1c\n\x04stop\x18\x03 \x01(\x0b\x32\x0c.Action.StopH\x00\x12\x1c\n\x04step\x18\x04 \x01(\x0b\x32\x0c.Action.StopH\x00\x12\x1e\n\x05input\x18\x05 \x01(\x0b\x32\r.Action.InputH\x00\x1a?\n\x06\x43reate\x12\x0c\n\x04main\x18\x01 \x01(\t\x12\x0e\n\x04\x63ode\x18\x02 \x01(\tH\x00\x12\r\n\x03tar\x18\x03 \x01(\x0cH\x00\x42\x08\n\x06source\x1a\x07\n\x05Start\x1a\x06\n\x04Stop\x1a\x06\n\x04Step\x1a\x16\n\x05Input\x12\r\n\x05lines\x18\x01 \x03(\tB\x08\n\x06\x61\x63tion\"(\n\x0eTracerResponse\x12\x16\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x06.Eventb\x06proto3')
+  serialized_pb=_b('\n\x0ctracer.proto\x1a\x0b\x65vent.proto\")\n\rTracerRequest\x12\x18\n\x07\x61\x63tions\x18\x01 \x03(\x0b\x32\x07.Action\"\xf6\x01\n\x06\x41\x63tion\x12\x1e\n\x05start\x18\x01 \x01(\x0b\x32\r.Action.StartH\x00\x12\x1c\n\x04stop\x18\x02 \x01(\x0b\x32\x0c.Action.StopH\x00\x12\x1c\n\x04step\x18\x03 \x01(\x0b\x32\x0c.Action.StopH\x00\x12\x1e\n\x05input\x18\x04 \x01(\x0b\x32\r.Action.InputH\x00\x1a>\n\x05Start\x12\x0c\n\x04main\x18\x01 \x01(\t\x12\x0e\n\x04\x63ode\x18\x02 \x01(\tH\x00\x12\r\n\x03tar\x18\x03 \x01(\x0cH\x00\x42\x08\n\x06source\x1a\x06\n\x04Stop\x1a\x06\n\x04Step\x1a\x16\n\x05Input\x12\r\n\x05lines\x18\x01 \x03(\tB\x08\n\x06\x61\x63tion\"(\n\x0eTracerResponse\x12\x16\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x06.Eventb\x06proto3')
   ,
   dependencies=[event__pb2.DESCRIPTOR,])
 
@@ -58,29 +58,29 @@ _TRACERREQUEST = _descriptor.Descriptor(
 )
 
 
-_ACTION_CREATE = _descriptor.Descriptor(
-  name='Create',
-  full_name='Action.Create',
+_ACTION_START = _descriptor.Descriptor(
+  name='Start',
+  full_name='Action.Start',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='main', full_name='Action.Create.main', index=0,
+      name='main', full_name='Action.Start.main', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='code', full_name='Action.Create.code', index=1,
+      name='code', full_name='Action.Start.code', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='tar', full_name='Action.Create.tar', index=2,
+      name='tar', full_name='Action.Start.tar', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -98,34 +98,11 @@ _ACTION_CREATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='source', full_name='Action.Create.source',
+      name='source', full_name='Action.Start.source',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=241,
-  serialized_end=304,
-)
-
-_ACTION_START = _descriptor.Descriptor(
-  name='Start',
-  full_name='Action.Start',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=306,
-  serialized_end=313,
+  serialized_start=207,
+  serialized_end=269,
 )
 
 _ACTION_STOP = _descriptor.Descriptor(
@@ -147,8 +124,8 @@ _ACTION_STOP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=315,
-  serialized_end=321,
+  serialized_start=271,
+  serialized_end=277,
 )
 
 _ACTION_STEP = _descriptor.Descriptor(
@@ -170,8 +147,8 @@ _ACTION_STEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=323,
-  serialized_end=329,
+  serialized_start=279,
+  serialized_end=285,
 )
 
 _ACTION_INPUT = _descriptor.Descriptor(
@@ -200,8 +177,8 @@ _ACTION_INPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=331,
-  serialized_end=353,
+  serialized_start=287,
+  serialized_end=309,
 )
 
 _ACTION = _descriptor.Descriptor(
@@ -212,36 +189,29 @@ _ACTION = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='create', full_name='Action.create', index=0,
+      name='start', full_name='Action.start', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='start', full_name='Action.start', index=1,
+      name='stop', full_name='Action.stop', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='stop', full_name='Action.stop', index=2,
+      name='step', full_name='Action.step', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='step', full_name='Action.step', index=3,
+      name='input', full_name='Action.input', index=3,
       number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='input', full_name='Action.input', index=4,
-      number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -249,7 +219,7 @@ _ACTION = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_ACTION_CREATE, _ACTION_START, _ACTION_STOP, _ACTION_STEP, _ACTION_INPUT, ],
+  nested_types=[_ACTION_START, _ACTION_STOP, _ACTION_STEP, _ACTION_INPUT, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -262,7 +232,7 @@ _ACTION = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=73,
-  serialized_end=363,
+  serialized_end=319,
 )
 
 
@@ -292,30 +262,25 @@ _TRACERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=365,
-  serialized_end=405,
+  serialized_start=321,
+  serialized_end=361,
 )
 
 _TRACERREQUEST.fields_by_name['actions'].message_type = _ACTION
-_ACTION_CREATE.containing_type = _ACTION
-_ACTION_CREATE.oneofs_by_name['source'].fields.append(
-  _ACTION_CREATE.fields_by_name['code'])
-_ACTION_CREATE.fields_by_name['code'].containing_oneof = _ACTION_CREATE.oneofs_by_name['source']
-_ACTION_CREATE.oneofs_by_name['source'].fields.append(
-  _ACTION_CREATE.fields_by_name['tar'])
-_ACTION_CREATE.fields_by_name['tar'].containing_oneof = _ACTION_CREATE.oneofs_by_name['source']
 _ACTION_START.containing_type = _ACTION
+_ACTION_START.oneofs_by_name['source'].fields.append(
+  _ACTION_START.fields_by_name['code'])
+_ACTION_START.fields_by_name['code'].containing_oneof = _ACTION_START.oneofs_by_name['source']
+_ACTION_START.oneofs_by_name['source'].fields.append(
+  _ACTION_START.fields_by_name['tar'])
+_ACTION_START.fields_by_name['tar'].containing_oneof = _ACTION_START.oneofs_by_name['source']
 _ACTION_STOP.containing_type = _ACTION
 _ACTION_STEP.containing_type = _ACTION
 _ACTION_INPUT.containing_type = _ACTION
-_ACTION.fields_by_name['create'].message_type = _ACTION_CREATE
 _ACTION.fields_by_name['start'].message_type = _ACTION_START
 _ACTION.fields_by_name['stop'].message_type = _ACTION_STOP
 _ACTION.fields_by_name['step'].message_type = _ACTION_STOP
 _ACTION.fields_by_name['input'].message_type = _ACTION_INPUT
-_ACTION.oneofs_by_name['action'].fields.append(
-  _ACTION.fields_by_name['create'])
-_ACTION.fields_by_name['create'].containing_oneof = _ACTION.oneofs_by_name['action']
 _ACTION.oneofs_by_name['action'].fields.append(
   _ACTION.fields_by_name['start'])
 _ACTION.fields_by_name['start'].containing_oneof = _ACTION.oneofs_by_name['action']
@@ -342,13 +307,6 @@ TracerRequest = _reflection.GeneratedProtocolMessageType('TracerRequest', (_mess
 _sym_db.RegisterMessage(TracerRequest)
 
 Action = _reflection.GeneratedProtocolMessageType('Action', (_message.Message,), dict(
-
-  Create = _reflection.GeneratedProtocolMessageType('Create', (_message.Message,), dict(
-    DESCRIPTOR = _ACTION_CREATE,
-    __module__ = 'tracer_pb2'
-    # @@protoc_insertion_point(class_scope:Action.Create)
-    ))
-  ,
 
   Start = _reflection.GeneratedProtocolMessageType('Start', (_message.Message,), dict(
     DESCRIPTOR = _ACTION_START,
@@ -382,7 +340,6 @@ Action = _reflection.GeneratedProtocolMessageType('Action', (_message.Message,),
   # @@protoc_insertion_point(class_scope:Action)
   ))
 _sym_db.RegisterMessage(Action)
-_sym_db.RegisterMessage(Action.Create)
 _sym_db.RegisterMessage(Action.Start)
 _sym_db.RegisterMessage(Action.Stop)
 _sym_db.RegisterMessage(Action.Step)
