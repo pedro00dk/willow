@@ -9,13 +9,13 @@ class Inspector:
 
     def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
         stack, frames = self.inspect_stack(frame, exec_call_frame, True)
-        heap, stack_references = self.inspect_heap(frames)
+        stack, heap = self.inspect_heap(stack, frames)
+
         return {
             'type': event,
             'finish': event == 'return' and len(frames) == 1,
             'exception': ExceptionUtil.dump(args[1], args[2]) if event == 'exception' else None,
             'stack': stack,
-            'stackReferences': stack_references,
             'heap': heap
         }
 
@@ -31,20 +31,20 @@ class Inspector:
         stack = [{'name': FrameUtil.name(frame), 'line': FrameUtil.line(frame)} for frame in frames]
         return stack, frames
 
-    def inspect_heap(self, stack_frames: list):
-        module = FrameUtil.module(stack_frames[-1])
+    def inspect_heap(self, stack: list, frames: list):
+        module = FrameUtil.module(frames[-1])
         heap = {}
         classes = set()
         stack_references = []
-        for frame in stack_frames[::-1]:
+        for i, frame in enumerate(frames[::-1]):
             scope_variables = FrameUtil.locals(frame)
             scope_references = [
                 (name, self.inspect_obj(scope_variables[name], heap, classes, module))
                 for name, value in scope_variables.items() if not name.startswith('_')
             ]
-            stack_references.append(scope_references)
+            stack[i]['variables'] = scope_references
 
-        return heap, stack_references
+        return stack, heap
 
     def inspect_obj(self, obj, heap: dict, classes: set, module: str):
         """
