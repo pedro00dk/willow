@@ -10,7 +10,6 @@ import * as rxOps from 'rxjs/operators'
  * generate size delimiters using var_int32 encoding. The generated buffers will always contain an entire data section.
  */
 export class ProtoProcess {
-    private command: string
     private instance: cp.ChildProcess
     private stdin$_: rx.Subject<protobuf.Writer>
     private stdout$_: rx.Observable<protobuf.Reader>
@@ -20,9 +19,7 @@ export class ProtoProcess {
     get stdout$() { return this.stdout$_ }
     get stderr$() { return this.stderr$_ }
 
-    constructor(command: string) {
-        this.command = command
-    }
+    constructor(private readonly command: string) { }
 
     isRunning() { return this.instance && !this.instance.killed }
 
