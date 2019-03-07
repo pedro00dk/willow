@@ -88,15 +88,16 @@ def read_input(mode: str, prompt: str = ''):
 def write_output(mode: str, event_messages: list):
     response = event_messages_to_response_protocol(event_messages)
     if mode == 'json':
-        print(json_format.MessageToJson(response, including_default_value_fields=True))
+        print(json_format.MessageToJson(response, including_default_value_fields=True), flush=True)
     elif mode == 'proto':
         serialized_message = response.SerializeToString()
         sys.stdout.buffer.write(len(serialized_message).to_bytes(4, 'little'))
         sys.stdout.buffer.write(serialized_message)
+        sys.stdout.buffer.flush()
     elif mode == 'text':
-        print(text_format.MessageToString(response, as_utf8=True, as_one_line=False))
+        print(text_format.MessageToString(response, as_utf8=True, as_one_line=False), flush=True)
     elif mode == 'text1':
-        print(text_format.MessageToString(response, as_utf8=True, as_one_line=True))
+        print(text_format.MessageToString(response, as_utf8=True, as_one_line=True), flush=True)
     else:
         raise Exception('unexpected output mode')
 
