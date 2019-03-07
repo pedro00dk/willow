@@ -42,20 +42,20 @@ export class ProtoProcess {
             .pipe(
                 rxOps.map(object => [new protobuf.BufferReader(object as Buffer)]),
                 rxOps.scan(
-                    (acc, buffer) => {
+                    (acc, reader) => {
                         if (!acc[acc.length - 1]) {
-                            const messageLength = buffer[0].fixed32()
-                            const bufferLength = buffer[0].len - buffer[0].pos
-                            buffer[0].pos = 0
-                            return messageLength === bufferLength ? [...buffer, undefined] : buffer
+                            const messageLength = reader[0].fixed32()
+                            const bufferLength = reader[0].len - reader[0].pos
+                            reader[0].pos = 0
+                            return messageLength === bufferLength ? [...reader, undefined] : reader
                         } else {
                             const messageLength = acc[0].fixed32()
-                            const bufferLength = buffer[0].len
+                            const bufferLength = reader[0].len
                             const accLength = acc.reduce((acc, buffer) => acc + buffer.len - buffer.pos, 0)
                             acc[0].pos = 0
                             return messageLength === accLength + bufferLength
-                                ? [...acc, ...buffer, undefined]
-                                : [...acc, ...buffer]
+                                ? [...acc, ...reader, undefined]
+                                : [...acc, ...reader]
                         }
                     },
                     [undefined] as protobuf.BufferReader[]
