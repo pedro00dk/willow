@@ -2,6 +2,7 @@ import * as express from 'express'
 import * as log from 'npmlog'
 import { StepConstraints } from './tracer/step-constraints'
 import { Tracer } from './tracer/tracer'
+import { TracerProcess } from './tracer/tracer-process'
 import { TracerWrapper } from './tracer/tracer-wrapper'
 
 
@@ -10,55 +11,40 @@ import { TracerWrapper } from './tracer/tracer-wrapper'
  */
 export class Server {
     private server: express.Express
-    private port: number
-    private suppliers: Map<string, (code: string) => Tracer>
-    private sessions: Map<number, { supplier: string, tracer: Tracer }>
-    private sessionIdGenerator: number
+    private sessions: Map<number, { language: string, tracer: Tracer }> = new Map()
+    private sessionIdGenerator: number = 0
 
-    /**
-     * Creates the server with the port and the tracer suppliers.
-     */
-    constructor(port: number, suppliers: Map<string, (code: string) => Tracer>) {
-        if (port < 0 || port > 65355) {
-            const error = 'illegal port number'
-            log.error(Server.name, error, { port })
-            throw new Error(error)
-        }
+    constructor(private port: number, private tracers: { [language: string]: string }) {
         this.server = express()
         this.server.use(express.json())
-        this.port = port
-        this.suppliers = suppliers
-        this.sessions = new Map()
-        this.sessionIdGenerator = 0
-        this.configureRoutes()
+        this.configureServerRoutes()
     }
 
-    /**
-     * Configures server routes.
-     */
-    private configureRoutes() {
+    private configureServerRoutes() {
         this.server.get(
-            '/suppliers',
+            '/tracers',
             (request, response) => {
                 log.http(Server.name, request.path)
-                response.send(this.getSuppliers())
+                response.send(Object.keys(this.tracers))
             }
         )
         this.server.get(
             '/sessions',
             (request, response) => {
                 log.http(Server.name, request.path)
-                response.send(this.getSessions())
+                response.send(
+                    [...this.sessions.entries()]
+                        .map(([id, { language, tracer }]) => ({ id, language, state: tracer.getState() }))
+                )
             }
         )
         this.server.post(
             '/create',
             (request, response) => {
-                const supplier = request.body['supplier'] as string
-                const code = request.body['code'] as string
-                log.http(Server.name, request.path, { supplier })
+                const language = request.body['language'] as string
+                log.http(Server.name, request.path, { language })
                 try {
-                    response.send(this.createSession(supplier, code))
+                    response.send(this.create(language))
                 } catch (error) {
                     response.status(400).send(error.message)
                 }
@@ -72,7 +58,7 @@ export class Server {
                 const args = request.body['args'] as unknown[]
                 log.http(Server.name, request.path, { id, action })
                 try {
-                    const results = await this.executeOnSession(id, action, args)
+                    const results = await this.execute(id, action, args)
                     const finished = !this.sessions.has(id)
                     response.setHeader('finished', finished.toString())
                     response.send(results)
@@ -83,98 +69,50 @@ export class Server {
         )
     }
 
-    /**
-     * Lists the available suppliers.
-     */
-    getSuppliers() {
-        return [...this.suppliers.keys()]
-    }
+    create(language: string) {
+        if (!this.tracers[language]) throw new Error('unexpected language')
 
-    /**
-     * Returns the sessions ids and its suppliers.
-     */
-    getSessions() {
-        return [...this.sessions.entries()]
-            .map(([id, { supplier, tracer }]) => ({ id, supplier, state: tracer.getState() }))
-    }
-
-    /**
-     * Creates a new tracer session with the received supplier and code.
-     */
-    createSession(supplier: string, code: string) {
-        if (code == undefined) {
-            const error = 'code not found'
-            log.warn(Server.name, error, { code })
-            throw new Error(error)
-        }
-        if (!this.suppliers.has(supplier)) {
-            const error = `supplier not found`
-            log.warn(Server.name, error, { supplier })
-            throw new Error(error)
-        }
         const id = this.sessionIdGenerator++
-        let tracer = this.suppliers.get(supplier)(code)
-        tracer = tracer instanceof TracerWrapper ? tracer : new TracerWrapper(tracer)
+        log.info(Server.name, 'create', { id, language })
+        const tracer = new TracerWrapper(new TracerProcess(this.tracers[language]))
         tracer.addStepProcessor(new StepConstraints(1000, 50, 50, 20, 100, 10))
-        this.sessions.set(id, { supplier, tracer })
-        log.info(Server.name, 'created session', { id, supplier })
-        return { id, supplier }
+        this.sessions.set(id, { language, tracer })
+        return { id, language }
     }
 
-    /**
-     * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
-     */
-    async executeOnSession(id: number, action: string, args: unknown[]) {
-        if (id == undefined || !this.sessions.has(id)) {
-            const error = 'session id not found'
-            log.info(Server.name, error, { id })
-            throw new Error(error)
-        }
-        if (action == undefined) {
-            const error = 'action not found'
-            log.info(Server.name, error, { action })
-            throw new Error(error)
-        }
-        if (!args) {
-            const error = 'args not found'
-            log.info(Server.name, error, { args })
-            throw new Error(error)
-        }
+    async execute(id: number, action: string, args: unknown[]) {
+        if (!this.sessions.has(id)) throw new Error('session id not found')
+        if (action == undefined) throw new Error('action not found')
+        if (!args) throw new Error('args not found')
+
+        log.info(Server.name, 'execute', { id, action })
         const tracer = this.sessions.get(id).tracer
         let result: unknown
         try {
             if (action === 'getState') result = tracer.getState()
-            else if (action === 'start') result = await tracer.start()
+            else if (action === 'start') result = await tracer.start(args[0] as string, args[1] as string)
             else if (action === 'stop') result = tracer.stop()
-            else if (action === 'input') result = tracer.input(args[0] as string)
             else if (action === 'step') result = await tracer.step()
             else if (action === 'stepOver') result = await tracer.stepOver()
             else if (action === 'stepOut') result = await tracer.stepOut()
             else if (action === 'continue') result = await tracer.continue()
+            else if (action === 'input') result = tracer.input(args[0] as string[])
             else if (action === 'getBreakpoints') result = tracer.getBreakpoints()
-            else if (action === 'setBreakpoints') result = tracer.setBreakpoints(args[0] as number[])
-            else {
-                const error = 'action not found'
-                log.warn(Server.name, error, { action })
-                throw new Error(error)
-            }
+            else if (action === 'setBreakpoints') result = tracer.setBreakpoints(new Set(args[0] as number[]))
+            else throw new Error('action not found')
         } catch (error) {
             throw error
         } finally {
             if (tracer.getState() === 'stopped') {
-                log.info(Server.name, 'tracer stopped', { id })
+                log.info(Server.name, 'execute - tracer stopped', { id })
                 this.sessions.delete(id)
             }
         }
-        log.info(Server.name, 'executed', { id, action })
         return result
     }
 
-    /**
-     * Starts the server.
-     */
     listen() {
-        log.info(Server.name, 'start listening', { port: this.port })
+        log.info(Server.name, 'listen', { port: this.port })
         this.server.listen(this.port)
     }
 }
