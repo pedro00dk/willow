@@ -108,9 +108,9 @@ class FrameProcessor:
             elif action.name == message.Action.STEP:
                 # do not throw exception (will send LOCKED event)
                 pass
-            else: # stack action or unknown actions
+            else:  # stack action or unknown actions
                 raise Exception('unexpected action')
-            
+
             if len(self._input_cache) == 0:
                 self._event_queue.put(message.Message(message.Event.LOCKED, 'input'))
 

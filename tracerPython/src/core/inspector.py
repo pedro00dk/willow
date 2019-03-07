@@ -35,7 +35,6 @@ class Inspector:
         module = FrameUtil.module(frames[-1])
         heap = {}
         classes = set()
-        stack_references = []
         for i, frame in enumerate(frames[::-1]):
             scope_variables = FrameUtil.locals(frame)
             scope_references = [
