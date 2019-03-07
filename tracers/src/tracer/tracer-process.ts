@@ -1,120 +1,91 @@
 import * as log from 'npmlog'
+import * as protobuf from 'protobufjs'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
-import { ObservableProcess } from '../process/observable-process'
-import { Action, isErrorResult, isLastResult, Result } from '../types/tracers'
+import { ProtoProcess } from '../process/proto-process'
+import * as protocol from '../protobuf/protocol'
 import { Tracer } from './tracer'
 
 
 /**
- * Connects to a tracer process.
+ * Spawns and connects to a tracer process.
  */
 export class TracerProcess implements Tracer {
-    private process: ObservableProcess<Action | string>
-    private results: rx.Observable<Result[]>
-    private state: 'created' | 'started' | 'stopped'
+    private actions$: rx.Subject<protocol.Action[]>
+    private events$: rx.Observable<protocol.Event[]>
+    private state: ReturnType<Tracer['getState']> = 'created'
 
-    /**
-     * Initializes the client with the command to spawn the process.
-     */
-    constructor(command: string) {
-        this.process = new ObservableProcess(command)
-        this.state = 'created'
+    constructor(private command: string) { }
+
+    private checkState(...states: typeof TracerProcess.prototype.state[]) {
+        if (!states.includes(this.state)) throw new Error(`unexpected state: ${this.state}, expected: ${states}`)
     }
 
-    /**
-     * Throws an exception if the tracer state is not in the expected states list.
-     */
-    private requireState(...states: typeof TracerProcess.prototype.state[]) {
-        if (!states.includes(this.state)) {
-            const error = `unexpected tracer state: ${this.state}, expected one of: ${states}`
-            log.warn(TracerProcess.name, error)
-            throw new Error(error)
-        }
-    }
-
-    /**
-     * Spawns the tracer process and configures the observables to transform the input and check for errors.
-     */
-    private async spawn() {
-        log.info(TracerProcess.name, 'spawn')
-        this.process.spawn()
-        this.results = this.process.stdMux
-            .pipe(
-                rxOps.map(streamLine => {
-                    if (streamLine.source === 'stderr') {
-                        const error = `process stderr: ${streamLine.line}`
-                        log.error(TracerProcess.name, error)
-                        throw new Error(error)
-                    }
-                    if (!streamLine.line.startsWith('[')) {
-                        const error = `process stdout: ${streamLine.line}`
-                        log.error(TracerProcess.name, error)
-                        throw new Error(error)
-                    }
-                    try {
-                        return JSON.parse(streamLine.line) as Result[]
-                    } catch (error) {
-                        const error_ = `process stdout: ${error.message}`
-                        log.error(TracerProcess.name, error_)
-                        throw new SyntaxError(error_)
-                    }
-                })
+    private async spawnProcess() {
+        log.info(TracerProcess.name, 'spawn', { command: this.command })
+        const process = new ProtoProcess(this.command)
+        process.spawnProcess()
+        this.actions$ = new rx.Subject()
+        this.actions$
+            .pipe(rxOps.flatMap(actions => actions.map(action => [action]))) // send one action per request
+            .subscribe(
+                actions => {
+                    const requestWriter = protocol.TracerRequest.encode(
+                        new protocol.TracerRequest({ actions }), protobuf.BufferWriter.create()
+                    )
+                    process.stdin$.next(protobuf.BufferWriter.create().fixed32(requestWriter.len))
+                    process.stdin$.next(requestWriter)
+                },
+                error => process.stdin$.error(error),
+                () => process.stdin$.complete()
             )
-        this.results
+        this.events$ = process.stdout$
+            .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events))
+        this.events$
             .pipe(
-                rxOps.flatMap(results => rx.from(results)),
-                rxOps.filter(result => isErrorResult(result) || isLastResult(result)),
+                rxOps.flatMap(events => events),
+                rxOps.filter(event => event.inspected ? event.inspected.frame.finish : event.threw != undefined),
                 rxOps.take(1)
             )
-            .subscribe(
-                value => {
-                    log.info(TracerProcess.name, 'received error or last result')
-                    this.stop()
-                },
-                error => {
-                    log.info(TracerProcess.name, `received process error: ${error.message}`)
-                    this.stop()
-                }
-            )
-        await this.results.pipe(rxOps.take(1)).toPromise()
+            .subscribe(value => this.stop())
+        process.stderr$
+            .subscribe(line => this.stop())
     }
 
     getState() {
         return this.state
     }
 
-    async start() {
+    async start(main: string, code: string) {
         log.info(TracerProcess.name, 'start')
-        this.requireState('created')
+        this.checkState('created')
         this.state = 'started'
-        await this.spawn()
-        this.process.stdin.next('start')
-        const results = await this.results.pipe(rxOps.take(1)).toPromise()
-        return results
+        await this.spawnProcess()
+        this.actions$.next([new protocol.Action({ start: new protocol.Action.Start({ main, code }) })])
+        return await this.events$.pipe(rxOps.take(1)).toPromise()
     }
 
     stop() {
         log.info(TracerProcess.name, 'stop')
-        this.requireState('started', 'created')
+        // this.checkState('initialized', 'started')
         this.state = 'stopped'
         try {
-            this.process.stdin.next('stop')
-            this.process.stdin.complete()
+            this.actions$.next([new protocol.Action({ stop: new protocol.Action.Stop() })])
+            this.actions$.complete()
         } catch (error) { /* ignore */ }
-    }
-
-    input(input: string) {
-        log.verbose(TracerProcess.name, 'input', { input })
-        this.requireState('started')
-        this.process.stdin.next(`input ${input}`)
     }
 
     async step() {
         log.verbose(TracerProcess.name, 'step')
-        this.requireState('started')
-        this.process.stdin.next('step')
-        const results = await this.results.pipe(rxOps.take(1)).toPromise()
-        return results
+        this.checkState('started')
+        this.actions$.next([new protocol.Action({ step: new protocol.Action.Step() })])
+        return await this.events$.pipe(rxOps.take(1)).toPromise()
+    }
+
+    async input(lines: string[]) {
+        log.verbose(TracerProcess.name, 'input', { lines })
+        this.checkState('started')
+        this.actions$.next([new protocol.Action({ input: new protocol.Action.Input({ lines }) })])
+        return await this.events$.pipe(rxOps.take(1)).toPromise()
     }
 }

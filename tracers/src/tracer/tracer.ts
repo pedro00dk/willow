@@ -6,7 +6,7 @@ import * as protocol from '../protobuf/protocol'
  * other functions may be implemented using the required functions.
  */
 export interface Tracer {
-    getState(): 'initialized' | 'started' | 'stopped'
+    getState(): 'created' | 'started' | 'stopped'
     start(main: string, code: string): Promise<protocol.Event[]>
     stop(): void
     step(): Promise<protocol.Event[]>
