@@ -40,14 +40,12 @@ class Client:
             raise AssertionError('tracer stopped')
 
         self._action_queue.put(message.Message(message.Action.STOP))
-        event = self._event_queue.get()
         # self._tracer_process.terminate()
         self._tracer_process.join()
         self._tracer_process = None
         self._manager = None
         self._action_queue = None
         self._event_queue = None
-        return event
 
     def step(self):
         if not self.is_tracer_running():
