@@ -17,7 +17,8 @@ export class TracerWrapper implements Tracer {
 
     private updatePreviousInspectedEvent(events: protocol.Event[]) {
         const inspectedEvents = events.filter(event => event.inspected != undefined)
-        if (inspectedEvents.length !== 0) this.previousInspectedEvent = inspectedEvents[inspectedEvents.length - 1]
+        if (inspectedEvents.length !== 0)
+            this.previousInspectedEvent = inspectedEvents[inspectedEvents.length - 1].inspected
     }
 
     getState() {
@@ -99,7 +100,7 @@ export class TracerWrapper implements Tracer {
     }
 
     addStepProcessor(stepProcessor: StepProcessor) {
-        log.info(TracerWrapper.name, 'add step processor', {stepProcessor})
+        log.info(TracerWrapper.name, 'add step processor', { stepProcessor })
         if (!stepProcessor) throw new Error('undefined step processor')
         this.processors.push(stepProcessor)
     }
