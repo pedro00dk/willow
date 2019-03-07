@@ -1,5 +1,4 @@
 import * as cp from 'child_process'
-import * as log from 'npmlog'
 import * as protobuf from 'protobufjs'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
@@ -10,9 +9,8 @@ import * as rxOps from 'rxjs/operators'
  * generate size delimiters using var_int32 encoding. The generated buffers will always contain an entire data section.
  */
 export class ProtoProcess {
-    private instance: cp.ChildProcess
-    private stdin$_: rx.Subject<protobuf.BufferWriter>
-    private stdout$_: rx.Observable<protobuf.BufferReader>
+    private stdin$_: rx.Subject<protobuf.Writer>
+    private stdout$_: rx.Observable<protobuf.Reader>
     private stderr$_: rx.Observable<string>
 
     get stdin$() { return this.stdin$_ }
@@ -21,52 +19,53 @@ export class ProtoProcess {
 
     constructor(private readonly command: string) { }
 
-    isRunning() { return this.instance && !this.instance.killed }
+    isRunning() {
+        return this.stdin$ && !this.stdin$.closed
+    }
 
     spawnProcess() {
-        log.info(ProtoProcess.name, 'spawn', { command: this.command })
         if (this.isRunning()) throw new Error('process running')
 
-        this.instance = cp.spawn(this.command, { shell: '/bin/bash' })
-        const stop$ = rx.merge(rx.fromEvent(this.instance, 'error'), rx.fromEvent(this.instance, 'exit'))
+        const instance = cp.spawn(this.command, { shell: '/bin/bash' })
+        const stop$ = rx.merge(rx.fromEvent(instance, 'error'), rx.fromEvent(instance, 'exit'))
             .pipe(rxOps.take(1))
         this.stdin$_ = new rx.Subject()
         this.stdin$_
             .pipe(rxOps.takeUntil(stop$))
             .subscribe(
-                next => this.instance.stdin.write(next.finish()),
-                error => { if (!this.instance.killed) this.instance.kill() },
-                () => { if (!this.instance.killed) this.instance.kill() }
+                next => instance.stdin.write(next.finish()),
+                error => !instance.killed ? instance.kill() : undefined,
+                () => !instance.killed ? instance.kill() : undefined
             )
-        this.stdout$_ = rx.fromEvent(this.instance.stdout, 'data')
+        this.stdout$_ = rx.fromEvent(instance.stdout, 'data')
             .pipe(
-                rxOps.map(object => [new protobuf.BufferReader(object as Buffer)]),
+                rxOps.map(object => [new protobuf.Reader(object as Buffer)]),
                 rxOps.scan(
                     (acc, reader) => {
                         if (!acc[acc.length - 1]) {
                             const messageLength = reader[0].fixed32()
-                            const bufferLength = reader[0].len - reader[0].pos
+                            const readerLength = reader[0].len - reader[0].pos
                             reader[0].pos = 0
-                            return messageLength === bufferLength ? [...reader, undefined] : reader
+                            return messageLength === readerLength ? [...reader, undefined] : reader
                         } else {
                             const messageLength = acc[0].fixed32()
-                            const bufferLength = reader[0].len
+                            const readerLength = reader[0].len
                             const accLength = acc.reduce((acc, buffer) => acc + buffer.len - buffer.pos, 0)
                             acc[0].pos = 0
-                            return messageLength === accLength + bufferLength
+                            return messageLength === accLength + readerLength
                                 ? [...acc, ...reader, undefined]
                                 : [...acc, ...reader]
                         }
                     },
-                    [undefined] as protobuf.BufferReader[]
+                    [undefined] as protobuf.Reader[]
                 ),
                 rxOps.filter(buffers => buffers[buffers.length - 1] == undefined),
-                rxOps.map(buffers => new protobuf.BufferReader(
+                rxOps.map(buffers => new protobuf.Reader(
                     Buffer.concat(buffers.slice(0, -1).map(buffer => buffer.buf))
                 )),
                 rxOps.takeUntil(stop$)
             )
-        this.stderr$_ = rx.fromEvent(this.instance.stderr, 'data')
+        this.stderr$_ = rx.fromEvent(instance.stderr, 'data')
             .pipe(
                 rxOps.map(object => object as Buffer),
                 rxOps.map(buffer => buffer.toString('utf8')),
