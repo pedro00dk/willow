@@ -37,9 +37,10 @@ class Tracer:
             sys.settrace(frame_processor.trace)
             exec(compiled, generated_globals)
         except Exception as e:
+            # tracer exceptions automatically call sys.settrace(None)
             exception_dump = ExceptionUtil.dump(e, remove_lines=(1,))
             self._event_queue.put(message.Message(message.Event.THREW, exception_dump))
-        finally:
+        else:
             sys.settrace(None)
 
 
@@ -69,7 +70,9 @@ class FrameProcessor:
         while True:
             action = self._action_queue.get()
             if action.name == message.Action.STOP:
-                return None
+                # the only way to stop any traced code
+                # return None in all scopes only stop the tracer but not the traced code
+                raise Exception('stop exception')
             elif action.name == message.Action.STEP:
                 frame = self._inspector.inspect(frame, event, args, self._exec_call_frame)
                 self._event_queue.put(message.Message(message.Event.INSPECTED, frame))
