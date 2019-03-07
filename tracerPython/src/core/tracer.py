@@ -14,10 +14,6 @@ class Tracer:
     Traces python code and analyses its state after every instruction.
     """
 
-    @staticmethod
-    def init_run(action_queue: mp.Queue, event_queue: mp.Queue):
-        Tracer(action_queue, event_queue).run()
-
     def __init__(self, action_queue: mp.Queue, event_queue: mp.Queue):
         self._action_queue = action_queue
         self._event_queue = event_queue

@@ -24,7 +24,7 @@ class Client:
         self._manager = mp.Manager()
         self._action_queue = self._manager.Queue()
         self._event_queue = self._manager.Queue()
-        self._tracer_process = mp.Process(target=tracer.Tracer.init_run, args=(self._action_queue, self._event_queue))
+        self._tracer_process = mp.Process(target=tracer.Tracer(self._action_queue, self._event_queue).run)
         self._tracer_process.start()
 
         self._action_queue.put(message.Message(message.Action.START, {'main': main, 'code': code}))
