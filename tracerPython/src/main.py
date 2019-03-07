@@ -138,6 +138,7 @@ def event_message_to_event_protocol(event_message: message.Message):
             )
             for scope in event_message.value['stack']
         ])
+        event.inspected.frame.heap.references.clear()
         [
             event.inspected.frame.heap.references[reference].CopyFrom(event_pb2.Frame.Heap.Obj(
                 type=event_pb2.Frame.Heap.Obj.Type.Value(
