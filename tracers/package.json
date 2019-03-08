@@ -7,7 +7,9 @@
         "@types/npmlog": "^4.1.1",
         "@types/yargs": "^12.0.9",
         "jest": "^24.1.0",
+        "prettier": "^1.16.4",
         "tslint": "^5.12.1",
+        "tslint-config-prettier": "^1.18.0",
         "typescript": "^3.3.3"
     },
     "dependencies": {
@@ -26,8 +28,8 @@
         "python_supplier_test": "cd ../tracerPython/ && source ./package.sh start --test"
     },
     "scripts": {
+        "lint": "tslint --config ../tslint.json --project ./package.json && prettier --config ./.prettierrc.js --check --write './src/**/!(*.js|*.d.ts)'",
         "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/* && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
-        "lint": "tslint --config ./tslint.json --project ./package.json",
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- $npm_package_config_test",
         "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- $npm_package_config_main",
         "debug-tracers": "npm run debug -- --tracer java \"$npm_package_config_java_supplier\" --tracer python \"$npm_package_config_python_supplier\"",
