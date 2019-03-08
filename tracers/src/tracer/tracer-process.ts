@@ -12,7 +12,7 @@ import { Tracer } from './tracer'
  */
 export class TracerProcess implements Tracer {
     private actions$: rx.Subject<protocol.Action[]>
-    private events$: rx.Observable<protocol.Event[]>
+    private events$: rx.Observable<protocol.Event[] | string>
     private state: ReturnType<Tracer['getState']> = 'created'
 
     constructor(private command: string) { }
@@ -37,32 +37,34 @@ export class TracerProcess implements Tracer {
                 error => process.stdin$.error(error),
                 () => process.stdin$.complete()
             )
-        this.events$ = process.stdout$
-            .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events))
-        this.events$
-            .pipe(
-                rxOps.flatMap(events => events),
-                rxOps.filter(event => event.inspected ? event.inspected.frame.finish : event.threw != undefined),
-                rxOps.take(1)
-            )
-            .subscribe(next => this.stop())
-        process.stderr$
-            .pipe(rxOps.take(1))
-            .subscribe(next => this.stop())
+        this.events$ = rx.merge(
+            process.stdout$
+                .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events)),
+            process.stderr$
+                .pipe(rxOps.map(text => `tracer process stderr:\n${text}`))
+        )
+            .pipe(rxOps.shareReplay(1)) // necessary to get a event or error before subscribing
     }
 
     getState() {
         return this.state
     }
 
-    start(main: string, code: string) {
+    async start(main: string, code: string) {
         log.info(TracerProcess.name, 'start')
         this.checkState('created')
         this.state = 'started'
         this.spawnProcess()
         const eventsPromise = this.events$.pipe(rxOps.take(1)).toPromise()
         this.actions$.next([new protocol.Action({ start: new protocol.Action.Start({ main, code }) })])
-        return eventsPromise
+        const events = await eventsPromise
+        if (typeof events === 'string') {
+            this.stop()
+            throw new Error(events)
+        }
+        if (events.some(event => event.threw != undefined || event.inspected && event.inspected.frame.finish))
+            this.stop()
+        return events
     }
 
     stop() {
@@ -73,12 +75,19 @@ export class TracerProcess implements Tracer {
         // this.actions$.complete() // the process shall stop automatically (this call will force stop/kill)
     }
 
-    step() {
+    async step() {
         log.verbose(TracerProcess.name, 'step')
         this.checkState('started')
-        const eventsPromise = this.events$.pipe(rxOps.take(1)).toPromise()
+        const eventsPromise = this.events$.pipe(rxOps.take(2)).toPromise()
         this.actions$.next([new protocol.Action({ step: new protocol.Action.Step() })])
-        return eventsPromise
+        const events = await eventsPromise
+        if (typeof events === 'string') {
+            this.stop()
+            throw new Error(events)
+        }
+        if (events.some(event => event.threw != undefined || event.inspected && event.inspected.frame.finish))
+            this.stop()
+        return events
     }
 
     input(lines: string[]) {
