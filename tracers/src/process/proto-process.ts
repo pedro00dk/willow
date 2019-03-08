@@ -6,7 +6,8 @@ import * as rxOps from 'rxjs/operators'
 
 /**
  * Creates and connects to a process providing easy access to observable buffers. The consumed process stream must
- * generate size delimiters using var_int32 encoding. The generated buffers will always contain an entire data section.
+ * generate length delimiters using var_int32 encoding. The generated buffers will always contain an entire data
+ * section.
  */
 export class ProtoProcess {
     private stdin$_: rx.Subject<protobuf.Writer>
@@ -37,24 +38,24 @@ export class ProtoProcess {
                 error => !instance.killed ? instance.kill() : undefined,
                 () => !instance.killed ? instance.kill() : undefined
             )
-        this.stdout$_ = rx.fromEvent(instance.stdout, 'data')
+        this.stdout$_ = rx.fromEvent<Buffer>(instance.stdout, 'data')
             .pipe(
-                rxOps.map(object => [new protobuf.Reader(object as Buffer)]),
-                rxOps.scan(
+                rxOps.map(buffer => new protobuf.Reader(buffer as Uint8Array)),
+                rxOps.scan<protobuf.Reader>(
                     (acc, reader) => {
-                        if (!acc[acc.length - 1]) {
-                            const messageLength = reader[0].fixed32()
-                            const readerLength = reader[0].len - reader[0].pos
-                            reader[0].pos = 0
-                            return messageLength === readerLength ? [...reader, undefined] : reader
+                        if (acc[acc.length - 1] == undefined) {
+                            const messageLength = reader.fixed32()
+                            const readerLength = reader.len - reader.pos
+                            reader.pos = 0
+                            return messageLength === readerLength ? [reader, undefined] : [reader]
                         } else {
                             const messageLength = acc[0].fixed32()
-                            const readerLength = reader[0].len
+                            const readerLength = reader.len
                             const accLength = acc.reduce((acc, buffer) => acc + buffer.len - buffer.pos, 0)
                             acc[0].pos = 0
                             return messageLength === accLength + readerLength
-                                ? [...acc, ...reader, undefined]
-                                : [...acc, ...reader]
+                                ? [...acc, reader, undefined]
+                                : [...acc, reader]
                         }
                     },
                     [undefined] as protobuf.Reader[]
@@ -65,9 +66,9 @@ export class ProtoProcess {
                 )),
                 rxOps.takeUntil(stop$)
             )
-        this.stderr$_ = rx.fromEvent(instance.stderr, 'data')
+        this.stderr$_ = rx.fromEvent<Buffer>(instance.stderr, 'data')
             .pipe(
-                rxOps.map(object => (object as Buffer).toString('utf8')),
+                rxOps.map(buffer => buffer.toString('utf8')),
                 rxOps.takeUntil(stop$)
             )
     }
