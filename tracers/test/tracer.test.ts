@@ -35,7 +35,7 @@ tracers.forEach(([language, command]) => {
                 'create - start(working code) - stop',
                 async () => {
                     const tracer = new TracerProcess(command)
-                    await tracer.start(codes[language].main, codes[language].working)
+                    await expect(tracer.start(codes[language].main, codes[language].working)).resolves.toBeDefined()
                     expect(tracer.getState()).toBe('started')
                     expect(() => tracer.stop()).not.toThrow()
                 }
@@ -45,7 +45,7 @@ tracers.forEach(([language, command]) => {
                 async () => {
                     const tracer = new TracerProcess(command)
                     await tracer.start(codes[language].main, codes[language].working)
-                    expect(() => tracer.step()).not.toThrow()
+                    await expect(tracer.step()).resolves.toBeDefined()
                     expect(() => tracer.stop()).not.toThrow()
                 }
             )
@@ -61,7 +61,8 @@ tracers.forEach(([language, command]) => {
                             break
                         }
                     }
-                    expect(() => tracer.step()).toThrow()
+                    expect(tracer.getState()).toBe('stopped')
+                    await expect(tracer.step()).rejects.toBeDefined()
                     expect(() => tracer.stop()).toThrow()
                 }
             )
@@ -70,7 +71,8 @@ tracers.forEach(([language, command]) => {
                 async () => {
                     const tracer = new TracerProcess(command)
                     await tracer.start(codes[language].main, codes[language].broken)
-                    expect(() => tracer.step()).toThrow()
+                    expect(tracer.getState()).toBe('stopped')
+                    await expect(tracer.step()).rejects.toBeDefined()
                     expect(() => tracer.stop()).toThrow()
                 }
             )
