@@ -67,14 +67,7 @@ export class ProtoProcess {
             )
         this.stderr$_ = rx.fromEvent(instance.stderr, 'data')
             .pipe(
-                rxOps.map(object => object as Buffer),
-                rxOps.map(buffer => buffer.toString('utf8')),
-                rxOps.flatMap(text => rx.from(text.split(/(\n)/))),
-                rxOps.filter(part => part.length !== 0),
-                rxOps.map(part => [part]),
-                rxOps.scan((acc, parts) => acc[acc.length - 1] === '\n' ? parts : [...acc, ...parts], ['\n']),
-                rxOps.filter(parts => parts[parts.length - 1] === '\n'),
-                rxOps.map(lineParts => lineParts.join('')),
+                rxOps.map(object => (object as Buffer).toString('utf8')),
                 rxOps.takeUntil(stop$)
             )
     }
