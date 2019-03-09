@@ -1,22 +1,22 @@
 {
-	"folders": [
-		{
-			"path": "client"
-		},
-		{
-			"path": "server"
-		},
-		{
-			"path": "tracerJava"
-		},
-		{
-			"path": "tracerPython"
-		},
-		{
-			"path": "tracers"
-		},
-		{
-			"path": "."
-		}
-	]
+    "folders": [
+        {
+            "path": "client"
+        },
+        {
+            "path": "server"
+        },
+        {
+            "path": "tracerJava"
+        },
+        {
+            "path": "tracerPython"
+        },
+        {
+            "path": "tracers"
+        },
+        {
+            "path": "."
+        }
+    ]
 }

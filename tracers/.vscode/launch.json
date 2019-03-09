@@ -10,15 +10,8 @@
             "request": "launch",
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run",
-                "debug-tracers"
-            ],
-            "args": [
-                "--",
-                "--port",
-                "${input:port}"
-            ],
+            "runtimeArgs": ["run", "debug-tracers"],
+            "args": ["--", "--port", "${input:port}"],
             "port": 9229
         },
         {
@@ -33,8 +26,8 @@
         {
             "id": "port",
             "type": "promptString",
-            "default": "8001",
-            "description": "port",
+            "default": "8002",
+            "description": "port"
         }
     ]
 }
