@@ -29,13 +29,6 @@ case $command in
         # fix import paths of other proto modules
         sed --in-place --regexp-extended "s/(import .*_pb2 as .*_pb2)/from . \1/g" -- ./src/protobuf/*_pb2.py
         ;;
-    format)
-        ./.venv/bin/flake8
-        # ./.venv/bin/autopep8
-        ;;
-    test)
-        echo "no tests implemented yet"
-        ;;
     start)
         shift
         ./.venv/bin/python ./src/main.py "$@"
