@@ -5,13 +5,12 @@ import { Tracer } from './tracer/tracer'
 import { TracerProcess } from './tracer/tracer-process'
 import { TracerWrapper } from './tracer/tracer-wrapper'
 
-
 /**
  * Server to expose tracers through http.
  */
 export class Server {
     private server: express.Express
-    private sessions: Map<number, { language: string, tracer: Tracer }> = new Map()
+    private sessions: Map<number, { language: string; tracer: Tracer }> = new Map()
     private sessionIdGenerator: number = 0
 
     constructor(private port: number, private tracers: { [language: string]: string }) {
@@ -21,52 +20,43 @@ export class Server {
     }
 
     private configureServerRoutes() {
-        this.server.get(
-            '/tracers',
-            (request, response) => {
-                log.http(Server.name, request.path)
-                response.send(Object.keys(this.tracers))
+        this.server.get('/tracers', (request, response) => {
+            log.http(Server.name, request.path)
+            response.send(Object.keys(this.tracers))
+        })
+        this.server.get('/sessions', (request, response) => {
+            log.http(Server.name, request.path)
+            response.send(
+                [...this.sessions.entries()].map(([id, { language, tracer }]) => ({
+                    id,
+                    language,
+                    state: tracer.getState()
+                }))
+            )
+        })
+        this.server.post('/create', (request, response) => {
+            const language = request.body['language'] as string
+            log.http(Server.name, request.path, { language })
+            try {
+                response.send(this.create(language))
+            } catch (error) {
+                response.status(400).send(error.message)
             }
-        )
-        this.server.get(
-            '/sessions',
-            (request, response) => {
-                log.http(Server.name, request.path)
-                response.send(
-                    [...this.sessions.entries()]
-                        .map(([id, { language, tracer }]) => ({ id, language, state: tracer.getState() }))
-                )
+        })
+        this.server.post('/execute', async (request, response) => {
+            const id = request.body['id'] as number
+            const action = request.body['action'] as string
+            const args = request.body['args'] as unknown[]
+            log.http(Server.name, request.path, { id, action })
+            try {
+                const results = await this.execute(id, action, args)
+                const finished = !this.sessions.has(id)
+                response.setHeader('finished', finished.toString())
+                response.send(results)
+            } catch (error) {
+                response.status(400).send(error.message)
             }
-        )
-        this.server.post(
-            '/create',
-            (request, response) => {
-                const language = request.body['language'] as string
-                log.http(Server.name, request.path, { language })
-                try {
-                    response.send(this.create(language))
-                } catch (error) {
-                    response.status(400).send(error.message)
-                }
-            }
-        )
-        this.server.post(
-            '/execute',
-            async (request, response) => {
-                const id = request.body['id'] as number
-                const action = request.body['action'] as string
-                const args = request.body['args'] as unknown[]
-                log.http(Server.name, request.path, { id, action })
-                try {
-                    const results = await this.execute(id, action, args)
-                    const finished = !this.sessions.has(id)
-                    response.setHeader('finished', finished.toString())
-                    response.send(results)
-                } catch (error) {
-                    response.status(400).send(error.message)
-                }
-            }
-        )
+        })
     }
 
     create(language: string) {

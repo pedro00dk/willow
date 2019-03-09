@@ -3,7 +3,6 @@ import * as protobuf from 'protobufjs'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
 
-
 /**
  * Creates and connects to a process providing easy access to observable buffers. The consumed process stream must
  * generate length delimiters using var_int32 encoding. The generated buffers will always contain an entire data
@@ -14,11 +13,17 @@ export class ProtoProcess {
     private stdout$_: rx.Observable<protobuf.Reader>
     private stderr$_: rx.Observable<string>
 
-    get stdin$() { return this.stdin$_ }
-    get stdout$() { return this.stdout$_ }
-    get stderr$() { return this.stderr$_ }
+    get stdin$() {
+        return this.stdin$_
+    }
+    get stdout$() {
+        return this.stdout$_
+    }
+    get stderr$() {
+        return this.stderr$_
+    }
 
-    constructor(private readonly command: string) { }
+    constructor(private readonly command: string) {}
 
     isRunning() {
         return this.stdin$ && !this.stdin$.closed
@@ -28,17 +33,19 @@ export class ProtoProcess {
         if (this.isRunning()) throw new Error('process running')
 
         const instance = cp.spawn(this.command, { shell: '/bin/bash' })
-        const stop$ = rx.merge(rx.fromEvent(instance, 'error'), rx.fromEvent(instance, 'exit'))
+        const stop$ = rx //
+            .merge(rx.fromEvent(instance, 'error'), rx.fromEvent(instance, 'exit'))
             .pipe(rxOps.take(1))
         this.stdin$_ = new rx.Subject()
-        this.stdin$_
+        this.stdin$_ //
             .pipe(rxOps.takeUntil(stop$))
             .subscribe(
                 next => instance.stdin.write(next.finish()),
-                error => !instance.killed ? instance.kill() : undefined,
-                () => !instance.killed ? instance.kill() : undefined
+                error => (!instance.killed ? instance.kill() : undefined),
+                () => (!instance.killed ? instance.kill() : undefined)
             )
-        this.stdout$_ = rx.fromEvent<Buffer>(instance.stdout, 'data')
+        this.stdout$_ = rx //
+            .fromEvent<Buffer>(instance.stdout, 'data')
             .pipe(
                 rxOps.map(buffer => new protobuf.Reader(buffer as Uint8Array)),
                 rxOps.scan<protobuf.Reader>(
@@ -61,12 +68,13 @@ export class ProtoProcess {
                     [undefined] as protobuf.Reader[]
                 ),
                 rxOps.filter(buffers => buffers[buffers.length - 1] == undefined),
-                rxOps.map(buffers => new protobuf.Reader(
-                    Buffer.concat(buffers.slice(0, -1).map(buffer => buffer.buf))
-                )),
+                rxOps.map(
+                    buffers => new protobuf.Reader(Buffer.concat(buffers.slice(0, -1).map(buffer => buffer.buf)))
+                ),
                 rxOps.takeUntil(stop$)
             )
-        this.stderr$_ = rx.fromEvent<Buffer>(instance.stderr, 'data')
+        this.stderr$_ = rx //
+            .fromEvent<Buffer>(instance.stderr, 'data')
             .pipe(
                 rxOps.map(buffer => buffer.toString('utf8')),
                 rxOps.takeUntil(stop$)

@@ -6,7 +6,6 @@ import { ProtoProcess } from '../process/proto-process'
 import * as protocol from '../protobuf/protocol'
 import { Tracer } from './tracer'
 
-
 /**
  * Spawns and connects to a tracer process.
  */
@@ -15,7 +14,7 @@ export class TracerProcess implements Tracer {
     private events$: rx.Observable<protocol.Event[] | string>
     private state: ReturnType<Tracer['getState']> = 'created'
 
-    constructor(private command: string) { }
+    constructor(private command: string) {}
 
     private checkState(...states: typeof TracerProcess.prototype.state[]) {
         if (!states.includes(this.state)) throw new Error(`unexpected state: ${this.state}, expected: ${states}`)
@@ -26,8 +25,8 @@ export class TracerProcess implements Tracer {
         const process = new ProtoProcess(this.command)
         process.spawnProcess()
         this.actions$ = new rx.Subject()
-        this.actions$
-            .pipe(rxOps.flatMap(actions => actions.map(action => [action]))) // send one action per request
+        this.actions$ //
+            .pipe(rxOps.flatMap(actions => actions.map(action => [action])))
             .subscribe(
                 actions => {
                     const requestWriter = protocol.TracerRequest.encode(new protocol.TracerRequest({ actions }))
@@ -37,12 +36,13 @@ export class TracerProcess implements Tracer {
                 error => process.stdin$.error(error),
                 () => process.stdin$.complete()
             )
-        this.events$ = rx.merge(
-            process.stdout$
-                .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events)),
-            process.stderr$
-                .pipe(rxOps.map(text => `tracer process stderr:\n${text}`))
-        )
+        this.events$ = rx //
+            .merge(
+                process.stdout$ //
+                    .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events)),
+                process.stderr$ //
+                    .pipe(rxOps.map(text => `tracer process stderr:\n${text}`))
+            )
             .pipe(rxOps.shareReplay(1)) // necessary to get a event or error before subscribing
     }
 
@@ -62,7 +62,7 @@ export class TracerProcess implements Tracer {
             this.stop()
             throw new Error(events)
         }
-        if (events.some(event => event.threw != undefined || event.inspected && event.inspected.frame.finish))
+        if (events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish)))
             this.stop()
         return events
     }
@@ -85,7 +85,7 @@ export class TracerProcess implements Tracer {
             this.stop()
             throw new Error(events)
         }
-        if (events.some(event => event.threw != undefined || event.inspected && event.inspected.frame.finish))
+        if (events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish)))
             this.stop()
         return events
     }

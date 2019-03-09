@@ -1,7 +1,6 @@
 import * as protocol from '../protobuf/protocol'
 import { queryObjectTypes, queryValueTypes, StepProcessor } from './tracer'
 
-
 /**
  * Checks results memory constraints on event frames.
  */
@@ -9,8 +8,12 @@ export class StepConstraints implements StepProcessor {
     private currentStep: number = 0
 
     constructor(
-        private steps: number, private stackSize: number, private heapSize: number, private stringLength: number,
-        private iterableLength: number, private objectProperties: number
+        private steps: number,
+        private stackSize: number,
+        private heapSize: number,
+        private stringLength: number,
+        private iterableLength: number,
+        private objectProperties: number
     ) {
         if (steps < 1) throw new Error('steps smaller than 1')
         if (stackSize < 1) throw new Error('stackSize smaller than 1')
@@ -48,7 +51,7 @@ export class StepConstraints implements StepProcessor {
 
         for (const value of queryValueTypes(frame, 'stringValue')) {
             const strValue = value as string
-            if ((strValue.startsWith('\'') || strValue.startsWith('"')) && strValue.length > this.stringLength + 2)
+            if ((strValue.startsWith("'") || strValue.startsWith('"')) && strValue.length > this.stringLength + 2)
                 throw new Error(`tracer constraint: max string length exceeded ${this.stringLength}`)
         }
     }

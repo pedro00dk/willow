@@ -1,6 +1,5 @@
 import * as protocol from '../protobuf/protocol'
 
-
 /**
  * Interface for tracer objects. All required functions are operations that shall be implemented by tracer processes,
  * other functions may be implemented using the required functions.
@@ -40,8 +39,7 @@ export function applyStepProcessorStack(stepProcessors: StepProcessor[], step: (
  */
 export function* queryObjectTypes(frame: protocol.Frame, ...types: protocol.Frame.Heap.Obj.Type[]) {
     const typeSet = new Set(types)
-    for (const obj of Object.values(frame.heap.references))
-        if (typeSet.has(obj.type)) yield obj
+    for (const obj of Object.values(frame.heap.references)) if (typeSet.has(obj.type)) yield obj
 }
 
 /**
@@ -49,11 +47,13 @@ export function* queryObjectTypes(frame: protocol.Frame, ...types: protocol.Fram
  */
 export function* queryValueTypes(frame: protocol.Frame, ...types: protocol.Frame.Value['value'][]) {
     const typeSet = new Set<string>(types)
-    for (const scope of frame.stack.scopes) for (const variable of Object.values(scope.variables))
-        if (typeSet.has(variable.value.value)) yield variable[variable.value.value]
+    for (const scope of frame.stack.scopes)
+        for (const variable of Object.values(scope.variables))
+            if (typeSet.has(variable.value.value)) yield variable.value[variable.value.value]
 
-    for (const obj of Object.values(frame.heap.references)) for (const member of obj.members) {
-        if (typeSet.has(member.key.value)) yield member.key[member.key.value]
-        if (typeSet.has(member.value.value)) yield member.value[member.value.value]
-    }
+    for (const obj of Object.values(frame.heap.references))
+        for (const member of obj.members) {
+            if (typeSet.has(member.key.value)) yield member.key[member.key.value]
+            if (typeSet.has(member.value.value)) yield member.value[member.value.value]
+        }
 }

@@ -2,7 +2,6 @@ import * as log from 'npmlog'
 import * as protocol from '../protobuf/protocol'
 import { applyStepProcessorStack, StepProcessor, Tracer } from './tracer'
 
-
 /**
  * Implements any missing optional methods from other Tracer implementations using only the required methods.
  */
@@ -47,10 +46,12 @@ export class TracerWrapper implements Tracer {
         const results: protocol.Event[] = []
         const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
-            results.push(...await this.step())
-            if (this.getState() === 'stopped' ||
-                this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length <= stackLength ||
-                results[results.length - 1].locked != undefined)
+            results.push(...(await this.step()))
+            if (
+                this.getState() === 'stopped' ||
+                (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length <= stackLength) ||
+                results[results.length - 1].locked != undefined
+            )
                 break
         }
         return results
@@ -61,10 +62,12 @@ export class TracerWrapper implements Tracer {
         const results: protocol.Event[] = []
         const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
-            results.push(...await this.step())
-            if (this.getState() === 'stopped' ||
-                this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length < stackLength ||
-                results[results.length - 1].locked != undefined)
+            results.push(...(await this.step()))
+            if (
+                this.getState() === 'stopped' ||
+                (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length < stackLength) ||
+                results[results.length - 1].locked != undefined
+            )
                 break
         }
         return results
@@ -77,8 +80,11 @@ export class TracerWrapper implements Tracer {
             const stepResults = await this.step()
             results.push(...stepResults)
             const currentLine = this.previousInspectedEvent ? this.previousInspectedEvent.frame.line : undefined
-            if (this.getState() === 'stopped' || this.breakpoints.has(currentLine) ||
-                results[results.length - 1].locked != undefined)
+            if (
+                this.getState() === 'stopped' ||
+                this.breakpoints.has(currentLine) ||
+                results[results.length - 1].locked != undefined
+            )
                 break
         }
         return results
