@@ -10,7 +10,7 @@
             "request": "launch",
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["run", "debug-tracers"],
+            "runtimeArgs": ["run", "debug"],
             "args": ["--", "--port", "${input:port}"],
             "port": 9229
         },
