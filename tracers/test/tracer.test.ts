@@ -3,13 +3,13 @@ import { TracerWrapper } from '../src/tracer/tracer-wrapper'
 
 const tracers = {
     // java: {
-    //     command: process.env.npm_package_config_java_supplier,
+    //     command: process.env.npm_package_config_java_tracer,
     //     main: 'Main.java',
     //     broken: '!@#$%*()',
     //     working: 'public class Main { public static void main(String[] args) { } }'
     // },
     python: {
-        command: process.env.npm_package_config_python_supplier,
+        command: process.env.npm_package_config_python_tracer,
         main: '<script>',
         broken: '!@#$%*()',
         working: ''

@@ -47,7 +47,7 @@ export class ProtoProcess {
         this.stdout$_ = rx //
             .fromEvent<Buffer>(instance.stdout, 'data')
             .pipe(
-                rxOps.map(buffer => new protobuf.Reader(buffer as Uint8Array)),
+                rxOps.map(buffer => new protobuf.Reader(buffer)),
                 rxOps.scan<protobuf.Reader>(
                     (acc, reader) => {
                         if (acc[acc.length - 1] == undefined) {
