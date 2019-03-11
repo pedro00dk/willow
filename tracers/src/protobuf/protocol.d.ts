@@ -2175,3 +2175,894 @@ export class TracerResponse implements ITracerResponse {
      */
     public toJSON(): { [k: string]: any };
 }
+
+/** Properties of an Empty. */
+export interface IEmpty {
+}
+
+/** Represents an Empty. */
+export class Empty implements IEmpty {
+
+    /**
+     * Constructs a new Empty.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IEmpty);
+
+    /**
+     * Creates a new Empty instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Empty instance
+     */
+    public static create(properties?: IEmpty): Empty;
+
+    /**
+     * Encodes the specified Empty message. Does not implicitly {@link Empty.verify|verify} messages.
+     * @param message Empty message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Empty, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Empty message, length delimited. Does not implicitly {@link Empty.verify|verify} messages.
+     * @param message Empty message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Empty, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes an Empty message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Empty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Empty;
+
+    /**
+     * Decodes an Empty message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Empty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Empty;
+
+    /**
+     * Verifies an Empty message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Empty
+     */
+    public static fromObject(object: { [k: string]: any }): Empty;
+
+    /**
+     * Creates a plain object from an Empty message. Also converts values to other types if specified.
+     * @param message Empty
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Empty, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Empty to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Languages. */
+export interface ILanguages {
+
+    /** Languages languages */
+    languages?: (string[]|null);
+}
+
+/** Represents a Languages. */
+export class Languages implements ILanguages {
+
+    /**
+     * Constructs a new Languages.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: ILanguages);
+
+    /** Languages languages. */
+    public languages: string[];
+
+    /**
+     * Creates a new Languages instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Languages instance
+     */
+    public static create(properties?: ILanguages): Languages;
+
+    /**
+     * Encodes the specified Languages message. Does not implicitly {@link Languages.verify|verify} messages.
+     * @param message Languages message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Languages, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Languages message, length delimited. Does not implicitly {@link Languages.verify|verify} messages.
+     * @param message Languages message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Languages, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Languages message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Languages
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Languages;
+
+    /**
+     * Decodes a Languages message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Languages
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Languages;
+
+    /**
+     * Verifies a Languages message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Languages message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Languages
+     */
+    public static fromObject(object: { [k: string]: any }): Languages;
+
+    /**
+     * Creates a plain object from a Languages message. Also converts values to other types if specified.
+     * @param message Languages
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Languages, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Languages to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Sessions. */
+export interface ISessions {
+
+    /** Sessions sessions */
+    sessions?: (Session[]|null);
+}
+
+/** Represents a Sessions. */
+export class Sessions implements ISessions {
+
+    /**
+     * Constructs a new Sessions.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: ISessions);
+
+    /** Sessions sessions. */
+    public sessions: Session[];
+
+    /**
+     * Creates a new Sessions instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Sessions instance
+     */
+    public static create(properties?: ISessions): Sessions;
+
+    /**
+     * Encodes the specified Sessions message. Does not implicitly {@link Sessions.verify|verify} messages.
+     * @param message Sessions message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Sessions, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Sessions message, length delimited. Does not implicitly {@link Sessions.verify|verify} messages.
+     * @param message Sessions message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Sessions, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Sessions message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Sessions
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Sessions;
+
+    /**
+     * Decodes a Sessions message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Sessions
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Sessions;
+
+    /**
+     * Verifies a Sessions message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Sessions message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Sessions
+     */
+    public static fromObject(object: { [k: string]: any }): Sessions;
+
+    /**
+     * Creates a plain object from a Sessions message. Also converts values to other types if specified.
+     * @param message Sessions
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Sessions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Sessions to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Session. */
+export interface ISession {
+
+    /** Session id */
+    id?: (Id|null);
+
+    /** Session language */
+    language?: (string|null);
+}
+
+/** Represents a Session. */
+export class Session implements ISession {
+
+    /**
+     * Constructs a new Session.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: ISession);
+
+    /** Session id. */
+    public id?: (Id|null);
+
+    /** Session language. */
+    public language: string;
+
+    /**
+     * Creates a new Session instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Session instance
+     */
+    public static create(properties?: ISession): Session;
+
+    /**
+     * Encodes the specified Session message. Does not implicitly {@link Session.verify|verify} messages.
+     * @param message Session message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Session, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Session message, length delimited. Does not implicitly {@link Session.verify|verify} messages.
+     * @param message Session message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Session, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Session message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Session
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Session;
+
+    /**
+     * Decodes a Session message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Session
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Session;
+
+    /**
+     * Verifies a Session message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Session message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Session
+     */
+    public static fromObject(object: { [k: string]: any }): Session;
+
+    /**
+     * Creates a plain object from a Session message. Also converts values to other types if specified.
+     * @param message Session
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Session, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Session to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of an Id. */
+export interface IId {
+
+    /** Id number */
+    number?: (number|null);
+}
+
+/** Represents an Id. */
+export class Id implements IId {
+
+    /**
+     * Constructs a new Id.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IId);
+
+    /** Id number. */
+    public number: number;
+
+    /**
+     * Creates a new Id instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Id instance
+     */
+    public static create(properties?: IId): Id;
+
+    /**
+     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
+     * @param message Id message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
+     * @param message Id message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes an Id message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Id;
+
+    /**
+     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Id;
+
+    /**
+     * Verifies an Id message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Id
+     */
+    public static fromObject(object: { [k: string]: any }): Id;
+
+    /**
+     * Creates a plain object from an Id message. Also converts values to other types if specified.
+     * @param message Id
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Id, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Id to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a StartResponse. */
+export interface IStartResponse {
+
+    /** StartResponse session */
+    session?: (Session|null);
+
+    /** StartResponse response */
+    response?: (TracerResponse|null);
+}
+
+/** Represents a StartResponse. */
+export class StartResponse implements IStartResponse {
+
+    /**
+     * Constructs a new StartResponse.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IStartResponse);
+
+    /** StartResponse session. */
+    public session?: (Session|null);
+
+    /** StartResponse response. */
+    public response?: (TracerResponse|null);
+
+    /**
+     * Creates a new StartResponse instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns StartResponse instance
+     */
+    public static create(properties?: IStartResponse): StartResponse;
+
+    /**
+     * Encodes the specified StartResponse message. Does not implicitly {@link StartResponse.verify|verify} messages.
+     * @param message StartResponse message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: StartResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified StartResponse message, length delimited. Does not implicitly {@link StartResponse.verify|verify} messages.
+     * @param message StartResponse message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: StartResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a StartResponse message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns StartResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): StartResponse;
+
+    /**
+     * Decodes a StartResponse message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns StartResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): StartResponse;
+
+    /**
+     * Verifies a StartResponse message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a StartResponse message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns StartResponse
+     */
+    public static fromObject(object: { [k: string]: any }): StartResponse;
+
+    /**
+     * Creates a plain object from a StartResponse message. Also converts values to other types if specified.
+     * @param message StartResponse
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: StartResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this StartResponse to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Breakpoints. */
+export interface IBreakpoints {
+
+    /** Breakpoints lines */
+    lines?: (number[]|null);
+}
+
+/** Represents a Breakpoints. */
+export class Breakpoints implements IBreakpoints {
+
+    /**
+     * Constructs a new Breakpoints.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IBreakpoints);
+
+    /** Breakpoints lines. */
+    public lines: number[];
+
+    /**
+     * Creates a new Breakpoints instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Breakpoints instance
+     */
+    public static create(properties?: IBreakpoints): Breakpoints;
+
+    /**
+     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @param message Breakpoints message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @param message Breakpoints message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Breakpoints;
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Breakpoints;
+
+    /**
+     * Verifies a Breakpoints message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Breakpoints
+     */
+    public static fromObject(object: { [k: string]: any }): Breakpoints;
+
+    /**
+     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
+     * @param message Breakpoints
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Breakpoints, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Breakpoints to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Represents a Tracers */
+export class Tracers extends $protobuf.rpc.Service {
+
+    /**
+     * Constructs a new Tracers service.
+     * @param rpcImpl RPC implementation
+     * @param [requestDelimited=false] Whether requests are length-delimited
+     * @param [responseDelimited=false] Whether responses are length-delimited
+     */
+    constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
+
+    /**
+     * Creates new Tracers service using the specified rpc implementation.
+     * @param rpcImpl RPC implementation
+     * @param [requestDelimited=false] Whether requests are length-delimited
+     * @param [responseDelimited=false] Whether responses are length-delimited
+     * @returns RPC service. Useful where requests and/or responses are streamed.
+     */
+    public static create(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean): Tracers;
+
+    /**
+     * Calls getLanguages.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Languages
+     */
+    public getLanguages(request: Empty, callback: Tracers.getLanguagesCallback): void;
+
+    /**
+     * Calls getLanguages.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getLanguages(request: Empty): Promise<Languages>;
+
+    /**
+     * Calls getSessions.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Sessions
+     */
+    public getSessions(request: Empty, callback: Tracers.getSessionsCallback): void;
+
+    /**
+     * Calls getSessions.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getSessions(request: Empty): Promise<Sessions>;
+
+    /**
+     * Calls start.
+     * @param request Start message or plain object
+     * @param callback Node-style callback called with the error, if any, and StartResponse
+     */
+    public start(request: Action.Start, callback: Tracers.startCallback): void;
+
+    /**
+     * Calls start.
+     * @param request Start message or plain object
+     * @returns Promise
+     */
+    public start(request: Action.Start): Promise<StartResponse>;
+
+    /**
+     * Calls stop.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public stop(request: Id, callback: Tracers.stopCallback): void;
+
+    /**
+     * Calls stop.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stop(request: Id): Promise<Empty>;
+
+    /**
+     * Calls step.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public step(request: Id, callback: Tracers.stepCallback): void;
+
+    /**
+     * Calls step.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public step(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls stepOver.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public stepOver(request: Id, callback: Tracers.stepOverCallback): void;
+
+    /**
+     * Calls stepOver.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stepOver(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls stepOut.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public stepOut(request: Id, callback: Tracers.stepOutCallback): void;
+
+    /**
+     * Calls stepOut.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stepOut(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls continue.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public continue(request: Id, callback: Tracers.continueCallback): void;
+
+    /**
+     * Calls continue.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public continue(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls input.
+     * @param request Input message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public input(request: Action.Input, callback: Tracers.inputCallback): void;
+
+    /**
+     * Calls input.
+     * @param request Input message or plain object
+     * @returns Promise
+     */
+    public input(request: Action.Input): Promise<Empty>;
+
+    /**
+     * Calls getBreakpoints.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Breakpoints
+     */
+    public getBreakpoints(request: Empty, callback: Tracers.getBreakpointsCallback): void;
+
+    /**
+     * Calls getBreakpoints.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getBreakpoints(request: Empty): Promise<Breakpoints>;
+
+    /**
+     * Calls setBreakpoints.
+     * @param request Breakpoints message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public setBreakpoints(request: Breakpoints, callback: Tracers.setBreakpointsCallback): void;
+
+    /**
+     * Calls setBreakpoints.
+     * @param request Breakpoints message or plain object
+     * @returns Promise
+     */
+    public setBreakpoints(request: Breakpoints): Promise<Empty>;
+}
+
+export namespace Tracers {
+
+    /**
+     * Callback as used by {@link Tracers#getLanguages}.
+     * @param error Error, if any
+     * @param [response] Languages
+     */
+    type getLanguagesCallback = (error: (Error|null), response?: Languages) => void;
+
+    /**
+     * Callback as used by {@link Tracers#getSessions}.
+     * @param error Error, if any
+     * @param [response] Sessions
+     */
+    type getSessionsCallback = (error: (Error|null), response?: Sessions) => void;
+
+    /**
+     * Callback as used by {@link Tracers#start}.
+     * @param error Error, if any
+     * @param [response] StartResponse
+     */
+    type startCallback = (error: (Error|null), response?: StartResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stop}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type stopCallback = (error: (Error|null), response?: Empty) => void;
+
+    /**
+     * Callback as used by {@link Tracers#step}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stepOver}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepOverCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stepOut}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepOutCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#continue_}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type continueCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#input}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type inputCallback = (error: (Error|null), response?: Empty) => void;
+
+    /**
+     * Callback as used by {@link Tracers#getBreakpoints}.
+     * @param error Error, if any
+     * @param [response] Breakpoints
+     */
+    type getBreakpointsCallback = (error: (Error|null), response?: Breakpoints) => void;
+
+    /**
+     * Callback as used by {@link Tracers#setBreakpoints}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type setBreakpointsCallback = (error: (Error|null), response?: Empty) => void;
+}

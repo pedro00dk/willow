@@ -5200,4 +5200,1806 @@ export const TracerResponse = $root.TracerResponse = (() => {
     return TracerResponse;
 })();
 
+export const Empty = $root.Empty = (() => {
+
+    /**
+     * Properties of an Empty.
+     * @exports IEmpty
+     * @interface IEmpty
+     */
+
+    /**
+     * Constructs a new Empty.
+     * @exports Empty
+     * @classdesc Represents an Empty.
+     * @implements IEmpty
+     * @constructor
+     * @param {IEmpty=} [properties] Properties to set
+     */
+    function Empty(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Creates a new Empty instance using the specified properties.
+     * @function create
+     * @memberof Empty
+     * @static
+     * @param {IEmpty=} [properties] Properties to set
+     * @returns {Empty} Empty instance
+     */
+    Empty.create = function create(properties) {
+        return new Empty(properties);
+    };
+
+    /**
+     * Encodes the specified Empty message. Does not implicitly {@link Empty.verify|verify} messages.
+     * @function encode
+     * @memberof Empty
+     * @static
+     * @param {Empty} message Empty message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Empty.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Empty message, length delimited. Does not implicitly {@link Empty.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Empty
+     * @static
+     * @param {Empty} message Empty message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Empty.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an Empty message from the specified reader or buffer.
+     * @function decode
+     * @memberof Empty
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Empty} Empty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Empty.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Empty();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an Empty message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Empty
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Empty} Empty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Empty.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an Empty message.
+     * @function verify
+     * @memberof Empty
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Empty.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        return null;
+    };
+
+    /**
+     * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Empty
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Empty} Empty
+     */
+    Empty.fromObject = function fromObject(object) {
+        if (object instanceof $root.Empty)
+            return object;
+        return new $root.Empty();
+    };
+
+    /**
+     * Creates a plain object from an Empty message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Empty
+     * @static
+     * @param {Empty} message Empty
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Empty.toObject = function toObject() {
+        return {};
+    };
+
+    /**
+     * Converts this Empty to JSON.
+     * @function toJSON
+     * @memberof Empty
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Empty.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Empty;
+})();
+
+export const Languages = $root.Languages = (() => {
+
+    /**
+     * Properties of a Languages.
+     * @exports ILanguages
+     * @interface ILanguages
+     * @property {Array.<string>|null} [languages] Languages languages
+     */
+
+    /**
+     * Constructs a new Languages.
+     * @exports Languages
+     * @classdesc Represents a Languages.
+     * @implements ILanguages
+     * @constructor
+     * @param {ILanguages=} [properties] Properties to set
+     */
+    function Languages(properties) {
+        this.languages = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Languages languages.
+     * @member {Array.<string>} languages
+     * @memberof Languages
+     * @instance
+     */
+    Languages.prototype.languages = $util.emptyArray;
+
+    /**
+     * Creates a new Languages instance using the specified properties.
+     * @function create
+     * @memberof Languages
+     * @static
+     * @param {ILanguages=} [properties] Properties to set
+     * @returns {Languages} Languages instance
+     */
+    Languages.create = function create(properties) {
+        return new Languages(properties);
+    };
+
+    /**
+     * Encodes the specified Languages message. Does not implicitly {@link Languages.verify|verify} messages.
+     * @function encode
+     * @memberof Languages
+     * @static
+     * @param {Languages} message Languages message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Languages.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.languages != null && message.languages.length)
+            for (let i = 0; i < message.languages.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.languages[i]);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Languages message, length delimited. Does not implicitly {@link Languages.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Languages
+     * @static
+     * @param {Languages} message Languages message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Languages.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Languages message from the specified reader or buffer.
+     * @function decode
+     * @memberof Languages
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Languages} Languages
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Languages.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Languages();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.languages && message.languages.length))
+                    message.languages = [];
+                message.languages.push(reader.string());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Languages message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Languages
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Languages} Languages
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Languages.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Languages message.
+     * @function verify
+     * @memberof Languages
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Languages.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.languages != null && message.hasOwnProperty("languages")) {
+            if (!Array.isArray(message.languages))
+                return "languages: array expected";
+            for (let i = 0; i < message.languages.length; ++i)
+                if (!$util.isString(message.languages[i]))
+                    return "languages: string[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a Languages message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Languages
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Languages} Languages
+     */
+    Languages.fromObject = function fromObject(object) {
+        if (object instanceof $root.Languages)
+            return object;
+        let message = new $root.Languages();
+        if (object.languages) {
+            if (!Array.isArray(object.languages))
+                throw TypeError(".Languages.languages: array expected");
+            message.languages = [];
+            for (let i = 0; i < object.languages.length; ++i)
+                message.languages[i] = String(object.languages[i]);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Languages message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Languages
+     * @static
+     * @param {Languages} message Languages
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Languages.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.languages = [];
+        if (message.languages && message.languages.length) {
+            object.languages = [];
+            for (let j = 0; j < message.languages.length; ++j)
+                object.languages[j] = message.languages[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this Languages to JSON.
+     * @function toJSON
+     * @memberof Languages
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Languages.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Languages;
+})();
+
+export const Sessions = $root.Sessions = (() => {
+
+    /**
+     * Properties of a Sessions.
+     * @exports ISessions
+     * @interface ISessions
+     * @property {Array.<Session>|null} [sessions] Sessions sessions
+     */
+
+    /**
+     * Constructs a new Sessions.
+     * @exports Sessions
+     * @classdesc Represents a Sessions.
+     * @implements ISessions
+     * @constructor
+     * @param {ISessions=} [properties] Properties to set
+     */
+    function Sessions(properties) {
+        this.sessions = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Sessions sessions.
+     * @member {Array.<Session>} sessions
+     * @memberof Sessions
+     * @instance
+     */
+    Sessions.prototype.sessions = $util.emptyArray;
+
+    /**
+     * Creates a new Sessions instance using the specified properties.
+     * @function create
+     * @memberof Sessions
+     * @static
+     * @param {ISessions=} [properties] Properties to set
+     * @returns {Sessions} Sessions instance
+     */
+    Sessions.create = function create(properties) {
+        return new Sessions(properties);
+    };
+
+    /**
+     * Encodes the specified Sessions message. Does not implicitly {@link Sessions.verify|verify} messages.
+     * @function encode
+     * @memberof Sessions
+     * @static
+     * @param {Sessions} message Sessions message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Sessions.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.sessions != null && message.sessions.length)
+            for (let i = 0; i < message.sessions.length; ++i)
+                $root.Session.encode(message.sessions[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Sessions message, length delimited. Does not implicitly {@link Sessions.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Sessions
+     * @static
+     * @param {Sessions} message Sessions message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Sessions.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Sessions message from the specified reader or buffer.
+     * @function decode
+     * @memberof Sessions
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Sessions} Sessions
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Sessions.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Sessions();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.sessions && message.sessions.length))
+                    message.sessions = [];
+                message.sessions.push($root.Session.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Sessions message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Sessions
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Sessions} Sessions
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Sessions.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Sessions message.
+     * @function verify
+     * @memberof Sessions
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Sessions.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.sessions != null && message.hasOwnProperty("sessions")) {
+            if (!Array.isArray(message.sessions))
+                return "sessions: array expected";
+            for (let i = 0; i < message.sessions.length; ++i) {
+                let error = $root.Session.verify(message.sessions[i]);
+                if (error)
+                    return "sessions." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a Sessions message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Sessions
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Sessions} Sessions
+     */
+    Sessions.fromObject = function fromObject(object) {
+        if (object instanceof $root.Sessions)
+            return object;
+        let message = new $root.Sessions();
+        if (object.sessions) {
+            if (!Array.isArray(object.sessions))
+                throw TypeError(".Sessions.sessions: array expected");
+            message.sessions = [];
+            for (let i = 0; i < object.sessions.length; ++i) {
+                if (typeof object.sessions[i] !== "object")
+                    throw TypeError(".Sessions.sessions: object expected");
+                message.sessions[i] = $root.Session.fromObject(object.sessions[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Sessions message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Sessions
+     * @static
+     * @param {Sessions} message Sessions
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Sessions.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.sessions = [];
+        if (message.sessions && message.sessions.length) {
+            object.sessions = [];
+            for (let j = 0; j < message.sessions.length; ++j)
+                object.sessions[j] = $root.Session.toObject(message.sessions[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this Sessions to JSON.
+     * @function toJSON
+     * @memberof Sessions
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Sessions.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Sessions;
+})();
+
+export const Session = $root.Session = (() => {
+
+    /**
+     * Properties of a Session.
+     * @exports ISession
+     * @interface ISession
+     * @property {Id|null} [id] Session id
+     * @property {string|null} [language] Session language
+     */
+
+    /**
+     * Constructs a new Session.
+     * @exports Session
+     * @classdesc Represents a Session.
+     * @implements ISession
+     * @constructor
+     * @param {ISession=} [properties] Properties to set
+     */
+    function Session(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Session id.
+     * @member {Id|null|undefined} id
+     * @memberof Session
+     * @instance
+     */
+    Session.prototype.id = null;
+
+    /**
+     * Session language.
+     * @member {string} language
+     * @memberof Session
+     * @instance
+     */
+    Session.prototype.language = "";
+
+    /**
+     * Creates a new Session instance using the specified properties.
+     * @function create
+     * @memberof Session
+     * @static
+     * @param {ISession=} [properties] Properties to set
+     * @returns {Session} Session instance
+     */
+    Session.create = function create(properties) {
+        return new Session(properties);
+    };
+
+    /**
+     * Encodes the specified Session message. Does not implicitly {@link Session.verify|verify} messages.
+     * @function encode
+     * @memberof Session
+     * @static
+     * @param {Session} message Session message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Session.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.id != null && message.hasOwnProperty("id"))
+            $root.Id.encode(message.id, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.language != null && message.hasOwnProperty("language"))
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.language);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Session message, length delimited. Does not implicitly {@link Session.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Session
+     * @static
+     * @param {Session} message Session message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Session.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Session message from the specified reader or buffer.
+     * @function decode
+     * @memberof Session
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Session} Session
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Session.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Session();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.id = $root.Id.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.language = reader.string();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Session message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Session
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Session} Session
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Session.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Session message.
+     * @function verify
+     * @memberof Session
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Session.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.id != null && message.hasOwnProperty("id")) {
+            let error = $root.Id.verify(message.id);
+            if (error)
+                return "id." + error;
+        }
+        if (message.language != null && message.hasOwnProperty("language"))
+            if (!$util.isString(message.language))
+                return "language: string expected";
+        return null;
+    };
+
+    /**
+     * Creates a Session message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Session
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Session} Session
+     */
+    Session.fromObject = function fromObject(object) {
+        if (object instanceof $root.Session)
+            return object;
+        let message = new $root.Session();
+        if (object.id != null) {
+            if (typeof object.id !== "object")
+                throw TypeError(".Session.id: object expected");
+            message.id = $root.Id.fromObject(object.id);
+        }
+        if (object.language != null)
+            message.language = String(object.language);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Session message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Session
+     * @static
+     * @param {Session} message Session
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Session.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults) {
+            object.id = null;
+            object.language = "";
+        }
+        if (message.id != null && message.hasOwnProperty("id"))
+            object.id = $root.Id.toObject(message.id, options);
+        if (message.language != null && message.hasOwnProperty("language"))
+            object.language = message.language;
+        return object;
+    };
+
+    /**
+     * Converts this Session to JSON.
+     * @function toJSON
+     * @memberof Session
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Session.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Session;
+})();
+
+export const Id = $root.Id = (() => {
+
+    /**
+     * Properties of an Id.
+     * @exports IId
+     * @interface IId
+     * @property {number|null} [number] Id number
+     */
+
+    /**
+     * Constructs a new Id.
+     * @exports Id
+     * @classdesc Represents an Id.
+     * @implements IId
+     * @constructor
+     * @param {IId=} [properties] Properties to set
+     */
+    function Id(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Id number.
+     * @member {number} number
+     * @memberof Id
+     * @instance
+     */
+    Id.prototype.number = 0;
+
+    /**
+     * Creates a new Id instance using the specified properties.
+     * @function create
+     * @memberof Id
+     * @static
+     * @param {IId=} [properties] Properties to set
+     * @returns {Id} Id instance
+     */
+    Id.create = function create(properties) {
+        return new Id(properties);
+    };
+
+    /**
+     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
+     * @function encode
+     * @memberof Id
+     * @static
+     * @param {Id} message Id message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Id.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.number != null && message.hasOwnProperty("number"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.number);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Id
+     * @static
+     * @param {Id} message Id message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Id.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an Id message from the specified reader or buffer.
+     * @function decode
+     * @memberof Id
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Id} Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Id.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Id();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.number = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Id
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Id} Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Id.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an Id message.
+     * @function verify
+     * @memberof Id
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Id.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.number != null && message.hasOwnProperty("number"))
+            if (!$util.isInteger(message.number))
+                return "number: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Id
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Id} Id
+     */
+    Id.fromObject = function fromObject(object) {
+        if (object instanceof $root.Id)
+            return object;
+        let message = new $root.Id();
+        if (object.number != null)
+            message.number = object.number | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from an Id message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Id
+     * @static
+     * @param {Id} message Id
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Id.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults)
+            object.number = 0;
+        if (message.number != null && message.hasOwnProperty("number"))
+            object.number = message.number;
+        return object;
+    };
+
+    /**
+     * Converts this Id to JSON.
+     * @function toJSON
+     * @memberof Id
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Id.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Id;
+})();
+
+export const StartResponse = $root.StartResponse = (() => {
+
+    /**
+     * Properties of a StartResponse.
+     * @exports IStartResponse
+     * @interface IStartResponse
+     * @property {Session|null} [session] StartResponse session
+     * @property {TracerResponse|null} [response] StartResponse response
+     */
+
+    /**
+     * Constructs a new StartResponse.
+     * @exports StartResponse
+     * @classdesc Represents a StartResponse.
+     * @implements IStartResponse
+     * @constructor
+     * @param {IStartResponse=} [properties] Properties to set
+     */
+    function StartResponse(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * StartResponse session.
+     * @member {Session|null|undefined} session
+     * @memberof StartResponse
+     * @instance
+     */
+    StartResponse.prototype.session = null;
+
+    /**
+     * StartResponse response.
+     * @member {TracerResponse|null|undefined} response
+     * @memberof StartResponse
+     * @instance
+     */
+    StartResponse.prototype.response = null;
+
+    /**
+     * Creates a new StartResponse instance using the specified properties.
+     * @function create
+     * @memberof StartResponse
+     * @static
+     * @param {IStartResponse=} [properties] Properties to set
+     * @returns {StartResponse} StartResponse instance
+     */
+    StartResponse.create = function create(properties) {
+        return new StartResponse(properties);
+    };
+
+    /**
+     * Encodes the specified StartResponse message. Does not implicitly {@link StartResponse.verify|verify} messages.
+     * @function encode
+     * @memberof StartResponse
+     * @static
+     * @param {StartResponse} message StartResponse message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StartResponse.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.session != null && message.hasOwnProperty("session"))
+            $root.Session.encode(message.session, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.response != null && message.hasOwnProperty("response"))
+            $root.TracerResponse.encode(message.response, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified StartResponse message, length delimited. Does not implicitly {@link StartResponse.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof StartResponse
+     * @static
+     * @param {StartResponse} message StartResponse message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StartResponse.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a StartResponse message from the specified reader or buffer.
+     * @function decode
+     * @memberof StartResponse
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {StartResponse} StartResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StartResponse.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.StartResponse();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.session = $root.Session.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.response = $root.TracerResponse.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a StartResponse message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof StartResponse
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {StartResponse} StartResponse
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StartResponse.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a StartResponse message.
+     * @function verify
+     * @memberof StartResponse
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    StartResponse.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.session != null && message.hasOwnProperty("session")) {
+            let error = $root.Session.verify(message.session);
+            if (error)
+                return "session." + error;
+        }
+        if (message.response != null && message.hasOwnProperty("response")) {
+            let error = $root.TracerResponse.verify(message.response);
+            if (error)
+                return "response." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates a StartResponse message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof StartResponse
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {StartResponse} StartResponse
+     */
+    StartResponse.fromObject = function fromObject(object) {
+        if (object instanceof $root.StartResponse)
+            return object;
+        let message = new $root.StartResponse();
+        if (object.session != null) {
+            if (typeof object.session !== "object")
+                throw TypeError(".StartResponse.session: object expected");
+            message.session = $root.Session.fromObject(object.session);
+        }
+        if (object.response != null) {
+            if (typeof object.response !== "object")
+                throw TypeError(".StartResponse.response: object expected");
+            message.response = $root.TracerResponse.fromObject(object.response);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a StartResponse message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof StartResponse
+     * @static
+     * @param {StartResponse} message StartResponse
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    StartResponse.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults) {
+            object.session = null;
+            object.response = null;
+        }
+        if (message.session != null && message.hasOwnProperty("session"))
+            object.session = $root.Session.toObject(message.session, options);
+        if (message.response != null && message.hasOwnProperty("response"))
+            object.response = $root.TracerResponse.toObject(message.response, options);
+        return object;
+    };
+
+    /**
+     * Converts this StartResponse to JSON.
+     * @function toJSON
+     * @memberof StartResponse
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    StartResponse.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return StartResponse;
+})();
+
+export const Breakpoints = $root.Breakpoints = (() => {
+
+    /**
+     * Properties of a Breakpoints.
+     * @exports IBreakpoints
+     * @interface IBreakpoints
+     * @property {Array.<number>|null} [lines] Breakpoints lines
+     */
+
+    /**
+     * Constructs a new Breakpoints.
+     * @exports Breakpoints
+     * @classdesc Represents a Breakpoints.
+     * @implements IBreakpoints
+     * @constructor
+     * @param {IBreakpoints=} [properties] Properties to set
+     */
+    function Breakpoints(properties) {
+        this.lines = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Breakpoints lines.
+     * @member {Array.<number>} lines
+     * @memberof Breakpoints
+     * @instance
+     */
+    Breakpoints.prototype.lines = $util.emptyArray;
+
+    /**
+     * Creates a new Breakpoints instance using the specified properties.
+     * @function create
+     * @memberof Breakpoints
+     * @static
+     * @param {IBreakpoints=} [properties] Properties to set
+     * @returns {Breakpoints} Breakpoints instance
+     */
+    Breakpoints.create = function create(properties) {
+        return new Breakpoints(properties);
+    };
+
+    /**
+     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @function encode
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Breakpoints.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.lines != null && message.lines.length) {
+            writer.uint32(/* id 1, wireType 2 =*/10).fork();
+            for (let i = 0; i < message.lines.length; ++i)
+                writer.int32(message.lines[i]);
+            writer.ldelim();
+        }
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Breakpoints.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer.
+     * @function decode
+     * @memberof Breakpoints
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Breakpoints} Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Breakpoints.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Breakpoints();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.lines && message.lines.length))
+                    message.lines = [];
+                if ((tag & 7) === 2) {
+                    let end2 = reader.uint32() + reader.pos;
+                    while (reader.pos < end2)
+                        message.lines.push(reader.int32());
+                } else
+                    message.lines.push(reader.int32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Breakpoints
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Breakpoints} Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Breakpoints.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Breakpoints message.
+     * @function verify
+     * @memberof Breakpoints
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Breakpoints.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.lines != null && message.hasOwnProperty("lines")) {
+            if (!Array.isArray(message.lines))
+                return "lines: array expected";
+            for (let i = 0; i < message.lines.length; ++i)
+                if (!$util.isInteger(message.lines[i]))
+                    return "lines: integer[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Breakpoints
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Breakpoints} Breakpoints
+     */
+    Breakpoints.fromObject = function fromObject(object) {
+        if (object instanceof $root.Breakpoints)
+            return object;
+        let message = new $root.Breakpoints();
+        if (object.lines) {
+            if (!Array.isArray(object.lines))
+                throw TypeError(".Breakpoints.lines: array expected");
+            message.lines = [];
+            for (let i = 0; i < object.lines.length; ++i)
+                message.lines[i] = object.lines[i] | 0;
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Breakpoints.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.lines = [];
+        if (message.lines && message.lines.length) {
+            object.lines = [];
+            for (let j = 0; j < message.lines.length; ++j)
+                object.lines[j] = message.lines[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this Breakpoints to JSON.
+     * @function toJSON
+     * @memberof Breakpoints
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Breakpoints.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Breakpoints;
+})();
+
+export const Tracers = $root.Tracers = (() => {
+
+    /**
+     * Constructs a new Tracers service.
+     * @exports Tracers
+     * @classdesc Represents a Tracers
+     * @extends $protobuf.rpc.Service
+     * @constructor
+     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
+     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
+     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
+     */
+    function Tracers(rpcImpl, requestDelimited, responseDelimited) {
+        $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
+    }
+
+    (Tracers.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Tracers;
+
+    /**
+     * Creates new Tracers service using the specified rpc implementation.
+     * @function create
+     * @memberof Tracers
+     * @static
+     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
+     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
+     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
+     * @returns {Tracers} RPC service. Useful where requests and/or responses are streamed.
+     */
+    Tracers.create = function create(rpcImpl, requestDelimited, responseDelimited) {
+        return new this(rpcImpl, requestDelimited, responseDelimited);
+    };
+
+    /**
+     * Callback as used by {@link Tracers#getLanguages}.
+     * @memberof Tracers
+     * @typedef getLanguagesCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Languages} [response] Languages
+     */
+
+    /**
+     * Calls getLanguages.
+     * @function getLanguages
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getLanguagesCallback} callback Node-style callback called with the error, if any, and Languages
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getLanguages = function getLanguages(request, callback) {
+        return this.rpcCall(getLanguages, $root.Empty, $root.Languages, request, callback);
+    }, "name", { value: "getLanguages" });
+
+    /**
+     * Calls getLanguages.
+     * @function getLanguages
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Languages>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#getSessions}.
+     * @memberof Tracers
+     * @typedef getSessionsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Sessions} [response] Sessions
+     */
+
+    /**
+     * Calls getSessions.
+     * @function getSessions
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getSessionsCallback} callback Node-style callback called with the error, if any, and Sessions
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getSessions = function getSessions(request, callback) {
+        return this.rpcCall(getSessions, $root.Empty, $root.Sessions, request, callback);
+    }, "name", { value: "getSessions" });
+
+    /**
+     * Calls getSessions.
+     * @function getSessions
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Sessions>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#start}.
+     * @memberof Tracers
+     * @typedef startCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {StartResponse} [response] StartResponse
+     */
+
+    /**
+     * Calls start.
+     * @function start
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Start} request Start message or plain object
+     * @param {Tracers.startCallback} callback Node-style callback called with the error, if any, and StartResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.start = function start(request, callback) {
+        return this.rpcCall(start, $root.Action.Start, $root.StartResponse, request, callback);
+    }, "name", { value: "start" });
+
+    /**
+     * Calls start.
+     * @function start
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Start} request Start message or plain object
+     * @returns {Promise<StartResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stop}.
+     * @memberof Tracers
+     * @typedef stopCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls stop.
+     * @function stop
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stopCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stop = function stop(request, callback) {
+        return this.rpcCall(stop, $root.Id, $root.Empty, request, callback);
+    }, "name", { value: "stop" });
+
+    /**
+     * Calls stop.
+     * @function stop
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#step}.
+     * @memberof Tracers
+     * @typedef stepCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls step.
+     * @function step
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.step = function step(request, callback) {
+        return this.rpcCall(step, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "step" });
+
+    /**
+     * Calls step.
+     * @function step
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stepOver}.
+     * @memberof Tracers
+     * @typedef stepOverCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls stepOver.
+     * @function stepOver
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepOverCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stepOver = function stepOver(request, callback) {
+        return this.rpcCall(stepOver, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "stepOver" });
+
+    /**
+     * Calls stepOver.
+     * @function stepOver
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stepOut}.
+     * @memberof Tracers
+     * @typedef stepOutCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls stepOut.
+     * @function stepOut
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepOutCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stepOut = function stepOut(request, callback) {
+        return this.rpcCall(stepOut, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "stepOut" });
+
+    /**
+     * Calls stepOut.
+     * @function stepOut
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#continue_}.
+     * @memberof Tracers
+     * @typedef continueCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls continue.
+     * @function continue
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.continueCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype["continue"] = function continue_(request, callback) {
+        return this.rpcCall(continue_, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "continue" });
+
+    /**
+     * Calls continue.
+     * @function continue
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#input}.
+     * @memberof Tracers
+     * @typedef inputCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls input.
+     * @function input
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Input} request Input message or plain object
+     * @param {Tracers.inputCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.input = function input(request, callback) {
+        return this.rpcCall(input, $root.Action.Input, $root.Empty, request, callback);
+    }, "name", { value: "input" });
+
+    /**
+     * Calls input.
+     * @function input
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Input} request Input message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#getBreakpoints}.
+     * @memberof Tracers
+     * @typedef getBreakpointsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Breakpoints} [response] Breakpoints
+     */
+
+    /**
+     * Calls getBreakpoints.
+     * @function getBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getBreakpointsCallback} callback Node-style callback called with the error, if any, and Breakpoints
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getBreakpoints = function getBreakpoints(request, callback) {
+        return this.rpcCall(getBreakpoints, $root.Empty, $root.Breakpoints, request, callback);
+    }, "name", { value: "getBreakpoints" });
+
+    /**
+     * Calls getBreakpoints.
+     * @function getBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Breakpoints>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#setBreakpoints}.
+     * @memberof Tracers
+     * @typedef setBreakpointsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls setBreakpoints.
+     * @function setBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Breakpoints} request Breakpoints message or plain object
+     * @param {Tracers.setBreakpointsCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.setBreakpoints = function setBreakpoints(request, callback) {
+        return this.rpcCall(setBreakpoints, $root.Breakpoints, $root.Empty, request, callback);
+    }, "name", { value: "setBreakpoints" });
+
+    /**
+     * Calls setBreakpoints.
+     * @function setBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Breakpoints} request Breakpoints message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    return Tracers;
+})();
+
 export { $root as default };
