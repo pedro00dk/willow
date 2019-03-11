@@ -13,7 +13,7 @@ export class Server {
     private sessions: Map<number, { language: string; tracer: Tracer }> = new Map()
     private sessionIdGenerator: number = 0
 
-    constructor(private port: number, private tracers: { [language: string]: string }) {
+    constructor(private mode: 'json' | 'proto', private port: number, private tracers: { [language: string]: string }) {
         this.server = express()
         this.server.use(express.json())
         this.configureServerRoutes()
