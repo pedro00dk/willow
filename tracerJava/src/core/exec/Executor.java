@@ -9,7 +9,7 @@ import com.sun.jdi.event.ThreadStartEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.tools.jdi.VirtualMachineManagerImpl;
-import core.EventProcessor;
+import core.FrameProcessor;
 import core.Project;
 
 import java.io.IOException;
@@ -23,15 +23,12 @@ import java.util.stream.Collectors;
  */
 public class Executor {
     private Project project;
-    private EventProcessor eventProcessor;
+    private FrameProcessor frameProcessor;
     private VirtualMachine vm;
 
-    /**
-     * Initializes the executor with the received project and the event processor, the project shall be compiled.
-     */
-    public Executor(Project project, EventProcessor eventProcessor) {
+    public Executor(Project project, FrameProcessor frameProcessor) {
         this.project = project;
-        this.eventProcessor = eventProcessor;
+        this.frameProcessor = frameProcessor;
     }
 
     public boolean isRunning() {
@@ -42,14 +39,11 @@ public class Executor {
         return project;
     }
 
-    public EventProcessor getEventProcessor() {
-        return eventProcessor;
+    public FrameProcessor getFrameProcessor() {
+        return frameProcessor;
     }
 
-    /**
-     * Executes the received project and send filtered events to the event processor.
-     */
-    public void execute() throws IOException, IllegalConnectorArgumentsException, VMStartException, VMDisconnectedException, InterruptedException {
+    public void execute() throws Exception {
         startVirtualMachine();
         var allowedThreadsNames = configureEventRequests();
 
@@ -66,7 +60,7 @@ public class Executor {
                 // input hook TODO check better strategies (not working well)
                 var eventSet = vm.eventQueue().remove(100);
                 while (eventSet == null) {
-                    vmStdin.write((eventProcessor.inputHook() + "\n").getBytes());
+                    vmStdin.write((frameProcessor.inputHook() + "\n").getBytes());
                     vmStdin.flush();
                     eventSet = vm.eventQueue().remove(100);
                 }
@@ -83,13 +77,13 @@ public class Executor {
                     // print hooks
                     var printAvailable = vmStdout.available();
                     if (printAvailable > 0)
-                        eventProcessor.printHook(new String(vmStdout.readNBytes(printAvailable)));
+                        frameProcessor.printHook(new String(vmStdout.readNBytes(printAvailable)));
                     var errorAvailable = vmStderr.available();
                     if (errorAvailable > 0)
-                        eventProcessor.printHook(new String(vmStderr.readNBytes(errorAvailable)));
+                        frameProcessor.printHook(new String(vmStderr.readNBytes(errorAvailable)));
 
                     // trace
-                    var continueTracing = eventProcessor.trace(event);
+                    var continueTracing = frameProcessor.trace(event);
                     if (!continueTracing) {
                         vm.exit(0);
                         // breaks only internal loop to stop event set iterator
@@ -103,9 +97,6 @@ public class Executor {
         }
     }
 
-    /**
-     * Returns a virtual machine reference running the project.
-     */
     private void startVirtualMachine() throws IOException, IllegalConnectorArgumentsException, VMStartException {
         if (!project.isCompiled()) throw new IllegalStateException("project not compiled");
         if (isRunning()) throw new IllegalStateException("executor already running");
@@ -125,9 +116,6 @@ public class Executor {
         vm = connector.launch(connectorArguments);
     }
 
-    /**
-     * Sets all necessary requests for executing the project.
-     */
     private Set<String> configureEventRequests() {
         var defaultThreads = List.copyOf(vm.allThreads());
         var mainThread = defaultThreads.stream()

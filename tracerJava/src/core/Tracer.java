@@ -2,8 +2,8 @@ package core;
 
 import core.exec.Executor;
 import core.util.ExceptionUtil;
-import message.ActionMessage;
-import message.ResultMessage;
+import protobuf.EventOuterClass;
+import protobuf.Tracer.Action;
 
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -12,45 +12,42 @@ import java.util.concurrent.BlockingQueue;
  * Traces a java file and analyses its state after every instruction.
  */
 public class Tracer {
-    private Project project;
-    private BlockingQueue<ActionMessage> actionQueue;
-    private BlockingQueue<ResultMessage> resultQueue;
+    private BlockingQueue<Action> actionQueue;
+    private BlockingQueue<EventOuterClass.Event> eventQueue;
 
-    /**
-     * Initializes the tracer with the java filename, its contents and action/result queues.
-     */
-    public Tracer(String filename, String code, BlockingQueue<ActionMessage> actionQueue, BlockingQueue<ResultMessage> resultQueue) {
-        this.project = new Project(filename, code);
+    public Tracer(BlockingQueue<Action> actionQueue, BlockingQueue<EventOuterClass.Event> eventQueue) {
         this.actionQueue = actionQueue;
-        this.resultQueue = resultQueue;
+        this.eventQueue = eventQueue;
     }
 
-    /**
-     * Configures and runs the tracer.
-     */
-    public void run() {
-        var eventProcessor = new EventProcessor(this.actionQueue, this.resultQueue);
+    public void run() throws InterruptedException {
         try {
-            actionQueue.take();
+            var action = actionQueue.take();
+            if (action.hasStop()) return;
+            else if (!action.hasStart()) throw new Exception("unexpected action");
+
+            var main = action.getStart().getMain();
+            var code = action.getStart().getCode();
+
+            var frameProcessor = new FrameProcessor(this.actionQueue, this.eventQueue);
+            var project = new Project(main, code);
             project.generate();
             project.compile();
-            resultQueue.put(new ResultMessage(ResultMessage.Result.started, null));
-            new Executor(project, eventProcessor).execute();
+            var startedEventBuilder = EventOuterClass.Event.newBuilder();
+            startedEventBuilder.getStartedBuilder().build();
+            eventQueue.put(startedEventBuilder.build());
+            new Executor(project, frameProcessor).execute();
         } catch (InstantiationException e) {
             // compilation error
-            var exceptionDump = ExceptionUtil.dump(e, Set.of(-1, -2, -3, -4));
-            try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
+            var exception = ExceptionUtil.dump(e, Set.of(-1, -2, -3, -4));
+            var threwEventBuilder = EventOuterClass.Event.newBuilder();
+            threwEventBuilder.getThrewBuilder().setException(exception);
+            eventQueue.put(threwEventBuilder.build());
         } catch (Exception e) {
-            var exceptionDump = ExceptionUtil.dump(e);
-            try {
-                resultQueue.put(new ResultMessage(ResultMessage.Result.error, exceptionDump));
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
+            var exception = ExceptionUtil.dump(e);
+            var threwEventBuilder = EventOuterClass.Event.newBuilder();
+            threwEventBuilder.getThrewBuilder().setException(exception);
+            eventQueue.put(threwEventBuilder.build());
         }
     }
 }
