@@ -2269,7 +2269,7 @@ export class Tracers extends $protobuf.rpc.Service {
     /**
      * Calls stepOver.
      * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     * @param callback Node-style callback called with the error, if any, and TracerResponses
      */
     public stepOver(request: Id, callback: Tracers.stepOverCallback): void;
 
@@ -2278,12 +2278,12 @@ export class Tracers extends $protobuf.rpc.Service {
      * @param request Id message or plain object
      * @returns Promise
      */
-    public stepOver(request: Id): Promise<TracerResponse>;
+    public stepOver(request: Id): Promise<TracerResponses>;
 
     /**
      * Calls stepOut.
      * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     * @param callback Node-style callback called with the error, if any, and TracerResponses
      */
     public stepOut(request: Id, callback: Tracers.stepOutCallback): void;
 
@@ -2292,12 +2292,12 @@ export class Tracers extends $protobuf.rpc.Service {
      * @param request Id message or plain object
      * @returns Promise
      */
-    public stepOut(request: Id): Promise<TracerResponse>;
+    public stepOut(request: Id): Promise<TracerResponses>;
 
     /**
      * Calls continue.
      * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     * @param callback Node-style callback called with the error, if any, and TracerResponses
      */
     public continue(request: Id, callback: Tracers.continueCallback): void;
 
@@ -2306,7 +2306,7 @@ export class Tracers extends $protobuf.rpc.Service {
      * @param request Id message or plain object
      * @returns Promise
      */
-    public continue(request: Id): Promise<TracerResponse>;
+    public continue(request: Id): Promise<TracerResponses>;
 
     /**
      * Calls input.
@@ -2391,23 +2391,23 @@ export namespace Tracers {
     /**
      * Callback as used by {@link Tracers#stepOver}.
      * @param error Error, if any
-     * @param [response] TracerResponse
+     * @param [response] TracerResponses
      */
-    type stepOverCallback = (error: (Error|null), response?: TracerResponse) => void;
+    type stepOverCallback = (error: (Error|null), response?: TracerResponses) => void;
 
     /**
      * Callback as used by {@link Tracers#stepOut}.
      * @param error Error, if any
-     * @param [response] TracerResponse
+     * @param [response] TracerResponses
      */
-    type stepOutCallback = (error: (Error|null), response?: TracerResponse) => void;
+    type stepOutCallback = (error: (Error|null), response?: TracerResponses) => void;
 
     /**
      * Callback as used by {@link Tracers#continue_}.
      * @param error Error, if any
-     * @param [response] TracerResponse
+     * @param [response] TracerResponses
      */
-    type continueCallback = (error: (Error|null), response?: TracerResponse) => void;
+    type continueCallback = (error: (Error|null), response?: TracerResponses) => void;
 
     /**
      * Callback as used by {@link Tracers#input}.
@@ -3164,6 +3164,96 @@ export class StartResponse implements IStartResponse {
 
     /**
      * Converts this StartResponse to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a TracerResponses. */
+export interface ITracerResponses {
+
+    /** TracerResponses responses */
+    responses?: (TracerResponse[]|null);
+}
+
+/** Represents a TracerResponses. */
+export class TracerResponses implements ITracerResponses {
+
+    /**
+     * Constructs a new TracerResponses.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: ITracerResponses);
+
+    /** TracerResponses responses. */
+    public responses: TracerResponse[];
+
+    /**
+     * Creates a new TracerResponses instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns TracerResponses instance
+     */
+    public static create(properties?: ITracerResponses): TracerResponses;
+
+    /**
+     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @param message TracerResponses message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @param message TracerResponses message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): TracerResponses;
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): TracerResponses;
+
+    /**
+     * Verifies a TracerResponses message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns TracerResponses
+     */
+    public static fromObject(object: { [k: string]: any }): TracerResponses;
+
+    /**
+     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
+     * @param message TracerResponses
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: TracerResponses, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this TracerResponses to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

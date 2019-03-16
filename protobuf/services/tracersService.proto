@@ -16,9 +16,9 @@ service Tracers {
   rpc start(StartRequest) returns (StartResponse);
   rpc stop(Id) returns (Empty);
   rpc step(Id) returns (TracerResponse);
-  rpc stepOver(Id) returns (TracerResponse);
-  rpc stepOut(Id) returns (TracerResponse);
-  rpc continue(Id) returns (TracerResponse);
+  rpc stepOver(Id) returns (TracerResponses);
+  rpc stepOut(Id) returns (TracerResponses);
+  rpc continue(Id) returns (TracerResponses);
   rpc input(Action.Input) returns (Empty);
   rpc getBreakpoints(Empty) returns (Breakpoints);
   rpc setBreakpoints(Breakpoints) returns (Empty);
@@ -51,5 +51,7 @@ message StartResponse {
   Id id = 1;
   TracerResponse response = 2;
 }
+
+message TracerResponses { repeated TracerResponse responses = 1; }
 
 message Breakpoints { repeated int32 lines = 1; }

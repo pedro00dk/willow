@@ -43,11 +43,11 @@ export class TracerWrapper implements Tracer {
 
     async stepOver() {
         log.info(TracerWrapper.name, 'step over')
-        const responses: protocol.TracerResponse[] = []
+        const responses = protocol.TracerResponses.create({ responses: [] })
         const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
             const nextResponse = await this.step()
-            responses.push(nextResponse)
+            responses.responses.push(nextResponse)
             if (
                 this.getState() === 'stopped' ||
                 (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length <= stackLength) ||
@@ -60,11 +60,11 @@ export class TracerWrapper implements Tracer {
 
     async stepOut() {
         log.info(TracerWrapper.name, 'step out')
-        const responses: protocol.TracerResponse[] = []
+        const responses = protocol.TracerResponses.create({ responses: [] })
         const stackLength = this.previousInspectedEvent ? this.previousInspectedEvent.frame.stack.scopes.length : 1
         while (true) {
             const nextResponse = await this.step()
-            responses.push(nextResponse)
+            responses.responses.push(nextResponse)
             if (
                 this.getState() === 'stopped' ||
                 (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length < stackLength) ||
@@ -77,10 +77,10 @@ export class TracerWrapper implements Tracer {
 
     async continue() {
         log.info(TracerWrapper.name, 'continue')
-        const responses: protocol.TracerResponse[] = []
+        const responses = protocol.TracerResponses.create({ responses: [] })
         while (true) {
             const nextResponse = await this.step()
-            responses.push(nextResponse)
+            responses.responses.push(nextResponse)
             const currentLine = this.previousInspectedEvent ? this.previousInspectedEvent.frame.line : undefined
             if (
                 this.getState() === 'stopped' ||

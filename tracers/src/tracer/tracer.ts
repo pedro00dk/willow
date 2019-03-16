@@ -9,9 +9,9 @@ export interface Tracer {
     start(main: string, code: string): Promise<protocol.TracerResponse>
     stop(): void
     step(): Promise<protocol.TracerResponse>
-    stepOver?(): Promise<protocol.TracerResponse[]>
-    stepOut?(): Promise<protocol.TracerResponse[]>
-    continue?(): Promise<protocol.TracerResponse[]>
+    stepOver?(): Promise<protocol.TracerResponses>
+    stepOut?(): Promise<protocol.TracerResponses>
+    continue?(): Promise<protocol.TracerResponses>
     input(lines: string[]): void
     getBreakpoints?(): ReadonlySet<number>
     setBreakpoints?(breakpoints: ReadonlySet<number>): void

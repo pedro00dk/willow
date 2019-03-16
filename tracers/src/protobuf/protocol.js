@@ -5403,7 +5403,7 @@ export const Tracers = $root.Tracers = (() => {
      * @typedef stepOverCallback
      * @type {function}
      * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
+     * @param {TracerResponses} [response] TracerResponses
      */
 
     /**
@@ -5412,12 +5412,12 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @param {Tracers.stepOverCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @param {Tracers.stepOverCallback} callback Node-style callback called with the error, if any, and TracerResponses
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype.stepOver = function stepOver(request, callback) {
-        return this.rpcCall(stepOver, $root.Id, $root.TracerResponse, request, callback);
+        return this.rpcCall(stepOver, $root.Id, $root.TracerResponses, request, callback);
     }, "name", { value: "stepOver" });
 
     /**
@@ -5426,7 +5426,7 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
+     * @returns {Promise<TracerResponses>} Promise
      * @variation 2
      */
 
@@ -5436,7 +5436,7 @@ export const Tracers = $root.Tracers = (() => {
      * @typedef stepOutCallback
      * @type {function}
      * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
+     * @param {TracerResponses} [response] TracerResponses
      */
 
     /**
@@ -5445,12 +5445,12 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @param {Tracers.stepOutCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @param {Tracers.stepOutCallback} callback Node-style callback called with the error, if any, and TracerResponses
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype.stepOut = function stepOut(request, callback) {
-        return this.rpcCall(stepOut, $root.Id, $root.TracerResponse, request, callback);
+        return this.rpcCall(stepOut, $root.Id, $root.TracerResponses, request, callback);
     }, "name", { value: "stepOut" });
 
     /**
@@ -5459,7 +5459,7 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
+     * @returns {Promise<TracerResponses>} Promise
      * @variation 2
      */
 
@@ -5469,7 +5469,7 @@ export const Tracers = $root.Tracers = (() => {
      * @typedef continueCallback
      * @type {function}
      * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
+     * @param {TracerResponses} [response] TracerResponses
      */
 
     /**
@@ -5478,12 +5478,12 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @param {Tracers.continueCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @param {Tracers.continueCallback} callback Node-style callback called with the error, if any, and TracerResponses
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype["continue"] = function continue_(request, callback) {
-        return this.rpcCall(continue_, $root.Id, $root.TracerResponse, request, callback);
+        return this.rpcCall(continue_, $root.Id, $root.TracerResponses, request, callback);
     }, "name", { value: "continue" });
 
     /**
@@ -5492,7 +5492,7 @@ export const Tracers = $root.Tracers = (() => {
      * @memberof Tracers
      * @instance
      * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
+     * @returns {Promise<TracerResponses>} Promise
      * @variation 2
      */
 
@@ -7224,6 +7224,214 @@ export const StartResponse = $root.StartResponse = (() => {
     };
 
     return StartResponse;
+})();
+
+export const TracerResponses = $root.TracerResponses = (() => {
+
+    /**
+     * Properties of a TracerResponses.
+     * @exports ITracerResponses
+     * @interface ITracerResponses
+     * @property {Array.<TracerResponse>|null} [responses] TracerResponses responses
+     */
+
+    /**
+     * Constructs a new TracerResponses.
+     * @exports TracerResponses
+     * @classdesc Represents a TracerResponses.
+     * @implements ITracerResponses
+     * @constructor
+     * @param {ITracerResponses=} [properties] Properties to set
+     */
+    function TracerResponses(properties) {
+        this.responses = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * TracerResponses responses.
+     * @member {Array.<TracerResponse>} responses
+     * @memberof TracerResponses
+     * @instance
+     */
+    TracerResponses.prototype.responses = $util.emptyArray;
+
+    /**
+     * Creates a new TracerResponses instance using the specified properties.
+     * @function create
+     * @memberof TracerResponses
+     * @static
+     * @param {ITracerResponses=} [properties] Properties to set
+     * @returns {TracerResponses} TracerResponses instance
+     */
+    TracerResponses.create = function create(properties) {
+        return new TracerResponses(properties);
+    };
+
+    /**
+     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @function encode
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    TracerResponses.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.responses != null && message.responses.length)
+            for (let i = 0; i < message.responses.length; ++i)
+                $root.TracerResponse.encode(message.responses[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    TracerResponses.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer.
+     * @function decode
+     * @memberof TracerResponses
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {TracerResponses} TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    TracerResponses.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.TracerResponses();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.responses && message.responses.length))
+                    message.responses = [];
+                message.responses.push($root.TracerResponse.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof TracerResponses
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {TracerResponses} TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    TracerResponses.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a TracerResponses message.
+     * @function verify
+     * @memberof TracerResponses
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    TracerResponses.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.responses != null && message.hasOwnProperty("responses")) {
+            if (!Array.isArray(message.responses))
+                return "responses: array expected";
+            for (let i = 0; i < message.responses.length; ++i) {
+                let error = $root.TracerResponse.verify(message.responses[i]);
+                if (error)
+                    return "responses." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof TracerResponses
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {TracerResponses} TracerResponses
+     */
+    TracerResponses.fromObject = function fromObject(object) {
+        if (object instanceof $root.TracerResponses)
+            return object;
+        let message = new $root.TracerResponses();
+        if (object.responses) {
+            if (!Array.isArray(object.responses))
+                throw TypeError(".TracerResponses.responses: array expected");
+            message.responses = [];
+            for (let i = 0; i < object.responses.length; ++i) {
+                if (typeof object.responses[i] !== "object")
+                    throw TypeError(".TracerResponses.responses: object expected");
+                message.responses[i] = $root.TracerResponse.fromObject(object.responses[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    TracerResponses.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.responses = [];
+        if (message.responses && message.responses.length) {
+            object.responses = [];
+            for (let j = 0; j < message.responses.length; ++j)
+                object.responses[j] = $root.TracerResponse.toObject(message.responses[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this TracerResponses to JSON.
+     * @function toJSON
+     * @memberof TracerResponses
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    TracerResponses.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return TracerResponses;
 })();
 
 export const Breakpoints = $root.Breakpoints = (() => {
