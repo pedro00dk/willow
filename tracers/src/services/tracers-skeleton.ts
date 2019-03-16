@@ -37,6 +37,7 @@ export class TracersSkeleton {
     }
 
     private configureRoutes() {
+        this.router.get('/mode', (req, res) => res.send(this.mode))
         this.router.post('/getLanguages', (req, res) => {
             const response = this.getLanguages(
                 this.readMessage(req, protocol.Empty.decodeDelimited, protocol.Empty.create)
