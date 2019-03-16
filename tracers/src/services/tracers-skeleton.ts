@@ -29,7 +29,7 @@ export class TracersSkeleton {
         this.configureRoutes()
     }
 
-    private readMessage<T>(req: express.Request, decode: (buf: Buffer) => T, create: (props: any) => T) {
+    private readMessage<T>(req: express.Request, decode: (buf: Buffer) => T, create: (props: {}) => T) {
         return this.mode === 'proto' ? decode(req.body as Buffer) : create(req.body as {})
     }
 
