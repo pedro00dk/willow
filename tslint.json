@@ -6,6 +6,7 @@
         "curly": false,
         "interface-name": false,
         "interface-over-type-literal": false,
+        "max-classes-per-file": false,
         "member-access": [true, "no-public"],
         "member-ordering": false,
         "no-null-keyword": true,
