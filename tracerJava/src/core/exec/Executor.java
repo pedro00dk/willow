@@ -69,10 +69,15 @@ public class Executor {
                 for (var event : eventSet) {
 
                     // interrupt not allowed threads
-                    if (event instanceof ThreadStartEvent &&
-                            !allowedThreadsNames.contains(((ThreadStartEvent) event).thread().name()))
-                        ((ThreadStartEvent) event).thread().interrupt();
-
+                    try {
+                        if (event instanceof ThreadStartEvent &&
+                                !allowedThreadsNames.contains(((ThreadStartEvent) event).thread().name()))
+                            ((ThreadStartEvent) event).thread().interrupt();
+                    } catch (VMDisconnectedException e) {
+                        throw new RuntimeException(
+                                new NoClassDefFoundError(new String(vmStderr.readNBytes(vmStderr.available())))
+                        );
+                    }
 
                     // print hooks
                     var printAvailable = vmStdout.available();

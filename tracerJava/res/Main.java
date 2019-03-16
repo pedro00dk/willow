@@ -1,9 +1,8 @@
+// test code
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        // test script
-
         var b = true;
         var i = 1234;
         var f = 123.4;
