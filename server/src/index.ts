@@ -2,7 +2,6 @@ import * as log from 'npmlog'
 import * as yargs from 'yargs'
 import { Server } from './server'
 
-
 /**
  * The main function.
  */

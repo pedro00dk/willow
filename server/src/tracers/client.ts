@@ -1,7 +1,6 @@
 import axios from 'axios'
 import * as log from 'npmlog'
 
-
 /**
  * Client for a tracer server.
  */
@@ -37,7 +36,7 @@ export class Client {
         try {
             const response = await axios.get(`${this.address}/sessions`)
             log.info(Client.name, 'get sessions', { status: response.status })
-            return response.data as { id: number, supplier: string, state: string }[]
+            return response.data as { id: number; supplier: string; state: string }[]
         } catch (error) {
             const error_ = error.response ? error.response.data : error.toString()
             log.info(Client.name, 'get sessions', error_)
@@ -52,7 +51,7 @@ export class Client {
         try {
             const response = await axios.post(`${this.address}/create`, { supplier, code })
             log.info(Client.name, 'create', { status: response.status })
-            return response.data as { id: number, supplier: string }
+            return response.data as { id: number; supplier: string }
         } catch (error) {
             const error_ = error.response ? error.response.data : error.toString()
             log.info(Client.name, 'create', error_)
@@ -66,7 +65,9 @@ export class Client {
     async execute(id: number, action: string, args: unknown[]) {
         try {
             const response = await axios.post(
-                `${this.address}/execute`, { id, action, args }, { transformResponse: res => res }
+                `${this.address}/execute`,
+                { id, action, args },
+                { transformResponse: res => res }
             )
             log.info(Client.name, 'execute', { status: response.status })
             return { data: response.data as string, finished: response.headers.finished === 'true' }

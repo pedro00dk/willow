@@ -3,7 +3,6 @@ import * as session from 'express-session'
 import * as log from 'npmlog'
 import { Client } from './tracers/client'
 
-
 /**
  * Server to willow actions.
  */
@@ -53,52 +52,40 @@ export class Server {
      * Configures server routes.
      */
     private configureRoutes() {
-        this.server.get(
-            '/session',
-            (request, response) => {
-                log.http(Server.name, request.path)
-                response.send({ session: request.session.id })
+        this.server.get('/session', (request, response) => {
+            log.http(Server.name, request.path)
+            response.send({ session: request.session.id })
+        })
+        this.server.get('/tracers/suppliers', (request, response) => {
+            log.http(Server.name, request.path)
+            try {
+                response.send(this.getSuppliers())
+            } catch (error) {
+                response.status(400).send(error.message)
             }
-        )
-        this.server.get(
-            '/tracers/suppliers',
-            (request, response) => {
-                log.http(Server.name, request.path)
-                try {
-                    response.send(this.getSuppliers())
-                } catch (error) {
-                    response.status(400).send(error.message)
-                }
+        })
+        this.server.post('/tracers/create', async (request, response) => {
+            const userId = request.session.id
+            const supplier = request.body['supplier'] as string
+            const code = request.body['code'] as string
+            log.http(Server.name, request.path, { userId, supplier })
+            try {
+                response.send(await this.createSession(userId, supplier, code))
+            } catch (error) {
+                response.status(400).send(error.message)
             }
-        )
-        this.server.post(
-            '/tracers/create',
-            async (request, response) => {
-                const userId = request.session.id
-                const supplier = request.body['supplier'] as string
-                const code = request.body['code'] as string
-                log.http(Server.name, request.path, { userId, supplier })
-                try {
-                    response.send(await this.createSession(userId, supplier, code))
-                } catch (error) {
-                    response.status(400).send(error.message)
-                }
+        })
+        this.server.post('/tracers/execute', async (request, response) => {
+            const userId = request.session.id
+            const action = request.body['action'] as string
+            const args = request.body['args'] as unknown[]
+            log.http(Server.name, request.path, { userId, action })
+            try {
+                response.send(await this.executeOnSession(userId, action, args))
+            } catch (error) {
+                response.status(400).send(error.message)
             }
-        )
-        this.server.post(
-            '/tracers/execute',
-            async (request, response) => {
-                const userId = request.session.id
-                const action = request.body['action'] as string
-                const args = request.body['args'] as unknown[]
-                log.http(Server.name, request.path, { userId, action })
-                try {
-                    response.send(await this.executeOnSession(userId, action, args))
-                } catch (error) {
-                    response.status(400).send(error.message)
-                }
-            }
-        )
+        })
     }
 
     /**
