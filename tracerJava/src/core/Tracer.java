@@ -1,7 +1,7 @@
 package core;
 
 import core.exec.Executor;
-import core.util.ExceptionUtil;
+import core.util.ThrowableUtil;
 import protobuf.EventOuterClass;
 import protobuf.Tracer.Action;
 
@@ -37,14 +37,19 @@ public class Tracer {
             startedEventBuilder.getStartedBuilder().build();
             eventQueue.put(startedEventBuilder.build());
             new Executor(project, frameProcessor).execute();
-        } catch (InstantiationException e) {
+        } catch (InstantiationException | IllegalArgumentException e) {
             // compilation error
-            var exception = ExceptionUtil.dump(e, Set.of(-1, -2, -3, -4));
+            var exception = ThrowableUtil.dump(e, Set.of(-1, -2, -3, -4));
+            var threwEventBuilder = EventOuterClass.Event.newBuilder();
+            threwEventBuilder.getThrewBuilder().setException(exception);
+            eventQueue.put(threwEventBuilder.build());
+        } catch (RuntimeException e) {
+            var exception = ThrowableUtil.dump(e.getCause());
             var threwEventBuilder = EventOuterClass.Event.newBuilder();
             threwEventBuilder.getThrewBuilder().setException(exception);
             eventQueue.put(threwEventBuilder.build());
         } catch (Exception e) {
-            var exception = ExceptionUtil.dump(e);
+            var exception = ThrowableUtil.dump(e);
             var threwEventBuilder = EventOuterClass.Event.newBuilder();
             threwEventBuilder.getThrewBuilder().setException(exception);
             eventQueue.put(threwEventBuilder.build());

@@ -3,7 +3,7 @@ package core;
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 import core.util.EventUtil;
-import core.util.ExceptionUtil;
+import core.util.ThrowableUtil;
 import protobuf.EventOuterClass;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public final class Inspector {
             var exceptionMessage = ((StringReference) exceptionEvent.exception().getValue(
                     exceptionEvent.exception().referenceType().fieldByName("detailMessage")
             )).value();
-            exception = ExceptionUtil.dump(
+            exception = ThrowableUtil.dump(
                     exceptionEvent.exception().referenceType().name(),
                     List.of(exceptionMessage),
                     exceptionMessage
@@ -114,7 +114,7 @@ public final class Inspector {
                 })
                 .collect(Collectors.toList());
         return Map.ofEntries(
-                Map.entry("stack", stackBuilder.addAllScopes(scopes)),
+                Map.entry("stack", stackBuilder.clearScopes().addAllScopes(scopes)),
                 Map.entry("heap", heapBuilder)
         );
     }

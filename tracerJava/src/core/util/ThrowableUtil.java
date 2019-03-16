@@ -11,26 +11,26 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Processes exception objects.
+ * Processes throwable objects.
  */
-public final class ExceptionUtil {
+public final class ThrowableUtil {
 
-    private ExceptionUtil() {
+    private ThrowableUtil() {
     }
 
     /**
-     * Extracts the exception data in a map.
+     * Extracts the throwable data in a map.
      */
-    public static EventOuterClass.Exception.Builder dump(Exception exception) {
-        return dump(exception, Set.of());
+    public static EventOuterClass.Exception.Builder dump(Throwable throwable) {
+        return dump(throwable, Set.of());
     }
 
     /**
-     * Extracts the exception data in a map.
+     * Extracts the throwable data in a map.
      */
-    public static EventOuterClass.Exception.Builder dump(Exception exception, Set<Integer> removeLines) {
+    public static EventOuterClass.Exception.Builder dump(Throwable throwable, Set<Integer> removeLines) {
         var tracebackWriter = new StringWriter();
-        exception.printStackTrace(new PrintWriter(tracebackWriter, true));
+        throwable.printStackTrace(new PrintWriter(tracebackWriter, true));
 
         var formattedTraceback = Arrays.stream(tracebackWriter.toString().split("\n"))
                 .map(l -> l + "\n")
@@ -41,8 +41,8 @@ public final class ExceptionUtil {
                 .collect(Collectors.toList());
 
         return EventOuterClass.Exception.newBuilder()
-                .setType(exception.getClass().getName())
-                .addAllArgs(List.of(exception.getMessage() != null ? exception.getMessage() : ""))
+                .setType(throwable.getClass().getName())
+                .addAllArgs(List.of(throwable.getMessage() != null ? throwable.getMessage() : ""))
                 .addAllTraceback(filteredTraceback);
 
     }
