@@ -47,6 +47,9 @@ public class Main {
             );
         } catch (HelpScreenException e) {
             // throws all ArgumentParserException except HelpScreens
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1); // force thread stop if the tracer is running
         }
     }
 
