@@ -29,7 +29,7 @@ export class TracerProcess implements Tracer {
             .pipe(rxOps.flatMap(actions => actions.map(action => [action])))
             .subscribe(
                 actions => {
-                    const requestWriter = protocol.TracerRequest.encode(new protocol.TracerRequest({ actions }))
+                    const requestWriter = protocol.TracerRequest.encode(protocol.TracerRequest.create({ actions }))
                     process.stdin$.next(protobuf.Writer.create().fixed32(requestWriter.len))
                     process.stdin$.next(requestWriter)
                 },
@@ -56,7 +56,7 @@ export class TracerProcess implements Tracer {
         this.state = 'started'
         this.spawnProcess()
         const eventsPromise = this.events$.pipe(rxOps.take(1)).toPromise()
-        this.actions$.next([new protocol.Action({ start: new protocol.Action.Start({ main, code }) })])
+        this.actions$.next([protocol.Action.create({ start: protocol.Action.Start.create({ main, code }) })])
         const events = await eventsPromise
         if (typeof events === 'string') {
             this.stop()
@@ -71,7 +71,7 @@ export class TracerProcess implements Tracer {
         log.info(TracerProcess.name, 'stop')
         this.checkState('started')
         this.state = 'stopped'
-        this.actions$.next([new protocol.Action({ stop: new protocol.Action.Stop() })])
+        this.actions$.next([protocol.Action.create({ stop: protocol.Action.Stop.create() })])
         // this.actions$.complete() // the process shall stop automatically (this call will force stop/kill)
     }
 
@@ -79,7 +79,7 @@ export class TracerProcess implements Tracer {
         log.verbose(TracerProcess.name, 'step')
         this.checkState('started')
         const eventsPromise = this.events$.pipe(rxOps.take(2)).toPromise()
-        this.actions$.next([new protocol.Action({ step: new protocol.Action.Step() })])
+        this.actions$.next([protocol.Action.create({ step: protocol.Action.Step.create() })])
         const events = await eventsPromise
         if (typeof events === 'string') {
             this.stop()
@@ -93,6 +93,6 @@ export class TracerProcess implements Tracer {
     input(lines: string[]) {
         log.verbose(TracerProcess.name, 'input', { lines })
         this.checkState('started')
-        this.actions$.next([new protocol.Action({ input: new protocol.Action.Input({ lines }) })])
+        this.actions$.next([protocol.Action.create({ input: protocol.Action.Input.create({ lines }) })])
     }
 }
