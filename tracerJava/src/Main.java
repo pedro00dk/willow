@@ -1,7 +1,5 @@
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.protobuf.TextFormat;
 import core.Client;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -19,7 +17,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         var parser = ArgumentParsers.newFor("tracer").build().description("Java tracer CLI");
         parser.addArgument("--auto")
                 .setDefault(false)
@@ -104,7 +102,7 @@ public class Main {
             } else {
                 if (inMode.equals("proto")) {
                     request = readProtoInput();
-                    tracer.demultiplexAction(request.getActions(0));
+                    events = tracer.demultiplexAction(request.getActions(0));
                 } else {
                     var actionData = readTextInput("action {\"stop\", \"step\", \"input\" json([\"line\"*])}:\n");
                     var splitIndex = actionData.indexOf(' ');
@@ -125,15 +123,17 @@ public class Main {
                             throw new Exception("unexpected action");
                     }
                     events = tracer.demultiplexAction(actionBuilder.build());
-                    if (events != null) writeOutput(outMode, events);
                 }
+                if (events != null) writeOutput(outMode, events);
             }
         }
     }
 
     private static Tracer.TracerRequest readProtoInput() throws IOException {
         return Tracer.TracerRequest.parseFrom(
-                System.in.readNBytes(ByteBuffer.wrap(System.in.readNBytes(4)).getInt())
+                System.in.readNBytes(
+                        ByteBuffer.wrap(System.in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt()
+                )
         );
     }
 
@@ -143,8 +143,6 @@ public class Main {
         System.out.print(prompt);
         return SCAN.nextLine();
     }
-
-    private static final Gson SERIALIZER = new GsonBuilder().serializeNulls().create();
 
     private static void writeOutput(String mode, List<EventOuterClass.Event> events) throws IOException {
         var response = Tracer.TracerResponse.newBuilder()
@@ -159,46 +157,7 @@ public class Main {
                 System.out.flush();
                 break;
             case "text":
-                System.out.println(TextFormat.printToString(response));
+                System.out.println(response.toString());
         }
     }
-//
-//    private static void runUncontrolled(Client client) throws InterruptedException {
-//        printResults(client.start());
-//        if (!client.isTracerRunning()) return;
-//        while (true) {
-//            var results = client.step();
-//            printResults(results);
-//            if (results.get(results.size() - 1).getName() == ResultMessage.Result.locked) client.input("");
-//            System.out.println(client.isTracerRunning());
-//            if (!client.isTracerRunning()) break;
-//        }
-//    }
-//
-//    private static void runControlled(Client client) {
-//        var scanner = new Scanner(System.in);
-//        while (true) {
-//            var actionData = scanner.nextLine();
-//            var spaceIndex = actionData.indexOf(' ');
-//            var action = spaceIndex != -1 ? actionData.substring(0, spaceIndex) : actionData;
-//            var value = spaceIndex != -1 ? actionData.substring(spaceIndex + 1) : "";
-//            try {
-//                if (action.equals(ActionMessage.Action.start.name())) printResults(client.start());
-//                else if (action.equals(ActionMessage.Action.stop.name())) {
-//                    try {
-//                        client.stop();
-//                    } catch (Exception e) { // ignore
-//                    }
-//                    break;
-//                } else if (action.equals(ActionMessage.Action.input.name())) client.input(value);
-//                else if (action.equals(ActionMessage.Action.step.name())) printResults(client.step());
-//                else {
-//                    throw new Exception("action not found");
-//                }
-//                if (!client.isTracerRunning()) break;
-//            } catch (Exception e) {
-//                printError(e.getMessage());
-//            }
-//        }
-//    }
 }
