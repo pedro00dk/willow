@@ -5200,6 +5200,404 @@ export const TracerResponse = $root.TracerResponse = (() => {
     return TracerResponse;
 })();
 
+export const Tracers = $root.Tracers = (() => {
+
+    /**
+     * Constructs a new Tracers service.
+     * @exports Tracers
+     * @classdesc Represents a Tracers
+     * @extends $protobuf.rpc.Service
+     * @constructor
+     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
+     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
+     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
+     */
+    function Tracers(rpcImpl, requestDelimited, responseDelimited) {
+        $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
+    }
+
+    (Tracers.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Tracers;
+
+    /**
+     * Creates new Tracers service using the specified rpc implementation.
+     * @function create
+     * @memberof Tracers
+     * @static
+     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
+     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
+     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
+     * @returns {Tracers} RPC service. Useful where requests and/or responses are streamed.
+     */
+    Tracers.create = function create(rpcImpl, requestDelimited, responseDelimited) {
+        return new this(rpcImpl, requestDelimited, responseDelimited);
+    };
+
+    /**
+     * Callback as used by {@link Tracers#getLanguages}.
+     * @memberof Tracers
+     * @typedef getLanguagesCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Languages} [response] Languages
+     */
+
+    /**
+     * Calls getLanguages.
+     * @function getLanguages
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getLanguagesCallback} callback Node-style callback called with the error, if any, and Languages
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getLanguages = function getLanguages(request, callback) {
+        return this.rpcCall(getLanguages, $root.Empty, $root.Languages, request, callback);
+    }, "name", { value: "getLanguages" });
+
+    /**
+     * Calls getLanguages.
+     * @function getLanguages
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Languages>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#getSessions}.
+     * @memberof Tracers
+     * @typedef getSessionsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Sessions} [response] Sessions
+     */
+
+    /**
+     * Calls getSessions.
+     * @function getSessions
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getSessionsCallback} callback Node-style callback called with the error, if any, and Sessions
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getSessions = function getSessions(request, callback) {
+        return this.rpcCall(getSessions, $root.Empty, $root.Sessions, request, callback);
+    }, "name", { value: "getSessions" });
+
+    /**
+     * Calls getSessions.
+     * @function getSessions
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Sessions>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#start}.
+     * @memberof Tracers
+     * @typedef startCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {StartResponse} [response] StartResponse
+     */
+
+    /**
+     * Calls start.
+     * @function start
+     * @memberof Tracers
+     * @instance
+     * @param {StartRequest} request StartRequest message or plain object
+     * @param {Tracers.startCallback} callback Node-style callback called with the error, if any, and StartResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.start = function start(request, callback) {
+        return this.rpcCall(start, $root.StartRequest, $root.StartResponse, request, callback);
+    }, "name", { value: "start" });
+
+    /**
+     * Calls start.
+     * @function start
+     * @memberof Tracers
+     * @instance
+     * @param {StartRequest} request StartRequest message or plain object
+     * @returns {Promise<StartResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stop}.
+     * @memberof Tracers
+     * @typedef stopCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls stop.
+     * @function stop
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stopCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stop = function stop(request, callback) {
+        return this.rpcCall(stop, $root.Id, $root.Empty, request, callback);
+    }, "name", { value: "stop" });
+
+    /**
+     * Calls stop.
+     * @function stop
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#step}.
+     * @memberof Tracers
+     * @typedef stepCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls step.
+     * @function step
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.step = function step(request, callback) {
+        return this.rpcCall(step, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "step" });
+
+    /**
+     * Calls step.
+     * @function step
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stepOver}.
+     * @memberof Tracers
+     * @typedef stepOverCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls stepOver.
+     * @function stepOver
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepOverCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stepOver = function stepOver(request, callback) {
+        return this.rpcCall(stepOver, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "stepOver" });
+
+    /**
+     * Calls stepOver.
+     * @function stepOver
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#stepOut}.
+     * @memberof Tracers
+     * @typedef stepOutCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls stepOut.
+     * @function stepOut
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.stepOutCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.stepOut = function stepOut(request, callback) {
+        return this.rpcCall(stepOut, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "stepOut" });
+
+    /**
+     * Calls stepOut.
+     * @function stepOut
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#continue_}.
+     * @memberof Tracers
+     * @typedef continueCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {TracerResponse} [response] TracerResponse
+     */
+
+    /**
+     * Calls continue.
+     * @function continue
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @param {Tracers.continueCallback} callback Node-style callback called with the error, if any, and TracerResponse
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype["continue"] = function continue_(request, callback) {
+        return this.rpcCall(continue_, $root.Id, $root.TracerResponse, request, callback);
+    }, "name", { value: "continue" });
+
+    /**
+     * Calls continue.
+     * @function continue
+     * @memberof Tracers
+     * @instance
+     * @param {Id} request Id message or plain object
+     * @returns {Promise<TracerResponse>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#input}.
+     * @memberof Tracers
+     * @typedef inputCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls input.
+     * @function input
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Input} request Input message or plain object
+     * @param {Tracers.inputCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.input = function input(request, callback) {
+        return this.rpcCall(input, $root.Action.Input, $root.Empty, request, callback);
+    }, "name", { value: "input" });
+
+    /**
+     * Calls input.
+     * @function input
+     * @memberof Tracers
+     * @instance
+     * @param {Action.Input} request Input message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#getBreakpoints}.
+     * @memberof Tracers
+     * @typedef getBreakpointsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Breakpoints} [response] Breakpoints
+     */
+
+    /**
+     * Calls getBreakpoints.
+     * @function getBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @param {Tracers.getBreakpointsCallback} callback Node-style callback called with the error, if any, and Breakpoints
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.getBreakpoints = function getBreakpoints(request, callback) {
+        return this.rpcCall(getBreakpoints, $root.Empty, $root.Breakpoints, request, callback);
+    }, "name", { value: "getBreakpoints" });
+
+    /**
+     * Calls getBreakpoints.
+     * @function getBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Empty} request Empty message or plain object
+     * @returns {Promise<Breakpoints>} Promise
+     * @variation 2
+     */
+
+    /**
+     * Callback as used by {@link Tracers#setBreakpoints}.
+     * @memberof Tracers
+     * @typedef setBreakpointsCallback
+     * @type {function}
+     * @param {Error|null} error Error, if any
+     * @param {Empty} [response] Empty
+     */
+
+    /**
+     * Calls setBreakpoints.
+     * @function setBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Breakpoints} request Breakpoints message or plain object
+     * @param {Tracers.setBreakpointsCallback} callback Node-style callback called with the error, if any, and Empty
+     * @returns {undefined}
+     * @variation 1
+     */
+    Object.defineProperty(Tracers.prototype.setBreakpoints = function setBreakpoints(request, callback) {
+        return this.rpcCall(setBreakpoints, $root.Breakpoints, $root.Empty, request, callback);
+    }, "name", { value: "setBreakpoints" });
+
+    /**
+     * Calls setBreakpoints.
+     * @function setBreakpoints
+     * @memberof Tracers
+     * @instance
+     * @param {Breakpoints} request Breakpoints message or plain object
+     * @returns {Promise<Empty>} Promise
+     * @variation 2
+     */
+
+    return Tracers;
+})();
+
 export const Empty = $root.Empty = (() => {
 
     /**
@@ -5358,6 +5756,193 @@ export const Empty = $root.Empty = (() => {
     };
 
     return Empty;
+})();
+
+export const Id = $root.Id = (() => {
+
+    /**
+     * Properties of an Id.
+     * @exports IId
+     * @interface IId
+     * @property {number|null} [number] Id number
+     */
+
+    /**
+     * Constructs a new Id.
+     * @exports Id
+     * @classdesc Represents an Id.
+     * @implements IId
+     * @constructor
+     * @param {IId=} [properties] Properties to set
+     */
+    function Id(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Id number.
+     * @member {number} number
+     * @memberof Id
+     * @instance
+     */
+    Id.prototype.number = 0;
+
+    /**
+     * Creates a new Id instance using the specified properties.
+     * @function create
+     * @memberof Id
+     * @static
+     * @param {IId=} [properties] Properties to set
+     * @returns {Id} Id instance
+     */
+    Id.create = function create(properties) {
+        return new Id(properties);
+    };
+
+    /**
+     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
+     * @function encode
+     * @memberof Id
+     * @static
+     * @param {Id} message Id message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Id.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.number != null && message.hasOwnProperty("number"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.number);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Id
+     * @static
+     * @param {Id} message Id message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Id.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an Id message from the specified reader or buffer.
+     * @function decode
+     * @memberof Id
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Id} Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Id.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Id();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.number = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Id
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Id} Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Id.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an Id message.
+     * @function verify
+     * @memberof Id
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Id.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.number != null && message.hasOwnProperty("number"))
+            if (!$util.isInteger(message.number))
+                return "number: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Id
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Id} Id
+     */
+    Id.fromObject = function fromObject(object) {
+        if (object instanceof $root.Id)
+            return object;
+        let message = new $root.Id();
+        if (object.number != null)
+            message.number = object.number | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from an Id message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Id
+     * @static
+     * @param {Id} message Id
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Id.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults)
+            object.number = 0;
+        if (message.number != null && message.hasOwnProperty("number"))
+            object.number = message.number;
+        return object;
+    };
+
+    /**
+     * Converts this Id to JSON.
+     * @function toJSON
+     * @memberof Id
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Id.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Id;
 })();
 
 export const Languages = $root.Languages = (() => {
@@ -5986,24 +6571,25 @@ export const Session = $root.Session = (() => {
     return Session;
 })();
 
-export const Id = $root.Id = (() => {
+export const StartRequest = $root.StartRequest = (() => {
 
     /**
-     * Properties of an Id.
-     * @exports IId
-     * @interface IId
-     * @property {number|null} [number] Id number
+     * Properties of a StartRequest.
+     * @exports IStartRequest
+     * @interface IStartRequest
+     * @property {string|null} [language] StartRequest language
+     * @property {Action.Start|null} [start] StartRequest start
      */
 
     /**
-     * Constructs a new Id.
-     * @exports Id
-     * @classdesc Represents an Id.
-     * @implements IId
+     * Constructs a new StartRequest.
+     * @exports StartRequest
+     * @classdesc Represents a StartRequest.
+     * @implements IStartRequest
      * @constructor
-     * @param {IId=} [properties] Properties to set
+     * @param {IStartRequest=} [properties] Properties to set
      */
-    function Id(properties) {
+    function StartRequest(properties) {
         if (properties)
             for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -6011,75 +6597,88 @@ export const Id = $root.Id = (() => {
     }
 
     /**
-     * Id number.
-     * @member {number} number
-     * @memberof Id
+     * StartRequest language.
+     * @member {string} language
+     * @memberof StartRequest
      * @instance
      */
-    Id.prototype.number = 0;
+    StartRequest.prototype.language = "";
 
     /**
-     * Creates a new Id instance using the specified properties.
-     * @function create
-     * @memberof Id
-     * @static
-     * @param {IId=} [properties] Properties to set
-     * @returns {Id} Id instance
+     * StartRequest start.
+     * @member {Action.Start|null|undefined} start
+     * @memberof StartRequest
+     * @instance
      */
-    Id.create = function create(properties) {
-        return new Id(properties);
+    StartRequest.prototype.start = null;
+
+    /**
+     * Creates a new StartRequest instance using the specified properties.
+     * @function create
+     * @memberof StartRequest
+     * @static
+     * @param {IStartRequest=} [properties] Properties to set
+     * @returns {StartRequest} StartRequest instance
+     */
+    StartRequest.create = function create(properties) {
+        return new StartRequest(properties);
     };
 
     /**
-     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
+     * Encodes the specified StartRequest message. Does not implicitly {@link StartRequest.verify|verify} messages.
      * @function encode
-     * @memberof Id
+     * @memberof StartRequest
      * @static
-     * @param {Id} message Id message or plain object to encode
+     * @param {StartRequest} message StartRequest message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    Id.encode = function encode(message, writer) {
+    StartRequest.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.number != null && message.hasOwnProperty("number"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.number);
+        if (message.language != null && message.hasOwnProperty("language"))
+            writer.uint32(/* id 1, wireType 2 =*/10).string(message.language);
+        if (message.start != null && message.hasOwnProperty("start"))
+            $root.Action.Start.encode(message.start, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
     };
 
     /**
-     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
+     * Encodes the specified StartRequest message, length delimited. Does not implicitly {@link StartRequest.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof Id
+     * @memberof StartRequest
      * @static
-     * @param {Id} message Id message or plain object to encode
+     * @param {StartRequest} message StartRequest message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    Id.encodeDelimited = function encodeDelimited(message, writer) {
+    StartRequest.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes an Id message from the specified reader or buffer.
+     * Decodes a StartRequest message from the specified reader or buffer.
      * @function decode
-     * @memberof Id
+     * @memberof StartRequest
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {Id} Id
+     * @returns {StartRequest} StartRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    Id.decode = function decode(reader, length) {
+    StartRequest.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Id();
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.StartRequest();
         while (reader.pos < end) {
             let tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.number = reader.int32();
+                message.language = reader.string();
+                break;
+            case 2:
+                message.start = $root.Action.Start.decode(reader, reader.uint32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -6090,87 +6689,321 @@ export const Id = $root.Id = (() => {
     };
 
     /**
-     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * Decodes a StartRequest message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof Id
+     * @memberof StartRequest
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {Id} Id
+     * @returns {StartRequest} StartRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    Id.decodeDelimited = function decodeDelimited(reader) {
+    StartRequest.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies an Id message.
+     * Verifies a StartRequest message.
      * @function verify
-     * @memberof Id
+     * @memberof StartRequest
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    Id.verify = function verify(message) {
+    StartRequest.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.number != null && message.hasOwnProperty("number"))
-            if (!$util.isInteger(message.number))
-                return "number: integer expected";
+        if (message.language != null && message.hasOwnProperty("language"))
+            if (!$util.isString(message.language))
+                return "language: string expected";
+        if (message.start != null && message.hasOwnProperty("start")) {
+            let error = $root.Action.Start.verify(message.start);
+            if (error)
+                return "start." + error;
+        }
         return null;
     };
 
     /**
-     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * Creates a StartRequest message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof Id
+     * @memberof StartRequest
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {Id} Id
+     * @returns {StartRequest} StartRequest
      */
-    Id.fromObject = function fromObject(object) {
-        if (object instanceof $root.Id)
+    StartRequest.fromObject = function fromObject(object) {
+        if (object instanceof $root.StartRequest)
             return object;
-        let message = new $root.Id();
-        if (object.number != null)
-            message.number = object.number | 0;
+        let message = new $root.StartRequest();
+        if (object.language != null)
+            message.language = String(object.language);
+        if (object.start != null) {
+            if (typeof object.start !== "object")
+                throw TypeError(".StartRequest.start: object expected");
+            message.start = $root.Action.Start.fromObject(object.start);
+        }
         return message;
     };
 
     /**
-     * Creates a plain object from an Id message. Also converts values to other types if specified.
+     * Creates a plain object from a StartRequest message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof Id
+     * @memberof StartRequest
      * @static
-     * @param {Id} message Id
+     * @param {StartRequest} message StartRequest
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    Id.toObject = function toObject(message, options) {
+    StartRequest.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         let object = {};
-        if (options.defaults)
-            object.number = 0;
-        if (message.number != null && message.hasOwnProperty("number"))
-            object.number = message.number;
+        if (options.defaults) {
+            object.language = "";
+            object.start = null;
+        }
+        if (message.language != null && message.hasOwnProperty("language"))
+            object.language = message.language;
+        if (message.start != null && message.hasOwnProperty("start"))
+            object.start = $root.Action.Start.toObject(message.start, options);
         return object;
     };
 
     /**
-     * Converts this Id to JSON.
+     * Converts this StartRequest to JSON.
      * @function toJSON
-     * @memberof Id
+     * @memberof StartRequest
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    Id.prototype.toJSON = function toJSON() {
+    StartRequest.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return Id;
+    return StartRequest;
+})();
+
+export const InputRequest = $root.InputRequest = (() => {
+
+    /**
+     * Properties of an InputRequest.
+     * @exports IInputRequest
+     * @interface IInputRequest
+     * @property {Id|null} [id] InputRequest id
+     * @property {Action.Input|null} [input] InputRequest input
+     */
+
+    /**
+     * Constructs a new InputRequest.
+     * @exports InputRequest
+     * @classdesc Represents an InputRequest.
+     * @implements IInputRequest
+     * @constructor
+     * @param {IInputRequest=} [properties] Properties to set
+     */
+    function InputRequest(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * InputRequest id.
+     * @member {Id|null|undefined} id
+     * @memberof InputRequest
+     * @instance
+     */
+    InputRequest.prototype.id = null;
+
+    /**
+     * InputRequest input.
+     * @member {Action.Input|null|undefined} input
+     * @memberof InputRequest
+     * @instance
+     */
+    InputRequest.prototype.input = null;
+
+    /**
+     * Creates a new InputRequest instance using the specified properties.
+     * @function create
+     * @memberof InputRequest
+     * @static
+     * @param {IInputRequest=} [properties] Properties to set
+     * @returns {InputRequest} InputRequest instance
+     */
+    InputRequest.create = function create(properties) {
+        return new InputRequest(properties);
+    };
+
+    /**
+     * Encodes the specified InputRequest message. Does not implicitly {@link InputRequest.verify|verify} messages.
+     * @function encode
+     * @memberof InputRequest
+     * @static
+     * @param {InputRequest} message InputRequest message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    InputRequest.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.id != null && message.hasOwnProperty("id"))
+            $root.Id.encode(message.id, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.input != null && message.hasOwnProperty("input"))
+            $root.Action.Input.encode(message.input, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified InputRequest message, length delimited. Does not implicitly {@link InputRequest.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof InputRequest
+     * @static
+     * @param {InputRequest} message InputRequest message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    InputRequest.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an InputRequest message from the specified reader or buffer.
+     * @function decode
+     * @memberof InputRequest
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {InputRequest} InputRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    InputRequest.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.InputRequest();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.id = $root.Id.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.input = $root.Action.Input.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an InputRequest message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof InputRequest
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {InputRequest} InputRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    InputRequest.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an InputRequest message.
+     * @function verify
+     * @memberof InputRequest
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    InputRequest.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.id != null && message.hasOwnProperty("id")) {
+            let error = $root.Id.verify(message.id);
+            if (error)
+                return "id." + error;
+        }
+        if (message.input != null && message.hasOwnProperty("input")) {
+            let error = $root.Action.Input.verify(message.input);
+            if (error)
+                return "input." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates an InputRequest message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof InputRequest
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {InputRequest} InputRequest
+     */
+    InputRequest.fromObject = function fromObject(object) {
+        if (object instanceof $root.InputRequest)
+            return object;
+        let message = new $root.InputRequest();
+        if (object.id != null) {
+            if (typeof object.id !== "object")
+                throw TypeError(".InputRequest.id: object expected");
+            message.id = $root.Id.fromObject(object.id);
+        }
+        if (object.input != null) {
+            if (typeof object.input !== "object")
+                throw TypeError(".InputRequest.input: object expected");
+            message.input = $root.Action.Input.fromObject(object.input);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from an InputRequest message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof InputRequest
+     * @static
+     * @param {InputRequest} message InputRequest
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    InputRequest.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults) {
+            object.id = null;
+            object.input = null;
+        }
+        if (message.id != null && message.hasOwnProperty("id"))
+            object.id = $root.Id.toObject(message.id, options);
+        if (message.input != null && message.hasOwnProperty("input"))
+            object.input = $root.Action.Input.toObject(message.input, options);
+        return object;
+    };
+
+    /**
+     * Converts this InputRequest to JSON.
+     * @function toJSON
+     * @memberof InputRequest
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    InputRequest.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return InputRequest;
 })();
 
 export const StartResponse = $root.StartResponse = (() => {
@@ -6602,404 +7435,6 @@ export const Breakpoints = $root.Breakpoints = (() => {
     };
 
     return Breakpoints;
-})();
-
-export const Tracers = $root.Tracers = (() => {
-
-    /**
-     * Constructs a new Tracers service.
-     * @exports Tracers
-     * @classdesc Represents a Tracers
-     * @extends $protobuf.rpc.Service
-     * @constructor
-     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
-     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
-     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
-     */
-    function Tracers(rpcImpl, requestDelimited, responseDelimited) {
-        $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
-    }
-
-    (Tracers.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Tracers;
-
-    /**
-     * Creates new Tracers service using the specified rpc implementation.
-     * @function create
-     * @memberof Tracers
-     * @static
-     * @param {$protobuf.RPCImpl} rpcImpl RPC implementation
-     * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
-     * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
-     * @returns {Tracers} RPC service. Useful where requests and/or responses are streamed.
-     */
-    Tracers.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-        return new this(rpcImpl, requestDelimited, responseDelimited);
-    };
-
-    /**
-     * Callback as used by {@link Tracers#getLanguages}.
-     * @memberof Tracers
-     * @typedef getLanguagesCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Languages} [response] Languages
-     */
-
-    /**
-     * Calls getLanguages.
-     * @function getLanguages
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @param {Tracers.getLanguagesCallback} callback Node-style callback called with the error, if any, and Languages
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.getLanguages = function getLanguages(request, callback) {
-        return this.rpcCall(getLanguages, $root.Empty, $root.Languages, request, callback);
-    }, "name", { value: "getLanguages" });
-
-    /**
-     * Calls getLanguages.
-     * @function getLanguages
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @returns {Promise<Languages>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#getSessions}.
-     * @memberof Tracers
-     * @typedef getSessionsCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Sessions} [response] Sessions
-     */
-
-    /**
-     * Calls getSessions.
-     * @function getSessions
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @param {Tracers.getSessionsCallback} callback Node-style callback called with the error, if any, and Sessions
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.getSessions = function getSessions(request, callback) {
-        return this.rpcCall(getSessions, $root.Empty, $root.Sessions, request, callback);
-    }, "name", { value: "getSessions" });
-
-    /**
-     * Calls getSessions.
-     * @function getSessions
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @returns {Promise<Sessions>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#start}.
-     * @memberof Tracers
-     * @typedef startCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {StartResponse} [response] StartResponse
-     */
-
-    /**
-     * Calls start.
-     * @function start
-     * @memberof Tracers
-     * @instance
-     * @param {Action.Start} request Start message or plain object
-     * @param {Tracers.startCallback} callback Node-style callback called with the error, if any, and StartResponse
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.start = function start(request, callback) {
-        return this.rpcCall(start, $root.Action.Start, $root.StartResponse, request, callback);
-    }, "name", { value: "start" });
-
-    /**
-     * Calls start.
-     * @function start
-     * @memberof Tracers
-     * @instance
-     * @param {Action.Start} request Start message or plain object
-     * @returns {Promise<StartResponse>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#stop}.
-     * @memberof Tracers
-     * @typedef stopCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Empty} [response] Empty
-     */
-
-    /**
-     * Calls stop.
-     * @function stop
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @param {Tracers.stopCallback} callback Node-style callback called with the error, if any, and Empty
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.stop = function stop(request, callback) {
-        return this.rpcCall(stop, $root.Id, $root.Empty, request, callback);
-    }, "name", { value: "stop" });
-
-    /**
-     * Calls stop.
-     * @function stop
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @returns {Promise<Empty>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#step}.
-     * @memberof Tracers
-     * @typedef stepCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
-     */
-
-    /**
-     * Calls step.
-     * @function step
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @param {Tracers.stepCallback} callback Node-style callback called with the error, if any, and TracerResponse
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.step = function step(request, callback) {
-        return this.rpcCall(step, $root.Id, $root.TracerResponse, request, callback);
-    }, "name", { value: "step" });
-
-    /**
-     * Calls step.
-     * @function step
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#stepOver}.
-     * @memberof Tracers
-     * @typedef stepOverCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
-     */
-
-    /**
-     * Calls stepOver.
-     * @function stepOver
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @param {Tracers.stepOverCallback} callback Node-style callback called with the error, if any, and TracerResponse
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.stepOver = function stepOver(request, callback) {
-        return this.rpcCall(stepOver, $root.Id, $root.TracerResponse, request, callback);
-    }, "name", { value: "stepOver" });
-
-    /**
-     * Calls stepOver.
-     * @function stepOver
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#stepOut}.
-     * @memberof Tracers
-     * @typedef stepOutCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
-     */
-
-    /**
-     * Calls stepOut.
-     * @function stepOut
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @param {Tracers.stepOutCallback} callback Node-style callback called with the error, if any, and TracerResponse
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.stepOut = function stepOut(request, callback) {
-        return this.rpcCall(stepOut, $root.Id, $root.TracerResponse, request, callback);
-    }, "name", { value: "stepOut" });
-
-    /**
-     * Calls stepOut.
-     * @function stepOut
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#continue_}.
-     * @memberof Tracers
-     * @typedef continueCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {TracerResponse} [response] TracerResponse
-     */
-
-    /**
-     * Calls continue.
-     * @function continue
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @param {Tracers.continueCallback} callback Node-style callback called with the error, if any, and TracerResponse
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype["continue"] = function continue_(request, callback) {
-        return this.rpcCall(continue_, $root.Id, $root.TracerResponse, request, callback);
-    }, "name", { value: "continue" });
-
-    /**
-     * Calls continue.
-     * @function continue
-     * @memberof Tracers
-     * @instance
-     * @param {Id} request Id message or plain object
-     * @returns {Promise<TracerResponse>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#input}.
-     * @memberof Tracers
-     * @typedef inputCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Empty} [response] Empty
-     */
-
-    /**
-     * Calls input.
-     * @function input
-     * @memberof Tracers
-     * @instance
-     * @param {Action.Input} request Input message or plain object
-     * @param {Tracers.inputCallback} callback Node-style callback called with the error, if any, and Empty
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.input = function input(request, callback) {
-        return this.rpcCall(input, $root.Action.Input, $root.Empty, request, callback);
-    }, "name", { value: "input" });
-
-    /**
-     * Calls input.
-     * @function input
-     * @memberof Tracers
-     * @instance
-     * @param {Action.Input} request Input message or plain object
-     * @returns {Promise<Empty>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#getBreakpoints}.
-     * @memberof Tracers
-     * @typedef getBreakpointsCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Breakpoints} [response] Breakpoints
-     */
-
-    /**
-     * Calls getBreakpoints.
-     * @function getBreakpoints
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @param {Tracers.getBreakpointsCallback} callback Node-style callback called with the error, if any, and Breakpoints
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.getBreakpoints = function getBreakpoints(request, callback) {
-        return this.rpcCall(getBreakpoints, $root.Empty, $root.Breakpoints, request, callback);
-    }, "name", { value: "getBreakpoints" });
-
-    /**
-     * Calls getBreakpoints.
-     * @function getBreakpoints
-     * @memberof Tracers
-     * @instance
-     * @param {Empty} request Empty message or plain object
-     * @returns {Promise<Breakpoints>} Promise
-     * @variation 2
-     */
-
-    /**
-     * Callback as used by {@link Tracers#setBreakpoints}.
-     * @memberof Tracers
-     * @typedef setBreakpointsCallback
-     * @type {function}
-     * @param {Error|null} error Error, if any
-     * @param {Empty} [response] Empty
-     */
-
-    /**
-     * Calls setBreakpoints.
-     * @function setBreakpoints
-     * @memberof Tracers
-     * @instance
-     * @param {Breakpoints} request Breakpoints message or plain object
-     * @param {Tracers.setBreakpointsCallback} callback Node-style callback called with the error, if any, and Empty
-     * @returns {undefined}
-     * @variation 1
-     */
-    Object.defineProperty(Tracers.prototype.setBreakpoints = function setBreakpoints(request, callback) {
-        return this.rpcCall(setBreakpoints, $root.Breakpoints, $root.Empty, request, callback);
-    }, "name", { value: "setBreakpoints" });
-
-    /**
-     * Calls setBreakpoints.
-     * @function setBreakpoints
-     * @memberof Tracers
-     * @instance
-     * @param {Breakpoints} request Breakpoints message or plain object
-     * @returns {Promise<Empty>} Promise
-     * @variation 2
-     */
-
-    return Tracers;
 })();
 
 export { $root as default };

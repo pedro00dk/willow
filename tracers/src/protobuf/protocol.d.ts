@@ -2176,6 +2176,261 @@ export class TracerResponse implements ITracerResponse {
     public toJSON(): { [k: string]: any };
 }
 
+/** Represents a Tracers */
+export class Tracers extends $protobuf.rpc.Service {
+
+    /**
+     * Constructs a new Tracers service.
+     * @param rpcImpl RPC implementation
+     * @param [requestDelimited=false] Whether requests are length-delimited
+     * @param [responseDelimited=false] Whether responses are length-delimited
+     */
+    constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
+
+    /**
+     * Creates new Tracers service using the specified rpc implementation.
+     * @param rpcImpl RPC implementation
+     * @param [requestDelimited=false] Whether requests are length-delimited
+     * @param [responseDelimited=false] Whether responses are length-delimited
+     * @returns RPC service. Useful where requests and/or responses are streamed.
+     */
+    public static create(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean): Tracers;
+
+    /**
+     * Calls getLanguages.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Languages
+     */
+    public getLanguages(request: Empty, callback: Tracers.getLanguagesCallback): void;
+
+    /**
+     * Calls getLanguages.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getLanguages(request: Empty): Promise<Languages>;
+
+    /**
+     * Calls getSessions.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Sessions
+     */
+    public getSessions(request: Empty, callback: Tracers.getSessionsCallback): void;
+
+    /**
+     * Calls getSessions.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getSessions(request: Empty): Promise<Sessions>;
+
+    /**
+     * Calls start.
+     * @param request StartRequest message or plain object
+     * @param callback Node-style callback called with the error, if any, and StartResponse
+     */
+    public start(request: StartRequest, callback: Tracers.startCallback): void;
+
+    /**
+     * Calls start.
+     * @param request StartRequest message or plain object
+     * @returns Promise
+     */
+    public start(request: StartRequest): Promise<StartResponse>;
+
+    /**
+     * Calls stop.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public stop(request: Id, callback: Tracers.stopCallback): void;
+
+    /**
+     * Calls stop.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stop(request: Id): Promise<Empty>;
+
+    /**
+     * Calls step.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public step(request: Id, callback: Tracers.stepCallback): void;
+
+    /**
+     * Calls step.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public step(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls stepOver.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public stepOver(request: Id, callback: Tracers.stepOverCallback): void;
+
+    /**
+     * Calls stepOver.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stepOver(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls stepOut.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public stepOut(request: Id, callback: Tracers.stepOutCallback): void;
+
+    /**
+     * Calls stepOut.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public stepOut(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls continue.
+     * @param request Id message or plain object
+     * @param callback Node-style callback called with the error, if any, and TracerResponse
+     */
+    public continue(request: Id, callback: Tracers.continueCallback): void;
+
+    /**
+     * Calls continue.
+     * @param request Id message or plain object
+     * @returns Promise
+     */
+    public continue(request: Id): Promise<TracerResponse>;
+
+    /**
+     * Calls input.
+     * @param request Input message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public input(request: Action.Input, callback: Tracers.inputCallback): void;
+
+    /**
+     * Calls input.
+     * @param request Input message or plain object
+     * @returns Promise
+     */
+    public input(request: Action.Input): Promise<Empty>;
+
+    /**
+     * Calls getBreakpoints.
+     * @param request Empty message or plain object
+     * @param callback Node-style callback called with the error, if any, and Breakpoints
+     */
+    public getBreakpoints(request: Empty, callback: Tracers.getBreakpointsCallback): void;
+
+    /**
+     * Calls getBreakpoints.
+     * @param request Empty message or plain object
+     * @returns Promise
+     */
+    public getBreakpoints(request: Empty): Promise<Breakpoints>;
+
+    /**
+     * Calls setBreakpoints.
+     * @param request Breakpoints message or plain object
+     * @param callback Node-style callback called with the error, if any, and Empty
+     */
+    public setBreakpoints(request: Breakpoints, callback: Tracers.setBreakpointsCallback): void;
+
+    /**
+     * Calls setBreakpoints.
+     * @param request Breakpoints message or plain object
+     * @returns Promise
+     */
+    public setBreakpoints(request: Breakpoints): Promise<Empty>;
+}
+
+export namespace Tracers {
+
+    /**
+     * Callback as used by {@link Tracers#getLanguages}.
+     * @param error Error, if any
+     * @param [response] Languages
+     */
+    type getLanguagesCallback = (error: (Error|null), response?: Languages) => void;
+
+    /**
+     * Callback as used by {@link Tracers#getSessions}.
+     * @param error Error, if any
+     * @param [response] Sessions
+     */
+    type getSessionsCallback = (error: (Error|null), response?: Sessions) => void;
+
+    /**
+     * Callback as used by {@link Tracers#start}.
+     * @param error Error, if any
+     * @param [response] StartResponse
+     */
+    type startCallback = (error: (Error|null), response?: StartResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stop}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type stopCallback = (error: (Error|null), response?: Empty) => void;
+
+    /**
+     * Callback as used by {@link Tracers#step}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stepOver}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepOverCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#stepOut}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type stepOutCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#continue_}.
+     * @param error Error, if any
+     * @param [response] TracerResponse
+     */
+    type continueCallback = (error: (Error|null), response?: TracerResponse) => void;
+
+    /**
+     * Callback as used by {@link Tracers#input}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type inputCallback = (error: (Error|null), response?: Empty) => void;
+
+    /**
+     * Callback as used by {@link Tracers#getBreakpoints}.
+     * @param error Error, if any
+     * @param [response] Breakpoints
+     */
+    type getBreakpointsCallback = (error: (Error|null), response?: Breakpoints) => void;
+
+    /**
+     * Callback as used by {@link Tracers#setBreakpoints}.
+     * @param error Error, if any
+     * @param [response] Empty
+     */
+    type setBreakpointsCallback = (error: (Error|null), response?: Empty) => void;
+}
+
 /** Properties of an Empty. */
 export interface IEmpty {
 }
@@ -2255,6 +2510,96 @@ export class Empty implements IEmpty {
 
     /**
      * Converts this Empty to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of an Id. */
+export interface IId {
+
+    /** Id number */
+    number?: (number|null);
+}
+
+/** Represents an Id. */
+export class Id implements IId {
+
+    /**
+     * Constructs a new Id.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IId);
+
+    /** Id number. */
+    public number: number;
+
+    /**
+     * Creates a new Id instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Id instance
+     */
+    public static create(properties?: IId): Id;
+
+    /**
+     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
+     * @param message Id message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
+     * @param message Id message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes an Id message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Id;
+
+    /**
+     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Id
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Id;
+
+    /**
+     * Verifies an Id message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Id
+     */
+    public static fromObject(object: { [k: string]: any }): Id;
+
+    /**
+     * Creates a plain object from an Id message. Also converts values to other types if specified.
+     * @param message Id
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Id, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Id to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
@@ -2536,91 +2881,193 @@ export class Session implements ISession {
     public toJSON(): { [k: string]: any };
 }
 
-/** Properties of an Id. */
-export interface IId {
+/** Properties of a StartRequest. */
+export interface IStartRequest {
 
-    /** Id number */
-    number?: (number|null);
+    /** StartRequest language */
+    language?: (string|null);
+
+    /** StartRequest start */
+    start?: (Action.Start|null);
 }
 
-/** Represents an Id. */
-export class Id implements IId {
+/** Represents a StartRequest. */
+export class StartRequest implements IStartRequest {
 
     /**
-     * Constructs a new Id.
+     * Constructs a new StartRequest.
      * @param [properties] Properties to set
      */
-    constructor(properties?: IId);
+    constructor(properties?: IStartRequest);
 
-    /** Id number. */
-    public number: number;
+    /** StartRequest language. */
+    public language: string;
+
+    /** StartRequest start. */
+    public start?: (Action.Start|null);
 
     /**
-     * Creates a new Id instance using the specified properties.
+     * Creates a new StartRequest instance using the specified properties.
      * @param [properties] Properties to set
-     * @returns Id instance
+     * @returns StartRequest instance
      */
-    public static create(properties?: IId): Id;
+    public static create(properties?: IStartRequest): StartRequest;
 
     /**
-     * Encodes the specified Id message. Does not implicitly {@link Id.verify|verify} messages.
-     * @param message Id message or plain object to encode
+     * Encodes the specified StartRequest message. Does not implicitly {@link StartRequest.verify|verify} messages.
+     * @param message StartRequest message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
-    public static encode(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+    public static encode(message: StartRequest, writer?: $protobuf.Writer): $protobuf.Writer;
 
     /**
-     * Encodes the specified Id message, length delimited. Does not implicitly {@link Id.verify|verify} messages.
-     * @param message Id message or plain object to encode
+     * Encodes the specified StartRequest message, length delimited. Does not implicitly {@link StartRequest.verify|verify} messages.
+     * @param message StartRequest message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
-    public static encodeDelimited(message: Id, writer?: $protobuf.Writer): $protobuf.Writer;
+    public static encodeDelimited(message: StartRequest, writer?: $protobuf.Writer): $protobuf.Writer;
 
     /**
-     * Decodes an Id message from the specified reader or buffer.
+     * Decodes a StartRequest message from the specified reader or buffer.
      * @param reader Reader or buffer to decode from
      * @param [length] Message length if known beforehand
-     * @returns Id
+     * @returns StartRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Id;
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): StartRequest;
 
     /**
-     * Decodes an Id message from the specified reader or buffer, length delimited.
+     * Decodes a StartRequest message from the specified reader or buffer, length delimited.
      * @param reader Reader or buffer to decode from
-     * @returns Id
+     * @returns StartRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Id;
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): StartRequest;
 
     /**
-     * Verifies an Id message.
+     * Verifies a StartRequest message.
      * @param message Plain object to verify
      * @returns `null` if valid, otherwise the reason why it is not
      */
     public static verify(message: { [k: string]: any }): (string|null);
 
     /**
-     * Creates an Id message from a plain object. Also converts values to their respective internal types.
+     * Creates a StartRequest message from a plain object. Also converts values to their respective internal types.
      * @param object Plain object
-     * @returns Id
+     * @returns StartRequest
      */
-    public static fromObject(object: { [k: string]: any }): Id;
+    public static fromObject(object: { [k: string]: any }): StartRequest;
 
     /**
-     * Creates a plain object from an Id message. Also converts values to other types if specified.
-     * @param message Id
+     * Creates a plain object from a StartRequest message. Also converts values to other types if specified.
+     * @param message StartRequest
      * @param [options] Conversion options
      * @returns Plain object
      */
-    public static toObject(message: Id, options?: $protobuf.IConversionOptions): { [k: string]: any };
+    public static toObject(message: StartRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
     /**
-     * Converts this Id to JSON.
+     * Converts this StartRequest to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of an InputRequest. */
+export interface IInputRequest {
+
+    /** InputRequest id */
+    id?: (Id|null);
+
+    /** InputRequest input */
+    input?: (Action.Input|null);
+}
+
+/** Represents an InputRequest. */
+export class InputRequest implements IInputRequest {
+
+    /**
+     * Constructs a new InputRequest.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IInputRequest);
+
+    /** InputRequest id. */
+    public id?: (Id|null);
+
+    /** InputRequest input. */
+    public input?: (Action.Input|null);
+
+    /**
+     * Creates a new InputRequest instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns InputRequest instance
+     */
+    public static create(properties?: IInputRequest): InputRequest;
+
+    /**
+     * Encodes the specified InputRequest message. Does not implicitly {@link InputRequest.verify|verify} messages.
+     * @param message InputRequest message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: InputRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified InputRequest message, length delimited. Does not implicitly {@link InputRequest.verify|verify} messages.
+     * @param message InputRequest message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: InputRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes an InputRequest message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns InputRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): InputRequest;
+
+    /**
+     * Decodes an InputRequest message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns InputRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): InputRequest;
+
+    /**
+     * Verifies an InputRequest message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates an InputRequest message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns InputRequest
+     */
+    public static fromObject(object: { [k: string]: any }): InputRequest;
+
+    /**
+     * Creates a plain object from an InputRequest message. Also converts values to other types if specified.
+     * @param message InputRequest
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: InputRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this InputRequest to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
@@ -2810,259 +3257,4 @@ export class Breakpoints implements IBreakpoints {
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
-}
-
-/** Represents a Tracers */
-export class Tracers extends $protobuf.rpc.Service {
-
-    /**
-     * Constructs a new Tracers service.
-     * @param rpcImpl RPC implementation
-     * @param [requestDelimited=false] Whether requests are length-delimited
-     * @param [responseDelimited=false] Whether responses are length-delimited
-     */
-    constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
-
-    /**
-     * Creates new Tracers service using the specified rpc implementation.
-     * @param rpcImpl RPC implementation
-     * @param [requestDelimited=false] Whether requests are length-delimited
-     * @param [responseDelimited=false] Whether responses are length-delimited
-     * @returns RPC service. Useful where requests and/or responses are streamed.
-     */
-    public static create(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean): Tracers;
-
-    /**
-     * Calls getLanguages.
-     * @param request Empty message or plain object
-     * @param callback Node-style callback called with the error, if any, and Languages
-     */
-    public getLanguages(request: Empty, callback: Tracers.getLanguagesCallback): void;
-
-    /**
-     * Calls getLanguages.
-     * @param request Empty message or plain object
-     * @returns Promise
-     */
-    public getLanguages(request: Empty): Promise<Languages>;
-
-    /**
-     * Calls getSessions.
-     * @param request Empty message or plain object
-     * @param callback Node-style callback called with the error, if any, and Sessions
-     */
-    public getSessions(request: Empty, callback: Tracers.getSessionsCallback): void;
-
-    /**
-     * Calls getSessions.
-     * @param request Empty message or plain object
-     * @returns Promise
-     */
-    public getSessions(request: Empty): Promise<Sessions>;
-
-    /**
-     * Calls start.
-     * @param request Start message or plain object
-     * @param callback Node-style callback called with the error, if any, and StartResponse
-     */
-    public start(request: Action.Start, callback: Tracers.startCallback): void;
-
-    /**
-     * Calls start.
-     * @param request Start message or plain object
-     * @returns Promise
-     */
-    public start(request: Action.Start): Promise<StartResponse>;
-
-    /**
-     * Calls stop.
-     * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and Empty
-     */
-    public stop(request: Id, callback: Tracers.stopCallback): void;
-
-    /**
-     * Calls stop.
-     * @param request Id message or plain object
-     * @returns Promise
-     */
-    public stop(request: Id): Promise<Empty>;
-
-    /**
-     * Calls step.
-     * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
-     */
-    public step(request: Id, callback: Tracers.stepCallback): void;
-
-    /**
-     * Calls step.
-     * @param request Id message or plain object
-     * @returns Promise
-     */
-    public step(request: Id): Promise<TracerResponse>;
-
-    /**
-     * Calls stepOver.
-     * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
-     */
-    public stepOver(request: Id, callback: Tracers.stepOverCallback): void;
-
-    /**
-     * Calls stepOver.
-     * @param request Id message or plain object
-     * @returns Promise
-     */
-    public stepOver(request: Id): Promise<TracerResponse>;
-
-    /**
-     * Calls stepOut.
-     * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
-     */
-    public stepOut(request: Id, callback: Tracers.stepOutCallback): void;
-
-    /**
-     * Calls stepOut.
-     * @param request Id message or plain object
-     * @returns Promise
-     */
-    public stepOut(request: Id): Promise<TracerResponse>;
-
-    /**
-     * Calls continue.
-     * @param request Id message or plain object
-     * @param callback Node-style callback called with the error, if any, and TracerResponse
-     */
-    public continue(request: Id, callback: Tracers.continueCallback): void;
-
-    /**
-     * Calls continue.
-     * @param request Id message or plain object
-     * @returns Promise
-     */
-    public continue(request: Id): Promise<TracerResponse>;
-
-    /**
-     * Calls input.
-     * @param request Input message or plain object
-     * @param callback Node-style callback called with the error, if any, and Empty
-     */
-    public input(request: Action.Input, callback: Tracers.inputCallback): void;
-
-    /**
-     * Calls input.
-     * @param request Input message or plain object
-     * @returns Promise
-     */
-    public input(request: Action.Input): Promise<Empty>;
-
-    /**
-     * Calls getBreakpoints.
-     * @param request Empty message or plain object
-     * @param callback Node-style callback called with the error, if any, and Breakpoints
-     */
-    public getBreakpoints(request: Empty, callback: Tracers.getBreakpointsCallback): void;
-
-    /**
-     * Calls getBreakpoints.
-     * @param request Empty message or plain object
-     * @returns Promise
-     */
-    public getBreakpoints(request: Empty): Promise<Breakpoints>;
-
-    /**
-     * Calls setBreakpoints.
-     * @param request Breakpoints message or plain object
-     * @param callback Node-style callback called with the error, if any, and Empty
-     */
-    public setBreakpoints(request: Breakpoints, callback: Tracers.setBreakpointsCallback): void;
-
-    /**
-     * Calls setBreakpoints.
-     * @param request Breakpoints message or plain object
-     * @returns Promise
-     */
-    public setBreakpoints(request: Breakpoints): Promise<Empty>;
-}
-
-export namespace Tracers {
-
-    /**
-     * Callback as used by {@link Tracers#getLanguages}.
-     * @param error Error, if any
-     * @param [response] Languages
-     */
-    type getLanguagesCallback = (error: (Error|null), response?: Languages) => void;
-
-    /**
-     * Callback as used by {@link Tracers#getSessions}.
-     * @param error Error, if any
-     * @param [response] Sessions
-     */
-    type getSessionsCallback = (error: (Error|null), response?: Sessions) => void;
-
-    /**
-     * Callback as used by {@link Tracers#start}.
-     * @param error Error, if any
-     * @param [response] StartResponse
-     */
-    type startCallback = (error: (Error|null), response?: StartResponse) => void;
-
-    /**
-     * Callback as used by {@link Tracers#stop}.
-     * @param error Error, if any
-     * @param [response] Empty
-     */
-    type stopCallback = (error: (Error|null), response?: Empty) => void;
-
-    /**
-     * Callback as used by {@link Tracers#step}.
-     * @param error Error, if any
-     * @param [response] TracerResponse
-     */
-    type stepCallback = (error: (Error|null), response?: TracerResponse) => void;
-
-    /**
-     * Callback as used by {@link Tracers#stepOver}.
-     * @param error Error, if any
-     * @param [response] TracerResponse
-     */
-    type stepOverCallback = (error: (Error|null), response?: TracerResponse) => void;
-
-    /**
-     * Callback as used by {@link Tracers#stepOut}.
-     * @param error Error, if any
-     * @param [response] TracerResponse
-     */
-    type stepOutCallback = (error: (Error|null), response?: TracerResponse) => void;
-
-    /**
-     * Callback as used by {@link Tracers#continue_}.
-     * @param error Error, if any
-     * @param [response] TracerResponse
-     */
-    type continueCallback = (error: (Error|null), response?: TracerResponse) => void;
-
-    /**
-     * Callback as used by {@link Tracers#input}.
-     * @param error Error, if any
-     * @param [response] Empty
-     */
-    type inputCallback = (error: (Error|null), response?: Empty) => void;
-
-    /**
-     * Callback as used by {@link Tracers#getBreakpoints}.
-     * @param error Error, if any
-     * @param [response] Breakpoints
-     */
-    type getBreakpointsCallback = (error: (Error|null), response?: Breakpoints) => void;
-
-    /**
-     * Callback as used by {@link Tracers#setBreakpoints}.
-     * @param error Error, if any
-     * @param [response] Empty
-     */
-    type setBreakpointsCallback = (error: (Error|null), response?: Empty) => void;
 }

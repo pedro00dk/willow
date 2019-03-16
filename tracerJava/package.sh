@@ -2,7 +2,7 @@ command=$1
 
 case $command in
     protobuf)
-        mkdir --parent ./src/protobuf && protoc --java_out=./src/protobuf --proto_path=../protobuf/ ../protobuf/*
+        mkdir --parent ./src/protobuf && protoc --java_out=./src/protobuf --proto_path=../protobuf/ ../protobuf/*.proto
         # fix missing packages
         sed --in-place "1s/^/package protobuf;\n/" -- ./src/protobuf/*.java
         ;;

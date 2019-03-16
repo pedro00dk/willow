@@ -27,7 +27,7 @@
         "debug-base": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
         "start-base": "tsc && node --require source-map-support/register -- ./dist/src/index.js",
         "format": "tslint --config ../tslint.json --project ./package.json && prettier --config ./.prettierrc.js --check --write \"./src/**/!(*.js|*.d.ts)\"",
-        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/* && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
+        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- ./dist/test",
         "debug": "npm run debug-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
         "start": "npm run start-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
