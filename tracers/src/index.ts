@@ -7,7 +7,7 @@ function main() {
         .usage('Http API for CLI tracers') // not being used as usage, but description
         .alias('h', 'help')
         .hide('version')
-        .option('mode', { default: 'json', choices: ['json', 'proto'], description: 'The server mode' })
+        .option('mode', { default: 'proto', choices: ['json', 'proto'], description: 'The server mode' })
         .option('port', { default: 8000, description: 'Set the server port' })
         .option('tracer', { array: true, description: 'Tracer <language> <command>', nargs: 2, string: true })
     const argumentS = parser.argv
