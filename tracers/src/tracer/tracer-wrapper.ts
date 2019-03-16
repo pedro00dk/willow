@@ -24,9 +24,9 @@ export class TracerWrapper implements Tracer {
         return this.internalTracer.getState()
     }
 
-    start(main: string, code: string) {
+    start(start: protocol.Action.Start) {
         log.info(TracerWrapper.name, 'start')
-        return this.internalTracer.start(main, code)
+        return this.internalTracer.start(start)
     }
 
     stop() {
@@ -92,19 +92,19 @@ export class TracerWrapper implements Tracer {
         return responses
     }
 
-    input(lines: string[]) {
+    input(input: protocol.Action.Input) {
         log.verbose(TracerWrapper.name, 'input')
-        return this.internalTracer.input(lines)
+        return this.internalTracer.input(input)
     }
 
     getBreakpoints() {
         log.info(TracerWrapper.name, 'get breakpoints')
-        return this.breakpoints
+        return protocol.Breakpoints.create({ lines: [...this.breakpoints] })
     }
 
-    setBreakpoints(breakpoints: ReadonlySet<number>) {
-        log.info(TracerWrapper.name, 'set breakpoints', { breakpoints: [...breakpoints] })
-        this.breakpoints = breakpoints
+    setBreakpoints(breakpoints: protocol.Breakpoints) {
+        log.info(TracerWrapper.name, 'set breakpoints', { breakpoints: [...breakpoints.lines] })
+        this.breakpoints = new Set(breakpoints.lines)
     }
 
     addStepProcessor(stepProcessor: ResponseProcessor) {

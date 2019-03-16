@@ -49,7 +49,7 @@ export class TracerProcess implements Tracer {
         return this.state
     }
 
-    async start(main: string, code: string) {
+    async start(start: protocol.Action.Start) {
         log.info(TracerProcess.name, 'start')
         this.checkState('created')
         this.state = 'started'
@@ -57,7 +57,7 @@ export class TracerProcess implements Tracer {
         const eventsPromise = this.responses$.pipe(rxOps.take(1)).toPromise()
         this.requests$.next(
             protocol.TracerRequest.create({
-                actions: [protocol.Action.create({ start: protocol.Action.Start.create({ main, code }) })]
+                actions: [protocol.Action.create({ start })]
             })
         )
         const response = await eventsPromise
@@ -105,13 +105,9 @@ export class TracerProcess implements Tracer {
         return response
     }
 
-    input(lines: string[]) {
-        log.verbose(TracerProcess.name, 'input', { lines })
+    input(input: protocol.Action.Input) {
+        log.verbose(TracerProcess.name, 'input', { lines: input.lines })
         this.checkState('started')
-        this.requests$.next(
-            protocol.TracerRequest.create({
-                actions: [protocol.Action.create({ input: protocol.Action.Input.create({ lines }) })]
-            })
-        )
+        this.requests$.next(protocol.TracerRequest.create({ actions: [protocol.Action.create({ input })] }))
     }
 }

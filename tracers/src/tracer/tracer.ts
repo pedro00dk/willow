@@ -6,15 +6,15 @@ import * as protocol from '../protobuf/protocol'
  */
 export interface Tracer {
     getState(): 'created' | 'started' | 'stopped'
-    start(main: string, code: string): Promise<protocol.TracerResponse>
+    start(start: protocol.Action.Start): Promise<protocol.TracerResponse>
     stop(): void
     step(): Promise<protocol.TracerResponse>
     stepOver?(): Promise<protocol.TracerResponses>
     stepOut?(): Promise<protocol.TracerResponses>
     continue?(): Promise<protocol.TracerResponses>
-    input(lines: string[]): void
-    getBreakpoints?(): ReadonlySet<number>
-    setBreakpoints?(breakpoints: ReadonlySet<number>): void
+    input(input: protocol.Action.Input): void
+    getBreakpoints?(): protocol.Breakpoints
+    setBreakpoints?(breakpoints: protocol.Breakpoints): void
     addStepProcessor?(stepProcessor: ResponseProcessor): void
 }
 
