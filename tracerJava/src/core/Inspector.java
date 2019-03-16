@@ -6,6 +6,7 @@ import core.util.EventUtil;
 import core.util.ThrowableUtil;
 import protobuf.EventOuterClass;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +56,7 @@ public final class Inspector {
         }
         var frameBuilder = EventOuterClass.Frame.newBuilder()
                 .setType(type)
+                .setLine(stackBuilder.getScopes(0).getLine())
                 .setFinish(type == EventOuterClass.Frame.Type.RETURN && stackBuilder.getScopesCount() == 1)
                 .setStack(stackBuilder)
                 .setHeap(heapBuilder);
@@ -64,17 +66,17 @@ public final class Inspector {
 
     private static EventOuterClass.Frame.Stack.Builder inspectStack(Event event) throws IncompatibleThreadStateException {
         var frames = EventUtil.getStackFrames(event);
+        var scopes = frames.stream()
+                .map(StackFrame::location)
+                .map(l -> EventOuterClass.Frame.Stack.Scope.newBuilder()
+                        .setLine(l.lineNumber())
+                        .setName(l.method().name())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        Collections.reverse(scopes);
         return EventOuterClass.Frame.Stack.newBuilder()
-                .addAllScopes(
-                        frames.stream()
-                                .map(StackFrame::location)
-                                .map(l -> EventOuterClass.Frame.Stack.Scope.newBuilder()
-                                        .setLine(l.lineNumber())
-                                        .setName(l.method().name())
-                                        .build()
-                                )
-                                .collect(Collectors.toList())
-                );
+                .addAllScopes(scopes);
     }
 
     private static Map<String, Object> inspectHeap(Event event, EventOuterClass.Frame.Stack.Builder stackBuilder) throws IncompatibleThreadStateException {
@@ -113,6 +115,7 @@ public final class Inspector {
 
                 })
                 .collect(Collectors.toList());
+        Collections.reverse(scopes);
         return Map.ofEntries(
                 Map.entry("stack", stackBuilder.clearScopes().addAllScopes(scopes)),
                 Map.entry("heap", heapBuilder)
@@ -145,8 +148,7 @@ public final class Inspector {
         if (jdiValue instanceof PrimitiveValue) {
             var valueBuilder = EventOuterClass.Frame.Value.newBuilder();
             if (jdiValue instanceof BooleanValue) valueBuilder.setBooleanValue(((BooleanValue) jdiValue).value());
-            if (jdiValue instanceof CharValue)
-                valueBuilder.setStringValue(String.valueOf(((CharValue) jdiValue).value()));
+            if (jdiValue instanceof CharValue) valueBuilder.setStringValue("'" + ((CharValue) jdiValue).value() + "'");
             if (jdiValue instanceof ByteValue) valueBuilder.setIntegerValue(((ByteValue) jdiValue).value());
             if (jdiValue instanceof ShortValue) valueBuilder.setIntegerValue(((ShortValue) jdiValue).value());
             if (jdiValue instanceof IntegerValue) valueBuilder.setIntegerValue(((IntegerValue) jdiValue).value());
@@ -218,7 +220,6 @@ public final class Inspector {
                 heapBuilder
         );
     }
-
 
     private static EventOuterClass.Frame.Value.Builder inspectListOrSet(ObjectReference jdiObjRef, ThreadReference threadReference, EventOuterClass.Frame.Heap.Builder heapBuilder) {
         try {
