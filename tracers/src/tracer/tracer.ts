@@ -50,7 +50,6 @@ export function* queryValueTypes(frame: protocol.Frame, ...types: protocol.Frame
     for (const scope of frame.stack.scopes)
         for (const variable of Object.values(scope.variables))
             if (typeSet.has(variable.value.value)) yield variable.value[variable.value.value]
-
     for (const obj of Object.values(frame.heap.references))
         for (const member of obj.members) {
             if (typeSet.has(member.key.value)) yield member.key[member.key.value]

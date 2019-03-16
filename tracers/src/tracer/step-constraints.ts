@@ -25,7 +25,6 @@ export class StepConstraints implements StepProcessor {
 
     private checkConstraints(event: protocol.Event) {
         if (!event.inspected) return
-
         const frame = event.inspected.frame
         this.currentStep++
         if (this.currentStep > this.steps) throw new Error(`tracer constraint: max steps exceeded ${this.steps}`)
@@ -33,7 +32,6 @@ export class StepConstraints implements StepProcessor {
             throw new Error(`tracer constraint: max stack size exceeded ${this.stackSize}`)
         if (Object.keys(frame.heap).length > this.heapSize)
             throw new Error(`tracer constraint: max heap size exceeded ${this.heapSize}`)
-
         const iterableTypes = [
             protocol.Frame.Heap.Obj.Type.ARRAY,
             protocol.Frame.Heap.Obj.Type.TUPLE,
@@ -44,11 +42,9 @@ export class StepConstraints implements StepProcessor {
         for (const obj of queryObjectTypes(frame, ...iterableTypes))
             if (obj.members.length > this.iterableLength)
                 throw new Error(`tracer constraint: max iterable length exceeded ${this.iterableLength}`)
-
         for (const obj of queryObjectTypes(frame, protocol.Frame.Heap.Obj.Type.OTHER))
             if (obj.userDefined && obj.members.length > this.objectProperties)
                 throw new Error(`tracer constraint: max object properties exceeded ${this.objectProperties}`)
-
         for (const value of queryValueTypes(frame, 'stringValue')) {
             const strValue = value as string
             if ((strValue.startsWith("'") || strValue.startsWith('"')) && strValue.length > this.stringLength + 2)
