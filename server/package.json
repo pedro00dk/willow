@@ -20,14 +20,11 @@
         "passport-google-oauth": "^1.0.0",
         "yargs": "^12.0.5"
     },
-    "config": {
-        "main": "./dist/src/index.js",
-        "test": "./dist/test"
-    },
     "scripts": {
-        "lint": "tslint --config ./tslint.json --project ./package.json",
-        "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- $npm_package_config_test",
-        "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- $npm_package_config_main",
-        "start": "tsc && node --require source-map-support/register -- $npm_package_config_main"
+        "format": "tslint --config ./tslint.json --project ./package.json && shopt -s globstar && prettier --config ./.prettierrc.js --check --write ./src/**/*[^.][^d].ts && shopt -u globstar",
+        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
+        "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- ./dist/test",
+        "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
+        "start": "tsc && node --require source-map-support/register -- ./dist/src/index.js"
     }
 }
