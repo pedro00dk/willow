@@ -2,14 +2,14 @@ import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import * as log from 'npmlog'
 import * as protocol from './protobuf/protocol'
-import { TracersService } from './tracers-service'
+import { TracersSkeleton } from './services/tracers-skeleton'
 
 /**
  * Server to expose tracers through http.
  */
 export class Server {
     private server: express.Express
-    private service: TracersService
+    private service: TracersSkeleton
 
     constructor(private mode: 'json' | 'proto', private port: number, tracers: { [language: string]: string }) {
         this.server = express()
@@ -18,7 +18,7 @@ export class Server {
                 ? bodyParser.json({ type: 'application/json' })
                 : bodyParser.raw({ type: 'application/octet-stream' })
         )
-        this.service = new TracersService(tracers)
+        this.service = new TracersSkeleton(tracers)
         this.configureServerRoutes()
     }
 

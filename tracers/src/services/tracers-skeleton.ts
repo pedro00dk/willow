@@ -1,13 +1,13 @@
-import * as protocol from './protobuf/protocol'
-import { StepConstraints } from './tracer/step-constraints'
-import { Tracer } from './tracer/tracer'
-import { TracerProcess } from './tracer/tracer-process'
-import { TracerWrapper } from './tracer/tracer-wrapper'
+import * as protocol from '../protobuf/protocol'
+import { StepConstraints } from '../tracer/step-constraints'
+import { Tracer } from '../tracer/tracer'
+import { TracerProcess } from '../tracer/tracer-process'
+import { TracerWrapper } from '../tracer/tracer-wrapper'
 
 /**
- * Server implementation of the tracers service protocol.
+ * Skeleton implementation of the tracers service protocol.
  */
-export class TracersService {
+export class TracersSkeleton {
     private sessions: Map<number, { language: string; tracer: Tracer }> = new Map()
     private sessionIdGenerator: number = 0
 
