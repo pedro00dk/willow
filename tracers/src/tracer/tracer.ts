@@ -6,29 +6,32 @@ import * as protocol from '../protobuf/protocol'
  */
 export interface Tracer {
     getState(): 'created' | 'started' | 'stopped'
-    start(main: string, code: string): Promise<protocol.Event[]>
+    start(main: string, code: string): Promise<protocol.TracerResponse>
     stop(): void
-    step(): Promise<protocol.Event[]>
-    stepOver?(): Promise<protocol.Event[]>
-    stepOut?(): Promise<protocol.Event[]>
-    continue?(): Promise<protocol.Event[]>
+    step(): Promise<protocol.TracerResponse>
+    stepOver?(): Promise<protocol.TracerResponse[]>
+    stepOut?(): Promise<protocol.TracerResponse[]>
+    continue?(): Promise<protocol.TracerResponse[]>
     input(lines: string[]): void
     getBreakpoints?(): ReadonlySet<number>
     setBreakpoints?(breakpoints: ReadonlySet<number>): void
-    addStepProcessor?(stepProcessor: StepProcessor): void
+    addStepProcessor?(stepProcessor: ResponseProcessor): void
 }
 
 /**
  * Interface for step processor objects. Step processors can buffer, filter, change or restrict the generated events.
  */
-export interface StepProcessor {
-    consume(step: () => Promise<protocol.Event[]>): Promise<protocol.Event[]>
+export interface ResponseProcessor {
+    consume(step: () => Promise<protocol.TracerResponse>): Promise<protocol.TracerResponse>
 }
 
 /**
  * Applies to all step processors to the received step function.
  */
-export function applyStepProcessorStack(stepProcessors: StepProcessor[], step: () => Promise<protocol.Event[]>) {
+export function applyResponseProcessorStack(
+    stepProcessors: ResponseProcessor[],
+    step: () => Promise<protocol.TracerResponse>
+) {
     return stepProcessors.reduceRight((acc, processor) => () => processor.consume(acc), step)()
 }
 

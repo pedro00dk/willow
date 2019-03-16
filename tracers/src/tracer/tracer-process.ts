@@ -10,8 +10,8 @@ import { Tracer } from './tracer'
  * Spawns and connects to a tracer process.
  */
 export class TracerProcess implements Tracer {
-    private actions$: rx.Subject<protocol.Action[]>
-    private events$: rx.Observable<protocol.Event[] | string>
+    private requests$: rx.Subject<protocol.TracerRequest>
+    private responses$: rx.Observable<protocol.TracerResponse | string>
     private state: ReturnType<Tracer['getState']> = 'created'
 
     constructor(private command: string) {}
@@ -24,22 +24,21 @@ export class TracerProcess implements Tracer {
         log.info(TracerProcess.name, 'spawn', { command: this.command })
         const process = new ProtoProcess(this.command)
         process.spawnProcess()
-        this.actions$ = new rx.Subject()
-        this.actions$ //
-            .pipe(rxOps.flatMap(actions => actions.map(action => [action])))
+        this.requests$ = new rx.Subject()
+        this.requests$ //
             .subscribe(
-                actions => {
-                    const requestWriter = protocol.TracerRequest.encode(protocol.TracerRequest.create({ actions }))
+                request => {
+                    const requestWriter = protocol.TracerRequest.encode(request)
                     process.stdin$.next(protobuf.Writer.create().fixed32(requestWriter.len))
                     process.stdin$.next(requestWriter)
                 },
                 error => process.stdin$.error(error),
                 () => process.stdin$.complete()
             )
-        this.events$ = rx //
+        this.responses$ = rx //
             .merge(
                 process.stdout$ //
-                    .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()).events)),
+                    .pipe(rxOps.map(reader => protocol.TracerResponse.decode(reader, reader.fixed32()))),
                 process.stderr$ //
                     .pipe(rxOps.map(text => `tracer process stderr:\n${text}`))
             )
@@ -55,44 +54,64 @@ export class TracerProcess implements Tracer {
         this.checkState('created')
         this.state = 'started'
         this.spawnProcess()
-        const eventsPromise = this.events$.pipe(rxOps.take(1)).toPromise()
-        this.actions$.next([protocol.Action.create({ start: protocol.Action.Start.create({ main, code }) })])
-        const events = await eventsPromise
-        if (typeof events === 'string') {
+        const eventsPromise = this.responses$.pipe(rxOps.take(1)).toPromise()
+        this.requests$.next(
+            protocol.TracerRequest.create({
+                actions: [protocol.Action.create({ start: protocol.Action.Start.create({ main, code }) })]
+            })
+        )
+        const response = await eventsPromise
+        if (typeof response === 'string') {
             this.stop()
-            throw new Error(events)
+            throw new Error(response)
         }
-        if (events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish)))
+        if (
+            response.events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish))
+        )
             this.stop()
-        return events
+        return response
     }
 
     stop() {
         log.info(TracerProcess.name, 'stop')
         this.checkState('started')
         this.state = 'stopped'
-        this.actions$.next([protocol.Action.create({ stop: protocol.Action.Stop.create() })])
+        this.requests$.next(
+            protocol.TracerRequest.create({
+                actions: [protocol.Action.create({ stop: protocol.Action.Stop.create() })]
+            })
+        )
         // this.actions$.complete() // the process shall stop automatically (this call will force stop/kill)
     }
 
     async step() {
         log.verbose(TracerProcess.name, 'step')
         this.checkState('started')
-        const eventsPromise = this.events$.pipe(rxOps.take(2)).toPromise()
-        this.actions$.next([protocol.Action.create({ step: protocol.Action.Step.create() })])
-        const events = await eventsPromise
-        if (typeof events === 'string') {
+        const eventsPromise = this.responses$.pipe(rxOps.take(2)).toPromise()
+        this.requests$.next(
+            protocol.TracerRequest.create({
+                actions: [protocol.Action.create({ step: protocol.Action.Step.create() })]
+            })
+        )
+        const response = await eventsPromise
+        if (typeof response === 'string') {
             this.stop()
-            throw new Error(events)
+            throw new Error(response)
         }
-        if (events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish)))
+        if (
+            response.events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish))
+        )
             this.stop()
-        return events
+        return response
     }
 
     input(lines: string[]) {
         log.verbose(TracerProcess.name, 'input', { lines })
         this.checkState('started')
-        this.actions$.next([protocol.Action.create({ input: protocol.Action.Input.create({ lines }) })])
+        this.requests$.next(
+            protocol.TracerRequest.create({
+                actions: [protocol.Action.create({ input: protocol.Action.Input.create({ lines }) })]
+            })
+        )
     }
 }

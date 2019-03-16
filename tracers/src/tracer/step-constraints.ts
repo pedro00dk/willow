@@ -1,10 +1,10 @@
 import * as protocol from '../protobuf/protocol'
-import { queryObjectTypes, queryValueTypes, StepProcessor } from './tracer'
+import { queryObjectTypes, queryValueTypes, ResponseProcessor } from './tracer'
 
 /**
  * Checks results memory constraints on event frames.
  */
-export class StepConstraints implements StepProcessor {
+export class StepConstraints implements ResponseProcessor {
     private currentStep: number = 0
 
     constructor(
@@ -52,9 +52,9 @@ export class StepConstraints implements StepProcessor {
         }
     }
 
-    async consume(step: () => Promise<protocol.Event[]>) {
-        const results = await step()
-        results.forEach(result => this.checkConstraints(result))
-        return results
+    async consume(step: () => Promise<protocol.TracerResponse>) {
+        const response = await step()
+        response.events.forEach(result => this.checkConstraints(result))
+        return response
     }
 }
