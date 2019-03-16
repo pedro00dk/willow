@@ -5,7 +5,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         var b = true;
         var i = 1234;
-        var f = 123.4;
+        var l = 1234567891011l;
+        var f = 123.4f;
+        var d = 123.4;
         var c = '1';
         var s = "qwer";
 
