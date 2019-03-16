@@ -5510,13 +5510,13 @@ export const Tracers = $root.Tracers = (() => {
      * @function input
      * @memberof Tracers
      * @instance
-     * @param {Action.Input} request Input message or plain object
+     * @param {InputRequest} request InputRequest message or plain object
      * @param {Tracers.inputCallback} callback Node-style callback called with the error, if any, and Empty
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype.input = function input(request, callback) {
-        return this.rpcCall(input, $root.Action.Input, $root.Empty, request, callback);
+        return this.rpcCall(input, $root.InputRequest, $root.Empty, request, callback);
     }, "name", { value: "input" });
 
     /**
@@ -5524,7 +5524,7 @@ export const Tracers = $root.Tracers = (() => {
      * @function input
      * @memberof Tracers
      * @instance
-     * @param {Action.Input} request Input message or plain object
+     * @param {InputRequest} request InputRequest message or plain object
      * @returns {Promise<Empty>} Promise
      * @variation 2
      */
@@ -5543,13 +5543,13 @@ export const Tracers = $root.Tracers = (() => {
      * @function getBreakpoints
      * @memberof Tracers
      * @instance
-     * @param {Empty} request Empty message or plain object
+     * @param {Id} request Id message or plain object
      * @param {Tracers.getBreakpointsCallback} callback Node-style callback called with the error, if any, and Breakpoints
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype.getBreakpoints = function getBreakpoints(request, callback) {
-        return this.rpcCall(getBreakpoints, $root.Empty, $root.Breakpoints, request, callback);
+        return this.rpcCall(getBreakpoints, $root.Id, $root.Breakpoints, request, callback);
     }, "name", { value: "getBreakpoints" });
 
     /**
@@ -5557,7 +5557,7 @@ export const Tracers = $root.Tracers = (() => {
      * @function getBreakpoints
      * @memberof Tracers
      * @instance
-     * @param {Empty} request Empty message or plain object
+     * @param {Id} request Id message or plain object
      * @returns {Promise<Breakpoints>} Promise
      * @variation 2
      */
@@ -5576,13 +5576,13 @@ export const Tracers = $root.Tracers = (() => {
      * @function setBreakpoints
      * @memberof Tracers
      * @instance
-     * @param {Breakpoints} request Breakpoints message or plain object
+     * @param {BreakpointsRequest} request BreakpointsRequest message or plain object
      * @param {Tracers.setBreakpointsCallback} callback Node-style callback called with the error, if any, and Empty
      * @returns {undefined}
      * @variation 1
      */
     Object.defineProperty(Tracers.prototype.setBreakpoints = function setBreakpoints(request, callback) {
-        return this.rpcCall(setBreakpoints, $root.Breakpoints, $root.Empty, request, callback);
+        return this.rpcCall(setBreakpoints, $root.BreakpointsRequest, $root.Empty, request, callback);
     }, "name", { value: "setBreakpoints" });
 
     /**
@@ -5590,7 +5590,7 @@ export const Tracers = $root.Tracers = (() => {
      * @function setBreakpoints
      * @memberof Tracers
      * @instance
-     * @param {Breakpoints} request Breakpoints message or plain object
+     * @param {BreakpointsRequest} request BreakpointsRequest message or plain object
      * @returns {Promise<Empty>} Promise
      * @variation 2
      */
@@ -6356,6 +6356,425 @@ export const Sessions = $root.Sessions = (() => {
     return Sessions;
 })();
 
+export const Breakpoints = $root.Breakpoints = (() => {
+
+    /**
+     * Properties of a Breakpoints.
+     * @exports IBreakpoints
+     * @interface IBreakpoints
+     * @property {Array.<number>|null} [lines] Breakpoints lines
+     */
+
+    /**
+     * Constructs a new Breakpoints.
+     * @exports Breakpoints
+     * @classdesc Represents a Breakpoints.
+     * @implements IBreakpoints
+     * @constructor
+     * @param {IBreakpoints=} [properties] Properties to set
+     */
+    function Breakpoints(properties) {
+        this.lines = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Breakpoints lines.
+     * @member {Array.<number>} lines
+     * @memberof Breakpoints
+     * @instance
+     */
+    Breakpoints.prototype.lines = $util.emptyArray;
+
+    /**
+     * Creates a new Breakpoints instance using the specified properties.
+     * @function create
+     * @memberof Breakpoints
+     * @static
+     * @param {IBreakpoints=} [properties] Properties to set
+     * @returns {Breakpoints} Breakpoints instance
+     */
+    Breakpoints.create = function create(properties) {
+        return new Breakpoints(properties);
+    };
+
+    /**
+     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @function encode
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Breakpoints.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.lines != null && message.lines.length) {
+            writer.uint32(/* id 1, wireType 2 =*/10).fork();
+            for (let i = 0; i < message.lines.length; ++i)
+                writer.int32(message.lines[i]);
+            writer.ldelim();
+        }
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Breakpoints.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer.
+     * @function decode
+     * @memberof Breakpoints
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Breakpoints} Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Breakpoints.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Breakpoints();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.lines && message.lines.length))
+                    message.lines = [];
+                if ((tag & 7) === 2) {
+                    let end2 = reader.uint32() + reader.pos;
+                    while (reader.pos < end2)
+                        message.lines.push(reader.int32());
+                } else
+                    message.lines.push(reader.int32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Breakpoints
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Breakpoints} Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Breakpoints.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Breakpoints message.
+     * @function verify
+     * @memberof Breakpoints
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Breakpoints.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.lines != null && message.hasOwnProperty("lines")) {
+            if (!Array.isArray(message.lines))
+                return "lines: array expected";
+            for (let i = 0; i < message.lines.length; ++i)
+                if (!$util.isInteger(message.lines[i]))
+                    return "lines: integer[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Breakpoints
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Breakpoints} Breakpoints
+     */
+    Breakpoints.fromObject = function fromObject(object) {
+        if (object instanceof $root.Breakpoints)
+            return object;
+        let message = new $root.Breakpoints();
+        if (object.lines) {
+            if (!Array.isArray(object.lines))
+                throw TypeError(".Breakpoints.lines: array expected");
+            message.lines = [];
+            for (let i = 0; i < object.lines.length; ++i)
+                message.lines[i] = object.lines[i] | 0;
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Breakpoints
+     * @static
+     * @param {Breakpoints} message Breakpoints
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Breakpoints.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.lines = [];
+        if (message.lines && message.lines.length) {
+            object.lines = [];
+            for (let j = 0; j < message.lines.length; ++j)
+                object.lines[j] = message.lines[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this Breakpoints to JSON.
+     * @function toJSON
+     * @memberof Breakpoints
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Breakpoints.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Breakpoints;
+})();
+
+export const TracerResponses = $root.TracerResponses = (() => {
+
+    /**
+     * Properties of a TracerResponses.
+     * @exports ITracerResponses
+     * @interface ITracerResponses
+     * @property {Array.<TracerResponse>|null} [responses] TracerResponses responses
+     */
+
+    /**
+     * Constructs a new TracerResponses.
+     * @exports TracerResponses
+     * @classdesc Represents a TracerResponses.
+     * @implements ITracerResponses
+     * @constructor
+     * @param {ITracerResponses=} [properties] Properties to set
+     */
+    function TracerResponses(properties) {
+        this.responses = [];
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * TracerResponses responses.
+     * @member {Array.<TracerResponse>} responses
+     * @memberof TracerResponses
+     * @instance
+     */
+    TracerResponses.prototype.responses = $util.emptyArray;
+
+    /**
+     * Creates a new TracerResponses instance using the specified properties.
+     * @function create
+     * @memberof TracerResponses
+     * @static
+     * @param {ITracerResponses=} [properties] Properties to set
+     * @returns {TracerResponses} TracerResponses instance
+     */
+    TracerResponses.create = function create(properties) {
+        return new TracerResponses(properties);
+    };
+
+    /**
+     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @function encode
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    TracerResponses.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.responses != null && message.responses.length)
+            for (let i = 0; i < message.responses.length; ++i)
+                $root.TracerResponse.encode(message.responses[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    TracerResponses.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer.
+     * @function decode
+     * @memberof TracerResponses
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {TracerResponses} TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    TracerResponses.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.TracerResponses();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.responses && message.responses.length))
+                    message.responses = [];
+                message.responses.push($root.TracerResponse.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof TracerResponses
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {TracerResponses} TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    TracerResponses.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a TracerResponses message.
+     * @function verify
+     * @memberof TracerResponses
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    TracerResponses.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.responses != null && message.hasOwnProperty("responses")) {
+            if (!Array.isArray(message.responses))
+                return "responses: array expected";
+            for (let i = 0; i < message.responses.length; ++i) {
+                let error = $root.TracerResponse.verify(message.responses[i]);
+                if (error)
+                    return "responses." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof TracerResponses
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {TracerResponses} TracerResponses
+     */
+    TracerResponses.fromObject = function fromObject(object) {
+        if (object instanceof $root.TracerResponses)
+            return object;
+        let message = new $root.TracerResponses();
+        if (object.responses) {
+            if (!Array.isArray(object.responses))
+                throw TypeError(".TracerResponses.responses: array expected");
+            message.responses = [];
+            for (let i = 0; i < object.responses.length; ++i) {
+                if (typeof object.responses[i] !== "object")
+                    throw TypeError(".TracerResponses.responses: object expected");
+                message.responses[i] = $root.TracerResponse.fromObject(object.responses[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof TracerResponses
+     * @static
+     * @param {TracerResponses} message TracerResponses
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    TracerResponses.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.arrays || options.defaults)
+            object.responses = [];
+        if (message.responses && message.responses.length) {
+            object.responses = [];
+            for (let j = 0; j < message.responses.length; ++j)
+                object.responses[j] = $root.TracerResponse.toObject(message.responses[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this TracerResponses to JSON.
+     * @function toJSON
+     * @memberof TracerResponses
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    TracerResponses.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return TracerResponses;
+})();
+
 export const Session = $root.Session = (() => {
 
     /**
@@ -7006,6 +7425,226 @@ export const InputRequest = $root.InputRequest = (() => {
     return InputRequest;
 })();
 
+export const BreakpointsRequest = $root.BreakpointsRequest = (() => {
+
+    /**
+     * Properties of a BreakpointsRequest.
+     * @exports IBreakpointsRequest
+     * @interface IBreakpointsRequest
+     * @property {Id|null} [id] BreakpointsRequest id
+     * @property {Breakpoints|null} [breakpoints] BreakpointsRequest breakpoints
+     */
+
+    /**
+     * Constructs a new BreakpointsRequest.
+     * @exports BreakpointsRequest
+     * @classdesc Represents a BreakpointsRequest.
+     * @implements IBreakpointsRequest
+     * @constructor
+     * @param {IBreakpointsRequest=} [properties] Properties to set
+     */
+    function BreakpointsRequest(properties) {
+        if (properties)
+            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * BreakpointsRequest id.
+     * @member {Id|null|undefined} id
+     * @memberof BreakpointsRequest
+     * @instance
+     */
+    BreakpointsRequest.prototype.id = null;
+
+    /**
+     * BreakpointsRequest breakpoints.
+     * @member {Breakpoints|null|undefined} breakpoints
+     * @memberof BreakpointsRequest
+     * @instance
+     */
+    BreakpointsRequest.prototype.breakpoints = null;
+
+    /**
+     * Creates a new BreakpointsRequest instance using the specified properties.
+     * @function create
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {IBreakpointsRequest=} [properties] Properties to set
+     * @returns {BreakpointsRequest} BreakpointsRequest instance
+     */
+    BreakpointsRequest.create = function create(properties) {
+        return new BreakpointsRequest(properties);
+    };
+
+    /**
+     * Encodes the specified BreakpointsRequest message. Does not implicitly {@link BreakpointsRequest.verify|verify} messages.
+     * @function encode
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {BreakpointsRequest} message BreakpointsRequest message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    BreakpointsRequest.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.id != null && message.hasOwnProperty("id"))
+            $root.Id.encode(message.id, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.breakpoints != null && message.hasOwnProperty("breakpoints"))
+            $root.Breakpoints.encode(message.breakpoints, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified BreakpointsRequest message, length delimited. Does not implicitly {@link BreakpointsRequest.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {BreakpointsRequest} message BreakpointsRequest message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    BreakpointsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a BreakpointsRequest message from the specified reader or buffer.
+     * @function decode
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {BreakpointsRequest} BreakpointsRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    BreakpointsRequest.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.BreakpointsRequest();
+        while (reader.pos < end) {
+            let tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.id = $root.Id.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.breakpoints = $root.Breakpoints.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a BreakpointsRequest message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {BreakpointsRequest} BreakpointsRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    BreakpointsRequest.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a BreakpointsRequest message.
+     * @function verify
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    BreakpointsRequest.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.id != null && message.hasOwnProperty("id")) {
+            let error = $root.Id.verify(message.id);
+            if (error)
+                return "id." + error;
+        }
+        if (message.breakpoints != null && message.hasOwnProperty("breakpoints")) {
+            let error = $root.Breakpoints.verify(message.breakpoints);
+            if (error)
+                return "breakpoints." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates a BreakpointsRequest message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {BreakpointsRequest} BreakpointsRequest
+     */
+    BreakpointsRequest.fromObject = function fromObject(object) {
+        if (object instanceof $root.BreakpointsRequest)
+            return object;
+        let message = new $root.BreakpointsRequest();
+        if (object.id != null) {
+            if (typeof object.id !== "object")
+                throw TypeError(".BreakpointsRequest.id: object expected");
+            message.id = $root.Id.fromObject(object.id);
+        }
+        if (object.breakpoints != null) {
+            if (typeof object.breakpoints !== "object")
+                throw TypeError(".BreakpointsRequest.breakpoints: object expected");
+            message.breakpoints = $root.Breakpoints.fromObject(object.breakpoints);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a BreakpointsRequest message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof BreakpointsRequest
+     * @static
+     * @param {BreakpointsRequest} message BreakpointsRequest
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    BreakpointsRequest.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        let object = {};
+        if (options.defaults) {
+            object.id = null;
+            object.breakpoints = null;
+        }
+        if (message.id != null && message.hasOwnProperty("id"))
+            object.id = $root.Id.toObject(message.id, options);
+        if (message.breakpoints != null && message.hasOwnProperty("breakpoints"))
+            object.breakpoints = $root.Breakpoints.toObject(message.breakpoints, options);
+        return object;
+    };
+
+    /**
+     * Converts this BreakpointsRequest to JSON.
+     * @function toJSON
+     * @memberof BreakpointsRequest
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    BreakpointsRequest.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return BreakpointsRequest;
+})();
+
 export const StartResponse = $root.StartResponse = (() => {
 
     /**
@@ -7224,425 +7863,6 @@ export const StartResponse = $root.StartResponse = (() => {
     };
 
     return StartResponse;
-})();
-
-export const TracerResponses = $root.TracerResponses = (() => {
-
-    /**
-     * Properties of a TracerResponses.
-     * @exports ITracerResponses
-     * @interface ITracerResponses
-     * @property {Array.<TracerResponse>|null} [responses] TracerResponses responses
-     */
-
-    /**
-     * Constructs a new TracerResponses.
-     * @exports TracerResponses
-     * @classdesc Represents a TracerResponses.
-     * @implements ITracerResponses
-     * @constructor
-     * @param {ITracerResponses=} [properties] Properties to set
-     */
-    function TracerResponses(properties) {
-        this.responses = [];
-        if (properties)
-            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * TracerResponses responses.
-     * @member {Array.<TracerResponse>} responses
-     * @memberof TracerResponses
-     * @instance
-     */
-    TracerResponses.prototype.responses = $util.emptyArray;
-
-    /**
-     * Creates a new TracerResponses instance using the specified properties.
-     * @function create
-     * @memberof TracerResponses
-     * @static
-     * @param {ITracerResponses=} [properties] Properties to set
-     * @returns {TracerResponses} TracerResponses instance
-     */
-    TracerResponses.create = function create(properties) {
-        return new TracerResponses(properties);
-    };
-
-    /**
-     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
-     * @function encode
-     * @memberof TracerResponses
-     * @static
-     * @param {TracerResponses} message TracerResponses message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    TracerResponses.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.responses != null && message.responses.length)
-            for (let i = 0; i < message.responses.length; ++i)
-                $root.TracerResponse.encode(message.responses[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-        return writer;
-    };
-
-    /**
-     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof TracerResponses
-     * @static
-     * @param {TracerResponses} message TracerResponses message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    TracerResponses.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a TracerResponses message from the specified reader or buffer.
-     * @function decode
-     * @memberof TracerResponses
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {TracerResponses} TracerResponses
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    TracerResponses.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.TracerResponses();
-        while (reader.pos < end) {
-            let tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                if (!(message.responses && message.responses.length))
-                    message.responses = [];
-                message.responses.push($root.TracerResponse.decode(reader, reader.uint32()));
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof TracerResponses
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {TracerResponses} TracerResponses
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    TracerResponses.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a TracerResponses message.
-     * @function verify
-     * @memberof TracerResponses
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    TracerResponses.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.responses != null && message.hasOwnProperty("responses")) {
-            if (!Array.isArray(message.responses))
-                return "responses: array expected";
-            for (let i = 0; i < message.responses.length; ++i) {
-                let error = $root.TracerResponse.verify(message.responses[i]);
-                if (error)
-                    return "responses." + error;
-            }
-        }
-        return null;
-    };
-
-    /**
-     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof TracerResponses
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {TracerResponses} TracerResponses
-     */
-    TracerResponses.fromObject = function fromObject(object) {
-        if (object instanceof $root.TracerResponses)
-            return object;
-        let message = new $root.TracerResponses();
-        if (object.responses) {
-            if (!Array.isArray(object.responses))
-                throw TypeError(".TracerResponses.responses: array expected");
-            message.responses = [];
-            for (let i = 0; i < object.responses.length; ++i) {
-                if (typeof object.responses[i] !== "object")
-                    throw TypeError(".TracerResponses.responses: object expected");
-                message.responses[i] = $root.TracerResponse.fromObject(object.responses[i]);
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof TracerResponses
-     * @static
-     * @param {TracerResponses} message TracerResponses
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    TracerResponses.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        let object = {};
-        if (options.arrays || options.defaults)
-            object.responses = [];
-        if (message.responses && message.responses.length) {
-            object.responses = [];
-            for (let j = 0; j < message.responses.length; ++j)
-                object.responses[j] = $root.TracerResponse.toObject(message.responses[j], options);
-        }
-        return object;
-    };
-
-    /**
-     * Converts this TracerResponses to JSON.
-     * @function toJSON
-     * @memberof TracerResponses
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    TracerResponses.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return TracerResponses;
-})();
-
-export const Breakpoints = $root.Breakpoints = (() => {
-
-    /**
-     * Properties of a Breakpoints.
-     * @exports IBreakpoints
-     * @interface IBreakpoints
-     * @property {Array.<number>|null} [lines] Breakpoints lines
-     */
-
-    /**
-     * Constructs a new Breakpoints.
-     * @exports Breakpoints
-     * @classdesc Represents a Breakpoints.
-     * @implements IBreakpoints
-     * @constructor
-     * @param {IBreakpoints=} [properties] Properties to set
-     */
-    function Breakpoints(properties) {
-        this.lines = [];
-        if (properties)
-            for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * Breakpoints lines.
-     * @member {Array.<number>} lines
-     * @memberof Breakpoints
-     * @instance
-     */
-    Breakpoints.prototype.lines = $util.emptyArray;
-
-    /**
-     * Creates a new Breakpoints instance using the specified properties.
-     * @function create
-     * @memberof Breakpoints
-     * @static
-     * @param {IBreakpoints=} [properties] Properties to set
-     * @returns {Breakpoints} Breakpoints instance
-     */
-    Breakpoints.create = function create(properties) {
-        return new Breakpoints(properties);
-    };
-
-    /**
-     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
-     * @function encode
-     * @memberof Breakpoints
-     * @static
-     * @param {Breakpoints} message Breakpoints message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Breakpoints.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.lines != null && message.lines.length) {
-            writer.uint32(/* id 1, wireType 2 =*/10).fork();
-            for (let i = 0; i < message.lines.length; ++i)
-                writer.int32(message.lines[i]);
-            writer.ldelim();
-        }
-        return writer;
-    };
-
-    /**
-     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof Breakpoints
-     * @static
-     * @param {Breakpoints} message Breakpoints message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Breakpoints.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a Breakpoints message from the specified reader or buffer.
-     * @function decode
-     * @memberof Breakpoints
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {Breakpoints} Breakpoints
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Breakpoints.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        let end = length === undefined ? reader.len : reader.pos + length, message = new $root.Breakpoints();
-        while (reader.pos < end) {
-            let tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                if (!(message.lines && message.lines.length))
-                    message.lines = [];
-                if ((tag & 7) === 2) {
-                    let end2 = reader.uint32() + reader.pos;
-                    while (reader.pos < end2)
-                        message.lines.push(reader.int32());
-                } else
-                    message.lines.push(reader.int32());
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof Breakpoints
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {Breakpoints} Breakpoints
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Breakpoints.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a Breakpoints message.
-     * @function verify
-     * @memberof Breakpoints
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    Breakpoints.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.lines != null && message.hasOwnProperty("lines")) {
-            if (!Array.isArray(message.lines))
-                return "lines: array expected";
-            for (let i = 0; i < message.lines.length; ++i)
-                if (!$util.isInteger(message.lines[i]))
-                    return "lines: integer[] expected";
-        }
-        return null;
-    };
-
-    /**
-     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof Breakpoints
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {Breakpoints} Breakpoints
-     */
-    Breakpoints.fromObject = function fromObject(object) {
-        if (object instanceof $root.Breakpoints)
-            return object;
-        let message = new $root.Breakpoints();
-        if (object.lines) {
-            if (!Array.isArray(object.lines))
-                throw TypeError(".Breakpoints.lines: array expected");
-            message.lines = [];
-            for (let i = 0; i < object.lines.length; ++i)
-                message.lines[i] = object.lines[i] | 0;
-        }
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof Breakpoints
-     * @static
-     * @param {Breakpoints} message Breakpoints
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    Breakpoints.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        let object = {};
-        if (options.arrays || options.defaults)
-            object.lines = [];
-        if (message.lines && message.lines.length) {
-            object.lines = [];
-            for (let j = 0; j < message.lines.length; ++j)
-                object.lines[j] = message.lines[j];
-        }
-        return object;
-    };
-
-    /**
-     * Converts this Breakpoints to JSON.
-     * @function toJSON
-     * @memberof Breakpoints
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    Breakpoints.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return Breakpoints;
 })();
 
 export { $root as default };

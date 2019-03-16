@@ -2310,45 +2310,45 @@ export class Tracers extends $protobuf.rpc.Service {
 
     /**
      * Calls input.
-     * @param request Input message or plain object
+     * @param request InputRequest message or plain object
      * @param callback Node-style callback called with the error, if any, and Empty
      */
-    public input(request: Action.Input, callback: Tracers.inputCallback): void;
+    public input(request: InputRequest, callback: Tracers.inputCallback): void;
 
     /**
      * Calls input.
-     * @param request Input message or plain object
+     * @param request InputRequest message or plain object
      * @returns Promise
      */
-    public input(request: Action.Input): Promise<Empty>;
+    public input(request: InputRequest): Promise<Empty>;
 
     /**
      * Calls getBreakpoints.
-     * @param request Empty message or plain object
+     * @param request Id message or plain object
      * @param callback Node-style callback called with the error, if any, and Breakpoints
      */
-    public getBreakpoints(request: Empty, callback: Tracers.getBreakpointsCallback): void;
+    public getBreakpoints(request: Id, callback: Tracers.getBreakpointsCallback): void;
 
     /**
      * Calls getBreakpoints.
-     * @param request Empty message or plain object
+     * @param request Id message or plain object
      * @returns Promise
      */
-    public getBreakpoints(request: Empty): Promise<Breakpoints>;
+    public getBreakpoints(request: Id): Promise<Breakpoints>;
 
     /**
      * Calls setBreakpoints.
-     * @param request Breakpoints message or plain object
+     * @param request BreakpointsRequest message or plain object
      * @param callback Node-style callback called with the error, if any, and Empty
      */
-    public setBreakpoints(request: Breakpoints, callback: Tracers.setBreakpointsCallback): void;
+    public setBreakpoints(request: BreakpointsRequest, callback: Tracers.setBreakpointsCallback): void;
 
     /**
      * Calls setBreakpoints.
-     * @param request Breakpoints message or plain object
+     * @param request BreakpointsRequest message or plain object
      * @returns Promise
      */
-    public setBreakpoints(request: Breakpoints): Promise<Empty>;
+    public setBreakpoints(request: BreakpointsRequest): Promise<Empty>;
 }
 
 export namespace Tracers {
@@ -2785,6 +2785,186 @@ export class Sessions implements ISessions {
     public toJSON(): { [k: string]: any };
 }
 
+/** Properties of a Breakpoints. */
+export interface IBreakpoints {
+
+    /** Breakpoints lines */
+    lines?: (number[]|null);
+}
+
+/** Represents a Breakpoints. */
+export class Breakpoints implements IBreakpoints {
+
+    /**
+     * Constructs a new Breakpoints.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IBreakpoints);
+
+    /** Breakpoints lines. */
+    public lines: number[];
+
+    /**
+     * Creates a new Breakpoints instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Breakpoints instance
+     */
+    public static create(properties?: IBreakpoints): Breakpoints;
+
+    /**
+     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @param message Breakpoints message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
+     * @param message Breakpoints message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Breakpoints;
+
+    /**
+     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Breakpoints
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Breakpoints;
+
+    /**
+     * Verifies a Breakpoints message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Breakpoints
+     */
+    public static fromObject(object: { [k: string]: any }): Breakpoints;
+
+    /**
+     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
+     * @param message Breakpoints
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Breakpoints, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Breakpoints to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a TracerResponses. */
+export interface ITracerResponses {
+
+    /** TracerResponses responses */
+    responses?: (TracerResponse[]|null);
+}
+
+/** Represents a TracerResponses. */
+export class TracerResponses implements ITracerResponses {
+
+    /**
+     * Constructs a new TracerResponses.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: ITracerResponses);
+
+    /** TracerResponses responses. */
+    public responses: TracerResponse[];
+
+    /**
+     * Creates a new TracerResponses instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns TracerResponses instance
+     */
+    public static create(properties?: ITracerResponses): TracerResponses;
+
+    /**
+     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @param message TracerResponses message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
+     * @param message TracerResponses message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): TracerResponses;
+
+    /**
+     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns TracerResponses
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): TracerResponses;
+
+    /**
+     * Verifies a TracerResponses message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns TracerResponses
+     */
+    public static fromObject(object: { [k: string]: any }): TracerResponses;
+
+    /**
+     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
+     * @param message TracerResponses
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: TracerResponses, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this TracerResponses to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
 /** Properties of a Session. */
 export interface ISession {
 
@@ -3073,6 +3253,102 @@ export class InputRequest implements IInputRequest {
     public toJSON(): { [k: string]: any };
 }
 
+/** Properties of a BreakpointsRequest. */
+export interface IBreakpointsRequest {
+
+    /** BreakpointsRequest id */
+    id?: (Id|null);
+
+    /** BreakpointsRequest breakpoints */
+    breakpoints?: (Breakpoints|null);
+}
+
+/** Represents a BreakpointsRequest. */
+export class BreakpointsRequest implements IBreakpointsRequest {
+
+    /**
+     * Constructs a new BreakpointsRequest.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IBreakpointsRequest);
+
+    /** BreakpointsRequest id. */
+    public id?: (Id|null);
+
+    /** BreakpointsRequest breakpoints. */
+    public breakpoints?: (Breakpoints|null);
+
+    /**
+     * Creates a new BreakpointsRequest instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns BreakpointsRequest instance
+     */
+    public static create(properties?: IBreakpointsRequest): BreakpointsRequest;
+
+    /**
+     * Encodes the specified BreakpointsRequest message. Does not implicitly {@link BreakpointsRequest.verify|verify} messages.
+     * @param message BreakpointsRequest message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: BreakpointsRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified BreakpointsRequest message, length delimited. Does not implicitly {@link BreakpointsRequest.verify|verify} messages.
+     * @param message BreakpointsRequest message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: BreakpointsRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a BreakpointsRequest message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns BreakpointsRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): BreakpointsRequest;
+
+    /**
+     * Decodes a BreakpointsRequest message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns BreakpointsRequest
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): BreakpointsRequest;
+
+    /**
+     * Verifies a BreakpointsRequest message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a BreakpointsRequest message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns BreakpointsRequest
+     */
+    public static fromObject(object: { [k: string]: any }): BreakpointsRequest;
+
+    /**
+     * Creates a plain object from a BreakpointsRequest message. Also converts values to other types if specified.
+     * @param message BreakpointsRequest
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: BreakpointsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this BreakpointsRequest to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
 /** Properties of a StartResponse. */
 export interface IStartResponse {
 
@@ -3164,186 +3440,6 @@ export class StartResponse implements IStartResponse {
 
     /**
      * Converts this StartResponse to JSON.
-     * @returns JSON object
-     */
-    public toJSON(): { [k: string]: any };
-}
-
-/** Properties of a TracerResponses. */
-export interface ITracerResponses {
-
-    /** TracerResponses responses */
-    responses?: (TracerResponse[]|null);
-}
-
-/** Represents a TracerResponses. */
-export class TracerResponses implements ITracerResponses {
-
-    /**
-     * Constructs a new TracerResponses.
-     * @param [properties] Properties to set
-     */
-    constructor(properties?: ITracerResponses);
-
-    /** TracerResponses responses. */
-    public responses: TracerResponse[];
-
-    /**
-     * Creates a new TracerResponses instance using the specified properties.
-     * @param [properties] Properties to set
-     * @returns TracerResponses instance
-     */
-    public static create(properties?: ITracerResponses): TracerResponses;
-
-    /**
-     * Encodes the specified TracerResponses message. Does not implicitly {@link TracerResponses.verify|verify} messages.
-     * @param message TracerResponses message or plain object to encode
-     * @param [writer] Writer to encode to
-     * @returns Writer
-     */
-    public static encode(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
-
-    /**
-     * Encodes the specified TracerResponses message, length delimited. Does not implicitly {@link TracerResponses.verify|verify} messages.
-     * @param message TracerResponses message or plain object to encode
-     * @param [writer] Writer to encode to
-     * @returns Writer
-     */
-    public static encodeDelimited(message: TracerResponses, writer?: $protobuf.Writer): $protobuf.Writer;
-
-    /**
-     * Decodes a TracerResponses message from the specified reader or buffer.
-     * @param reader Reader or buffer to decode from
-     * @param [length] Message length if known beforehand
-     * @returns TracerResponses
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): TracerResponses;
-
-    /**
-     * Decodes a TracerResponses message from the specified reader or buffer, length delimited.
-     * @param reader Reader or buffer to decode from
-     * @returns TracerResponses
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): TracerResponses;
-
-    /**
-     * Verifies a TracerResponses message.
-     * @param message Plain object to verify
-     * @returns `null` if valid, otherwise the reason why it is not
-     */
-    public static verify(message: { [k: string]: any }): (string|null);
-
-    /**
-     * Creates a TracerResponses message from a plain object. Also converts values to their respective internal types.
-     * @param object Plain object
-     * @returns TracerResponses
-     */
-    public static fromObject(object: { [k: string]: any }): TracerResponses;
-
-    /**
-     * Creates a plain object from a TracerResponses message. Also converts values to other types if specified.
-     * @param message TracerResponses
-     * @param [options] Conversion options
-     * @returns Plain object
-     */
-    public static toObject(message: TracerResponses, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-    /**
-     * Converts this TracerResponses to JSON.
-     * @returns JSON object
-     */
-    public toJSON(): { [k: string]: any };
-}
-
-/** Properties of a Breakpoints. */
-export interface IBreakpoints {
-
-    /** Breakpoints lines */
-    lines?: (number[]|null);
-}
-
-/** Represents a Breakpoints. */
-export class Breakpoints implements IBreakpoints {
-
-    /**
-     * Constructs a new Breakpoints.
-     * @param [properties] Properties to set
-     */
-    constructor(properties?: IBreakpoints);
-
-    /** Breakpoints lines. */
-    public lines: number[];
-
-    /**
-     * Creates a new Breakpoints instance using the specified properties.
-     * @param [properties] Properties to set
-     * @returns Breakpoints instance
-     */
-    public static create(properties?: IBreakpoints): Breakpoints;
-
-    /**
-     * Encodes the specified Breakpoints message. Does not implicitly {@link Breakpoints.verify|verify} messages.
-     * @param message Breakpoints message or plain object to encode
-     * @param [writer] Writer to encode to
-     * @returns Writer
-     */
-    public static encode(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
-
-    /**
-     * Encodes the specified Breakpoints message, length delimited. Does not implicitly {@link Breakpoints.verify|verify} messages.
-     * @param message Breakpoints message or plain object to encode
-     * @param [writer] Writer to encode to
-     * @returns Writer
-     */
-    public static encodeDelimited(message: Breakpoints, writer?: $protobuf.Writer): $protobuf.Writer;
-
-    /**
-     * Decodes a Breakpoints message from the specified reader or buffer.
-     * @param reader Reader or buffer to decode from
-     * @param [length] Message length if known beforehand
-     * @returns Breakpoints
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Breakpoints;
-
-    /**
-     * Decodes a Breakpoints message from the specified reader or buffer, length delimited.
-     * @param reader Reader or buffer to decode from
-     * @returns Breakpoints
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Breakpoints;
-
-    /**
-     * Verifies a Breakpoints message.
-     * @param message Plain object to verify
-     * @returns `null` if valid, otherwise the reason why it is not
-     */
-    public static verify(message: { [k: string]: any }): (string|null);
-
-    /**
-     * Creates a Breakpoints message from a plain object. Also converts values to their respective internal types.
-     * @param object Plain object
-     * @returns Breakpoints
-     */
-    public static fromObject(object: { [k: string]: any }): Breakpoints;
-
-    /**
-     * Creates a plain object from a Breakpoints message. Also converts values to other types if specified.
-     * @param message Breakpoints
-     * @param [options] Conversion options
-     * @returns Plain object
-     */
-    public static toObject(message: Breakpoints, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-    /**
-     * Converts this Breakpoints to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

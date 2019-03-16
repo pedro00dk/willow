@@ -19,9 +19,9 @@ service Tracers {
   rpc stepOver(Id) returns (TracerResponses);
   rpc stepOut(Id) returns (TracerResponses);
   rpc continue(Id) returns (TracerResponses);
-  rpc input(Action.Input) returns (Empty);
-  rpc getBreakpoints(Empty) returns (Breakpoints);
-  rpc setBreakpoints(Breakpoints) returns (Empty);
+  rpc input(InputRequest) returns (Empty);
+  rpc getBreakpoints(Id) returns (Breakpoints);
+  rpc setBreakpoints(BreakpointsRequest) returns (Empty);
 }
 
 message Empty {}
@@ -31,6 +31,10 @@ message Id { int32 id = 1; }
 message Languages { repeated string languages = 1; }
 
 message Sessions { repeated Session sessions = 1; }
+
+message Breakpoints { repeated int32 lines = 1; }
+
+message TracerResponses { repeated TracerResponse responses = 1; }
 
 message Session {
   Id id = 1;
@@ -47,11 +51,12 @@ message InputRequest {
   Action.Input input = 2;
 }
 
+message BreakpointsRequest {
+  Id id = 1;
+  Breakpoints breakpoints = 2;
+}
+
 message StartResponse {
   Id id = 1;
   TracerResponse response = 2;
 }
-
-message TracerResponses { repeated TracerResponse responses = 1; }
-
-message Breakpoints { repeated int32 lines = 1; }
