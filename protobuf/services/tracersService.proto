@@ -26,7 +26,7 @@ service Tracers {
 
 message Empty {}
 
-message Id { int32 number = 1; }
+message Id { int32 id = 1; }
 
 message Languages { repeated string languages = 1; }
 
@@ -48,7 +48,7 @@ message InputRequest {
 }
 
 message StartResponse {
-  Session session = 1;
+  Id id = 1;
   TracerResponse response = 2;
 }
 

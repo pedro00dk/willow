@@ -2518,8 +2518,8 @@ export class Empty implements IEmpty {
 /** Properties of an Id. */
 export interface IId {
 
-    /** Id number */
-    number?: (number|null);
+    /** Id id */
+    id?: (number|null);
 }
 
 /** Represents an Id. */
@@ -2531,8 +2531,8 @@ export class Id implements IId {
      */
     constructor(properties?: IId);
 
-    /** Id number. */
-    public number: number;
+    /** Id id. */
+    public id: number;
 
     /**
      * Creates a new Id instance using the specified properties.
@@ -3076,8 +3076,8 @@ export class InputRequest implements IInputRequest {
 /** Properties of a StartResponse. */
 export interface IStartResponse {
 
-    /** StartResponse session */
-    session?: (Session|null);
+    /** StartResponse id */
+    id?: (Id|null);
 
     /** StartResponse response */
     response?: (TracerResponse|null);
@@ -3092,8 +3092,8 @@ export class StartResponse implements IStartResponse {
      */
     constructor(properties?: IStartResponse);
 
-    /** StartResponse session. */
-    public session?: (Session|null);
+    /** StartResponse id. */
+    public id?: (Id|null);
 
     /** StartResponse response. */
     public response?: (TracerResponse|null);

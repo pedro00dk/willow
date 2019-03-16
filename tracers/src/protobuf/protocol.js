@@ -5764,7 +5764,7 @@ export const Id = $root.Id = (() => {
      * Properties of an Id.
      * @exports IId
      * @interface IId
-     * @property {number|null} [number] Id number
+     * @property {number|null} [id] Id id
      */
 
     /**
@@ -5783,12 +5783,12 @@ export const Id = $root.Id = (() => {
     }
 
     /**
-     * Id number.
-     * @member {number} number
+     * Id id.
+     * @member {number} id
      * @memberof Id
      * @instance
      */
-    Id.prototype.number = 0;
+    Id.prototype.id = 0;
 
     /**
      * Creates a new Id instance using the specified properties.
@@ -5814,8 +5814,8 @@ export const Id = $root.Id = (() => {
     Id.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.number != null && message.hasOwnProperty("number"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.number);
+        if (message.id != null && message.hasOwnProperty("id"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.id);
         return writer;
     };
 
@@ -5851,7 +5851,7 @@ export const Id = $root.Id = (() => {
             let tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.number = reader.int32();
+                message.id = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -5888,9 +5888,9 @@ export const Id = $root.Id = (() => {
     Id.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.number != null && message.hasOwnProperty("number"))
-            if (!$util.isInteger(message.number))
-                return "number: integer expected";
+        if (message.id != null && message.hasOwnProperty("id"))
+            if (!$util.isInteger(message.id))
+                return "id: integer expected";
         return null;
     };
 
@@ -5906,8 +5906,8 @@ export const Id = $root.Id = (() => {
         if (object instanceof $root.Id)
             return object;
         let message = new $root.Id();
-        if (object.number != null)
-            message.number = object.number | 0;
+        if (object.id != null)
+            message.id = object.id | 0;
         return message;
     };
 
@@ -5925,9 +5925,9 @@ export const Id = $root.Id = (() => {
             options = {};
         let object = {};
         if (options.defaults)
-            object.number = 0;
-        if (message.number != null && message.hasOwnProperty("number"))
-            object.number = message.number;
+            object.id = 0;
+        if (message.id != null && message.hasOwnProperty("id"))
+            object.id = message.id;
         return object;
     };
 
@@ -7012,7 +7012,7 @@ export const StartResponse = $root.StartResponse = (() => {
      * Properties of a StartResponse.
      * @exports IStartResponse
      * @interface IStartResponse
-     * @property {Session|null} [session] StartResponse session
+     * @property {Id|null} [id] StartResponse id
      * @property {TracerResponse|null} [response] StartResponse response
      */
 
@@ -7032,12 +7032,12 @@ export const StartResponse = $root.StartResponse = (() => {
     }
 
     /**
-     * StartResponse session.
-     * @member {Session|null|undefined} session
+     * StartResponse id.
+     * @member {Id|null|undefined} id
      * @memberof StartResponse
      * @instance
      */
-    StartResponse.prototype.session = null;
+    StartResponse.prototype.id = null;
 
     /**
      * StartResponse response.
@@ -7071,8 +7071,8 @@ export const StartResponse = $root.StartResponse = (() => {
     StartResponse.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.session != null && message.hasOwnProperty("session"))
-            $root.Session.encode(message.session, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.id != null && message.hasOwnProperty("id"))
+            $root.Id.encode(message.id, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
         if (message.response != null && message.hasOwnProperty("response"))
             $root.TracerResponse.encode(message.response, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
@@ -7110,7 +7110,7 @@ export const StartResponse = $root.StartResponse = (() => {
             let tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.session = $root.Session.decode(reader, reader.uint32());
+                message.id = $root.Id.decode(reader, reader.uint32());
                 break;
             case 2:
                 message.response = $root.TracerResponse.decode(reader, reader.uint32());
@@ -7150,10 +7150,10 @@ export const StartResponse = $root.StartResponse = (() => {
     StartResponse.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.session != null && message.hasOwnProperty("session")) {
-            let error = $root.Session.verify(message.session);
+        if (message.id != null && message.hasOwnProperty("id")) {
+            let error = $root.Id.verify(message.id);
             if (error)
-                return "session." + error;
+                return "id." + error;
         }
         if (message.response != null && message.hasOwnProperty("response")) {
             let error = $root.TracerResponse.verify(message.response);
@@ -7175,10 +7175,10 @@ export const StartResponse = $root.StartResponse = (() => {
         if (object instanceof $root.StartResponse)
             return object;
         let message = new $root.StartResponse();
-        if (object.session != null) {
-            if (typeof object.session !== "object")
-                throw TypeError(".StartResponse.session: object expected");
-            message.session = $root.Session.fromObject(object.session);
+        if (object.id != null) {
+            if (typeof object.id !== "object")
+                throw TypeError(".StartResponse.id: object expected");
+            message.id = $root.Id.fromObject(object.id);
         }
         if (object.response != null) {
             if (typeof object.response !== "object")
@@ -7202,11 +7202,11 @@ export const StartResponse = $root.StartResponse = (() => {
             options = {};
         let object = {};
         if (options.defaults) {
-            object.session = null;
+            object.id = null;
             object.response = null;
         }
-        if (message.session != null && message.hasOwnProperty("session"))
-            object.session = $root.Session.toObject(message.session, options);
+        if (message.id != null && message.hasOwnProperty("id"))
+            object.id = $root.Id.toObject(message.id, options);
         if (message.response != null && message.hasOwnProperty("response"))
             object.response = $root.TracerResponse.toObject(message.response, options);
         return object;
