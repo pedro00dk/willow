@@ -1,5 +1,6 @@
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
+import * as log from 'npmlog'
 import * as protocol from '../protobuf/protocol'
 import { StepConstraints } from '../tracer/step-constraints'
 import { Tracer } from '../tracer/tracer'
@@ -37,58 +38,96 @@ export class TracersSkeleton {
     }
 
     private configureRoutes() {
-        this.router.get('/mode', (req, res) => res.send(this.mode))
+        this.router.get('/mode', (req, res) => {
+            log.http(TracersSkeleton.name, 'mode', { mode: this.mode })
+            res.send(this.mode)
+        })
         this.router.post('/getLanguages', (req, res) => {
+            log.http(TracersSkeleton.name, 'getLanguages')
             const response = this.getLanguages(
-                this.readMessage(req, protocol.Empty.decodeDelimited, protocol.Empty.create)
+                this.readMessage(req, b => protocol.Empty.decodeDelimited(b), o => protocol.Empty.create(o))
             )
             this.writeMessage(res, () => protocol.Languages.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/getSessions', (req, res) => {
+            log.http(TracersSkeleton.name, 'getSessions')
             const response = this.getSessions(
-                this.readMessage(req, protocol.Empty.decodeDelimited, protocol.Empty.create)
+                this.readMessage(req, b => protocol.Empty.decodeDelimited(b), o => protocol.Empty.create(o))
             )
             this.writeMessage(res, () => protocol.Sessions.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/start', async (req, res) => {
+            log.http(TracersSkeleton.name, 'start')
             const response = await this.start(
-                this.readMessage(req, protocol.StartRequest.decodeDelimited, protocol.StartRequest.create)
+                this.readMessage(
+                    req,
+                    b => protocol.StartRequest.decodeDelimited(b),
+                    o => protocol.StartRequest.create(o)
+                )
             )
             this.writeMessage(res, () => protocol.StartResponse.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stop', (req, res) => {
-            const response = this.stop(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'stop')
+            const response = this.stop(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/step', async (req, res) => {
-            const response = await this.step(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'step')
+            const response = await this.step(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.TracerResponse.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stepOver', async (req, res) => {
-            const response = await this.stepOver(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'stepOver')
+            const response = await this.stepOver(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stepOut', async (req, res) => {
-            const response = await this.stepOut(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'stepOut')
+            const response = await this.stepOut(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/continue', async (req, res) => {
-            const response = await this.continue(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'continue')
+            const response = await this.continue(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/input', (req, res) => {
+            log.http(TracersSkeleton.name, 'input')
             const response = this.input(
-                this.readMessage(req, protocol.InputRequest.decodeDelimited, protocol.InputRequest.create)
+                this.readMessage(
+                    req,
+                    b => protocol.InputRequest.decodeDelimited(b),
+                    o => protocol.InputRequest.create(o)
+                )
             )
             this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/getBreakpoints', (req, res) => {
-            const response = this.getBreakpoints(this.readMessage(req, protocol.Id.decodeDelimited, protocol.Id.create))
+            log.http(TracersSkeleton.name, 'getBreakpoints')
+            const response = this.getBreakpoints(
+                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            )
             this.writeMessage(res, () => protocol.Breakpoints.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/setBreakpoints', (req, res) => {
+            log.http(TracersSkeleton.name, 'setBreakpoints')
             const response = this.setBreakpoints(
-                this.readMessage(req, protocol.BreakpointsRequest.decodeDelimited, protocol.BreakpointsRequest.create)
+                this.readMessage(
+                    req,
+                    b => protocol.BreakpointsRequest.decodeDelimited(b),
+                    protocol.BreakpointsRequest.create
+                )
             )
             this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
