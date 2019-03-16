@@ -53,10 +53,7 @@ class Inspector:
         Otherwise, returns a obj reference (list with a single number inside) inspecting obj members and filling the
         heap and classes.
         """
-        reference = id(obj)
-        if reference in heap:
-            return reference,
-        elif isinstance(obj, (bool, int, float, type(None))):
+        if isinstance(obj, (bool, int, float, type(None))):
             return obj
         elif isinstance(obj, (complex, str)):
             return repr(obj)
@@ -64,6 +61,10 @@ class Inspector:
             if obj.__module__ == module:
                 classes.add(obj)
             return obj.__name__
+        
+        reference = id(obj)
+        if reference in heap:
+            return reference,
 
         generic_type = ''
         members = None
@@ -80,7 +81,7 @@ class Inspector:
         else:  # unknown type
             generic_type = 'other'
 
-        if members:  # known object type processing
+        if members is not None:  # known object type processing
             # add reference to heap graph (has to be added before other objects inspections)
             heap[reference] = {}
             members_inspections = [
