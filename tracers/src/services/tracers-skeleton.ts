@@ -29,12 +29,24 @@ export class TracersSkeleton {
         this.configureRoutes()
     }
 
-    private readMessage<T>(req: express.Request, decode: (buf: Buffer) => T, create: (props: {}) => T) {
-        return this.mode === 'proto' ? decode(req.body as Buffer) : create(req.body as {})
-    }
-
-    private writeMessage(res: express.Response, toProto: () => Uint8Array, toJson: () => {}) {
-        res.send(this.mode === 'proto' ? toProto() : toJson())
+    private async respond<T, U>(
+        req: express.Request,
+        res: express.Response,
+        method: (request: T) => U | Promise<U>,
+        decode: (buffer: Buffer) => T,
+        create: (properties: {}) => T,
+        toProto: (response: U) => Uint8Array,
+        toJson: (response: U) => {}
+    ) {
+        try {
+            const request = this.mode === 'proto' ? decode(req.body) : create(req.body)
+            const response = method(request)
+            const awaitedResponse = response instanceof Promise ? await response : response
+            res.send(this.mode === 'proto' ? toProto(awaitedResponse) : toJson(awaitedResponse))
+        } catch (error) {
+            res.status(400)
+            res.send(error.message)
+        }
     }
 
     private configureRoutes() {
@@ -44,92 +56,132 @@ export class TracersSkeleton {
         })
         this.router.post('/getLanguages', (req, res) => {
             log.http(TracersSkeleton.name, 'getLanguages')
-            const response = this.getLanguages(
-                this.readMessage(req, b => protocol.Empty.decodeDelimited(b), o => protocol.Empty.create(o))
+            this.respond<protocol.Empty, protocol.Languages>(
+                req,
+                res,
+                request => this.getLanguages(request),
+                buffer => protocol.Empty.decodeDelimited(buffer),
+                properties => protocol.Empty.create(properties),
+                response => protocol.Languages.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Languages.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/getSessions', (req, res) => {
             log.http(TracersSkeleton.name, 'getSessions')
-            const response = this.getSessions(
-                this.readMessage(req, b => protocol.Empty.decodeDelimited(b), o => protocol.Empty.create(o))
+            this.respond<protocol.Empty, protocol.Sessions>(
+                req,
+                res,
+                request => this.getSessions(request),
+                buffer => protocol.Empty.decodeDelimited(buffer),
+                properties => protocol.Empty.create(properties),
+                response => protocol.Sessions.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Sessions.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/start', async (req, res) => {
             log.http(TracersSkeleton.name, 'start')
-            const response = await this.start(
-                this.readMessage(
-                    req,
-                    b => protocol.StartRequest.decodeDelimited(b),
-                    o => protocol.StartRequest.create(o)
-                )
+            this.respond<protocol.StartRequest, protocol.StartResponse>(
+                req,
+                res,
+                request => this.start(request),
+                buffer => protocol.StartRequest.decodeDelimited(buffer),
+                properties => protocol.StartRequest.create(properties),
+                response => protocol.StartResponse.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.StartResponse.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stop', (req, res) => {
-            log.http(TracersSkeleton.name, 'stop')
-            const response = this.stop(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.Empty>(
+                req,
+                res,
+                request => this.stop(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.Empty.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/step', async (req, res) => {
-            log.http(TracersSkeleton.name, 'step')
-            const response = await this.step(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.TracerResponse>(
+                req,
+                res,
+                request => this.step(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.TracerResponse.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.TracerResponse.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stepOver', async (req, res) => {
             log.http(TracersSkeleton.name, 'stepOver')
-            const response = await this.stepOver(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.TracerResponses>(
+                req,
+                res,
+                request => this.stepOver(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.TracerResponses.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/stepOut', async (req, res) => {
             log.http(TracersSkeleton.name, 'stepOut')
-            const response = await this.stepOut(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.TracerResponses>(
+                req,
+                res,
+                request => this.stepOut(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.TracerResponses.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/continue', async (req, res) => {
-            log.http(TracersSkeleton.name, 'continue')
-            const response = await this.continue(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.TracerResponses>(
+                req,
+                res,
+                request => this.continue(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.TracerResponses.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.TracerResponses.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/input', (req, res) => {
             log.http(TracersSkeleton.name, 'input')
-            const response = this.input(
-                this.readMessage(
-                    req,
-                    b => protocol.InputRequest.decodeDelimited(b),
-                    o => protocol.InputRequest.create(o)
-                )
+            this.respond<protocol.InputRequest, protocol.Empty>(
+                req,
+                res,
+                request => this.input(request),
+                buffer => protocol.InputRequest.decodeDelimited(buffer),
+                properties => protocol.InputRequest.create(properties),
+                response => protocol.Empty.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/getBreakpoints', (req, res) => {
             log.http(TracersSkeleton.name, 'getBreakpoints')
-            const response = this.getBreakpoints(
-                this.readMessage(req, b => protocol.Id.decodeDelimited(b), o => protocol.Id.create(o))
+            this.respond<protocol.Id, protocol.Breakpoints>(
+                req,
+                res,
+                request => this.getBreakpoints(request),
+                buffer => protocol.Id.decodeDelimited(buffer),
+                properties => protocol.Id.create(properties),
+                response => protocol.Breakpoints.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Breakpoints.encodeDelimited(response).finish(), () => response)
         })
         this.router.post('/setBreakpoints', (req, res) => {
             log.http(TracersSkeleton.name, 'setBreakpoints')
-            const response = this.setBreakpoints(
-                this.readMessage(
-                    req,
-                    b => protocol.BreakpointsRequest.decodeDelimited(b),
-                    protocol.BreakpointsRequest.create
-                )
+            this.respond<protocol.BreakpointsRequest, protocol.Empty>(
+                req,
+                res,
+                request => this.setBreakpoints(request),
+                buffer => protocol.BreakpointsRequest.decodeDelimited(buffer),
+                properties => protocol.BreakpointsRequest.create(properties),
+                response => protocol.Empty.encodeDelimited(response).finish(),
+                response => response
             )
-            this.writeMessage(res, () => protocol.Empty.encodeDelimited(response).finish(), () => response)
         })
     }
 
