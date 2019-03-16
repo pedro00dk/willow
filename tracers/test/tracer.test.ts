@@ -2,12 +2,12 @@ import { TracerProcess } from '../src/tracer/tracer-process'
 import { TracerWrapper } from '../src/tracer/tracer-wrapper'
 
 const tracers = {
-    // java: {
-    //     command: process.env.npm_package_config_java_tracer,
-    //     main: 'Main.java',
-    //     broken: '!@#$%*()',
-    //     working: 'public class Main { public static void main(String[] args) { } }'
-    // },
+    java: {
+        command: process.env.npm_package_config_java_tracer,
+        main: 'Main.java',
+        broken: '!@#$%*()',
+        working: 'public class Main { public static void main(String[] args) { } }'
+    },
     python: {
         command: process.env.npm_package_config_python_tracer,
         main: '<script>',
