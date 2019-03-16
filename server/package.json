@@ -20,6 +20,7 @@
         "npmlog": "^4.1.2",
         "passport": "^0.4.0",
         "passport-google-oauth": "^2.0.0",
+        "protobufjs": "^6.8.8",
         "yargs": "^13.2.2"
     },
     "scripts": {
