@@ -65,9 +65,7 @@ export class TracerProcess implements Tracer {
             this.stop()
             throw new Error(response)
         }
-        if (
-            response.events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish))
-        )
+        if (response.events.some(event => !!event.threw || (!!event.inspected && event.inspected.frame.finish)))
             this.stop()
         return response
     }
@@ -98,9 +96,7 @@ export class TracerProcess implements Tracer {
             this.stop()
             throw new Error(response)
         }
-        if (
-            response.events.some(event => event.threw != undefined || (event.inspected && event.inspected.frame.finish))
-        )
+        if (response.events.some(event => !!event.threw || (!!event.inspected && event.inspected.frame.finish)))
             this.stop()
         return response
     }

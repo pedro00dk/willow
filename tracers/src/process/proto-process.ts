@@ -49,7 +49,7 @@ export class ProtoProcess {
                 rxOps.map(buffer => new protobuf.Reader(buffer)),
                 rxOps.scan<protobuf.Reader>(
                     (acc, reader) => {
-                        if (acc[acc.length - 1] == undefined) {
+                        if (!acc[acc.length - 1]) {
                             const messageLength = reader.fixed32()
                             const readerLength = reader.len - reader.pos
                             reader.pos = 0
@@ -66,7 +66,7 @@ export class ProtoProcess {
                     },
                     [undefined] as protobuf.Reader[]
                 ),
-                rxOps.filter(buffers => buffers[buffers.length - 1] == undefined),
+                rxOps.filter(buffers => !buffers[buffers.length - 1]),
                 rxOps.map(
                     buffers => new protobuf.Reader(Buffer.concat(buffers.slice(0, -1).map(buffer => buffer.buf)))
                 ),

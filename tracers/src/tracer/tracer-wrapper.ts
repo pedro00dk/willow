@@ -15,7 +15,7 @@ export class TracerWrapper implements Tracer {
     }
 
     private updatePreviousInspectedEvent(response: protocol.TracerResponse) {
-        const inspectedEvents = response.events.filter(event => event.inspected != undefined)
+        const inspectedEvents = response.events.filter(event => !!event.inspected)
         if (inspectedEvents.length !== 0)
             this.previousInspectedEvent = inspectedEvents[inspectedEvents.length - 1].inspected
     }
@@ -51,7 +51,7 @@ export class TracerWrapper implements Tracer {
             if (
                 this.getState() === 'stopped' ||
                 (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length <= stackLength) ||
-                nextResponse.events[nextResponse.events.length - 1].locked != undefined
+                !!nextResponse.events[nextResponse.events.length - 1].locked
             )
                 break
         }
@@ -68,7 +68,7 @@ export class TracerWrapper implements Tracer {
             if (
                 this.getState() === 'stopped' ||
                 (this.previousInspectedEvent && this.previousInspectedEvent.frame.stack.scopes.length < stackLength) ||
-                nextResponse.events[nextResponse.events.length - 1].locked != undefined
+                !!nextResponse.events[nextResponse.events.length - 1].locked
             )
                 break
         }
@@ -85,7 +85,7 @@ export class TracerWrapper implements Tracer {
             if (
                 this.getState() === 'stopped' ||
                 this.breakpoints.has(currentLine) ||
-                nextResponse.events[nextResponse.events.length - 1].locked != undefined
+                !!nextResponse.events[nextResponse.events.length - 1].locked
             )
                 break
         }
