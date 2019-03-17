@@ -33,16 +33,15 @@ export class TracersSkeleton {
         req: express.Request,
         res: express.Response,
         method: (request: T) => U | Promise<U>,
-        decode: (buffer: Buffer) => T,
-        create: (properties: {}) => T,
-        toProto: (response: U) => Uint8Array,
-        toJson: (response: U) => {}
+        requestType: { create: (properties: {}) => T; decode: (buffer: Buffer) => T },
+        responseType: { encode: (response: U) => protobuf.Writer }
     ) {
+        log.http(TracersSkeleton.name, 'respond', req.path)
         try {
-            const request = this.mode === 'proto' ? decode(req.body) : create(req.body)
-            const response = method(request)
-            const awaitedResponse = response instanceof Promise ? await response : response
-            res.send(this.mode === 'proto' ? toProto(awaitedResponse) : toJson(awaitedResponse))
+            const request = this.mode === 'proto' ? requestType.decode(req.body) : requestType.create(req.body)
+            const responseOrPromise = method(request)
+            const response = responseOrPromise instanceof Promise ? await responseOrPromise : responseOrPromise
+            res.send(this.mode === 'proto' ? responseType.encode(response).finish() : response)
         } catch (error) {
             res.status(400)
             res.send(error.message)
@@ -54,135 +53,39 @@ export class TracersSkeleton {
             log.http(TracersSkeleton.name, 'mode', { mode: this.mode })
             res.send(this.mode)
         })
-        this.router.post('/getLanguages', (req, res) => {
-            log.http(TracersSkeleton.name, 'getLanguages')
-            this.respond<protocol.Empty, protocol.Languages>(
-                req,
-                res,
-                request => this.getLanguages(request),
-                buffer => protocol.Empty.decodeDelimited(buffer),
-                properties => protocol.Empty.create(properties),
-                response => protocol.Languages.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/getSessions', (req, res) => {
-            log.http(TracersSkeleton.name, 'getSessions')
-            this.respond<protocol.Empty, protocol.Sessions>(
-                req,
-                res,
-                request => this.getSessions(request),
-                buffer => protocol.Empty.decodeDelimited(buffer),
-                properties => protocol.Empty.create(properties),
-                response => protocol.Sessions.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/start', async (req, res) => {
-            log.http(TracersSkeleton.name, 'start')
-            this.respond<protocol.StartRequest, protocol.StartResponse>(
-                req,
-                res,
-                request => this.start(request),
-                buffer => protocol.StartRequest.decodeDelimited(buffer),
-                properties => protocol.StartRequest.create(properties),
-                response => protocol.StartResponse.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/stop', (req, res) => {
-            this.respond<protocol.Id, protocol.Empty>(
-                req,
-                res,
-                request => this.stop(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.Empty.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/step', async (req, res) => {
-            this.respond<protocol.Id, protocol.TracerResponse>(
-                req,
-                res,
-                request => this.step(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.TracerResponse.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/stepOver', async (req, res) => {
-            log.http(TracersSkeleton.name, 'stepOver')
-            this.respond<protocol.Id, protocol.TracerResponses>(
-                req,
-                res,
-                request => this.stepOver(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.TracerResponses.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/stepOut', async (req, res) => {
-            log.http(TracersSkeleton.name, 'stepOut')
-            this.respond<protocol.Id, protocol.TracerResponses>(
-                req,
-                res,
-                request => this.stepOut(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.TracerResponses.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/continue', async (req, res) => {
-            this.respond<protocol.Id, protocol.TracerResponses>(
-                req,
-                res,
-                request => this.continue(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.TracerResponses.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/input', (req, res) => {
-            log.http(TracersSkeleton.name, 'input')
-            this.respond<protocol.InputRequest, protocol.Empty>(
-                req,
-                res,
-                request => this.input(request),
-                buffer => protocol.InputRequest.decodeDelimited(buffer),
-                properties => protocol.InputRequest.create(properties),
-                response => protocol.Empty.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/getBreakpoints', (req, res) => {
-            log.http(TracersSkeleton.name, 'getBreakpoints')
-            this.respond<protocol.Id, protocol.Breakpoints>(
-                req,
-                res,
-                request => this.getBreakpoints(request),
-                buffer => protocol.Id.decodeDelimited(buffer),
-                properties => protocol.Id.create(properties),
-                response => protocol.Breakpoints.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
-        this.router.post('/setBreakpoints', (req, res) => {
-            log.http(TracersSkeleton.name, 'setBreakpoints')
-            this.respond<protocol.BreakpointsRequest, protocol.Empty>(
-                req,
-                res,
-                request => this.setBreakpoints(request),
-                buffer => protocol.BreakpointsRequest.decodeDelimited(buffer),
-                properties => protocol.BreakpointsRequest.create(properties),
-                response => protocol.Empty.encodeDelimited(response).finish(),
-                response => response
-            )
-        })
+        this.router.post('/getLanguages', (req, res) =>
+            this.respond(req, res, request => this.getLanguages(request), protocol.Empty, protocol.Languages)
+        )
+        this.router.post('/getSessions', (req, res) =>
+            this.respond(req, res, request => this.getSessions(request), protocol.Empty, protocol.Sessions)
+        )
+        this.router.post('/start', async (req, res) =>
+            this.respond(req, res, request => this.start(request), protocol.StartRequest, protocol.StartResponse)
+        )
+        this.router.post('/stop', (req, res) =>
+            this.respond(req, res, request => this.stop(request), protocol.Id, protocol.Empty)
+        )
+        this.router.post('/step', async (req, res) =>
+            this.respond(req, res, request => this.step(request), protocol.Id, protocol.TracerResponse)
+        )
+        this.router.post('/stepOver', async (req, res) =>
+            this.respond(req, res, request => this.stepOver(request), protocol.Id, protocol.TracerResponses)
+        )
+        this.router.post('/stepOut', async (req, res) =>
+            this.respond(req, res, request => this.stepOut(request), protocol.Id, protocol.TracerResponses)
+        )
+        this.router.post('/continue', async (req, res) =>
+            this.respond(req, res, request => this.continue(request), protocol.Id, protocol.TracerResponses)
+        )
+        this.router.post('/input', (req, res) =>
+            this.respond(req, res, request => this.input(request), protocol.InputRequest, protocol.Empty)
+        )
+        this.router.post('/getBreakpoints', (req, res) =>
+            this.respond(req, res, request => this.getBreakpoints(request), protocol.Id, protocol.Breakpoints)
+        )
+        this.router.post('/setBreakpoints', (req, res) =>
+            this.respond(req, res, request => this.setBreakpoints(request), protocol.BreakpointsRequest, protocol.Empty)
+        )
     }
 
     private checkGetSessionTracer(id: number) {
