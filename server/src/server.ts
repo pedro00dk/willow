@@ -15,28 +15,13 @@ export class Server {
     /**
      * Creates the server with the port and the secret.
      */
-    constructor(port: number, secret: string, client: string, tracerServerAddress: string) {
-        if (port < 0 || port > 65355) {
-            const error = 'illegal port number'
-            log.error(Server.name, error)
-            throw new Error(error)
-        }
-        if (secret == undefined) {
-            const error = 'secret not found'
-            log.error(Server.name, error)
-            throw new Error(error)
-        }
-        if (tracerServerAddress == undefined) {
-            const error = 'tracerServerAddress not found'
-            log.error(Server.name, error)
-            throw new Error(error)
-        }
+    constructor(port: number, secret: string, clients: string, tracerServerAddress: string) {
         this.server = express()
         this.server.use(express.json())
         this.server.use(session({ resave: false, saveUninitialized: true, secret }))
         this.server.use((request, response, next) => {
             // cors support with any origin (wildcard '*' not supported when credentials enabled)
-            const origin = [request.headers.origin].flat()[0] as string
+            const origin = clients !== '*' ? clients : ([request.headers.origin].flat()[0] as string)
             response.header('Access-Control-Allow-Origin', origin)
             response.header('Access-Control-Allow-Credentials', 'true')
             response.header('Access-Control-Allow-Headers', 'Content-Type')
