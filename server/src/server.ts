@@ -15,7 +15,7 @@ export class Server {
     /**
      * Creates the server with the port and the secret.
      */
-    constructor(port: number, secret: string, tracerServerAddress: string) {
+    constructor(port: number, secret: string, client: string, tracerServerAddress: string) {
         if (port < 0 || port > 65355) {
             const error = 'illegal port number'
             log.error(Server.name, error)
