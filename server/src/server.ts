@@ -1,21 +1,19 @@
+import * as axios from 'axios'
 import * as express from 'express'
 import * as session from 'express-session'
 import * as log from 'npmlog'
-import { Client } from './tracers/client'
+import * as protocol from './protobuf/protocol'
+import { TracersProxy } from './services/tracers-proxy'
 
 /**
- * Server to willow actions.
+ * Http server to willow API.
  */
 export class Server {
     private server: express.Express
-    private port: number
-    private tracersClient: Client
-    private usersTracers: Map<string, number>
+    private tracersProxy: TracersProxy
+    private clientTracers: Map<string, number>
 
-    /**
-     * Creates the server with the port and the secret.
-     */
-    constructor(port: number, secret: string, clients: string, tracerServerAddress: string) {
+    constructor(private port: number, private secret: string, clients: string, tracers: string) {
         this.server = express()
         this.server.use(express.json())
         this.server.use(session({ resave: false, saveUninitialized: true, secret }))
@@ -27,97 +25,135 @@ export class Server {
             response.header('Access-Control-Allow-Headers', 'Content-Type')
             next()
         })
-        this.port = port
-        this.tracersClient = new Client(tracerServerAddress)
-        this.usersTracers = new Map()
+        this.tracersProxy = new TracersProxy(axios.default.create({ baseURL: tracers }))
+        this.clientTracers = new Map()
         this.configureRoutes()
     }
 
-    /**
-     * Configures server routes.
-     */
     private configureRoutes() {
-        this.server.get('/session', (request, response) => {
-            log.http(Server.name, request.path)
-            response.send({ session: request.session.id })
+        this.server.get('/session', (req, res) => {
+            log.http(Server.name, req.path)
+            res.send({ session: req.session.id })
         })
-        this.server.get('/tracers/suppliers', (request, response) => {
-            log.http(Server.name, request.path)
+        const tracersRouter = express.Router()
+
+        const asyncRespond = async (req: express.Request, res: express.Response, action: () => Promise<unknown>) => {
+            log.http(Server.name, req.path)
             try {
-                response.send(this.getSuppliers())
+                res.send(await action())
             } catch (error) {
-                response.status(400).send(error.message)
+                res.status(400)
+                res.send(error.response ? error.response.data : error.toString())
             }
-        })
-        this.server.post('/tracers/create', async (request, response) => {
-            const userId = request.session.id
-            const supplier = request.body['supplier'] as string
-            const code = request.body['code'] as string
-            log.http(Server.name, request.path, { userId, supplier })
-            try {
-                response.send(await this.createSession(userId, supplier, code))
-            } catch (error) {
-                response.status(400).send(error.message)
-            }
-        })
-        this.server.post('/tracers/execute', async (request, response) => {
-            const userId = request.session.id
-            const action = request.body['action'] as string
-            const args = request.body['args'] as unknown[]
-            log.http(Server.name, request.path, { userId, action })
-            try {
-                response.send(await this.executeOnSession(userId, action, args))
-            } catch (error) {
-                response.status(400).send(error.message)
-            }
-        })
-    }
-
-    /**
-     * Lists the available suppliers.
-     */
-    getSuppliers() {
-        return this.tracersClient.getSuppliers()
-    }
-
-    /**
-     * Creates a new tracer session linked with the userId, with the received supplier and code.
-     */
-    async createSession(userId: string, supplier: string, code: string) {
-        if (this.usersTracers.has(userId)) {
-            const tracerId = this.usersTracers.get(userId)
-            await this.tracersClient.execute(tracerId, 'stop', [])
-            log.info(Server.name, 'removed previous session', { userId, tracerId })
         }
-        const { id } = await this.tracersClient.create(supplier, code)
-        log.info(Server.name, 'created session', { userId, tracerId: id, supplier })
-        this.usersTracers.set(userId, id)
+
+        tracersRouter.get('/getLanguages', (req, res) =>
+            asyncRespond(req, res, () => this.tracersProxy.getLanguages(protocol.Empty.create()))
+        )
+        // tracersRouter.get('/getSessions', (req, res) =>
+        //     asyncRespond(req, res, () => this.tracersProxy.getSessions(protocol.Empty.create()))
+        // )
+        tracersRouter.post('/start', (req, res) =>
+            asyncRespond(req, res, async () => {
+                if (this.clientTracers.has(req.session.id)) {
+                    await this.tracersProxy.stop(protocol.Id.create({ id: this.clientTracers.get(req.session.id) }))
+                    this.clientTracers.delete(req.session.id)
+                }
+                const language = req.body['language'] as string
+                const main = req.body['main'] as string
+                const code = req.body['code'] as string
+                const startResponse = await this.tracersProxy.start(
+                    protocol.StartRequest.create({ language, start: protocol.Action.Start.create({ main, code }) })
+                )
+                const lastEvent = startResponse.response.events[startResponse.response.events.length - 1]
+                if (!!lastEvent.started) this.clientTracers.set(req.session.id, startResponse.id.id)
+                return startResponse
+            })
+        )
+        tracersRouter.post('/stop', (req, res) =>
+            asyncRespond(req, res, () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                this.clientTracers.delete(req.session.id)
+                return this.tracersProxy.stop(protocol.Id.create({ id }))
+            })
+        )
+        tracersRouter.post('/step', (req, res) =>
+            asyncRespond(req, res, async () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const response = await this.tracersProxy.step(protocol.Id.create({ id }))
+                const lastEvent = response.events[response.events.length - 1]
+                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                    this.clientTracers.delete(req.session.id)
+                return response
+            })
+        )
+        tracersRouter.post('/stepOver', (req, res) =>
+            asyncRespond(req, res, async () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const responses = await this.tracersProxy.stepOver(protocol.Id.create({ id }))
+                const lastResponse = responses.responses[responses.responses.length - 1]
+                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                    this.clientTracers.delete(req.session.id)
+                return responses
+            })
+        )
+        tracersRouter.post('/stepOut', (req, res) =>
+            asyncRespond(req, res, async () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const responses = await this.tracersProxy.stepOut(protocol.Id.create({ id }))
+                const lastResponse = responses.responses[responses.responses.length - 1]
+                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                    this.clientTracers.delete(req.session.id)
+                return responses
+            })
+        )
+        tracersRouter.post('/continue', (req, res) =>
+            asyncRespond(req, res, async () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const responses = await this.tracersProxy.continue(protocol.Id.create({ id }))
+                const lastResponse = responses.responses[responses.responses.length - 1]
+                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                    this.clientTracers.delete(req.session.id)
+                return responses
+            })
+        )
+        tracersRouter.post('/input', (req, res) =>
+            asyncRespond(req, res, () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const lines = req.body as string[]
+                return this.tracersProxy.input(
+                    protocol.InputRequest.create({
+                        id: protocol.Id.create({ id }),
+                        input: protocol.Action.Input.create({ lines })
+                    })
+                )
+            })
+        )
+        tracersRouter.post('/getBreakpoints', (req, res) =>
+            asyncRespond(req, res, () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                return this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
+            })
+        )
+        tracersRouter.post('/setBreakpoints', (req, res) =>
+            asyncRespond(req, res, () => {
+                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                const lines = req.body as number[]
+                return this.tracersProxy.setBreakpoints(
+                    protocol.BreakpointsRequest.create({
+                        id: protocol.Id.create({ id }),
+                        breakpoints: protocol.Breakpoints.create({ lines })
+                    })
+                )
+            })
+        )
     }
 
-    /**
-     * Executes on the received session tracer an action correspondent to a tracer methods with the received args.
-     */
-    async executeOnSession(userId: string, action: string, args: unknown[]) {
-        if (!this.usersTracers.has(userId)) {
-            const error = 'user has no tracer associated'
-            log.warn(Server.name, error, { userId })
-            throw new Error(error)
-        }
-        const tracerId = this.usersTracers.get(userId)
-        const { data, finished } = await this.tracersClient.execute(tracerId, action, args)
-        if (finished) {
-            log.info(Server.name, 'tracer stopped', { userId, tracerId })
-            this.usersTracers.delete(userId)
-        }
-        log.info(Server.name, 'executed', { userId, tracerId, action, finished })
-        return data
-    }
-
-    /**
-     * Starts the server.
-     */
     listen() {
-        log.info(Server.name, 'start listening', { port: this.port })
+        log.info(Server.name, 'listen', { port: this.port })
         this.server.listen(this.port)
     }
 }
