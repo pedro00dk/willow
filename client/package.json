@@ -9,7 +9,9 @@
         "@types/redux-thunk": "^2.1.0",
         "parcel-bundler": "^1.12.2",
         "protobufjs": "^6.8.8",
+        "prettier": "^1.16.4",
         "tslint": "^5.14.0",
+        "tslint-config-prettier": "^1.18.0",
         "typescript": "^3.3.3333"
     },
     "dependencies": {
@@ -27,7 +29,7 @@
         "server": "http://localhost:8001"
     },
     "scripts": {
-        "format": "tslint --config ./tslint.json --project ./package.json && shopt -s globstar && prettier --config ./.prettierrc.js --check --write ./src/**/*[^.][^d].ts && shopt -u globstar",
+        "format": "tslint --config ./tslint.json --project ./package.json && shopt -s globstar && prettier --config ./.prettierrc.js --check --write ./src/**/*[^.][^d].ts* && shopt -u globstar",
         "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/*.proto && pbts --no-comments --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js && rm ./src/protobuf/protocol.js && sed --in-place \"/^.*\\(import\\|constructor\\|public toJSON\\|public static\\).*$/d\" -- ./src/protobuf/protocol.d.ts",
         "build": "parcel build --no-cache --no-source-maps --public-url ./ --out-dir ./dist/build -- $npm_package_main",
         "start": "SERVER_ADDRESS=$npm_package_config_server parcel serve --no-cache --out-dir ./dist/ --port 8000 -- $npm_package_main"

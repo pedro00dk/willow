@@ -3,19 +3,19 @@ import { Reducer } from 'redux'
 import { serverAddress } from '../server'
 import { ThunkAction } from './Store'
 
-
 type State = {
     readonly debugging: boolean
     readonly fetching: boolean
     readonly results: unknown[]
     readonly error?: string
 }
+
 type Action =
-    { type: 'debug/start', payload?: { results: unknown[] }, error?: string } |
-    { type: 'debug/stop', payload?: {}, error?: string } |
-    { type: 'debug/input', payload?: {}, error?: string } |
-    { type: 'debug/breakpoints', payload?: {}, error?: string } |
-    { type: 'debug/step', payload?: { results: unknown[] }, error?: string }
+    | { type: 'debug/start'; payload?: { results: unknown[] }; error?: string }
+    | { type: 'debug/stop'; payload?: {}; error?: string }
+    | { type: 'debug/input'; payload?: {}; error?: string }
+    | { type: 'debug/breakpoints'; payload?: {}; error?: string }
+    | { type: 'debug/step'; payload?: { results: unknown[] }; error?: string }
 
 const initialState: State = {
     debugging: false,
@@ -31,14 +31,14 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             return !action.payload && !action.error
                 ? { ...initialState, debugging: true, fetching: true }
                 : action.payload
-                    ? { ...state, fetching: false, results: action.payload.results }
-                    : { ...state, debugging: false, fetching: false, error: action.error }
+                ? { ...state, fetching: false, results: action.payload.results }
+                : { ...state, debugging: false, fetching: false, error: action.error }
         case 'debug/stop':
             return !action.payload && !action.error
                 ? { ...state, debugging: true, fetching: true }
                 : action.payload
-                    ? { ...state, debugging: false, fetching: false }
-                    : { ...state, debugging: false, fetching: false, error: action.error }
+                ? { ...state, debugging: false, fetching: false }
+                : { ...state, debugging: false, fetching: false, error: action.error }
         case 'debug/input':
             break
         case 'debug/step':
@@ -46,8 +46,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             return !action.payload && !action.error
                 ? { ...state, fetching: true }
                 : action.payload
-                    ? { ...state, fetching: false, results: [...state.results, ...action.payload.results] }
-                    : { ...state, debugging: false, fetching: false, error: action.error }
+                ? { ...state, fetching: false, results: [...state.results, ...action.payload.results] }
+                : { ...state, debugging: false, fetching: false, error: action.error }
 
         case 'debug/breakpoints':
             break
@@ -66,7 +66,9 @@ export function start(): ThunkAction {
                 { withCredentials: true }
             )
             const response = await axios.post(
-                `${serverAddress}/tracers/execute`, { action: 'start', args: [] }, { withCredentials: true }
+                `${serverAddress}/tracers/execute`,
+                { action: 'start', args: [] },
+                { withCredentials: true }
             )
             dispatch({ type: 'debug/start', payload: { results: response.data } })
         } catch (error) {
@@ -80,7 +82,9 @@ export function stop(): ThunkAction {
         dispatch({ type: 'debug/stop' })
         try {
             await axios.post(
-                `${serverAddress}/tracers/execute`, { action: 'stop', args: [] }, { withCredentials: true }
+                `${serverAddress}/tracers/execute`,
+                { action: 'stop', args: [] },
+                { withCredentials: true }
             )
             dispatch({ type: 'debug/stop', payload: {} })
         } catch (error) {
@@ -94,13 +98,14 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
         dispatch({ type: 'debug/step' })
         try {
             const response = await axios.post(
-                `${serverAddress}/tracers/execute`, { action, args: [] }, { withCredentials: true }
+                `${serverAddress}/tracers/execute`,
+                { action, args: [] },
+                { withCredentials: true }
             )
             dispatch({ type: 'debug/step', payload: { results: response.data } })
         } catch (error) {
             dispatch({ type: 'debug/step', error: error.response ? error.response.data : error.toString() })
         }
-
     }
 }
 

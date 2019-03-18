@@ -3,13 +3,12 @@ import { Reducer } from 'redux'
 import { serverAddress } from '../server'
 import { ThunkAction } from './Store'
 
-
 type State = {
     readonly session: string
     readonly fetching: boolean
     readonly failed: boolean
 }
-type Action = { type: 'session/fetch', payload?: { session: string }, error?: string }
+type Action = { type: 'session/fetch'; payload?: { session: string }; error?: string }
 
 const initialState: State = {
     session: undefined,
@@ -24,8 +23,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             return !action.payload && !action.error
                 ? { ...state, fetching: true, error: false }
                 : action.payload
-                    ? { ...state, session: action.payload.session, fetching: false, failed: false }
-                    : { ...state, fetching: false, failed: true }
+                ? { ...state, session: action.payload.session, fetching: false, failed: false }
+                : { ...state, fetching: false, failed: true }
     }
     return state
 }
@@ -34,7 +33,7 @@ export function fetch(): ThunkAction {
     return async dispatch => {
         dispatch({ type: 'session/fetch' })
         try {
-            const session = (await axios.get(`${serverAddress}/session`, { withCredentials: true }))
+            const session = await axios.get(`${serverAddress}/session`, { withCredentials: true })
             dispatch({ type: 'session/fetch', payload: { session: session.data.session } })
         } catch (error) {
             dispatch({ type: 'session/fetch', error: error.message })

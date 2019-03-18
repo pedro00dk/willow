@@ -2,10 +2,9 @@ import * as ace from 'brace'
 import * as React from 'react'
 import { TextEditor } from './TextEditor'
 
-
 type EditorExecEvent = {
     [props: string]: unknown
-    args: string | { text: string, event: ClipboardEvent }
+    args: string | { text: string; event: ClipboardEvent }
     command: ace.EditorCommand
     editor: ace.Editor
     preventDefault: () => void
@@ -14,31 +13,28 @@ type EditorExecEvent = {
 
 export function IOEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
-    React.useEffect(
-        () => {
-            if (!editor) return
-            editor.$blockScrolling = Infinity
+    React.useEffect(() => {
+        if (!editor) return
+        editor.$blockScrolling = Infinity
 
-            const onExec = (event: EditorExecEvent, commandManager: ace.CommandManager) => {
-                const command = event.command.name
-                if (!new Set(['insertstring', 'paste', 'backspace', 'del', 'cut']).has(command)) return
-                const anchor = editor.selection.getSelectionAnchor()
-                const lead = editor.selection.getSelectionLead()
-                const lastLine = editor.session.getLength() - 1
-                if (anchor.row < lastLine || lead.row < lastLine ||
-                    event.command.name === 'backspace' && anchor.column === 0 && lead.column === 0) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
+        const onExec = (event: EditorExecEvent, commandManager: ace.CommandManager) => {
+            const command = event.command.name
+            if (!new Set(['insertstring', 'paste', 'backspace', 'del', 'cut']).has(command)) return
+            const anchor = editor.selection.getSelectionAnchor()
+            const lead = editor.selection.getSelectionLead()
+            const lastLine = editor.session.getLength() - 1
+            if (
+                anchor.row < lastLine ||
+                lead.row < lastLine ||
+                (event.command.name === 'backspace' && anchor.column === 0 && lead.column === 0)
+            ) {
+                event.preventDefault()
+                event.stopPropagation()
             }
+        }
+        ;(editor.commands as any).on('exec', onExec)
+        return () => (editor.commands as any).off('exec', onExec)
+    }, [editor])
 
-            (editor.commands as any).on('exec', onExec)
-            return () => (editor.commands as any).off('exec', onExec)
-        },
-        [editor]
-    )
-
-    return <TextEditor
-        onEditorUpdate={setEditor}
-    />
+    return <TextEditor onEditorUpdate={setEditor} />
 }

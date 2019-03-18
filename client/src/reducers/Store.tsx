@@ -12,37 +12,45 @@ type State = {
     io: Parameters<typeof IOReducer>[0]
     session: Parameters<typeof SessionReducer>[0]
 }
-type Action = Parameters<typeof CodeReducer>[1] |
-    Parameters<typeof DebugReducer>[1] |
-    Parameters<typeof IOReducer>[1] |
-    Parameters<typeof SessionReducer>[1]
-type SubState = Pick<State, 'code'> |
-    Pick<State, 'debug'> |
-    Pick<State, 'io'> |
-    Pick<State, 'session'>
+
+type Action =
+    | Parameters<typeof CodeReducer>[1]
+    | Parameters<typeof DebugReducer>[1]
+    | Parameters<typeof IOReducer>[1]
+    | Parameters<typeof SessionReducer>[1]
+
+type SubState = Pick<State, 'code'> | Pick<State, 'debug'> | Pick<State, 'io'> | Pick<State, 'session'>
+
 export type ThunkAction<R = void> = ThunkAction<R, State, void, Action>
 
 const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware<State, Action, void>))
 const reduxStoreCreator = reduxStoreEnhancer(Redux.createStore)
-const reduxStore = reduxStoreCreator(Redux.combineReducers<State, Action>({
-    code: CodeReducer,
-    debug: DebugReducer,
-    io: IOReducer,
-    session: SessionReducer
-}))
+const reduxStore = reduxStoreCreator(
+    Redux.combineReducers<State, Action>({
+        code: CodeReducer,
+        debug: DebugReducer,
+        io: IOReducer,
+        session: SessionReducer
+    })
+)
 const storeContext = React.createContext<typeof reduxStore>(undefined)
 
-export function Store(props: { children?}) {
-    return <storeContext.Provider value={reduxStore}>
-        {props.children}
-    </storeContext.Provider>
+export function Store(props: { children?: React.ReactNode }) {
+    return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
 }
 
 function compareStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(prev)
-    return prevKeys.length === nextKeys.length && nextKeys.reduce((acc, key) => acc && prev[key] === next[key], true)
+    return (
+        prevKeys.length === nextKeys.length &&
+        nextKeys.reduce(
+            (acc, key) =>
+                acc && (prev as { [key: string]: unknown })[key] === (prev as { [key: string]: unknown })[key],
+            true
+        )
+    )
 }
 
 export function useDispatch() {
@@ -54,10 +62,8 @@ export function useDispatch() {
 export function useRedux<T extends SubState>(selector: (state: State) => T) {
     const store = React.useContext(storeContext)
     if (!store) throw new Error('Store context not found')
-
     const firstSelector = React.useCallback(selector, [])
     const storeReference = React.useRef(store)
-
     const [selection, setSelection] = React.useState(() => firstSelector(store.getState()))
     const previousSelection = React.useRef(selection)
 
@@ -72,20 +78,15 @@ export function useRedux<T extends SubState>(selector: (state: State) => T) {
         storeReference.current = store
         checkAndSetSelection()
     }
-
-    React.useEffect(
-        () => {
-            let didUnsubscribe = false
-            const checkForUpdates = () => !didUnsubscribe ? checkAndSetSelection() : undefined
-            checkForUpdates()
-            const unsubscribe = store.subscribe(checkForUpdates)
-            return () => {
-                didUnsubscribe = true
-                unsubscribe()
-            }
-        },
-        [store, selector]
-    )
-
+    React.useEffect(() => {
+        let didUnsubscribe = false
+        const checkForUpdates = () => (!didUnsubscribe ? checkAndSetSelection() : undefined)
+        checkForUpdates()
+        const unsubscribe = store.subscribe(checkForUpdates)
+        return () => {
+            didUnsubscribe = true
+            unsubscribe()
+        }
+    }, [store, selector])
     return selection
 }
