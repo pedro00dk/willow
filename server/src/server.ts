@@ -150,10 +150,12 @@ export class Server {
                 )
             })
         )
+        this.server.use('/tracers', tracersRouter)
     }
 
-    listen() {
+    async listen() {
         log.info(Server.name, 'listen', { port: this.port })
+        await this.tracersProxy.connect()
         this.server.listen(this.port)
     }
 }
