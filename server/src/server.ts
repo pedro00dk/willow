@@ -75,7 +75,7 @@ export class Server {
                         await this.tracersProxy.stop(
                             protocol.Id.create({ id: this.clientTracers.get(req.session.id).id })
                         )
-                        this.deleteClient(req.session.id)
+                        this.clearClient(req.session.id)
                     }
                     const language = req.body['language'] as string
                     const main = req.body['main'] as string
@@ -85,16 +85,16 @@ export class Server {
                     )
                     const response = startResponse.response
                     const lastEvent = response.events[response.events.length - 1]
-                    if (!!lastEvent.started) this.setClient(req.session.id, startResponse.id.id)
+                    if (!!lastEvent.started) this.createClient(req.session.id, startResponse.id.id)
                     return protocol.TracerResponse.toObject(response, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/stop', (req, res) =>
             asyncRespond(req, res, async () => {
                 const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
-                this.deleteClient(req.session.id)
+                this.clearClient(req.session.id)
                 const empty = await this.tracersProxy.stop(protocol.Id.create({ id }))
                 return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
             })
@@ -106,12 +106,13 @@ export class Server {
                 async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const response = await this.tracersProxy.step(protocol.Id.create({ id }))
+                    this.refreshClient(req.session.id)
                     const lastEvent = response.events[response.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                        this.deleteClient(req.session.id)
+                        this.clearClient(req.session.id)
                     return protocol.TracerResponse.toObject(response, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/stepOver', (req, res) =>
@@ -121,13 +122,14 @@ export class Server {
                 async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const responses = await this.tracersProxy.stepOver(protocol.Id.create({ id }))
+                    this.refreshClient(req.session.id)
                     const lastResponse = responses.responses[responses.responses.length - 1]
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                        this.deleteClient(req.session.id)
+                        this.clearClient(req.session.id)
                     return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/stepOut', (req, res) =>
@@ -137,13 +139,14 @@ export class Server {
                 async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const responses = await this.tracersProxy.stepOut(protocol.Id.create({ id }))
+                    this.refreshClient(req.session.id)
                     const lastResponse = responses.responses[responses.responses.length - 1]
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                        this.deleteClient(req.session.id)
+                        this.clearClient(req.session.id)
                     return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/continue', (req, res) =>
@@ -153,13 +156,14 @@ export class Server {
                 async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const responses = await this.tracersProxy.continue(protocol.Id.create({ id }))
+                    this.refreshClient(req.session.id)
                     const lastResponse = responses.responses[responses.responses.length - 1]
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                        this.deleteClient(req.session.id)
+                        this.clearClient(req.session.id)
                     return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/input', (req, res) =>
@@ -175,9 +179,10 @@ export class Server {
                             input: protocol.Action.Input.create({ lines })
                         })
                     )
+                    this.refreshClient(req.session.id)
                     return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/getBreakpoints', (req, res) =>
@@ -187,9 +192,10 @@ export class Server {
                 async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const breakpoints = await this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
+                    this.refreshClient(req.session.id)
                     return protocol.Breakpoints.toObject(breakpoints, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         tracersRouter.post('/setBreakpoints', (req, res) =>
@@ -205,31 +211,45 @@ export class Server {
                             breakpoints: protocol.Breakpoints.create({ lines })
                         })
                     )
+                    this.refreshClient(req.session.id)
                     return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
                 },
-                () => this.deleteClient(req.session.id)
+                () => this.clearClient(req.session.id)
             )
         )
         this.server.use('/tracers', tracersRouter)
     }
 
-    setClient(client: string, tracer: number) {
+    createClient(client: string, tracer: number) {
         log.info(Server.name, 'start client', { client, tracer })
         if (this.clientTracers.has(client)) return
         this.clientTracers.set(client, {
             id: tracer,
-            lifetime: setTimeout(() => this.deleteClient(client), this.lifetime * 60000),
-            inactive: setTimeout(() => this.deleteClient(client), this.inactive * 60000)
+            lifetime: setTimeout(() => {
+                log.info(Server.name, 'start client', 'lifetime timeout', { client, tracer })
+                this.clearClient(client, true)
+            }, this.lifetime * 60000),
+            inactive: setTimeout(() => {
+                log.info(Server.name, 'start client', 'inactive timeout', { client, tracer })
+                this.clearClient(client, true)
+            }, this.inactive * 60000)
         })
     }
 
-    deleteClient(client: string) {
-        log.info(Server.name, 'stop client', { client })
+    async clearClient(client: string, requireDelete: boolean = false) {
+        log.info(Server.name, 'clear client', { client })
         if (!this.clientTracers.has(client)) return
         const clientData = this.clientTracers.get(client)
         clearTimeout(clientData.lifetime)
         clearTimeout(clientData.inactive)
         this.clientTracers.delete(client)
+        if (!requireDelete) return
+        log.info(Server.name, 'clear client', 'require delete', { client })
+        try {
+            await this.tracersProxy.stop(protocol.Id.create({ id: clientData.id }))
+        } catch (error) {
+            log.info(Server.name, 'clear client', 'require delete fail', { client, error: error.message })
+        }
     }
 
     refreshClient(client: string) {
