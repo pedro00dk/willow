@@ -29,6 +29,13 @@ const { Range } = ace.acequire('ace/range') as {
     Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
 }
 
+const styles = {
+    breakpoint: css({ backgroundColor: 'LightCoral' }),
+    highlight: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
+    warning: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
+    error: css({ position: 'absolute', backgroundColor: 'LightCoral' })
+}
+
 type Props = {
     mode: 'java' | 'python'
     font?: number
@@ -50,7 +57,7 @@ export function CodeEditor(props: Props) {
             dispatch({ type: 'code/setText', payload: { text: editor.session.doc.getAllLines() } })
 
         const onGutterMouseDown = (event: EditorMouseEvent) => {
-            const gutterLayer = editor.renderer['$gutterLayer'] as EditorGutterLayer
+            const gutterLayer = (editor.renderer as { [key: string]: unknown })['$gutterLayer'] as EditorGutterLayer
             const region = gutterLayer.getRegion(event)
             if (region !== 'markers') return
             const line = (event.getDocumentPosition() as ace.Position).row
@@ -69,18 +76,12 @@ export function CodeEditor(props: Props) {
     }, [props.mode])
     React.useEffect(() => {
         if (!editor) return
-        const breakpointDecoration = css({ backgroundColor: 'LightCoral' })
-        const decorations = editor.session['$decorations'] as string[]
-        decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, breakpointDecoration))
-        code.breakpoints.forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, breakpointDecoration))
+        const decorations = (editor.session as { [key: string]: unknown })['$decorations'] as string[]
+        decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
+        code.breakpoints.forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, styles.breakpoint))
     }, [code.breakpoints])
     React.useEffect(() => {
         if (!editor) return
-        const decorations = {
-            highlight: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
-            warning: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
-            error: css({ position: 'absolute', backgroundColor: 'LightCoral' })
-        }
         const markers = editor.session.getMarkers(false) as EditorMarker[]
         Object.values(markers)
             .filter(marker => marker.id > 2)
@@ -88,7 +89,7 @@ export function CodeEditor(props: Props) {
         code.markers.forEach(marker =>
             editor.session.addMarker(
                 new Range(marker.line, 0, marker.line, Infinity),
-                decorations[marker.type],
+                styles[marker.type],
                 'fullLine',
                 false
             )
