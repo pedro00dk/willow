@@ -83,9 +83,10 @@ export class Server {
                     const startResponse = await this.tracersProxy.start(
                         protocol.StartRequest.create({ language, start: protocol.Action.Start.create({ main, code }) })
                     )
-                    const lastEvent = startResponse.response.events[startResponse.response.events.length - 1]
+                    const response = startResponse.response
+                    const lastEvent = response.events[response.events.length - 1]
                     if (!!lastEvent.started) this.startClient(req.session.id, startResponse.id.id)
-                    return startResponse
+                    return response
                 },
                 () => this.stopClient(req.session.id)
             )
