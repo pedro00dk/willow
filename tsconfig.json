@@ -4,7 +4,6 @@
         "lib": ["esnext"],
         "newLine": "LF",
         "noImplicitAny": true,
-        "noImplicitReturns": true,
         "noImplicitThis": true,
         "outDir": "./dist/",
         "sourceMap": true,
