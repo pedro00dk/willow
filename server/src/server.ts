@@ -56,7 +56,7 @@ export class Server {
             } catch (error) {
                 if (!!onError) onError()
                 res.status(400)
-                res.send(error.response ? error.response.data : error.toString())
+                res.send(!!error.response ? error.response.data : error.toString())
             }
         }
 

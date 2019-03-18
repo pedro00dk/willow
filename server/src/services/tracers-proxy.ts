@@ -42,7 +42,7 @@ export class TracersProxy {
             const data = (await api.post(method, request, this.requestConfig)).data
             return this.mode === 'proto' ? responseType.decode(data) : responseType.create(data)
         } catch (error) {
-            throw new Error(error.response ? error.response.data : error.toString())
+            throw new Error(!!error.response ? error.response.data : error.toString())
         }
     }
 
