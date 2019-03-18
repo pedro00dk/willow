@@ -37,11 +37,17 @@ export class Server {
         })
         const tracersRouter = express.Router()
 
-        const asyncRespond = async (req: express.Request, res: express.Response, action: () => Promise<unknown>) => {
+        const asyncRespond = async (
+            req: express.Request,
+            res: express.Response,
+            action: () => Promise<unknown>,
+            onError?: () => void
+        ) => {
             log.http(Server.name, req.path)
             try {
                 res.send(await action())
             } catch (error) {
+                if (!!onError) onError()
                 res.status(400)
                 res.send(error.response ? error.response.data : error.toString())
             }
@@ -54,21 +60,26 @@ export class Server {
         //     asyncRespond(req, res, () => this.tracersProxy.getSessions(protocol.Empty.create()))
         // )
         tracersRouter.post('/start', (req, res) =>
-            asyncRespond(req, res, async () => {
-                if (this.clientTracers.has(req.session.id)) {
-                    await this.tracersProxy.stop(protocol.Id.create({ id: this.clientTracers.get(req.session.id) }))
-                    this.clientTracers.delete(req.session.id)
-                }
-                const language = req.body['language'] as string
-                const main = req.body['main'] as string
-                const code = req.body['code'] as string
-                const startResponse = await this.tracersProxy.start(
-                    protocol.StartRequest.create({ language, start: protocol.Action.Start.create({ main, code }) })
-                )
-                const lastEvent = startResponse.response.events[startResponse.response.events.length - 1]
-                if (!!lastEvent.started) this.clientTracers.set(req.session.id, startResponse.id.id)
-                return startResponse
-            })
+            asyncRespond(
+                req,
+                res,
+                async () => {
+                    if (this.clientTracers.has(req.session.id)) {
+                        await this.tracersProxy.stop(protocol.Id.create({ id: this.clientTracers.get(req.session.id) }))
+                        this.clientTracers.delete(req.session.id)
+                    }
+                    const language = req.body['language'] as string
+                    const main = req.body['main'] as string
+                    const code = req.body['code'] as string
+                    const startResponse = await this.tracersProxy.start(
+                        protocol.StartRequest.create({ language, start: protocol.Action.Start.create({ main, code }) })
+                    )
+                    const lastEvent = startResponse.response.events[startResponse.response.events.length - 1]
+                    if (!!lastEvent.started) this.clientTracers.set(req.session.id, startResponse.id.id)
+                    return startResponse
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/stop', (req, res) =>
             asyncRespond(req, res, () => {
@@ -78,77 +89,112 @@ export class Server {
             })
         )
         tracersRouter.post('/step', (req, res) =>
-            asyncRespond(req, res, async () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const response = await this.tracersProxy.step(protocol.Id.create({ id }))
-                const lastEvent = response.events[response.events.length - 1]
-                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                    this.clientTracers.delete(req.session.id)
-                return response
-            })
+            asyncRespond(
+                req,
+                res,
+                async () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const response = await this.tracersProxy.step(protocol.Id.create({ id }))
+                    const lastEvent = response.events[response.events.length - 1]
+                    if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                        this.clientTracers.delete(req.session.id)
+                    return response
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/stepOver', (req, res) =>
-            asyncRespond(req, res, async () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const responses = await this.tracersProxy.stepOver(protocol.Id.create({ id }))
-                const lastResponse = responses.responses[responses.responses.length - 1]
-                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
-                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                    this.clientTracers.delete(req.session.id)
-                return responses
-            })
+            asyncRespond(
+                req,
+                res,
+                async () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const responses = await this.tracersProxy.stepOver(protocol.Id.create({ id }))
+                    const lastResponse = responses.responses[responses.responses.length - 1]
+                    const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                    if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                        this.clientTracers.delete(req.session.id)
+                    return responses
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/stepOut', (req, res) =>
-            asyncRespond(req, res, async () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const responses = await this.tracersProxy.stepOut(protocol.Id.create({ id }))
-                const lastResponse = responses.responses[responses.responses.length - 1]
-                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
-                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                    this.clientTracers.delete(req.session.id)
-                return responses
-            })
+            asyncRespond(
+                req,
+                res,
+                async () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const responses = await this.tracersProxy.stepOut(protocol.Id.create({ id }))
+                    const lastResponse = responses.responses[responses.responses.length - 1]
+                    const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                    if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                        this.clientTracers.delete(req.session.id)
+                    return responses
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/continue', (req, res) =>
-            asyncRespond(req, res, async () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const responses = await this.tracersProxy.continue(protocol.Id.create({ id }))
-                const lastResponse = responses.responses[responses.responses.length - 1]
-                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
-                if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
-                    this.clientTracers.delete(req.session.id)
-                return responses
-            })
+            asyncRespond(
+                req,
+                res,
+                async () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const responses = await this.tracersProxy.continue(protocol.Id.create({ id }))
+                    const lastResponse = responses.responses[responses.responses.length - 1]
+                    const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                    if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
+                        this.clientTracers.delete(req.session.id)
+                    return responses
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/input', (req, res) =>
-            asyncRespond(req, res, () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const lines = req.body as string[]
-                return this.tracersProxy.input(
-                    protocol.InputRequest.create({
-                        id: protocol.Id.create({ id }),
-                        input: protocol.Action.Input.create({ lines })
-                    })
-                )
-            })
+            asyncRespond(
+                req,
+                res,
+                () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const lines = req.body as string[]
+                    return this.tracersProxy.input(
+                        protocol.InputRequest.create({
+                            id: protocol.Id.create({ id }),
+                            input: protocol.Action.Input.create({ lines })
+                        })
+                    )
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/getBreakpoints', (req, res) =>
-            asyncRespond(req, res, () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                return this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
-            })
+            asyncRespond(
+                req,
+                res,
+                () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    return this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         tracersRouter.post('/setBreakpoints', (req, res) =>
-            asyncRespond(req, res, () => {
-                const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
-                const lines = req.body as number[]
-                return this.tracersProxy.setBreakpoints(
-                    protocol.BreakpointsRequest.create({
-                        id: protocol.Id.create({ id }),
-                        breakpoints: protocol.Breakpoints.create({ lines })
-                    })
-                )
-            })
+            asyncRespond(
+                req,
+                res,
+                () => {
+                    const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id) : -1
+                    const lines = req.body as number[]
+                    return this.tracersProxy.setBreakpoints(
+                        protocol.BreakpointsRequest.create({
+                            id: protocol.Id.create({ id }),
+                            breakpoints: protocol.Breakpoints.create({ lines })
+                        })
+                    )
+                },
+                () => this.clientTracers.delete(req.session.id)
+            )
         )
         this.server.use('/tracers', tracersRouter)
     }
