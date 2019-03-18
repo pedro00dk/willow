@@ -10,19 +10,8 @@
             "request": "launch",
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run",
-                "debug"
-            ],
-            "args": [
-                "--",
-                "--port",
-                "${input:port}",
-                "--secret",
-                "${input:secret}",
-                "--tracers",
-                "${input:tracers}"
-            ],
+            "runtimeArgs": ["run", "debug"],
+            "args": ["--", "--port", "${input:port}", "--tracers", "${input:tracers}"],
             "port": 9229
         },
         {
@@ -38,13 +27,13 @@
             "id": "port",
             "type": "promptString",
             "default": "8001",
-            "description": "port",
+            "description": "port"
         },
         {
             "id": "secret",
             "type": "promptString",
             "default": "secret",
-            "description": "secret",
+            "description": "secret"
         },
         {
             "id": "tracers",
