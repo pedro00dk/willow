@@ -86,16 +86,17 @@ export class Server {
                     const response = startResponse.response
                     const lastEvent = response.events[response.events.length - 1]
                     if (!!lastEvent.started) this.startClient(req.session.id, startResponse.id.id)
-                    return response
+                    return protocol.TracerResponse.toObject(response, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
         )
         tracersRouter.post('/stop', (req, res) =>
-            asyncRespond(req, res, () => {
+            asyncRespond(req, res, async () => {
                 const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                 this.stopClient(req.session.id)
-                return this.tracersProxy.stop(protocol.Id.create({ id }))
+                const empty = await this.tracersProxy.stop(protocol.Id.create({ id }))
+                return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
             })
         )
         tracersRouter.post('/step', (req, res) =>
@@ -108,7 +109,7 @@ export class Server {
                     const lastEvent = response.events[response.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
                         this.stopClient(req.session.id)
-                    return response
+                    return protocol.TracerResponse.toObject(response, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -124,7 +125,7 @@ export class Server {
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
                         this.stopClient(req.session.id)
-                    return responses
+                    return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -140,7 +141,7 @@ export class Server {
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
                         this.stopClient(req.session.id)
-                    return responses
+                    return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -156,7 +157,7 @@ export class Server {
                     const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                     if (!!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish))
                         this.stopClient(req.session.id)
-                    return responses
+                    return protocol.TracerResponses.toObject(responses, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -165,15 +166,16 @@ export class Server {
             asyncRespond(
                 req,
                 res,
-                () => {
+                async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const lines = req.body as string[]
-                    return this.tracersProxy.input(
+                    const empty = await this.tracersProxy.input(
                         protocol.InputRequest.create({
                             id: protocol.Id.create({ id }),
                             input: protocol.Action.Input.create({ lines })
                         })
                     )
+                    return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -182,9 +184,10 @@ export class Server {
             asyncRespond(
                 req,
                 res,
-                () => {
+                async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
-                    return this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
+                    const breakpoints = await this.tracersProxy.getBreakpoints(protocol.Id.create({ id }))
+                    return protocol.Breakpoints.toObject(breakpoints, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
@@ -193,15 +196,16 @@ export class Server {
             asyncRespond(
                 req,
                 res,
-                () => {
+                async () => {
                     const id = this.clientTracers.has(req.session.id) ? this.clientTracers.get(req.session.id).id : -1
                     const lines = req.body as number[]
-                    return this.tracersProxy.setBreakpoints(
+                    const empty = await this.tracersProxy.setBreakpoints(
                         protocol.BreakpointsRequest.create({
                             id: protocol.Id.create({ id }),
                             breakpoints: protocol.Breakpoints.create({ lines })
                         })
                     )
+                    return protocol.Empty.toObject(empty, { defaults: true, oneofs: true })
                 },
                 () => this.stopClient(req.session.id)
             )
