@@ -36,9 +36,14 @@ export class TracerWrapper implements Tracer {
 
     async step() {
         log.verbose(TracerWrapper.name, 'step')
-        const results = await applyResponseProcessorStack(this.processors, () => this.internalTracer.step())
-        this.updatePreviousInspectedEvent(results)
-        return results
+        try {
+            const results = await applyResponseProcessorStack(this.processors, () => this.internalTracer.step())
+            this.updatePreviousInspectedEvent(results)
+            return results
+        } catch (error) {
+            if (this.getState() === 'started') this.stop()
+            throw error
+        }
     }
 
     async stepOver() {
