@@ -14,6 +14,6 @@ case $command in
         (java -cp out/:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main "$@" 3>&1 1>&2 2>&3 | grep -iv 'picked') 3>&1 1>&2 2>&3
         ;;
     *)
-        echo 'command not found'
+        echo "command not found"
         ;;
 esac
