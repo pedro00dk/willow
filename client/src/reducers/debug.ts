@@ -80,7 +80,7 @@ export function stop(): ThunkAction {
     return async dispatch => {
         dispatch({ type: 'debug/stop' })
         try {
-            await serverApi.post('/tracers/execute')
+            await serverApi.post('/tracers/stop')
             dispatch({ type: 'debug/stop', payload: {} })
         } catch (error) {
             dispatch({ type: 'debug/stop', error: !!error.response ? error.response.data : error.toString() })
@@ -92,7 +92,7 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
     return async dispatch => {
         dispatch({ type: 'debug/step' })
         try {
-            const response = (await serverApi(`$/tracers/${action}`)).data as
+            const response = (await serverApi.post(`/tracers/${action}`)).data as
                 | protocol.ITracerResponse
                 | protocol.ITracerResponse[]
             dispatch({ type: 'debug/step', payload: { response } })
