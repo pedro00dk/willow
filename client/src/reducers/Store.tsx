@@ -1,15 +1,17 @@
 import * as React from 'react'
 import * as Redux from 'redux'
-import { default as thunk, ThunkAction, ThunkDispatch, ThunkMiddleware } from 'redux-thunk'
+import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as CodeReducer } from './code'
 import { reducer as DebugReducer } from './debug'
 import { reducer as IOReducer } from './io'
+import { reducer as LanguageReducer } from './language'
 import { reducer as SessionReducer } from './session'
 
 type State = {
     code: Parameters<typeof CodeReducer>[0]
     debug: Parameters<typeof DebugReducer>[0]
     io: Parameters<typeof IOReducer>[0]
+    language: Parameters<typeof LanguageReducer>[0]
     session: Parameters<typeof SessionReducer>[0]
 }
 
@@ -17,9 +19,15 @@ type Action =
     | Parameters<typeof CodeReducer>[1]
     | Parameters<typeof DebugReducer>[1]
     | Parameters<typeof IOReducer>[1]
+    | Parameters<typeof LanguageReducer>[1]
     | Parameters<typeof SessionReducer>[1]
 
-type SubState = Pick<State, 'code'> | Pick<State, 'debug'> | Pick<State, 'io'> | Pick<State, 'session'>
+type SubState =
+    | Pick<State, 'code'>
+    | Pick<State, 'debug'>
+    | Pick<State, 'io'>
+    | Pick<State, 'language'>
+    | Pick<State, 'session'>
 
 export type ThunkAction<R = void> = ThunkAction<R, State, void, Action>
 
@@ -30,6 +38,7 @@ const reduxStore = reduxStoreCreator(
         code: CodeReducer,
         debug: DebugReducer,
         io: IOReducer,
+        language: LanguageReducer,
         session: SessionReducer
     })
 )

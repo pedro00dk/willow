@@ -8,16 +8,21 @@ import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import { start, step, stop } from '../reducers/debug'
+import { fetch } from '../reducers/language'
 import { useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {
     available: css({ cursor: 'pointer' }),
-    disabled: css({ filter: 'grayscale(80%)' })
+    disabled: css({ filter: 'grayscale(80%)' }),
+    select: css({ width: 'auto !important' })
 }
 
 export function Debugger() {
     const dispatch = useDispatch()
-    const { debug } = useRedux(state => ({ debug: state.debug }))
+    const { debug, language } = useRedux(state => ({ debug: state.debug, language: state.language }))
+    React.useEffect(() => {
+        dispatch(fetch())
+    }, [])
     const available = {
         start: !debug.fetching,
         step: debug.debugging && !debug.fetching,
@@ -67,6 +72,26 @@ export function Debugger() {
                 title='stop'
                 onClick={() => (available.stop ? dispatch(stop()) : undefined)}
             />
+            <select className={cn('custom-select', styles.select)} disabled={false}>
+                {language.languages.map((language, i) => (
+                    <option key={i} value={language}>
+                        {language}
+                    </option>
+                ))}
+                {language.languages.length === 0 ? (
+                    language.fetching ? (
+                        <option key={-1} value='text'>
+                            ...
+                        </option>
+                    ) : (
+                        <option key={-1} value='text'>
+                            !!!
+                        </option>
+                    )
+                ) : (
+                    undefined
+                )}
+            </select>
         </>
     )
 }
