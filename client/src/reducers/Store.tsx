@@ -39,7 +39,7 @@ export function Store(props: { children?: React.ReactNode }) {
     return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
 }
 
-function compareStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
+function equalStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(prev)
@@ -47,7 +47,7 @@ function compareStoreSubStates<T extends SubState, U extends SubState>(prev: T, 
         prevKeys.length === nextKeys.length &&
         nextKeys.reduce(
             (acc, key) =>
-                acc && (prev as { [key: string]: unknown })[key] === (prev as { [key: string]: unknown })[key],
+                acc && (prev as { [key: string]: unknown })[key] === (next as { [key: string]: unknown })[key],
             true
         )
     )
@@ -55,38 +55,28 @@ function compareStoreSubStates<T extends SubState, U extends SubState>(prev: T, 
 
 export function useDispatch() {
     const store = React.useContext(storeContext)
-    if (!store) throw new Error('Store context not found')
+    if (!store) throw new Error('store context not found')
     return store.dispatch
 }
 
 export function useRedux<T extends SubState>(selector: (state: State) => T) {
     const store = React.useContext(storeContext)
-    if (!store) throw new Error('Store context not found')
-    const firstSelector = React.useCallback(selector, [])
-    const storeReference = React.useRef(store)
-    const [selection, setSelection] = React.useState(() => firstSelector(store.getState()))
-    const previousSelection = React.useRef(selection)
-
-    const checkAndSetSelection = () => {
-        const newSubState = selector(store.getState())
-        if (compareStoreSubStates(newSubState, previousSelection.current)) return
-        setSelection(newSubState)
-        previousSelection.current = newSubState
-    }
-
-    if (storeReference.current !== store) {
-        storeReference.current = store
-        checkAndSetSelection()
-    }
+    if (!store) throw new Error('store context not found')
+    const memoSelector = React.useCallback(selector, [])
+    const [subState, setSubState] = React.useState(() => memoSelector(store.getState()))
     React.useEffect(() => {
         let didUnsubscribe = false
-        const checkForUpdates = () => (!didUnsubscribe ? checkAndSetSelection() : undefined)
-        checkForUpdates()
-        const unsubscribe = store.subscribe(checkForUpdates)
+        const checkSubStateUpdate = () => {
+            const updatedSubState = memoSelector(store.getState())
+            if (didUnsubscribe || equalStoreSubStates(updatedSubState, subState)) return
+            setSubState(updatedSubState)
+        }
+        checkSubStateUpdate()
+        const unsubscribe = store.subscribe(checkSubStateUpdate)
         return () => {
             didUnsubscribe = true
             unsubscribe()
         }
-    }, [store, selector])
-    return selection
+    }, [])
+    return subState
 }
