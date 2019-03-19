@@ -21,7 +21,6 @@ const initialState: State = {
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
-    if (!action) return state
     switch (action.type) {
         case 'code/setLanguage':
         case 'code/setText':

@@ -29,7 +29,6 @@ const initialState: State = {
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
-    if (!action) return state
     switch (action.type) {
         case 'debug/start':
             if (!!action.payload) return { ...state, fetching: false, responses: [action.payload.response] }
