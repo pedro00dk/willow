@@ -15,7 +15,7 @@ type Action =
     | { type: 'debug/stop'; payload?: {}; error?: string }
     | {
           type: 'debug/step'
-          payload?: { response: protocol.ITracerResponse | protocol.ITracerResponse[] }
+          payload?: { responses: protocol.ITracerResponse[] }
           error?: string
       }
     | { type: 'debug/input'; payload?: {}; error?: string }
@@ -40,9 +40,16 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             return { ...state, debugging: true, fetching: true }
         case 'debug/step':
             if (!!action.payload) {
-                const responses =
-                    action.payload.response instanceof Array ? action.payload.response : [action.payload.response]
-                return { ...state, fetching: false, responses: [...state.responses, ...responses] }
+                // console.log(action.payload.response instanceof protocol.TracerResponses)
+                const lastResponse = action.payload.responses[action.payload.responses.length - 1]
+                const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+                const finished = !!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish)
+                return {
+                    ...state,
+                    debugging: !finished,
+                    fetching: false,
+                    responses: [...state.responses, ...action.payload.responses]
+                }
             }
             if (!!action.error) return { ...state, debugging: false, fetching: false, error: action.error }
             return { ...state, fetching: true }
@@ -93,8 +100,14 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
         try {
             const response = (await serverApi.post(`/tracers/${action}`)).data as
                 | protocol.ITracerResponse
-                | protocol.ITracerResponse[]
-            dispatch({ type: 'debug/step', payload: { response } })
+                | { responses: protocol.ITracerResponse[] }
+
+            const responseAsSingle = (response: any): response is protocol.ITracerResponse => {
+                return !!(response as protocol.ITracerResponse).events
+            }
+
+            const responses = responseAsSingle(response) ? [response] : response.responses
+            dispatch({ type: 'debug/step', payload: { responses } })
         } catch (error) {
             dispatch({ type: 'debug/step', error: !!error.response ? error.response.data : error.toString() })
         }
