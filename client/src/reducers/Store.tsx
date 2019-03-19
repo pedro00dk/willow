@@ -64,12 +64,14 @@ export function useRedux<T extends SubState>(selector: (state: State) => T) {
     if (!store) throw new Error('store context not found')
     const memoSelector = React.useCallback(selector, [])
     const [subState, setSubState] = React.useState(() => memoSelector(store.getState()))
+    const subStateRef = React.useRef(subState)
     React.useEffect(() => {
         let didUnsubscribe = false
         const checkSubStateUpdate = () => {
             const updatedSubState = memoSelector(store.getState())
-            if (didUnsubscribe || equalStoreSubStates(updatedSubState, subState)) return
+            if (didUnsubscribe || equalStoreSubStates(updatedSubState, subStateRef.current)) return
             setSubState(updatedSubState)
+            subStateRef.current = updatedSubState
         }
         checkSubStateUpdate()
         const unsubscribe = store.subscribe(checkSubStateUpdate)
