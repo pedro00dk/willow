@@ -57,7 +57,7 @@ export function CodeEditor(props: Props) {
             dispatch({ type: 'code/setText', payload: { text: editor.session.doc.getAllLines() } })
 
         const onGutterMouseDown = (event: EditorMouseEvent) => {
-            const gutterLayer = (editor.renderer as { [key: string]: unknown })['$gutterLayer'] as EditorGutterLayer
+            const gutterLayer = (editor.renderer as any).$gutterLayer as EditorGutterLayer
             const region = gutterLayer.getRegion(event)
             if (region !== 'markers') return
             const line = (event.getDocumentPosition() as ace.Position).row
@@ -76,7 +76,7 @@ export function CodeEditor(props: Props) {
     }, [props.mode])
     React.useEffect(() => {
         if (!editor) return
-        const decorations = (editor.session as { [key: string]: unknown })['$decorations'] as string[]
+        const decorations = (editor.session as any).$decorations as string[]
         decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
         code.breakpoints.forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, styles.breakpoint))
     }, [code.breakpoints])

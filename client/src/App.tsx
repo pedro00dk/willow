@@ -15,7 +15,7 @@ const styles = {
 
 export function App() {
     const dispatch = useDispatch()
-    const session = useRedux(state => ({ session: state.session })).session
+    const { session } = useRedux(state => ({ session: state.session }))
     React.useEffect(() => {
         dispatch(fetch())
     }, [])
@@ -53,7 +53,6 @@ function Body() {
         window.addEventListener('resize', onResize)
         return () => window.removeEventListener('resize', onResize)
     }, [])
-
     return (
         <Responsive
             width={size.width}
