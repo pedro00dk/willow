@@ -3,24 +3,36 @@ import { serverApi } from '../server'
 import { ThunkAction } from './Store'
 
 type State = {
-    readonly languages: string[]
     readonly fetching: boolean
+    readonly languages: string[]
+    readonly selected: string
     readonly error: string
 }
-type Action = { type: 'language/fetch'; payload?: { languages: string[] }; error?: string }
+type Action =
+    | { type: 'language/fetch'; payload?: { languages: string[] }; error?: string }
+    | { type: 'language/select'; payload: { selected: string } }
 
 const initialState: State = {
-    languages: [],
     fetching: false,
+    languages: [],
+    selected: undefined,
     error: undefined
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'language/fetch':
-            if (!!action.payload) return { ...state, fetching: false, languages: action.payload.languages }
+            if (!!action.payload)
+                return {
+                    ...state,
+                    fetching: false,
+                    languages: action.payload.languages,
+                    selected: action.payload.languages.length > 0 ? action.payload.languages[0] : undefined
+                }
             if (!!action.error) return { ...state, fetching: false, error: action.error }
             return { ...initialState, fetching: true }
+        case 'language/select':
+            return { ...state, selected: action.payload.selected }
     }
     return state
 }
