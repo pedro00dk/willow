@@ -79,6 +79,12 @@ export function start(): ThunkAction {
                 code: code.code.join('\n')
             })).data as protocol.ITracerResponse
             dispatch({ type: 'debug/start', payload: { response } })
+            response.events
+                .filter(event => !!event.printed)
+                .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
+            const lastEvent = response.events[response.events.length - 1]
+            if (!!lastEvent.threw)
+                dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback } })
         } catch (error) {
             dispatch({ type: 'debug/start', error: !!error.response ? error.response.data : error.toString() })
         }
@@ -110,6 +116,14 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
             }
 
             const responses = responseAsSingle(response) ? [response] : response.responses
+            responses.forEach(response => {
+                response.events
+                    .filter(event => !!event.printed)
+                    .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
+                const lastEvent = response.events[response.events.length - 1]
+                if (!!lastEvent.threw)
+                    dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback } })
+            })
             dispatch({ type: 'debug/step', payload: { responses } })
         } catch (error) {
             dispatch({ type: 'debug/step', error: !!error.response ? error.response.data : error.toString() })
