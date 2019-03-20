@@ -106,6 +106,5 @@ export function CodeEditor(props: Props) {
             )
         )
     }, [code.markers])
-
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

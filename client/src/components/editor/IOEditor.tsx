@@ -1,6 +1,7 @@
 import * as ace from 'brace'
 import * as React from 'react'
 import { TextEditor } from './TextEditor'
+import { useRedux } from '../../reducers/Store'
 
 type EditorExecEvent = {
     [props: string]: unknown
@@ -13,13 +14,17 @@ type EditorExecEvent = {
 
 export function IOEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+    const { io } = useRedux(state => ({ io: state.io }))
+    React.useEffect(() => {
+        if (!editor) return
+        editor.session.doc.setValue(io.content.join('\n'))
+    })
     React.useEffect(() => {
         if (!editor) return
         editor.$blockScrolling = Infinity
 
         const onExec = (event: EditorExecEvent, commandManager: ace.CommandManager) => {
-            const command = event.command.name
-            if (!new Set(['insertstring', 'paste', 'backspace', 'del', 'cut']).has(command)) return
+            if (event.command.readOnly) return
             const anchor = editor.selection.getSelectionAnchor()
             const lead = editor.selection.getSelectionLead()
             const lastLine = editor.session.getLength() - 1
@@ -35,6 +40,5 @@ export function IOEditor() {
         ;(editor.commands as any).on('exec', onExec)
         return () => (editor.commands as any).off('exec', onExec)
     }, [editor])
-
     return <TextEditor onEditorUpdate={setEditor} />
 }

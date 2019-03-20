@@ -26,7 +26,6 @@ export function TextEditor(props: Props) {
         }, 2000)
         return () => window.clearInterval(checkResizeInterval)
     }, [editorRef])
-    React.useEffect(() => (editor ? props.onEditorUpdate(editor) : undefined), [editor])
-
+    React.useEffect(() => (!!editor ? props.onEditorUpdate(editor) : undefined), [editor])
     return <div ref={editorRef} className='w-100 h-100' />
 }
