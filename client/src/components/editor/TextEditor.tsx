@@ -1,13 +1,6 @@
 import * as ace from 'brace'
 import * as React from 'react'
 
-import 'brace/ext/language_tools'
-import 'brace/ext/searchbox'
-import 'brace/mode/java'
-import 'brace/mode/python'
-import 'brace/mode/text'
-import 'brace/theme/chrome'
-
 type Props = {
     onEditorUpdate?: (editor: ace.Editor) => void
 }

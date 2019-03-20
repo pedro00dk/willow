@@ -4,6 +4,13 @@ import * as React from 'react'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
+import 'brace/ext/language_tools'
+import 'brace/ext/searchbox'
+import 'brace/mode/java'
+import 'brace/mode/python'
+import 'brace/mode/text'
+import 'brace/theme/chrome'
+
 type EditorMouseEvent = {
     [props: string]: unknown
     domEvent: MouseEvent
@@ -25,15 +32,19 @@ type EditorMarker = {
     range: ace.Range
 }
 
-const { Range } = ace.acequire('ace/range') as {
-    Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
-}
-
 const styles = {
     breakpoint: css({ backgroundColor: 'LightCoral' }),
     highlight: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
     warning: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
     error: css({ position: 'absolute', backgroundColor: 'LightCoral' })
+}
+
+const { Range } = ace.acequire('ace/range') as {
+    Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
+}
+
+function syntaxSupport(language: string) {
+    return new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 }
 
 type Props = {
@@ -43,7 +54,7 @@ type Props = {
 
 export function CodeEditor(props: Props) {
     const dispatch = useDispatch()
-    const code = useRedux(state => ({ code: state.code })).code
+    const { code, language } = useRedux(state => ({ code: state.code, language: state.language }))
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(() => {
         if (!editor) return
@@ -51,7 +62,6 @@ export function CodeEditor(props: Props) {
         editor.setTheme('ace/theme/chrome')
         editor.setFontSize(`${props.font ? props.font.toString() : 16}px`)
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
-        editor.session.setMode(`ace/mode/${props.mode}`)
 
         const onChange = (change: ace.EditorChangeEvent) =>
             dispatch({ type: 'code/setText', payload: { text: editor.session.doc.getAllLines() } })
@@ -72,8 +82,9 @@ export function CodeEditor(props: Props) {
         }
     }, [editor])
     React.useEffect(() => {
-        dispatch({ type: 'code/setLanguage', payload: { language: props.mode } })
-    }, [props.mode])
+        if (!editor) return
+        editor.session.setMode(syntaxSupport(language.selected))
+    }, [language.selected])
     React.useEffect(() => {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
