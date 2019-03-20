@@ -40,7 +40,6 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             return { ...state, debugging: true, fetching: true }
         case 'debug/step':
             if (!!action.payload) {
-                // console.log(action.payload.response instanceof protocol.TracerResponses)
                 const lastResponse = action.payload.responses[action.payload.responses.length - 1]
                 const lastEvent = lastResponse.events[lastResponse.events.length - 1]
                 const finished = !!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish)
@@ -73,7 +72,7 @@ export function start(): ThunkAction {
             const response = (await serverApi.post('/tracers/start', {
                 language: language.selected,
                 main: '<script>',
-                code: code.text.join('\n')
+                code: code.code.join('\n')
             })).data as protocol.ITracerResponse
             dispatch({ type: 'debug/start', payload: { response } })
         } catch (error) {

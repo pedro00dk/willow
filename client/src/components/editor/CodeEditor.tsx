@@ -64,7 +64,7 @@ export function CodeEditor(props: Props) {
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
 
         const onChange = (change: ace.EditorChangeEvent) =>
-            dispatch({ type: 'code/setText', payload: { text: editor.session.doc.getAllLines() } })
+            dispatch({ type: 'code/setCode', payload: { code: editor.session.doc.getAllLines() } })
 
         const onGutterMouseDown = (event: EditorMouseEvent) => {
             const gutterLayer = (editor.renderer as any).$gutterLayer as EditorGutterLayer
