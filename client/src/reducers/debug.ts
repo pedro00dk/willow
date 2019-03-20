@@ -69,11 +69,11 @@ export function start(): ThunkAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
         try {
-            const codeState = getState().code
+            const { code, language } = getState()
             const response = (await serverApi.post('/tracers/start', {
-                language: codeState.language,
+                language: language.selected,
                 main: '<script>',
-                code: codeState.text.join('\n')
+                code: code.text.join('\n')
             })).data as protocol.ITracerResponse
             dispatch({ type: 'debug/start', payload: { response } })
         } catch (error) {
