@@ -31,7 +31,11 @@ const initialState: State = {
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'debug/start':
-            if (!!action.payload) return { ...state, fetching: false, responses: [action.payload.response] }
+            if (!!action.payload) {
+                const lastEvent = action.payload.response.events[action.payload.response.events.length - 1]
+                const finished = !!lastEvent.threw || (!!lastEvent.inspected && lastEvent.inspected.frame.finish)
+                return { ...state, debugging: !finished, fetching: false, responses: [action.payload.response] }
+            }
             if (!!action.error) return { ...state, debugging: false, fetching: false, error: action.error }
             return { ...initialState, debugging: true, fetching: true }
         case 'debug/stop':
