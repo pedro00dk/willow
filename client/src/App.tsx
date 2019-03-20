@@ -6,19 +6,12 @@ import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { IOEditor } from './components/editor/IOEditor'
-import { fetch } from './reducers/session'
-import { useDispatch, useRedux } from './reducers/Store'
 
 const styles = {
     container: css({ height: '100vh' })
 }
 
 export function App() {
-    const dispatch = useDispatch()
-    const { session } = useRedux(state => ({ session: state.session }))
-    React.useEffect(() => {
-        dispatch(fetch())
-    }, [])
     return (
         <div className={cn('container-fluid', styles.container)}>
             <div className='row'>
