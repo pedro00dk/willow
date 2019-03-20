@@ -68,6 +68,7 @@ export function Debugger() {
                 <input
                     className={cn('form-control', styles.select)}
                     type='text'
+                    disabled={debug.debugging}
                     placeholder='filename'
                     onBlur={event => dispatch({ type: 'code/setMain', payload: { main: event.target.value } })}
                 />
