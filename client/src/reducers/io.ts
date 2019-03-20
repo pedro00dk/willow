@@ -1,19 +1,21 @@
 import { Reducer } from 'redux'
 
 type State = {
-    readonly output: ReadonlyArray<string>
-    readonly input: ReadonlyArray<string>
+    readonly content: ReadonlyArray<string>
+    readonly lastLineBreak: boolean
+    readonly input: string
 }
 
 type Action =
     | { type: 'io/reset' }
-    | { type: 'io/appendOutput'; payload: { output: string } }
+    | { type: 'io/appendOutput'; payload: { output: string | string[] } }
     | { type: 'io/commitInput' }
     | { type: 'io/setInputLine'; payload: { input: string } }
 
 const initialState: State = {
-    output: [''],
-    input: ['']
+    content: [''],
+    lastLineBreak: false,
+    input: ''
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
@@ -21,18 +23,25 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
         case 'io/reset':
             return { ...initialState }
         case 'io/appendOutput': {
-            const lines = action.payload.output.split(/\r?\n/)
-            const output = [...state.output.slice(0, -1), state.output.slice(-1)[0] + lines[0], ...lines.slice(1)]
-            return { ...state, output }
+            const outputLines =
+                typeof action.payload.output === 'string' ? action.payload.output.split(/\r?\n/) : action.payload.output
+            const outputEndsInLineBreak = outputLines.length > 1 && outputLines[outputLines.length - 1].length === 0
+            const mergeLine = state.lastLineBreak
+                ? []
+                : [`${state.content[state.content.length - 1]} ${outputLines[0]}`]
+            const contentLinesToConcat = mergeLine.length === 0 ? state.content : state.content.slice(0, -1)
+            const outputLinesToConcat = mergeLine.length === 0 ? outputLines : outputLines.slice(1)
+            const content = [...contentLinesToConcat, ...mergeLine, ...outputLinesToConcat]
+            return { ...state, lastLineBreak: outputEndsInLineBreak, content }
         }
         case 'io/commitInput': {
-            if (state.input.length < 2) break
-            const input = state.input.slice(1)
-            const output = [...state.output.slice(-1), state.output.slice(-1)[0] + state.input[0]]
-            return { ...state, input, output }
+            const content = state.lastLineBreak
+                ? [...state.content, state.input]
+                : [...state.content.slice(0, -1), `${state.content[state.content.length - 1]}${state.input}`]
+            return { ...state, lastLineBreak: true, content }
         }
         case 'io/setInputLine':
-            return { ...state, input: [...state.input.slice(0, -1), action.payload.input] }
+            return { ...state, input: action.payload.input }
     }
     return state
 }
