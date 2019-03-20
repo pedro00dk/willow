@@ -72,7 +72,12 @@ export function Debugger() {
                 title='stop'
                 onClick={() => (available.stop ? dispatch(stop()) : undefined)}
             />
-            <select className={cn('custom-select', styles.select)} disabled={false}>
+            <select
+                className={cn('custom-select', styles.select)}
+                disabled={debug.debugging}
+                defaultValue={language.selected}
+                onChange={event => dispatch({ type: 'language/select', payload: { selected: event.target.value } })}
+            >
                 {language.languages.map((language, i) => (
                     <option key={i} value={language}>
                         {language}
