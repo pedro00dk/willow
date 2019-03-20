@@ -71,6 +71,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 export function start(): ThunkAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
+        dispatch({ type: 'io/reset' })
         try {
             const { code, language } = getState()
             const response = (await serverApi.post('/tracers/start', {
@@ -84,7 +85,7 @@ export function start(): ThunkAction {
                 .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
             const lastEvent = response.events[response.events.length - 1]
             if (!!lastEvent.threw)
-                dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback } })
+                dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback.join('') } })
         } catch (error) {
             dispatch({ type: 'debug/start', error: !!error.response ? error.response.data : error.toString() })
         }
@@ -122,7 +123,10 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
                     .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
                 const lastEvent = response.events[response.events.length - 1]
                 if (!!lastEvent.threw)
-                    dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback } })
+                    dispatch({
+                        type: 'io/appendOutput',
+                        payload: { output: lastEvent.threw.exception.traceback.join('') }
+                    })
             })
             dispatch({ type: 'debug/step', payload: { responses } })
         } catch (error) {

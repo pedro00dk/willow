@@ -8,7 +8,7 @@ type State = {
 
 type Action =
     | { type: 'io/reset' }
-    | { type: 'io/appendOutput'; payload: { output: string | string[] } }
+    | { type: 'io/appendOutput'; payload: { output: string } }
     | { type: 'io/commitInput' }
     | { type: 'io/setInputLine'; payload: { input: string } }
 
@@ -23,12 +23,11 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
         case 'io/reset':
             return { ...initialState }
         case 'io/appendOutput': {
-            const outputLines =
-                typeof action.payload.output === 'string' ? action.payload.output.split(/\r?\n/) : action.payload.output
+            const outputLines = action.payload.output.split(/\r?\n/)
             const outputEndsInLineBreak = outputLines.length > 1 && outputLines[outputLines.length - 1].length === 0
             const mergeLine = state.lastLineBreak
                 ? []
-                : [`${state.content[state.content.length - 1]} ${outputLines[0]}`]
+                : [`${state.content[state.content.length - 1]}${outputLines[0]}`]
             const contentLinesToConcat = mergeLine.length === 0 ? state.content : state.content.slice(0, -1)
             const outputLinesToConcat = mergeLine.length === 0 ? outputLines : outputLines.slice(1)
             const content = [...contentLinesToConcat, ...mergeLine, ...outputLinesToConcat]
