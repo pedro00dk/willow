@@ -14,7 +14,8 @@ import { useDispatch, useRedux } from '../reducers/Store'
 const styles = {
     available: css({ cursor: 'pointer' }),
     disabled: css({ filter: 'grayscale(80%)' }),
-    select: css({ width: 'auto !important' })
+    select: css({ flex: '0 1 auto !important', width: 'auto !important' }),
+    input: css({ display: 'inline-flex !important', width: 'auto !important' })
 }
 
 export function Debugger() {
@@ -30,6 +31,47 @@ export function Debugger() {
     }
     return (
         <>
+            <div className={cn('input-group ml-3', styles.input)}>
+                <div className='input-group-prepend'>
+                    <label className='input-group-text'>Lang</label>
+                </div>
+                <select
+                    className={cn('custom-select', styles.select)}
+                    disabled={debug.debugging}
+                    defaultValue={language.selected}
+                    onChange={event => dispatch({ type: 'language/select', payload: { selected: event.target.value } })}
+                >
+                    {language.languages.map((language, i) => (
+                        <option key={i} value={language}>
+                            {language}
+                        </option>
+                    ))}
+                    {language.languages.length === 0 ? (
+                        language.fetching ? (
+                            <option key={-1} value='text'>
+                                ...
+                            </option>
+                        ) : (
+                            <option key={-1} value='text'>
+                                !!!
+                            </option>
+                        )
+                    ) : (
+                        undefined
+                    )}
+                </select>
+            </div>
+            <div className={cn('input-group ml-3', styles.input)}>
+                <div className='input-group-prepend'>
+                    <label className='input-group-text'>Main</label>
+                </div>
+                <input
+                    className={cn('form-control', styles.select)}
+                    type='text'
+                    placeholder='filename'
+                    onBlur={event => dispatch({ type: 'code/setMain', payload: { main: event.target.value } })}
+                />
+            </div>
             <img
                 className={cn('h-100', available.start ? styles.available : styles.disabled)}
                 src={playImg}
@@ -72,31 +114,6 @@ export function Debugger() {
                 title='stop'
                 onClick={() => (available.stop ? dispatch(stop()) : undefined)}
             />
-            <select
-                className={cn('custom-select', styles.select)}
-                disabled={debug.debugging}
-                defaultValue={language.selected}
-                onChange={event => dispatch({ type: 'language/select', payload: { selected: event.target.value } })}
-            >
-                {language.languages.map((language, i) => (
-                    <option key={i} value={language}>
-                        {language}
-                    </option>
-                ))}
-                {language.languages.length === 0 ? (
-                    language.fetching ? (
-                        <option key={-1} value='text'>
-                            ...
-                        </option>
-                    ) : (
-                        <option key={-1} value='text'>
-                            !!!
-                        </option>
-                    )
-                ) : (
-                    undefined
-                )}
-            </select>
         </>
     )
 }

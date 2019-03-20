@@ -54,12 +54,13 @@ function Body() {
             cols={{ lg: 12, md: 12, sm: 12, xs: 8, xxs: 4 }}
             autoSize={true}
             compactType='horizontal'
+            verticalCompact={true}
             draggableCancel='.ace_content, input, textarea'
         >
             <div
                 key='Debugger'
                 className='border shadow-sm'
-                data-grid={{ x: 0, y: 0, w: 4, h: 1, minW: 4, minH: 1, maxW: 4, maxH: 1 }}
+                data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}
             >
                 <Debugger />
             </div>
