@@ -44,11 +44,13 @@ public class Tracer {
             threwEventBuilder.getThrewBuilder().setException(exception);
             eventQueue.put(threwEventBuilder.build());
         } catch (RuntimeException e) {
-            var exception = ThrowableUtil.dump(e.getCause());
+            // pos compilation error
+            var exception = ThrowableUtil.dump(e.getCause(), Set.of(-1, -2, -3, -4));
             var threwEventBuilder = EventOuterClass.Event.newBuilder();
             threwEventBuilder.getThrewBuilder().setException(exception);
             eventQueue.put(threwEventBuilder.build());
         } catch (Exception e) {
+            // inspection error
             var exception = ThrowableUtil.dump(e);
             var threwEventBuilder = EventOuterClass.Event.newBuilder();
             threwEventBuilder.getThrewBuilder().setException(exception);
