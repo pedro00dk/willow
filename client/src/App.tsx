@@ -56,11 +56,7 @@ function Body() {
             compactType='vertical'
             draggableCancel='.ace_content, input, textarea'
         >
-            <div
-                key='Debugger'
-                className='border shadow-sm'
-                data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}
-            >
+            <div key='Debugger' className='border shadow-sm' data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}>
                 <Debugger />
             </div>
             <div key='CodeEditor' className='border shadow-sm' data-grid={{ x: 0, y: 1, w: 4, h: 8 }}>

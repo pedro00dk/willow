@@ -1,17 +1,23 @@
 import { Reducer } from 'redux'
 
+export enum MarkerType {
+    HIGHLIGHT,
+    WARNING,
+    ERROR
+}
+
 type State = {
     readonly main: string
     readonly code: string[]
     readonly breakpoints: ReadonlySet<number>
-    readonly markers: ReadonlySet<{ line: number; type: 'highlight' | 'warning' | 'error' }>
+    readonly markers: ReadonlySet<{ line: number; type: MarkerType }>
 }
 
 type Action =
     | { type: 'code/setMain'; payload: { main: string } }
     | { type: 'code/setCode'; payload: { code: string[] } }
     | { type: 'code/setBreakpoint'; payload: { line: number } }
-    | { type: 'code/setMarkers'; payload: { markers: { line: number; type: 'highlight' | 'warning' | 'error' }[] } }
+    | { type: 'code/setMarkers'; payload: { markers: { line: number; type: MarkerType }[] } }
 
 const initialState: State = {
     main: undefined,

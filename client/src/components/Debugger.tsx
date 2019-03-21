@@ -8,6 +8,7 @@ import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
+import { MarkerType } from '../reducers/code'
 import { start, step, stop } from '../reducers/debug'
 import { fetch } from '../reducers/language'
 import { State, ThunkAction, useDispatch, useRedux } from '../reducers/Store'
@@ -123,7 +124,7 @@ async function onStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug
     if (!debug.debugging) {
         dispatch({ type: 'io/reset' })
         await dispatch(start())
-    } else await step('continue')
+    } else await dispatch(step('continue'))
 }
 
 async function onStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
@@ -139,16 +140,44 @@ async function onStep(dispatch: Parameters<ThunkAction>[0], debug: State['debug'
 function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
     const currentResponse = React.useRef(0)
     React.useEffect(() => {
+        if (debug.fetching) return
+        if (debug.responses.length === 0) currentResponse.current = 0
+        console.log(debug.responses)
+        console.log(debug.responses.slice(currentResponse.current))
         debug.responses
             .slice(currentResponse.current)
             .flatMap(response => response.events)
             .forEach(event => processEvent(dispatch, event))
-        currentResponse.current = debug.responses.length - 1
+        currentResponse.current = debug.responses.length
     }, [debug])
 }
 
-function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.Event) {
-    if (!!event.threw)
-        return dispatch({ type: 'io/appendOutput', payload: { output: event.threw.exception.traceback.join('') } })
-    if (!!event.printed) return dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } })
+function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.IEvent) {
+    if (!!event.started) return processStartedEvent(dispatch, event.started)
+    if (!!event.inspected) return processInspectedEvent(dispatch, event.inspected)
+    if (!!event.printed) return processPrintedEvent(dispatch, event.printed)
+    if (!!event.locked) return processLockedEvent(dispatch, event.locked)
+    if (!!event.threw) return processThrewEvent(dispatch, event.threw)
+}
+
+function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: protocol.Event.IStarted) {}
+
+function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: protocol.Event.IInspected) {
+    if (inspected.frame.type === protocol.Frame.Type.EXCEPTION)
+        dispatch({ type: 'io/appendOutput', payload: { output: inspected.frame.exception.traceback.join('') } })
+    if (inspected.frame.finish) dispatch({ type: 'code/setMarkers', payload: { markers: [] } })
+    else {
+        const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
+        dispatch({ type: 'code/setMarkers', payload: { markers: [{ line: inspected.frame.line, type }] } })
+    }
+}
+
+function processPrintedEvent(dispatch: Parameters<ThunkAction>[0], printed: protocol.Event.IPrinted) {
+    return dispatch({ type: 'io/appendOutput', payload: { output: printed.value } })
+}
+
+function processLockedEvent(dispatch: Parameters<ThunkAction>[0], locked: protocol.Event.ILocked) {}
+
+function processThrewEvent(dispatch: Parameters<ThunkAction>[0], threw: protocol.Event.IThrew) {
+    dispatch({ type: 'io/appendOutput', payload: { output: threw.exception.traceback.join('') } })
 }

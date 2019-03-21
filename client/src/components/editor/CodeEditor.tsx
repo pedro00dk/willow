@@ -1,6 +1,7 @@
 import * as ace from 'brace'
 import { css } from 'emotion'
 import * as React from 'react'
+import { MarkerType } from '../../reducers/code'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
@@ -17,12 +18,14 @@ type EditorMouseEvent = {
     editor: ace.Editor
     getDocumentPosition: () => ace.Position
 }
+
 type EditorGutterLayer = {
     [props: string]: unknown
     $cells: { [props: string]: unknown; element: HTMLDivElement }[]
     element: HTMLDivElement
     getRegion: (event: EditorMouseEvent) => 'foldWidgets' | 'markers'
 }
+
 type EditorMarker = {
     id: number
     inFront: boolean
@@ -34,9 +37,9 @@ type EditorMarker = {
 
 const styles = {
     breakpoint: css({ backgroundColor: 'LightCoral' }),
-    highlight: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
-    warning: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
-    error: css({ position: 'absolute', backgroundColor: 'LightCoral' })
+    [MarkerType.HIGHLIGHT]: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
+    [MarkerType.WARNING]: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
+    [MarkerType.ERROR]: css({ position: 'absolute', backgroundColor: 'LightCoral' })
 }
 
 const { Range } = ace.acequire('ace/range') as {
