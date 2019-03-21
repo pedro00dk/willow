@@ -7,9 +7,10 @@ import stepIntoImg from '../../public/buttons/stepInto.png'
 import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
+import * as protocol from '../protobuf/protocol'
 import { start, step, stop } from '../reducers/debug'
 import { fetch } from '../reducers/language'
-import { useDispatch, useRedux } from '../reducers/Store'
+import { State, ThunkAction, useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {
     available: css({ cursor: 'pointer' }),
@@ -24,11 +25,8 @@ export function Debugger() {
     React.useEffect(() => {
         dispatch(fetch())
     }, [])
-    const available = {
-        start: !debug.fetching,
-        step: debug.debugging && !debug.fetching,
-        stop: debug.debugging
-    }
+    useDebugUpdate(dispatch, debug)
+    const availability = getAvailabilities(debug)
     return (
         <>
             <div className={cn('input-group ml-3', styles.input)}>
@@ -74,47 +72,83 @@ export function Debugger() {
                 />
             </div>
             <img
-                className={cn('h-100', available.start ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.start ? styles.available : styles.disabled)}
                 src={playImg}
                 title={!debug.debugging ? 'start' : 'continue'}
-                onClick={() =>
-                    available.start ? (!debug.debugging ? dispatch(start()) : dispatch(step('continue'))) : undefined
-                }
+                onClick={() => onStart(dispatch, debug)}
             />
             <img
-                className={cn('h-100', available.step ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepOverImg}
                 title='step over'
-                onClick={() => (available.step ? dispatch(step('stepOver')) : undefined)}
+                onClick={() => onStep(dispatch, debug, 'stepOver')}
             />
             <img
-                className={cn('h-100', available.step ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepIntoImg}
                 title='step into'
-                onClick={() => (available.step ? dispatch(step('step')) : undefined)}
+                onClick={() => onStep(dispatch, debug, 'step')}
             />
             <img
-                className={cn('h-100', available.step ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepOutImg}
                 title='step out'
-                onClick={() => (available.step ? dispatch(step('stepOut')) : undefined)}
+                onClick={() => onStep(dispatch, debug, 'stepOut')}
             />
             <img
-                className={cn('h-100', available.stop ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
                 src={restartImg}
                 title='restart'
                 onClick={async () => {
-                    if (!available.stop) return
-                    await dispatch(stop())
-                    dispatch(start())
+                    await onStop(dispatch, debug)
+                    await onStart(dispatch, debug)
                 }}
             />
             <img
-                className={cn('h-100', available.stop ? styles.available : styles.disabled)}
+                className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
                 src={stopImg}
                 title='stop'
-                onClick={() => (available.stop ? dispatch(stop()) : undefined)}
+                onClick={() => (availability.stop ? dispatch(stop()) : undefined)}
             />
         </>
     )
+}
+
+function getAvailabilities(debug: State['debug']) {
+    return { start: !debug.fetching, step: debug.debugging && !debug.fetching, stop: debug.debugging }
+}
+
+async function onStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+    if (!getAvailabilities(debug).start) return
+    if (!debug.debugging) {
+        dispatch({ type: 'io/reset' })
+        await dispatch(start())
+    } else await step('continue')
+}
+
+async function onStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+    if (!getAvailabilities(debug).stop) return
+    await dispatch(stop())
+}
+
+async function onStep(dispatch: Parameters<ThunkAction>[0], debug: State['debug'], action: Parameters<typeof step>[0]) {
+    if (!getAvailabilities(debug).step) return
+    await dispatch(step(action))
+}
+
+function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+    const currentResponse = React.useRef(0)
+    React.useEffect(() => {
+        debug.responses
+            .slice(currentResponse.current)
+            .flatMap(response => response.events)
+            .forEach(event => processEvent(dispatch, event))
+        currentResponse.current = debug.responses.length - 1
+    }, [debug])
+}
+
+function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.Event) {
+    if (!!event.threw)
+        return dispatch({ type: 'io/appendOutput', payload: { output: event.threw.exception.traceback.join('') } })
+    if (!!event.printed) return dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } })
 }

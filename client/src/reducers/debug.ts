@@ -68,10 +68,9 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function start(): ThunkAction {
+export function start(): ThunkAction<Promise<void>> {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
-        dispatch({ type: 'io/reset' })
         try {
             const { code, language } = getState()
             const response = (await serverApi.post('/tracers/start', {
@@ -80,19 +79,13 @@ export function start(): ThunkAction {
                 code: code.code.join('\n')
             })).data as protocol.ITracerResponse
             dispatch({ type: 'debug/start', payload: { response } })
-            response.events
-                .filter(event => !!event.printed)
-                .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
-            const lastEvent = response.events[response.events.length - 1]
-            if (!!lastEvent.threw)
-                dispatch({ type: 'io/appendOutput', payload: { output: lastEvent.threw.exception.traceback.join('') } })
         } catch (error) {
             dispatch({ type: 'debug/start', error: !!error.response ? error.response.data : error.toString() })
         }
     }
 }
 
-export function stop(): ThunkAction {
+export function stop(): ThunkAction<Promise<void>> {
     return async dispatch => {
         dispatch({ type: 'debug/stop' })
         try {
@@ -104,7 +97,7 @@ export function stop(): ThunkAction {
     }
 }
 
-export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): ThunkAction {
+export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): ThunkAction<Promise<void>> {
     return async dispatch => {
         dispatch({ type: 'debug/step' })
         try {
@@ -117,17 +110,6 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Thun
             }
 
             const responses = responseAsSingle(response) ? [response] : response.responses
-            responses.forEach(response => {
-                response.events
-                    .filter(event => !!event.printed)
-                    .forEach(event => dispatch({ type: 'io/appendOutput', payload: { output: event.printed.value } }))
-                const lastEvent = response.events[response.events.length - 1]
-                if (!!lastEvent.threw)
-                    dispatch({
-                        type: 'io/appendOutput',
-                        payload: { output: lastEvent.threw.exception.traceback.join('') }
-                    })
-            })
             dispatch({ type: 'debug/step', payload: { responses } })
         } catch (error) {
             dispatch({ type: 'debug/step', error: !!error.response ? error.response.data : error.toString() })
