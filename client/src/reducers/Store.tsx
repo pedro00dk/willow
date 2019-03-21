@@ -7,7 +7,7 @@ import { reducer as IOReducer } from './io'
 import { reducer as LanguageReducer } from './language'
 import { reducer as SessionReducer } from './session'
 
-type State = {
+export type State = {
     code: Parameters<typeof CodeReducer>[0]
     debug: Parameters<typeof DebugReducer>[0]
     io: Parameters<typeof IOReducer>[0]
@@ -15,14 +15,14 @@ type State = {
     session: Parameters<typeof SessionReducer>[0]
 }
 
-type Action =
+export type Action =
     | Parameters<typeof CodeReducer>[1]
     | Parameters<typeof DebugReducer>[1]
     | Parameters<typeof IOReducer>[1]
     | Parameters<typeof LanguageReducer>[1]
     | Parameters<typeof SessionReducer>[1]
 
-type SubState =
+export type SubState =
     | Pick<State, 'code'>
     | Pick<State, 'debug'>
     | Pick<State, 'io'>
