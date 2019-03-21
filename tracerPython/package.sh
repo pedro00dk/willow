@@ -9,7 +9,7 @@ case $command in
         ;;
     install)
         shift
-        if [ "$#" -eq "0" ]
+        if [ "$#" -eq '0' ]
         then
             ./.venv/bin/pip install --requirement ./requirements.txt
         else
@@ -25,15 +25,15 @@ case $command in
         fi
         ;;
     protobuf)
-        mkdir --parent ./src/protobuf && protoc --python_out=./src/protobuf --proto_path=../protobuf/ ../protobuf/*.proto
+        mkdir -p ./src/protobuf && protoc --python_out=./src/protobuf --proto_path=../protobuf/ ../protobuf/*.proto
         # fix import paths of other proto modules
-        sed --in-place --regexp-extended "s/(import .*_pb2 as .*_pb2)/from . \1/g" -- ./src/protobuf/*_pb2.py
+        sed -i -r 's/(import .*_pb2 as .*_pb2)/from . \1/g' -- ./src/protobuf/*_pb2.py
         ;;
     start)
         shift
         ./.venv/bin/python ./src/main.py "$@"
         ;;
     *)
-        echo "missing script: $command"
+        echo 'command not found'
         ;;
 esac

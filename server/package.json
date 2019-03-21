@@ -24,10 +24,10 @@
         "yargs": "^13.2.2"
     },
     "scripts": {
-        "format": "tslint --config ./tslint.json --project ./package.json && shopt -s globstar && prettier --config ./.prettierrc.js --check --write ./src/**/*[^.][^d].ts && shopt -u globstar",
-        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
+        "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json -e ./src/protobuf/protocol.ts && prettier --config ./.prettierrc.js -c --write ./src/**/!\\(protocol\\).ts* && shopt -u extglob globstar",
+        "protobuf": "mkdir -p ./src/protobuf && pbjs -t static-module --es6 --force-message --out ./src/protobuf/protocol.js -p ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts -o ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- ./dist/test",
-        "debug": "tsc && node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
-        "start": "tsc && node --require source-map-support/register -- ./dist/src/index.js"
+        "debug": "tsc && node -r source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
+        "start": "tsc && node -r source-map-support/register -- ./dist/src/index.js"
     }
 }

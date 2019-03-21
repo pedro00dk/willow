@@ -3,6 +3,9 @@ FROM python:alpine
 WORKDIR /app
 ADD ./res ./res
 ADD ./src ./src
+ADD ./package.sh ./
 
-ENTRYPOINT ["python", "-OO", "./src/main.py"]
+RUN source package.sh build
+
+ENTRYPOINT ["source", "package.sh", "start"]
 CMD ["--help"]

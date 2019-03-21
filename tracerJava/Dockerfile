@@ -4,8 +4,9 @@ WORKDIR /app
 ADD ./lib ./lib
 ADD ./res ./res
 ADD ./src ./src
+ADD ./package.sh ./
 
-RUN javac -cp ./src/:./lib/* -d ./out/ --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED ./src/Main.java
+RUN source package.sh build
 
-ENTRYPOINT ["java", "-cp", "./out/:./lib/*", "--add-exports", "jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED", "Main"]
+ENTRYPOINT ["source", "package.sh", "start"]
 CMD ["--help"]
