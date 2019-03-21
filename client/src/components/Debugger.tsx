@@ -141,7 +141,7 @@ function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debu
     const currentResponse = React.useRef(0)
     React.useEffect(() => {
         if (debug.fetching) return
-        if (debug.responses.length === 0) currentResponse.current = 0
+        if (!debug.debugging) currentResponse.current = 0
         console.log(debug.responses)
         console.log(debug.responses.slice(currentResponse.current))
         debug.responses
@@ -160,7 +160,9 @@ function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.IEve
     if (!!event.threw) return processThrewEvent(dispatch, event.threw)
 }
 
-function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: protocol.Event.IStarted) {}
+function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: protocol.Event.IStarted) {
+    dispatch(step('step'))
+}
 
 function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: protocol.Event.IInspected) {
     if (inspected.frame.type === protocol.Frame.Type.EXCEPTION)
