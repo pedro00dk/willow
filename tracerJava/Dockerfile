@@ -8,5 +8,5 @@ ADD ./package.sh ./
 
 RUN source package.sh build
 
-ENTRYPOINT ["source", "package.sh", "start"]
+ENTRYPOINT ["sh", "package.sh", "start"]
 CMD ["--help"]
