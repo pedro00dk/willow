@@ -27,7 +27,7 @@ export function Debugger() {
         dispatch(fetch())
     }, [])
     useDebugUpdate(dispatch, debug)
-    const availability = getAvailabilities(debug)
+    const availability = getAvailableActions(debug)
     return (
         <>
             <div className={cn('input-group ml-3', styles.input)}>
@@ -76,72 +76,76 @@ export function Debugger() {
                 className={cn('h-100', availability.start ? styles.available : styles.disabled)}
                 src={playImg}
                 title={!debug.debugging ? 'start' : 'continue'}
-                onClick={() => onStart(dispatch, debug)}
+                onClick={() => callStart(dispatch, debug)}
             />
             <img
                 className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepOverImg}
                 title='step over'
-                onClick={() => onStep(dispatch, debug, 'stepOver')}
+                onClick={() => callStep(dispatch, debug, 'stepOver')}
             />
             <img
                 className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepIntoImg}
                 title='step into'
-                onClick={() => onStep(dispatch, debug, 'step')}
+                onClick={() => callStep(dispatch, debug, 'step')}
             />
             <img
                 className={cn('h-100', availability.step ? styles.available : styles.disabled)}
                 src={stepOutImg}
                 title='step out'
-                onClick={() => onStep(dispatch, debug, 'stepOut')}
+                onClick={() => callStep(dispatch, debug, 'stepOut')}
             />
             <img
                 className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
                 src={restartImg}
                 title='restart'
                 onClick={async () => {
-                    await onStop(dispatch, debug)
-                    await onStart(dispatch, debug)
+                    await callStop(dispatch, debug)
+                    await callStart(dispatch, debug)
                 }}
             />
             <img
                 className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
                 src={stopImg}
                 title='stop'
-                onClick={() => (availability.stop ? dispatch(stop()) : undefined)}
+                onClick={() => callStop(dispatch, debug)}
             />
         </>
     )
 }
 
-function getAvailabilities(debug: State['debug']) {
+function getAvailableActions(debug: State['debug']) {
     return { start: !debug.fetching, step: debug.debugging && !debug.fetching, stop: debug.debugging }
 }
 
-async function onStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
-    if (!getAvailabilities(debug).start) return
+async function callStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+    if (!getAvailableActions(debug).start) return
     if (!debug.debugging) {
         dispatch({ type: 'io/reset' })
         await dispatch(start())
     } else await dispatch(step('continue'))
 }
 
-async function onStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
-    if (!getAvailabilities(debug).stop) return
+async function callStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+    if (!getAvailableActions(debug).stop) return
     await dispatch(stop())
 }
 
-async function onStep(dispatch: Parameters<ThunkAction>[0], debug: State['debug'], action: Parameters<typeof step>[0]) {
-    if (!getAvailabilities(debug).step) return
+async function callStep(
+    dispatch: Parameters<ThunkAction>[0],
+    debug: State['debug'],
+    action: Parameters<typeof step>[0]
+) {
+    if (!getAvailableActions(debug).step) return
     await dispatch(step(action))
 }
 
 function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
     const currentResponse = React.useRef(0)
     React.useEffect(() => {
-        if (debug.fetching) return
-        if (!debug.debugging) currentResponse.current = 0
+        if (!debug.debugging || debug.fetching) return
+        if (debug.debugging && debug.responses.length === 0) currentResponse.current = 0
         console.log(debug.responses)
         console.log(debug.responses.slice(currentResponse.current))
         debug.responses
