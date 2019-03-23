@@ -1,0 +1,72 @@
+language: generic
+
+jobs:
+    include:
+        #
+        #
+        ### test ###
+        - stage: test
+          name: server
+          before_install:
+            - nvm install v11.12.0
+            - nvm use v11.12.0
+          install:
+            - cd ./server/
+            - npm install
+          script: npm run test
+        #
+        - name: tracers
+          before_install:
+            - nvm install v11.12.0
+            - nvm use v11.12.0
+            - pyenv install -s 3.6.3
+            - pyenv global 3.6.3
+            - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+            - . ./install-jdk.sh -F 11
+            - sudo ln -f -T /bin/bash /bin/sh
+          install:
+            - cd ./tracerJava/
+            - . package.sh build
+            - cd ../tracerPython/
+            - . package.sh setup
+            - . package.sh install
+            - cd ../tracers/
+            - npm install
+          script: npm run test
+        #
+        #
+        ### test_docker ###
+        - stage: test_docker
+          name: server
+          install:
+            - cd ./server/
+            - docker image build --tag willow:server .
+          script: docker container run --rm --interactive --tty --entrypoint npm willow:server run test 
+        #
+        - name: tracers
+          install:
+            - cd ./tracerJava/
+            - docker image build --tag willow:tracerJava .
+            - cd ../tracerPython/
+            - docker image build --tag willow:tracerPython .
+            - cd ../tracers/
+            - docker image build --tag willow:tracers .
+          script: |
+            docker container run --rm --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint npm willow:tracers run test-base \
+                -- \
+                --tracer java 'docker run --rm -i willow:tracerJava --in-mode proto' 'Main.java' 'public class Main{public static void main(String[] a) {}}' 'error!@#$' \
+                --tracer python 'docker run --rm -i willow:tracerPython --in-mode proto' '<script>' 'x = 0' 'error!@#$'
+        #
+        #
+        ### deploy ###
+        - stage: deploy
+          name: deploy
+          script: echo 'TODO'
+
+stages:
+    - test
+    - name: test_docker
+      if: branch = deploy
+    - name: deploy
+      if: branch = deploy
+

@@ -5,7 +5,7 @@ case $command in
         python -m venv .venv
         ;;
     activate)
-        source ./.venv/bin/activate
+        . ./.venv/bin/activate
         ;;
     install)
         shift
