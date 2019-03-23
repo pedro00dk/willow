@@ -2,23 +2,17 @@ import * as protocol from '../src/protobuf/protocol'
 import { TracerProcess } from '../src/tracer/tracer-process'
 import { TracerWrapper } from '../src/tracer/tracer-wrapper'
 
-const tracers = {
-    java: {
-        command: process.env.npm_package_config_java_tracer,
-        broken: protocol.Action.Start.create({ main: 'Main.java', code: '!@#$%*()' }),
-        working: protocol.Action.Start.create({
-            main: 'Main.java',
-            code: 'public class Main { public static void main(String[] args) { } }'
-        })
-    },
-    python: {
-        command: process.env.npm_package_config_python_tracer,
-        broken: protocol.Action.Start.create({ main: '<script>', code: '!@#$%*()' }),
-        working: protocol.Action.Start.create({ main: '<script>', code: '' })
-    }
-}
+const tracers = process.argv
+    .map((arg, i) => [arg, i] as [string, number])
+    .filter(([arg, i]) => arg === '--tracer')
+    .map(([arg, i]) => ({
+        language: process.argv[i + 1],
+        command: process.argv[i + 2],
+        working: protocol.Action.Start.create({ main: process.argv[i + 3], code: process.argv[i + 4] }),
+        broken: protocol.Action.Start.create({ main: process.argv[i + 3], code: process.argv[i + 5] })
+    }))
 
-Object.entries(tracers).forEach(([language, { command, broken, working }]) => {
+Object.values(tracers).forEach(({ language, command, working, broken }) => {
     describe(`tracer process -- ${language}`, () => {
         test('create - stop(fail)', () => {
             const tracer = new TracerProcess(command)

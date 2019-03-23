@@ -27,10 +27,11 @@
     },
     "scripts": {
         "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json -e ./src/protobuf/protocol.ts && prettier --config ./.prettierrc.js -c --write ./src/**/!\\(protocol\\)?\\(.d\\).ts* && shopt -u extglob globstar",
-        "protobuf": "mkdir --parent ./src/protobuf && pbjs --target static-module --es6 --force-message --out ./src/protobuf/protocol.js --path ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts --out ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
+        "protobuf": "mkdir -p ./src/protobuf && pbjs -t static-module --es6 --force-message --out ./src/protobuf/protocol.js -p ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts -o ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
+        "test-base": "tsc && jest --coverage --detect-open-handles --force-exit -- ./dist/test",
         "debug-base": "tsc && node -r source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
         "start-base": "tsc && node -r source-map-support/register -- ./dist/src/index.js",
-        "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- ./dist/test",
+        "test": "npm run test-base -- --tracer java \"$npm_package_config_java_tracer\" 'Main.java' 'public class Main { public static void main(String[] args) {}}' 'error!@#$' --tracer python \"$npm_package_config_python_tracer\" '<script>' ' ' 'error!@#$'",
         "debug": "npm run debug-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
         "start": "npm run start-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
         "start-test": "npm run start-base -- --tracer java \"$npm_package_config_java_tracer --test\" --tracer python \"$npm_package_config_python_tracer --test\""
