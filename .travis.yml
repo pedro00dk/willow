@@ -8,30 +8,30 @@ jobs:
         - stage: test
           name: server
           before_install:
-            - nvm install v11.12.0
-            - nvm use v11.12.0
+              - nvm install v11.12.0
+              - nvm use v11.12.0
           install:
-            - cd ./server/
-            - npm install
+              - cd ./server/
+              - npm install
           script: npm run test
         #
         - name: tracers
           before_install:
-            - nvm install v11.12.0
-            - nvm use v11.12.0
-            - pyenv install -s 3.6.3
-            - pyenv global 3.6.3
-            - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-            - . ./install-jdk.sh -F 11
-            - sudo ln -f -T /bin/bash /bin/sh
+              - nvm install v11.12.0
+              - nvm use v11.12.0
+              - pyenv install -s 3.6.3
+              - pyenv global 3.6.3
+              - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+              - . ./install-jdk.sh -F 11
+              - sudo ln -f -T /bin/bash /bin/sh
           install:
-            - cd ./tracerJava/
-            - . package.sh build
-            - cd ../tracerPython/
-            - . package.sh setup
-            - . package.sh install
-            - cd ../tracers/
-            - npm install
+              - cd ./tracerJava/
+              - . package.sh build
+              - cd ../tracerPython/
+              - . package.sh setup
+              - . package.sh install
+              - cd ../tracers/
+              - npm install
           script: npm run test
         #
         #
@@ -39,34 +39,49 @@ jobs:
         - stage: test_docker
           name: server
           install:
-            - cd ./server/
-            - docker image build --tag willow:server .
-          script: docker container run --rm --interactive --tty --entrypoint npm willow:server run test 
+              - cd ./server/
+              - docker image build --tag willow:server .
+          script: docker container run --rm --interactive --tty --entrypoint npm willow:server run test
         #
         - name: tracers
           install:
-            - cd ./tracerJava/
-            - docker image build --tag willow:tracerJava .
-            - cd ../tracerPython/
-            - docker image build --tag willow:tracerPython .
-            - cd ../tracers/
-            - docker image build --tag willow:tracers .
+              - cd ./tracerJava/
+              - docker image build --tag willow:tracerJava .
+              - cd ../tracerPython/
+              - docker image build --tag willow:tracerPython .
+              - cd ../tracers/
+              - docker image build --tag willow:tracers .
           script: |
-            docker container run --rm --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint npm willow:tracers run test-base \
-                -- \
-                --tracer java 'docker run --rm -i willow:tracerJava --in-mode proto' 'Main.java' 'public class Main{public static void main(String[] a) {}}' 'error!@#$' \
-                --tracer python 'docker run --rm -i willow:tracerPython --in-mode proto' '<script>' 'x = 0' 'error!@#$'
+              docker container run --rm --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint npm willow:tracers run test-base \
+                  -- \
+                  --tracer java 'docker run --rm -i willow:tracerJava --in-mode proto' 'Main.java' 'public class Main{public static void main(String[] a) {}}' 'error!@#$' \
+                  --tracer python 'docker run --rm -i willow:tracerPython --in-mode proto' '<script>' 'x = 0' 'error!@#$'
         #
         #
         ### deploy ###
         - stage: deploy
           name: deploy
-          script: echo 'TODO'
+          install:
+              - echo $GCLOUD_SERVICE_ACCOUNT_AUTH | base64 -di | gcloud auth activate-service-account --key-file=-
+              - gcloud config set project $GCLOUD_PROJECT_NAME
+              - gcloud config set compute/zone $GCLOUD_PROJECT_ZONE
+              - gcloud config list
+              - |
+                gcloud compute instances create willow-instance \
+                    --service-account=$GCLOUD_SERVICE_ACCOUNT_NAME \
+                    --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=f1-micro \
+                    --subnet=default --tags=http-server,https-server --boot-disk-size=10GB || true
+              - |
+                gcloud compute firewall-rules create default-allow-http \
+                --action=ALLOW --rules=tcp:80 --target-tags=http-server || true
+              - |
+                gcloud compute firewall-rules create default-allow-https \
+                --action=ALLOW --rules=tcp:443 --target-tags=https-server || true
+              - gcloud compute ssh willow-instance -- pwd
 
 stages:
-    - test
+    - name: test
     - name: test_docker
       if: branch = deploy
     - name: deploy
       if: branch = deploy
-
