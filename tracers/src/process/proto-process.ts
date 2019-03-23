@@ -31,7 +31,7 @@ export class ProtoProcess {
 
     spawnProcess() {
         if (this.isRunning()) throw new Error('process running')
-        const instance = cp.spawn(this.command, { shell: '/bin/bash' })
+        const instance = cp.spawn(this.command, { shell: '/bin/sh' })
         const stop$ = rx //
             .merge(rx.fromEvent(instance, 'error'), rx.fromEvent(instance, 'exit'))
             .pipe(rxOps.take(1))
