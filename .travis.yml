@@ -110,7 +110,7 @@ jobs:
                     --tracer python "docker run --rm -i willow:tracerPython --in-mode proto"
                 sleep 10 # willow_server needs the willow_tracers already running
                 TRACERS_IP=$(docker container inspect --format "{{ .NetworkSettings.IPAddress }}" -- willow_tracers)
-                docker container run --name willow_server --network bridge --rm --detach --interactive --tty --publish 443:8001 \
+                docker container run --name willow_server --network bridge --rm --detach --interactive --tty --publish 80:8001 \
                     -- \
                     willow:server \
                     -- \
