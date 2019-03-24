@@ -1,4 +1,5 @@
 import * as axios from 'axios'
+import * as cors from 'cors'
 import * as express from 'express'
 import * as session from 'express-session'
 import * as log from 'npmlog'
@@ -24,14 +25,17 @@ export class Server {
         this.server = express()
         this.server.use(express.json())
         this.server.use(session({ resave: false, saveUninitialized: true, secret }))
-        this.server.use((request, response, next) => {
-            // cors support with any origin (wildcard '*' not supported when credentials enabled)
-            const origin = clients !== '*' ? clients : ([request.headers.origin].flat()[0] as string)
-            response.header('Access-Control-Allow-Origin', origin)
-            response.header('Access-Control-Allow-Credentials', 'true')
-            response.header('Access-Control-Allow-Headers', 'Content-Type')
-            next()
-        })
+
+        this.server.use(
+            cors({
+                origin: (origin, callback) =>
+                    clients === '*' || clients === origin
+                        ? callback(undefined, true)
+                        : callback(new Error('not allowed by CORS')),
+                credentials: true
+            })
+        )
+
         this.tracersProxy = new TracersProxy(axios.default.create({ baseURL: tracers }))
         this.clientTracers = new Map()
         this.configureRoutes()
