@@ -61,7 +61,8 @@ jobs:
         ### deploy ###
         - stage: deploy
           name: deploy
-          install:
+          # using install because no deploy provider will help to deploy on google compute engines
+          before_install:
               - echo $GCLOUD_SERVICE_ACCOUNT_AUTH | base64 -di | gcloud auth activate-service-account --key-file=-
               - gcloud config set project $GCLOUD_PROJECT_NAME
               - gcloud config set compute/zone $GCLOUD_PROJECT_ZONE
@@ -77,7 +78,46 @@ jobs:
               - |
                 gcloud compute firewall-rules create default-allow-https \
                 --action=ALLOW --rules=tcp:443 --target-tags=https-server || true
-              - gcloud compute ssh willow-instance -- pwd
+          install:
+              - |
+                echo '
+                set -ev
+                rm -fr ./willow/ || true
+                git clone https://github.com/pedro00dk/willow
+                cd ./willow/
+                # kill and remove any running containers
+                docker container kill $(docker container ls --all --quiet) || true
+                docker container rm $(docker container ls --all --quiet) || true
+                # create images
+                cd ./server/
+                docker image build --tag willow:server .
+                cd ../tracerJava/
+                docker image build --tag willow:tracerJava .
+                cd ../tracerPython/
+                docker image build --tag willow:tracerPython .
+                cd ../tracers/
+                docker image build --tag willow:tracers .
+                # clean dangling images
+                docker image prune --force
+                # starting containers
+                docker container run --name willow_tracers --network bridge --rm --detach --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint npm \
+                    -- \
+                    willow:tracers \
+                    run start-base \
+                    -- \
+                    --port 8002 \
+                    --tracer java "docker run --rm -i willow:tracerJava --in-mode proto" \
+                    --tracer python "docker run --rm -i willow:tracerPython --in-mode proto"
+                sleep 10 # willow_server needs the willow_tracers already running
+                TRACERS_IP=$(docker container inspect --format "{{ .NetworkSettings.IPAddress }}" -- willow_tracers)
+                docker container run --name willow_server --network bridge --rm --detach --interactive --tty --publish 443:8001 \
+                    -- \
+                    willow:server \
+                    -- \
+                    --port 8001 \
+                    --tracers "http://${TRACERS_IP}:8002/tracers"
+                ' > deploy.sh
+              - gcloud compute ssh willow-instance -- sh -c "$(cat deploy.sh)"
 
 stages:
     - name: test
