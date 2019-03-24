@@ -70,7 +70,7 @@ jobs:
               - |
                 gcloud compute instances create willow-instance \
                     --service-account=$GCLOUD_SERVICE_ACCOUNT_NAME \
-                    --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=f1-micro \
+                    --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=n1-standard-1 \
                     --subnet=default --tags=http-server,https-server --boot-disk-size=10GB || true
               - |
                 gcloud compute firewall-rules create default-allow-http \
