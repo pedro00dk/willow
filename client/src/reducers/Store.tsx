@@ -4,7 +4,6 @@ import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as BreakpointsReducer } from './breakpoints'
 import { reducer as CodeReducer } from './code'
 import { reducer as DebugReducer } from './debug'
-import { reducer as IOReducer } from './io'
 import { reducer as LanguageReducer } from './language'
 import { reducer as MarkersReducer } from './markers'
 import { reducer as SessionReducer } from './session'
@@ -13,7 +12,6 @@ export type State = {
     breakpoints: Parameters<typeof BreakpointsReducer>[0]
     code: Parameters<typeof CodeReducer>[0]
     debug: Parameters<typeof DebugReducer>[0]
-    io: Parameters<typeof IOReducer>[0]
     language: Parameters<typeof LanguageReducer>[0]
     markers: Parameters<typeof MarkersReducer>[0]
     session: Parameters<typeof SessionReducer>[0]
@@ -23,7 +21,6 @@ export type Action =
     | Parameters<typeof BreakpointsReducer>[1]
     | Parameters<typeof CodeReducer>[1]
     | Parameters<typeof DebugReducer>[1]
-    | Parameters<typeof IOReducer>[1]
     | Parameters<typeof LanguageReducer>[1]
     | Parameters<typeof MarkersReducer>[1]
     | Parameters<typeof SessionReducer>[1]
@@ -32,7 +29,6 @@ export type SubState =
     | Pick<State, 'breakpoints'>
     | Pick<State, 'code'>
     | Pick<State, 'debug'>
-    | Pick<State, 'io'>
     | Pick<State, 'language'>
     | Pick<State, 'markers'>
     | Pick<State, 'session'>
@@ -46,7 +42,6 @@ const reduxStore = reduxStoreCreator(
         breakpoints: BreakpointsReducer,
         code: CodeReducer,
         debug: DebugReducer,
-        io: IOReducer,
         language: LanguageReducer,
         markers: MarkersReducer,
         session: SessionReducer

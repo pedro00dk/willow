@@ -13,11 +13,7 @@ type State = {
 type Action =
     | { type: 'debug/start'; payload?: { response: protocol.ITracerResponse }; error?: string }
     | { type: 'debug/stop'; payload?: {}; error?: string }
-    | {
-          type: 'debug/step'
-          payload?: { responses: protocol.ITracerResponse[] }
-          error?: string
-      }
+    | { type: 'debug/step'; payload?: { responses: protocol.ITracerResponse[] }; error?: string }
     | { type: 'debug/input'; payload?: {}; error?: string }
     | { type: 'debug/setBreakpoints'; payload?: {}; error?: string }
 

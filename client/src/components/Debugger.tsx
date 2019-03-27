@@ -121,10 +121,8 @@ function getAvailableActions(debug: State['debug']) {
 
 async function callStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
     if (!getAvailableActions(debug).start) return
-    if (!debug.debugging) {
-        dispatch({ type: 'io/reset' })
-        await dispatch(start())
-    } else await dispatch(step('continue'))
+    if (!debug.debugging) await dispatch(start())
+    else await dispatch(step('continue'))
 }
 
 async function callStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
@@ -169,8 +167,6 @@ function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: prot
 }
 
 function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: protocol.Event.IInspected) {
-    if (inspected.frame.type === protocol.Frame.Type.EXCEPTION)
-        dispatch({ type: 'io/appendOutput', payload: { output: inspected.frame.exception.traceback.join('') } })
     if (inspected.frame.finish) dispatch({ type: 'markers/set', payload: { markers: [] } })
     else {
         const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
@@ -179,11 +175,13 @@ function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: 
 }
 
 function processPrintedEvent(dispatch: Parameters<ThunkAction>[0], printed: protocol.Event.IPrinted) {
-    return dispatch({ type: 'io/appendOutput', payload: { output: printed.value } })
+    //
 }
 
-function processLockedEvent(dispatch: Parameters<ThunkAction>[0], locked: protocol.Event.ILocked) {}
+function processLockedEvent(dispatch: Parameters<ThunkAction>[0], locked: protocol.Event.ILocked) {
+    //
+}
 
 function processThrewEvent(dispatch: Parameters<ThunkAction>[0], threw: protocol.Event.IThrew) {
-    dispatch({ type: 'io/appendOutput', payload: { output: threw.exception.traceback.join('') } })
+    //
 }
