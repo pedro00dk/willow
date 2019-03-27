@@ -57,7 +57,12 @@ type Props = {
 
 export function CodeEditor(props: Props) {
     const dispatch = useDispatch()
-    const { code, language } = useRedux(state => ({ code: state.code, language: state.language }))
+    const { breakpoints, code, language, markers } = useRedux(state => ({
+        breakpoints: state.breakpoints,
+        code: state.code,
+        language: state.language,
+        markers: state.markers
+    }))
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     React.useEffect(() => {
         if (!editor) return
@@ -74,7 +79,7 @@ export function CodeEditor(props: Props) {
             const region = gutterLayer.getRegion(event)
             if (region !== 'markers') return
             const line = (event.getDocumentPosition() as ace.Position).row
-            dispatch({ type: 'code/setBreakpoint', payload: { line } })
+            dispatch({ type: 'breakpoints/set', payload: { lines: [...breakpoints.lines, line] } })
         }
 
         editor.on('change', onChange)
@@ -92,22 +97,17 @@ export function CodeEditor(props: Props) {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
         decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
-        code.breakpoints.forEach(breakpoint => editor.session.addGutterDecoration(breakpoint, styles.breakpoint))
-    }, [code.breakpoints])
+        breakpoints.lines.forEach(line => editor.session.addGutterDecoration(line, styles.breakpoint))
+    }, [breakpoints.lines])
     React.useEffect(() => {
         if (!editor) return
-        const markers = editor.session.getMarkers(false) as EditorMarker[]
-        Object.values(markers)
+        const aceMarkers = editor.session.getMarkers(false) as EditorMarker[]
+        Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
-        code.markers.forEach(marker =>
-            editor.session.addMarker(
-                new Range(marker.line, 0, marker.line, Infinity),
-                styles[marker.type],
-                'fullLine',
-                false
-            )
+        markers.markers.forEach(marker =>
+            editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), styles[marker.type], 'fullLine', false)
         )
-    }, [code.markers])
+    }, [markers.markers])
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

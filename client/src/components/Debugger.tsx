@@ -171,10 +171,10 @@ function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: prot
 function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: protocol.Event.IInspected) {
     if (inspected.frame.type === protocol.Frame.Type.EXCEPTION)
         dispatch({ type: 'io/appendOutput', payload: { output: inspected.frame.exception.traceback.join('') } })
-    if (inspected.frame.finish) dispatch({ type: 'code/setMarkers', payload: { markers: [] } })
+    if (inspected.frame.finish) dispatch({ type: 'markers/set', payload: { markers: [] } })
     else {
         const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
-        dispatch({ type: 'code/setMarkers', payload: { markers: [{ line: inspected.frame.line, type }] } })
+        dispatch({ type: 'markers/set', payload: { markers: [{ line: inspected.frame.line, type }] } })
     }
 }
 
