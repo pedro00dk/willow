@@ -161,6 +161,7 @@ export class TracersSkeleton {
     }
 
     setBreakpoints(request: protocol.BreakpointsRequest): protocol.Empty {
-        return undefined
+        this.checkGetSessionTracer(request.id.id).setBreakpoints(request.breakpoints)
+        return protocol.Empty.create()
     }
 }
