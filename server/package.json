@@ -26,7 +26,7 @@
         "yargs": "^13.2.2"
     },
     "scripts": {
-        "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json -e ./src/protobuf/protocol.ts && prettier --config ./.prettierrc.js -c --write ./src/**/!\\(protocol\\).ts* && shopt -u extglob globstar",
+        "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json -e ./src/protobuf/protocol.ts && prettier --config ./.prettierrc.js -c --write ./src/**/!\\(protocol\\)?\\(.d\\).ts* && shopt -u extglob globstar",
         "protobuf": "mkdir -p ./src/protobuf && pbjs -t static-module --es6 --force-message --out ./src/protobuf/protocol.js -p ../protobuf/ -- ../protobuf/*.proto ../protobuf/services/*.proto  && pbts -o ./src/protobuf/protocol.d.ts -- ./src/protobuf/protocol.js",
         "test": "tsc && jest --coverage --detectOpenHandles --forceExit -- ./dist/test",
         "debug": "tsc && node -r source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",

@@ -9,7 +9,7 @@ export class Server {
     private server: express.Express
     private service: TracersSkeleton
 
-    constructor(private mode: 'json' | 'proto', private port: number, tracers: { [language: string]: string }) {
+    constructor(private port: number, mode: 'json' | 'proto', tracers: { [language: string]: string }) {
         this.server = express()
         this.service = new TracersSkeleton(mode, tracers)
         this.server.use('/tracers', this.service.router)

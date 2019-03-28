@@ -11,13 +11,13 @@ function main() {
         .option('port', { default: 8000, description: 'Set the server port' })
         .option('tracer', { array: true, description: 'Tracer <language> <command>', nargs: 2, string: true })
     const argumentS = parser.argv
-    const mode = argumentS.mode as 'json' | 'proto'
     const port = argumentS.port
+    const mode = argumentS.mode as 'json' | 'proto'
     const tracers = [...Array(argumentS.tracer ? argumentS.tracer.length / 2 : 0)] //
         .map((_, i) => [argumentS.tracer[i * 2], argumentS.tracer[i * 2 + 1]] as [string, string])
         .reduce((acc, [language, command]) => ({ ...acc, [language]: command }), {} as { [language: string]: string })
     log.info(main.name, 'cli', { port, tracers })
-    new Server(mode, port, tracers).listen()
+    new Server(port, mode, tracers).listen()
 }
 
 if (!module.parent) main()

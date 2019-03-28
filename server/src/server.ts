@@ -16,7 +16,7 @@ export class Server {
 
     constructor(
         private port: number,
-        private secret: string,
+        secret: string,
         clients: string,
         tracers: string,
         private lifetime: number,
