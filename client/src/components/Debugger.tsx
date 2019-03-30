@@ -11,7 +11,7 @@ import * as protocol from '../protobuf/protocol'
 import { MarkerType } from '../reducers/code'
 import { start, step, stop } from '../reducers/debug'
 import { fetch } from '../reducers/language'
-import { State, ThunkAction, useDispatch, useRedux } from '../reducers/Store'
+import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {
     available: css({ cursor: 'pointer' }),
@@ -119,19 +119,19 @@ function getAvailableActions(debug: State['debug']) {
     return { start: !debug.fetching, step: debug.debugging && !debug.fetching, stop: debug.debugging }
 }
 
-async function callStart(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+async function callStart(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     if (!getAvailableActions(debug).start) return
     if (!debug.debugging) await dispatch(start())
     else await dispatch(step('continue'))
 }
 
-async function callStop(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+async function callStop(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     if (!getAvailableActions(debug).stop) return
     await dispatch(stop())
 }
 
 async function callStep(
-    dispatch: Parameters<ThunkAction>[0],
+    dispatch: Parameters<AsyncAction>[0],
     debug: State['debug'],
     action: Parameters<typeof step>[0]
 ) {
@@ -139,7 +139,7 @@ async function callStep(
     await dispatch(step(action))
 }
 
-function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debug']) {
+function useDebugUpdate(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     const currentResponse = React.useRef(0)
     React.useEffect(() => {
         if (!debug.debugging || debug.fetching) return
@@ -154,7 +154,7 @@ function useDebugUpdate(dispatch: Parameters<ThunkAction>[0], debug: State['debu
     }, [debug])
 }
 
-function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.IEvent) {
+function processEvent(dispatch: Parameters<AsyncAction>[0], event: protocol.IEvent) {
     if (!!event.started) return processStartedEvent(dispatch, event.started)
     if (!!event.inspected) return processInspectedEvent(dispatch, event.inspected)
     if (!!event.printed) return processPrintedEvent(dispatch, event.printed)
@@ -162,11 +162,11 @@ function processEvent(dispatch: Parameters<ThunkAction>[0], event: protocol.IEve
     if (!!event.threw) return processThrewEvent(dispatch, event.threw)
 }
 
-function processStartedEvent(dispatch: Parameters<ThunkAction>[0], started: protocol.Event.IStarted) {
+function processStartedEvent(dispatch: Parameters<AsyncAction>[0], started: protocol.Event.IStarted) {
     dispatch(step('step'))
 }
 
-function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: protocol.Event.IInspected) {
+function processInspectedEvent(dispatch: Parameters<AsyncAction>[0], inspected: protocol.Event.IInspected) {
     if (inspected.frame.finish) dispatch({ type: 'markers/set', payload: { markers: [] } })
     else {
         const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
@@ -174,14 +174,14 @@ function processInspectedEvent(dispatch: Parameters<ThunkAction>[0], inspected: 
     }
 }
 
-function processPrintedEvent(dispatch: Parameters<ThunkAction>[0], printed: protocol.Event.IPrinted) {
+function processPrintedEvent(dispatch: Parameters<AsyncAction>[0], printed: protocol.Event.IPrinted) {
     //
 }
 
-function processLockedEvent(dispatch: Parameters<ThunkAction>[0], locked: protocol.Event.ILocked) {
+function processLockedEvent(dispatch: Parameters<AsyncAction>[0], locked: protocol.Event.ILocked) {
     //
 }
 
-function processThrewEvent(dispatch: Parameters<ThunkAction>[0], threw: protocol.Event.IThrew) {
+function processThrewEvent(dispatch: Parameters<AsyncAction>[0], threw: protocol.Event.IThrew) {
     //
 }

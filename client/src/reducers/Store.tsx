@@ -33,7 +33,7 @@ export type SubState =
     | Pick<State, 'markers'>
     | Pick<State, 'session'>
 
-export type ThunkAction<R = void> = ThunkAction<R, State, void, Action>
+export type AsyncAction<R = void> = ThunkAction<Promise<R>, State, void, Action>
 
 const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware<State, Action, void>))
 const reduxStoreCreator = reduxStoreEnhancer(Redux.createStore)

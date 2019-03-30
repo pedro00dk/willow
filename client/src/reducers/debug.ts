@@ -1,7 +1,7 @@
 import { Reducer } from 'redux'
 import * as protocol from '../protobuf/protocol'
 import { serverApi } from '../server'
-import { ThunkAction } from './Store'
+import { AsyncAction } from './Store'
 
 type State = {
     readonly debugging: boolean
@@ -64,7 +64,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function start(): ThunkAction<Promise<void>> {
+export function start(): AsyncAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
         try {
@@ -81,7 +81,7 @@ export function start(): ThunkAction<Promise<void>> {
     }
 }
 
-export function stop(): ThunkAction<Promise<void>> {
+export function stop(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'debug/stop' })
         try {
@@ -93,7 +93,7 @@ export function stop(): ThunkAction<Promise<void>> {
     }
 }
 
-export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): ThunkAction<Promise<void>> {
+export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'debug/step' })
         try {

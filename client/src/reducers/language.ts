@@ -1,6 +1,6 @@
 import { Reducer } from 'redux'
 import { serverApi } from '../server'
-import { ThunkAction } from './Store'
+import { AsyncAction } from './Store'
 
 type State = {
     readonly fetching: boolean
@@ -37,7 +37,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function fetch(): ThunkAction {
+export function fetch(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'language/fetch' })
         try {
