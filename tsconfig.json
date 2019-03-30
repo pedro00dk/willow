@@ -3,6 +3,7 @@
         "downlevelIteration": true,
         "lib": ["esnext"],
         "newLine": "LF",
+        "moduleResolution": "node",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": true,
