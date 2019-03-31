@@ -165,8 +165,9 @@ function processEvent(dispatch: Parameters<AsyncAction>[0], event: protocol.IEve
     if (!!event.threw) return processThrewEvent(dispatch, event.threw)
 }
 
-function processStartedEvent(dispatch: Parameters<AsyncAction>[0], started: protocol.Event.IStarted) {
-    dispatch(debugActions.step('step'))
+async function processStartedEvent(dispatch: Parameters<AsyncAction>[0], started: protocol.Event.IStarted) {
+    await dispatch(debugActions.setBreakpoints())
+    await dispatch(debugActions.step('continue'))
 }
 
 function processInspectedEvent(dispatch: Parameters<AsyncAction>[0], inspected: protocol.Event.IInspected) {
