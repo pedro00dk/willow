@@ -94,7 +94,7 @@ export function CodeEditor(props: Props) {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.session.setMode(syntaxSupport(language.selected))
+        editor.session.setMode(syntaxSupport(language.languages[language.selected]))
     }, [language.selected])
 
     React.useEffect(() => {

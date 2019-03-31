@@ -5,12 +5,12 @@ import { AsyncAction } from './Store'
 type State = {
     readonly fetching: boolean
     readonly languages: string[]
-    readonly selected: string
+    readonly selected: number
     readonly error: string
 }
 type Action =
     | { type: 'language/fetch'; payload?: { languages: string[] }; error?: string }
-    | { type: 'language/select'; payload: { selected: string } }
+    | { type: 'language/select'; payload: { selected: number } }
 
 const initialState: State = {
     fetching: false,
@@ -27,17 +27,17 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
                     ...state,
                     fetching: false,
                     languages: action.payload.languages,
-                    selected: action.payload.languages.length > 0 ? action.payload.languages[0] : undefined
+                    selected: action.payload.languages.length > 0 ? 0 : undefined
                 }
             if (!!action.error) return { ...state, fetching: false, error: action.error }
             return { ...initialState, fetching: true }
         case 'language/select':
-            return { ...state, selected: action.payload.selected }
+            return { ...state, ...action.payload }
     }
     return state
 }
 
-export function fetch(): AsyncAction {
+const fetch = (): AsyncAction => {
     return async dispatch => {
         dispatch({ type: 'language/fetch' })
         try {
@@ -48,3 +48,7 @@ export function fetch(): AsyncAction {
         }
     }
 }
+
+const select = (selected: number): Action => ({ type: 'language/select', payload: { selected } })
+
+export const actions = { fetch, select }

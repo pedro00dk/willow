@@ -6,7 +6,9 @@ export enum MarkerType {
     ERROR
 }
 
-type State = { readonly markers: ReadonlySet<{ line: number; type: MarkerType }> }
+type State = {
+    readonly markers: ReadonlySet<{ line: number; type: MarkerType }>
+}
 
 type Action = { type: 'markers/set'; payload: { markers: { line: number; type: MarkerType }[] } }
 
@@ -21,3 +23,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     }
     return state
 }
+
+const set = (markers: { line: number; type: MarkerType }[]): Action => ({ type: 'markers/set', payload: { markers } })
+
+export const actions = { set }

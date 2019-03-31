@@ -7,6 +7,7 @@ type State = {
     readonly fetching: boolean
     readonly error: string
 }
+
 type Action = { type: 'session/fetch'; payload?: { session: string }; error?: string }
 
 const initialState: State = {
@@ -25,7 +26,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function fetch(): AsyncAction {
+const fetch = (): AsyncAction => {
     return async dispatch => {
         dispatch({ type: 'session/fetch' })
         try {
@@ -36,3 +37,5 @@ export function fetch(): AsyncAction {
         }
     }
 }
+
+export const actions = { fetch }

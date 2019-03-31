@@ -64,13 +64,13 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export function start(): AsyncAction {
+const start = (): AsyncAction => {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
         try {
             const { code, language } = getState()
             const response = (await serverApi.post('/tracers/start', {
-                language: language.selected,
+                language: language.languages[language.selected],
                 main: code.main,
                 code: code.code.join('\n')
             })).data as protocol.ITracerResponse
@@ -81,7 +81,7 @@ export function start(): AsyncAction {
     }
 }
 
-export function stop(): AsyncAction {
+const stop = (): AsyncAction => {
     return async dispatch => {
         dispatch({ type: 'debug/stop' })
         try {
@@ -93,7 +93,7 @@ export function stop(): AsyncAction {
     }
 }
 
-export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction {
+const step = (action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction => {
     return async dispatch => {
         dispatch({ type: 'debug/step' })
         try {
@@ -116,3 +116,5 @@ export function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): Asyn
 // // 'input'
 // // 'getBreakpoints'
 // // 'setBreakpoints'
+
+export const actions = { start, stop, step }

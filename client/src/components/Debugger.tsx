@@ -8,9 +8,9 @@ import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
-import { start, step, stop } from '../reducers/debug'
-import { fetch } from '../reducers/language'
-import { MarkerType } from '../reducers/markers'
+import { actions as debugActions } from '../reducers/debug'
+import { actions as languageActions } from '../reducers/language'
+import { actions as markersActions, MarkerType } from '../reducers/markers'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {
@@ -23,10 +23,13 @@ const styles = {
 export function Debugger() {
     const dispatch = useDispatch()
     const { debug, language } = useRedux(state => ({ debug: state.debug, language: state.language }))
+
     React.useEffect(() => {
-        dispatch(fetch())
+        dispatch(languageActions.fetch())
     }, [])
+
     useDebugUpdate(dispatch, debug)
+
     const availability = getAvailableActions(debug)
     return (
         <>
@@ -37,8 +40,8 @@ export function Debugger() {
                 <select
                     className={cn('custom-select', styles.select)}
                     disabled={debug.debugging}
-                    defaultValue={language.selected}
-                    onChange={event => dispatch({ type: 'language/select', payload: { selected: event.target.value } })}
+                    defaultValue={language.languages[language.selected]}
+                    onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
                 >
                     {language.languages.map((language, i) => (
                         <option key={i} value={language}>
@@ -121,22 +124,22 @@ function getAvailableActions(debug: State['debug']) {
 
 async function callStart(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     if (!getAvailableActions(debug).start) return
-    if (!debug.debugging) await dispatch(start())
-    else await dispatch(step('continue'))
+    if (!debug.debugging) await dispatch(debugActions.start())
+    else await dispatch(debugActions.step('continue'))
 }
 
 async function callStop(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     if (!getAvailableActions(debug).stop) return
-    await dispatch(stop())
+    await dispatch(debugActions.stop())
 }
 
 async function callStep(
     dispatch: Parameters<AsyncAction>[0],
     debug: State['debug'],
-    action: Parameters<typeof step>[0]
+    action: Parameters<typeof debugActions.step>[0]
 ) {
     if (!getAvailableActions(debug).step) return
-    await dispatch(step(action))
+    await dispatch(debugActions.step(action))
 }
 
 function useDebugUpdate(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
@@ -163,14 +166,14 @@ function processEvent(dispatch: Parameters<AsyncAction>[0], event: protocol.IEve
 }
 
 function processStartedEvent(dispatch: Parameters<AsyncAction>[0], started: protocol.Event.IStarted) {
-    dispatch(step('step'))
+    dispatch(debugActions.step('step'))
 }
 
 function processInspectedEvent(dispatch: Parameters<AsyncAction>[0], inspected: protocol.Event.IInspected) {
-    if (inspected.frame.finish) dispatch({ type: 'markers/set', payload: { markers: [] } })
+    if (inspected.frame.finish) dispatch(markersActions.set([]))
     else {
         const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
-        dispatch({ type: 'markers/set', payload: { markers: [{ line: inspected.frame.line, type }] } })
+        dispatch(markersActions.set([{ line: inspected.frame.line, type }]))
     }
 }
 
