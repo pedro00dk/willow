@@ -57,7 +57,7 @@ export function Store(props: { children?: React.ReactNode }) {
 function equalStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
-    const nextKeys = Object.keys(prev)
+    const nextKeys = Object.keys(next)
 
     return (
         prevKeys.length === nextKeys.length &&
