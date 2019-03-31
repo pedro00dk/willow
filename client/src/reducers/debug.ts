@@ -117,8 +117,8 @@ const setBreakpoints = (): AsyncAction => {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/setBreakpoints' })
         try {
-            const { breakpoints } = getState()
-            await serverApi.post(`/tracers/setBreakpoints`, [...breakpoints.lines])
+            const { breakpoint } = getState()
+            await serverApi.post(`/tracers/setBreakpoints`, [...breakpoint.lines])
             dispatch({ type: 'debug/setBreakpoints', payload: {} })
         } catch (error) {
             dispatch({ type: 'debug/setBreakpoints', error: !!error.response ? error.response.data : error.toString() })

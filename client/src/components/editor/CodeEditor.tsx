@@ -1,9 +1,9 @@
 import * as ace from 'brace'
 import { css } from 'emotion'
 import * as React from 'react'
-import { actions as breakpointsActions } from '../../reducers/breakpoints'
+import { actions as breakpointActions } from '../../reducers/breakpoint'
 import { actions as codeActions } from '../../reducers/code'
-import { MarkerType } from '../../reducers/markers'
+import { MarkerType } from '../../reducers/marker'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
@@ -60,8 +60,8 @@ type Props = {
 export function CodeEditor(props: Props) {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoints, language, markers } = useRedux(state => ({
-        breakpoints: state.breakpoints,
+    const { breakpoint, language, markers } = useRedux(state => ({
+        breakpoint: state.breakpoint,
         language: state.language,
         markers: state.markers
     }))
@@ -80,7 +80,7 @@ export function CodeEditor(props: Props) {
             const region = gutterLayer.getRegion(event)
             if (region !== 'markers') return
             const line = (event.getDocumentPosition() as ace.Position).row
-            dispatch(breakpointsActions.toggle(line))
+            dispatch(breakpointActions.toggle(line))
         }
 
         editor.on('change', onChange)
@@ -101,8 +101,8 @@ export function CodeEditor(props: Props) {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
         decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
-        breakpoints.lines.forEach(line => editor.session.addGutterDecoration(line, styles.breakpoint))
-    }, [breakpoints.lines])
+        breakpoint.lines.forEach(line => editor.session.addGutterDecoration(line, styles.breakpoint))
+    }, [breakpoint.lines])
 
     React.useEffect(() => {
         if (!editor) return

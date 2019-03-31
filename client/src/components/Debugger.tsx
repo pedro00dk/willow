@@ -10,7 +10,7 @@ import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
 import { actions as debugActions } from '../reducers/debug'
 import { actions as languageActions } from '../reducers/language'
-import { actions as markersActions, MarkerType } from '../reducers/markers'
+import { actions as markerActions, MarkerType } from '../reducers/marker'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {
@@ -171,10 +171,10 @@ async function processStartedEvent(dispatch: Parameters<AsyncAction>[0], started
 }
 
 function processInspectedEvent(dispatch: Parameters<AsyncAction>[0], inspected: protocol.Event.IInspected) {
-    if (inspected.frame.finish) dispatch(markersActions.set([]))
+    if (inspected.frame.finish) dispatch(markerActions.set([]))
     else {
         const type = inspected.frame.type !== protocol.Frame.Type.EXCEPTION ? MarkerType.HIGHLIGHT : MarkerType.ERROR
-        dispatch(markersActions.set([{ line: inspected.frame.line, type }]))
+        dispatch(markerActions.set([{ line: inspected.frame.line, type }]))
     }
 }
 

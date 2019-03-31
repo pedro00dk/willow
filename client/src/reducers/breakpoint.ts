@@ -4,7 +4,7 @@ type State = {
     readonly lines: ReadonlySet<number>
 }
 
-type Action = { type: 'breakpoints/toggle'; payload: { line: number } }
+type Action = { type: 'breakpoint/toggle'; payload: { line: number } }
 
 const initialState: State = {
     lines: new Set()
@@ -12,7 +12,7 @@ const initialState: State = {
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
-        case 'breakpoints/toggle':
+        case 'breakpoint/toggle':
             const lines = state.lines.has(action.payload.line)
                 ? [...state.lines].filter(line => line !== action.payload.line)
                 : [...state.lines, action.payload.line]
@@ -21,6 +21,6 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const toggle = (line: number): Action => ({ type: 'breakpoints/toggle', payload: { line } })
+const toggle = (line: number): Action => ({ type: 'breakpoint/toggle', payload: { line } })
 
 export const actions = { toggle }
