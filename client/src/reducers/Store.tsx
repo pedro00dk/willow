@@ -25,13 +25,14 @@ export type Action =
     | Parameters<typeof MarkersReducer>[1]
     | Parameters<typeof SessionReducer>[1]
 
-export type SubState =
-    | Pick<State, 'breakpoints'>
-    | Pick<State, 'code'>
-    | Pick<State, 'debug'>
-    | Pick<State, 'language'>
-    | Pick<State, 'markers'>
-    | Pick<State, 'session'>
+export type SubState = Partial<
+    Pick<State, 'breakpoints'> &
+        Pick<State, 'code'> &
+        Pick<State, 'debug'> &
+        Pick<State, 'language'> &
+        Pick<State, 'markers'> &
+        Pick<State, 'session'>
+>
 
 export type AsyncAction<R = void> = ThunkAction<Promise<R>, State, void, Action>
 
@@ -57,6 +58,7 @@ function equalStoreSubStates<T extends SubState, U extends SubState>(prev: T, ne
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(prev)
+
     return (
         prevKeys.length === nextKeys.length &&
         nextKeys.reduce(
@@ -79,14 +81,17 @@ export function useRedux<T extends SubState>(selector: (state: State) => T) {
     const memoSelector = React.useCallback(selector, [])
     const [subState, setSubState] = React.useState(() => memoSelector(store.getState()))
     const subStateRef = React.useRef(subState)
+
     React.useEffect(() => {
         let didUnsubscribe = false
+
         const checkSubStateUpdate = () => {
             const updatedSubState = memoSelector(store.getState())
             if (didUnsubscribe || equalStoreSubStates(updatedSubState, subStateRef.current)) return
             setSubState(updatedSubState)
             subStateRef.current = updatedSubState
         }
+
         checkSubStateUpdate()
         const unsubscribe = store.subscribe(checkSubStateUpdate)
         return () => {
@@ -94,5 +99,6 @@ export function useRedux<T extends SubState>(selector: (state: State) => T) {
             unsubscribe()
         }
     }, [])
+
     return subState
 }
