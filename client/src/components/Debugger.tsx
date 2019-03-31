@@ -8,9 +8,9 @@ import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
-import { MarkerType } from '../reducers/code'
 import { start, step, stop } from '../reducers/debug'
 import { fetch } from '../reducers/language'
+import { MarkerType } from '../reducers/markers'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 
 const styles = {

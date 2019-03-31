@@ -4,11 +4,13 @@ import * as React from 'react'
 type Props = {
     onEditorUpdate?: (editor: ace.Editor) => void
 }
+
 // tslint:disable-next-line: variable-name
 export const MemoTextEditor = React.memo(TextEditor)
 export function TextEditor(props: Props) {
     const editorRef = React.useRef<HTMLDivElement>(undefined)
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+
     React.useEffect(() => {
         if (!editorRef.current) return
         const editor = ace.edit(editorRef.current)
@@ -26,6 +28,11 @@ export function TextEditor(props: Props) {
         }, 2000)
         return () => window.clearInterval(checkResizeInterval)
     }, [editorRef])
-    React.useEffect(() => (!!editor ? props.onEditorUpdate(editor) : undefined), [editor])
+
+    React.useEffect(() => {
+        if (!editor) return
+        props.onEditorUpdate(editor)
+    }, [editor])
+
     return <div ref={editorRef} className='w-100 h-100' />
 }

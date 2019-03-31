@@ -1,7 +1,9 @@
 import * as ace from 'brace'
 import { css } from 'emotion'
 import * as React from 'react'
-import { MarkerType } from '../../reducers/code'
+import { actions as breakpointsActions } from '../../reducers/breakpoints'
+import { actions as codeActions } from '../../reducers/code'
+import { MarkerType } from '../../reducers/markers'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
@@ -56,14 +58,14 @@ type Props = {
 }
 
 export function CodeEditor(props: Props) {
+    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoints, code, language, markers } = useRedux(state => ({
+    const { breakpoints, language, markers } = useRedux(state => ({
         breakpoints: state.breakpoints,
-        code: state.code,
         language: state.language,
         markers: state.markers
     }))
-    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+
     React.useEffect(() => {
         if (!editor) return
         editor.$blockScrolling = Infinity
@@ -71,34 +73,37 @@ export function CodeEditor(props: Props) {
         editor.setFontSize(`${props.font ? props.font.toString() : 16}px`)
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
 
-        const onChange = (change: ace.EditorChangeEvent) =>
-            dispatch({ type: 'code/setCode', payload: { code: editor.session.doc.getAllLines() } })
+        const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
 
         const onGutterMouseDown = (event: EditorMouseEvent) => {
             const gutterLayer = (editor.renderer as any).$gutterLayer as EditorGutterLayer
             const region = gutterLayer.getRegion(event)
             if (region !== 'markers') return
             const line = (event.getDocumentPosition() as ace.Position).row
-            dispatch({ type: 'breakpoints/set', payload: { lines: [...breakpoints.lines, line] } })
+            dispatch(breakpointsActions.toggle(line))
         }
 
         editor.on('change', onChange)
         editor.on('guttermousedown', onGutterMouseDown)
+
         return () => {
             editor.off('change', onChange)
             editor.off('guttermousedown', onGutterMouseDown)
         }
     }, [editor])
+
     React.useEffect(() => {
         if (!editor) return
         editor.session.setMode(syntaxSupport(language.selected))
     }, [language.selected])
+
     React.useEffect(() => {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
         decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
         breakpoints.lines.forEach(line => editor.session.addGutterDecoration(line, styles.breakpoint))
     }, [breakpoints.lines])
+
     React.useEffect(() => {
         if (!editor) return
         const aceMarkers = editor.session.getMarkers(false) as EditorMarker[]
@@ -109,5 +114,6 @@ export function CodeEditor(props: Props) {
             editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), styles[marker.type], 'fullLine', false)
         )
     }, [markers.markers])
+
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }
