@@ -12,6 +12,7 @@ import { actions as debugActions } from '../reducers/debug'
 import { actions as languageActions } from '../reducers/language'
 import { actions as markerActions, MarkerType } from '../reducers/marker'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
+import { LanguageSelector } from './LanguageSelector'
 
 const styles = {
     available: css({ cursor: 'pointer' }),
@@ -33,36 +34,7 @@ export function Debugger() {
     const availability = getAvailableActions(debug)
     return (
         <>
-            <div className={cn('input-group ml-3', styles.input)}>
-                <div className='input-group-prepend'>
-                    <label className='input-group-text'>Lang</label>
-                </div>
-                <select
-                    className={cn('custom-select', styles.select)}
-                    disabled={debug.debugging}
-                    defaultValue={language.languages[language.selected]}
-                    onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
-                >
-                    {language.languages.map((language, i) => (
-                        <option key={i} value={language}>
-                            {language}
-                        </option>
-                    ))}
-                    {language.languages.length === 0 ? (
-                        language.fetching ? (
-                            <option key={-1} value='text'>
-                                ...
-                            </option>
-                        ) : (
-                            <option key={-1} value='text'>
-                                !!!
-                            </option>
-                        )
-                    ) : (
-                        undefined
-                    )}
-                </select>
-            </div>
+            <LanguageSelector />
             <div className={cn('input-group ml-3', styles.input)}>
                 <div className='input-group-prepend'>
                     <label className='input-group-text'>Main</label>
