@@ -9,7 +9,6 @@ import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
 import { actions as debugActions } from '../reducers/debug'
-import { actions as languageActions } from '../reducers/language'
 import { actions as markerActions, MarkerType } from '../reducers/marker'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
@@ -23,11 +22,7 @@ const styles = {
 
 export function Debugger() {
     const dispatch = useDispatch()
-    const { debug, language } = useRedux(state => ({ debug: state.debug, language: state.language }))
-
-    React.useEffect(() => {
-        dispatch(languageActions.fetch())
-    }, [])
+    const { debug } = useRedux(state => ({ debug: state.debug }))
 
     useDebugUpdate(dispatch, debug)
 
@@ -35,18 +30,6 @@ export function Debugger() {
     return (
         <>
             <LanguageSelector />
-            <div className={cn('input-group ml-3', styles.input)}>
-                <div className='input-group-prepend'>
-                    <label className='input-group-text'>Main</label>
-                </div>
-                <input
-                    className={cn('form-control', styles.select)}
-                    type='text'
-                    disabled={debug.debugging}
-                    placeholder='filename'
-                    onBlur={event => dispatch({ type: 'code/setMain', payload: { main: event.target.value } })}
-                />
-            </div>
             <img
                 className={cn('h-100', availability.start ? styles.available : styles.disabled)}
                 src={playImg}
