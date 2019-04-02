@@ -7,13 +7,22 @@ import net.sourceforge.argparse4j.impl.action.StoreTrueArgumentAction;
 import protobuf.EventOuterClass;
 import protobuf.Tracer;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -58,12 +67,27 @@ public class Main {
         if (inMode.equals("proto")) {
             request = readProtoInput();
             if (!request.getActions(0).hasStart()) throw new Exception("unexpected action");
+            var main = request.getActions(0).getStart().getMain();
+            if (main == null || main.isBlank()) {
+                main = getMainFileName(request.getActions(0).getStart().getCode());
+                var requestBuilder = request.toBuilder();
+                requestBuilder.getActionsBuilderList().get(0).getStartBuilder().setMain(main);
+                request = requestBuilder.build();
+            }
         } else {
             var input = readTextInput("start {json([\"main\", \"code\"])}:\n");
             var array = new Gson().fromJson(input, JsonArray.class);
-            var main = array.get(0).getAsString();
+            String main = null;
+            try {
+                main = array.get(0).getAsString();
+            } catch (UnsupportedOperationException e) {
+                // ignore null
+            }
             var code = array.get(1).getAsString();
             var startActionBuilder = Tracer.Action.newBuilder();
+
+            if (main == null || main.isBlank()) main = getMainFileName(code);
+
             startActionBuilder.getStartBuilder()
                     .setMain(main)
                     .setCode(code);
@@ -159,5 +183,32 @@ public class Main {
             case "text":
                 System.out.println(response.toString());
         }
+    }
+
+    private static String getMainFileName(String code) {
+        code = code != null ? code : "";
+        var codeLines = code.lines().collect(Collectors.toList());
+        var classRegex = Pattern.compile("^.*public\\s+class\\s+([A-Za-z][A-Za-z0-9_]*).*");
+        var mainMethodRegex = Pattern.compile("^.*public\\s+static\\s+void\\s+main\\s*\\(.*");
+        var mainMethodRegexPredicate = mainMethodRegex.asMatchPredicate();
+
+        var mainMethodLine = IntStream.range(0, codeLines.size())
+                .filter(index -> mainMethodRegexPredicate.test(codeLines.get(index)))
+                .findFirst()
+                .orElse(-1);
+
+        var classes = IntStream.range(0, codeLines.size())
+                .mapToObj(index -> Map.entry(index, classRegex.matcher(codeLines.get(index))))
+                .filter(entry -> entry.getValue().matches())
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().group(1)))
+                .collect(Collectors.toList());
+
+        var mainClass = classes.stream()
+                .filter(entry -> entry.getKey() <= mainMethodLine)
+                .reduce((first, second) -> second) // no find last
+                .map(Map.Entry::getValue)
+                .orElse(classes.size() > 0 ? classes.get(0).getValue() : "");
+
+        return mainClass.isEmpty() ? "" : mainClass + ".java";
     }
 }

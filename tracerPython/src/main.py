@@ -33,6 +33,9 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
         main = start_data[0]
         code = start_data[1]
 
+    if not main or len(main.strip()) == 0:
+        main = '<script>'
+
     if test:
         main = '<script>'
         code = pathlib.Path('./res/main.py').read_text(encoding='utf8')
