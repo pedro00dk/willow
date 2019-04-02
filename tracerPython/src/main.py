@@ -128,8 +128,10 @@ def event_message_to_event_protocol(event_message: message.Message):
                     event_pb2.Frame.Stack.Scope.Variable(
                         name=name,
                         value=event_pb2.Frame.Value(booleanValue=value) if isinstance(value, bool) else
-                        # protobuf does not support arbitrary precision integer like python does (using string instead)
-                        #event_pb2.Frame.Value(integerValue=value) if isinstance(value, int) else
+                        # protobuf does not support arbitrary precision integer like python does
+                        # using string for numbers > 2**64
+                        event_pb2.Frame.Value(integerValue=value)
+                            if isinstance(value, int) and abs(value) < 9223372036854775808 else
                         event_pb2.Frame.Value(stringValue=str(value)) if isinstance(value, int) else
                         event_pb2.Frame.Value(floatValue=value) if isinstance(value, float) else
                         event_pb2.Frame.Value(stringValue=value) if isinstance(value, str) else
