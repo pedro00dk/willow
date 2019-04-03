@@ -14,6 +14,7 @@ import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
 const styles = {
+    image: cn(css({ height: '1.5rem', width: '1.5rem' }), 'm-3'),
     available: css({ cursor: 'pointer' }),
     disabled: css({ filter: 'grayscale(80%)' }),
     select: css({ flex: '0 1 auto !important', width: 'auto !important' }),
@@ -28,34 +29,34 @@ export function Debugger() {
 
     const availability = getAvailableActions(debug)
     return (
-        <>
+        <div className='d-flex flex-row align-items-center shadow-sm mb-1'>
             <LanguageSelector />
             <img
-                className={cn('h-100', availability.start ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.start ? styles.available : styles.disabled)}
                 src={playImg}
                 title={!debug.debugging ? 'start' : 'continue'}
                 onClick={() => callStart(dispatch, debug)}
             />
             <img
-                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.step ? styles.available : styles.disabled)}
                 src={stepOverImg}
                 title='step over'
                 onClick={() => callStep(dispatch, debug, 'stepOver')}
             />
             <img
-                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.step ? styles.available : styles.disabled)}
                 src={stepIntoImg}
                 title='step into'
                 onClick={() => callStep(dispatch, debug, 'step')}
             />
             <img
-                className={cn('h-100', availability.step ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.step ? styles.available : styles.disabled)}
                 src={stepOutImg}
                 title='step out'
                 onClick={() => callStep(dispatch, debug, 'stepOut')}
             />
             <img
-                className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.stop ? styles.available : styles.disabled)}
                 src={restartImg}
                 title='restart'
                 onClick={async () => {
@@ -64,12 +65,12 @@ export function Debugger() {
                 }}
             />
             <img
-                className={cn('h-100', availability.stop ? styles.available : styles.disabled)}
+                className={cn(styles.image, availability.stop ? styles.available : styles.disabled)}
                 src={stopImg}
                 title='stop'
                 onClick={() => callStop(dispatch, debug)}
             />
-        </>
+        </div>
     )
 }
 
