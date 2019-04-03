@@ -1,69 +1,56 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { Responsive } from 'react-grid-layout'
 import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
+import { SplitPane } from './components/SplitPane'
 
 const styles = {
-    container: css({ height: '100vh' })
+    navbarLogo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
+    navbarText: css({ fontSize: '2rem' })
 }
 
 export function App() {
     return (
-        <div className={cn('container-fluid', styles.container)}>
-            <div className='row'>
-                <div className='col p-0'>
-                    <Header />
-                </div>
-            </div>
-            <div className='row'>
-                <div className='col p-0'>
-                    <Body />
-                </div>
-            </div>
+        <div className={cn('d-flex', 'flex-column', 'vh-100', 'vw-100')}>
+            <Header />
+            <div className='pb-2' />
+            <Body />
         </div>
     )
 }
 
 function Header() {
     return (
-        <nav className='navbar navbar-expand static-top navbar-dark bg-dark shadow'>
-            <a className='navbar-brand' href='#'>
-                <img src={logo} width={30} height={30} />
-                <span className='ml-2'>Willow</span>
+        <nav className='navbar navbar-expand navbar-light shadow-sm static-top'>
+            <a className='d-flex flex-row align-items-center navbar-brand' href='#'>
+                <img src={logo} className={styles.navbarLogo} />
+                <span className={cn('ml-2', styles.navbarText)}>Willow</span>
             </a>
         </nav>
     )
 }
 
 function Body() {
-    const [size, setSize] = React.useState({ width: window.innerWidth, height: window.innerHeight })
-    React.useEffect(() => {
-        const onResize = (event: UIEvent) => setSize({ width: window.innerWidth, height: innerHeight })
-        window.addEventListener('resize', onResize)
-        return () => window.removeEventListener('resize', onResize)
-    }, [])
+    {
+        /* <div key='Debugger' className='border shadow-sm' data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}>
+        </div> */
+    }
+    {
+        /* <div key='CodeEditor' className='border shadow-sm' data-grid={{ x: 0, y: 1, w: 4, h: 11 }}>
+        </div>
+        */
+    }
     return (
-        <Responsive
-            width={size.width}
-            rowHeight={(size.height - 190) / 12}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 12, sm: 12, xs: 8, xxs: 4 }}
-            autoSize={true}
-            compactType='horizontal'
-            draggableCancel='.ace_content, input, textarea'
-        >
-            <div key='Debugger' className='border shadow-sm' data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}>
+        <div className='flex-fill'>
+            <SplitPane resizable={false} split='horizontal'>
                 <Debugger />
-            </div>
-            <div key='CodeEditor' className='border shadow-sm' data-grid={{ x: 0, y: 1, w: 4, h: 11 }}>
-                <CodeEditor mode='python' />
-            </div>
-            <div key='Graph' className='border shadow-sm' data-grid={{ x: 4, y: 0, w: 8, h: 11 }}>
-                Graph
-            </div>
-        </Responsive>
+                <SplitPane resizable split='vertical' base='35%' left={50} right={-50}>
+                    <CodeEditor mode='python' />
+                    <div>Graph</div>
+                </SplitPane>
+            </SplitPane>
+        </div>
     )
 }

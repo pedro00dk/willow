@@ -10,6 +10,7 @@ const styles = {
 }
 
 export function LanguageSelector() {
+    const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
     const { debug, language } = useRedux(state => ({ debug: state.debug, language: state.language }))
 
@@ -19,8 +20,19 @@ export function LanguageSelector() {
 
     return (
         <div className={cn('input-group ml-3', styles.input)}>
-            <div className='input-group-prepend'>
-                <label className='input-group-text'>Lang</label>
+            <div
+                className='input-group-prepend'
+                onClick={() => dispatch(languageActions.fetch())}
+                onMouseEnter={() => setMouseOver(true)}
+                onMouseLeave={() => setMouseOver(false)}
+            >
+                <label className='input-group-text'>
+                    {!mouseOver ? 'Language' : 'Reload'}
+
+                    {language.fetching && (
+                        <span className='spinner-grow spinner-grow-sm' role='status' aria-hidden='true' />
+                    )}
+                </label>
             </div>
             <select
                 className={cn('custom-select', styles.select)}
@@ -29,22 +41,10 @@ export function LanguageSelector() {
                 onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
             >
                 {language.languages.map((language, i) => (
-                    <option key={i} value={language}>
-                        {language}
-                    </option>
+                    <option key={i} value={language} label={language} />
                 ))}
-                {language.languages.length === 0 ? (
-                    language.fetching ? (
-                        <option key={-1} value='text'>
-                            ...
-                        </option>
-                    ) : (
-                        <option key={-1} value='text'>
-                            !!!
-                        </option>
-                    )
-                ) : (
-                    undefined
+                {language.languages.length === 0 && (
+                    <option key={-1} value='text' label={language.fetching ? '...' : '!!!'} />
                 )}
             </select>
         </div>
