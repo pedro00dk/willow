@@ -6,6 +6,7 @@ import { AsyncAction } from './Store'
 type State = {
     readonly debugging: boolean
     readonly fetching: boolean
+    readonly stopped: boolean
     readonly responses: protocol.ITracerResponse[]
     readonly error?: string
 }
@@ -20,6 +21,7 @@ type Action =
 const initialState: State = {
     debugging: false,
     fetching: false,
+    stopped: false,
     responses: [],
     error: undefined
 }
@@ -35,8 +37,9 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
             if (!!action.error) return { ...state, debugging: false, fetching: false, error: action.error }
             return { ...initialState, debugging: true, fetching: true }
         case 'debug/stop':
-            if (!!action.payload) return { ...state, debugging: false, fetching: false }
-            if (!!action.error) return { ...state, debugging: false, fetching: false, error: action.error }
+            if (!!action.payload) return { ...state, debugging: false, fetching: false, stopped: true }
+            if (!!action.error)
+                return { ...state, debugging: false, fetching: false, stopped: true, error: action.error }
             return { ...state, debugging: true, fetching: true }
         case 'debug/step':
             if (!!action.payload) {
