@@ -29,8 +29,9 @@ const styles = {
 }
 
 type Props = {
-    split?: ReactSplitPaneProps['split']
+    className?: ReactSplitPaneProps['className']
     resizable?: ReactSplitPaneProps['allowResize']
+    split?: ReactSplitPaneProps['split']
     base?: ReactSplitPaneProps['size']
     left?: ReactSplitPaneProps['minSize']
     right?: ReactSplitPaneProps['maxSize']
@@ -40,7 +41,7 @@ type Props = {
 export function SplitPane(props: Props) {
     return (
         <ReactSplitPane
-            className='d-flex position-relative'
+            className={props.className}
             resizerClassName={cn(
                 styles.resizer,
                 props.resizable ? styles.resizerHover : undefined,

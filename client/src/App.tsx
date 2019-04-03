@@ -33,23 +33,12 @@ function Header() {
 }
 
 function Body() {
-    {
-        /* <div key='Debugger' className='border shadow-sm' data-grid={{ x: 0, y: 0, w: 12, h: 1, static: true }}>
-        </div> */
-    }
-    {
-        /* <div key='CodeEditor' className='border shadow-sm' data-grid={{ x: 0, y: 1, w: 4, h: 11 }}>
-        </div>
-        */
-    }
     return (
-        <div className='flex-fill'>
-            <SplitPane resizable={false} split='horizontal'>
-                <Debugger />
-                <SplitPane resizable split='vertical' base='35%' left={50} right={-50}>
-                    <CodeEditor mode='python' />
-                    <div>Graph</div>
-                </SplitPane>
+        <div className='d-flex flex-column flex-fill'>
+            <Debugger />
+            <SplitPane className='d-flex position-relative' resizable split='vertical' base='35%' left={50} right={-50}>
+                <CodeEditor mode='python' />
+                <div>Graph</div>
             </SplitPane>
         </div>
     )
