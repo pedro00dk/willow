@@ -116,6 +116,19 @@ const step = (action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction
     }
 }
 
+const input = (): AsyncAction => {
+    return async (dispatch, getState) => {
+        dispatch({ type: 'debug/input' })
+        try {
+            const { input } = getState()
+            await serverApi.post(`/tracers/input`, [...input.lines])
+            dispatch({ type: 'debug/input', payload: {} })
+        } catch (error) {
+            dispatch({ type: 'debug/input', error: !!error.response ? error.response.data : error.toString() })
+        }
+    }
+}
+
 const setBreakpoints = (): AsyncAction => {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/setBreakpoints' })
@@ -129,6 +142,4 @@ const setBreakpoints = (): AsyncAction => {
     }
 }
 
-// 'input'
-
-export const actions = { start, stop, step, setBreakpoints }
+export const actions = { start, stop, step, input, setBreakpoints }
