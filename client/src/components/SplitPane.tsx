@@ -54,6 +54,7 @@ export function SplitPane(props: Props) {
             defaultSize={props.base}
             minSize={props.left}
             maxSize={props.right}
+            {...{ paneClassName: 'd-flex' } as any}
         >
             {props.children}
         </ReactSplitPane>
