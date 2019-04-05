@@ -4,6 +4,7 @@ import * as React from 'react'
 import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
+import { InputEditor } from './components/editor/InputEditor'
 import { SplitPane } from './components/SplitPane'
 
 const styles = {
@@ -37,7 +38,17 @@ function Body() {
         <div className='d-flex flex-column flex-fill'>
             <Debugger />
             <SplitPane className='d-flex position-relative' resizable split='vertical' base='35%' left={50} right={-50}>
-                <CodeEditor mode='python' />
+                <SplitPane
+                    className='d-flex position-relative'
+                    resizable
+                    split='horizontal'
+                    base='70%'
+                    left={50}
+                    right={-50}
+                >
+                    <CodeEditor mode='python' />
+                    <InputEditor />
+                </SplitPane>
                 <div>Graph</div>
             </SplitPane>
         </div>
