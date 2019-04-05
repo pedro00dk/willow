@@ -46,7 +46,7 @@ function Body() {
                     left={50}
                     right={-50}
                 >
-                    <CodeEditor mode='python' />
+                    <CodeEditor />
                     <InputEditor />
                 </SplitPane>
                 <div>Graph</div>
