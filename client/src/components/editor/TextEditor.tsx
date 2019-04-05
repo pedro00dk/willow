@@ -1,6 +1,29 @@
 import * as ace from 'brace'
 import * as React from 'react'
 
+export type EditorMouseEvent = {
+    [props: string]: unknown
+    domEvent: MouseEvent
+    editor: ace.Editor
+    getDocumentPosition: () => ace.Position
+}
+
+export type EditorGutterLayer = {
+    [props: string]: unknown
+    $cells: { [props: string]: unknown; element: HTMLDivElement }[]
+    element: HTMLDivElement
+    getRegion: (event: EditorMouseEvent) => 'foldWidgets' | 'markers'
+}
+
+export type EditorMarker = {
+    id: number
+    inFront: boolean
+    clazz: string
+    type: string
+    renderer: unknown
+    range: ace.Range
+}
+
 type Props = {
     onEditorUpdate?: (editor: ace.Editor) => void
 }

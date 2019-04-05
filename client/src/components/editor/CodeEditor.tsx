@@ -5,7 +5,7 @@ import { actions as breakpointActions } from '../../reducers/breakpoint'
 import { actions as codeActions } from '../../reducers/code'
 import { MarkerType } from '../../reducers/marker'
 import { useDispatch, useRedux } from '../../reducers/Store'
-import { MemoTextEditor } from './TextEditor'
+import { EditorGutterLayer, EditorMarker, EditorMouseEvent, MemoTextEditor } from './TextEditor'
 
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
@@ -14,34 +14,11 @@ import 'brace/mode/python'
 import 'brace/mode/text'
 import 'brace/theme/chrome'
 
-type EditorMouseEvent = {
-    [props: string]: unknown
-    domEvent: MouseEvent
-    editor: ace.Editor
-    getDocumentPosition: () => ace.Position
-}
-
-type EditorGutterLayer = {
-    [props: string]: unknown
-    $cells: { [props: string]: unknown; element: HTMLDivElement }[]
-    element: HTMLDivElement
-    getRegion: (event: EditorMouseEvent) => 'foldWidgets' | 'markers'
-}
-
-type EditorMarker = {
-    id: number
-    inFront: boolean
-    clazz: string
-    type: string
-    renderer: unknown
-    range: ace.Range
-}
-
 const styles = {
-    breakpoint: css({ backgroundColor: 'LightCoral' }),
-    [MarkerType.HIGHLIGHT]: css({ position: 'absolute', backgroundColor: 'LightBlue' }),
-    [MarkerType.WARNING]: css({ position: 'absolute', backgroundColor: 'LightYellow' }),
-    [MarkerType.ERROR]: css({ position: 'absolute', backgroundColor: 'LightCoral' })
+    breakpoint: css({ backgroundColor: 'lightcoral' }),
+    [MarkerType.HIGHLIGHT]: css({ position: 'absolute', backgroundColor: 'lightblue' }),
+    [MarkerType.WARNING]: css({ position: 'absolute', backgroundColor: 'lightyellow' }),
+    [MarkerType.ERROR]: css({ position: 'absolute', backgroundColor: 'lightcoral' })
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -52,12 +29,7 @@ function syntaxSupport(language: string) {
     return new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 }
 
-type Props = {
-    mode: 'java' | 'python'
-    font?: number
-}
-
-export function CodeEditor(props: Props) {
+export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { breakpoint, language, markers } = useRedux(state => ({
@@ -70,7 +42,7 @@ export function CodeEditor(props: Props) {
         if (!editor) return
         editor.$blockScrolling = Infinity
         editor.setTheme('ace/theme/chrome')
-        editor.setFontSize(`${props.font ? props.font.toString() : 16}px`)
+        editor.setFontSize('1rem')
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
 
         const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
