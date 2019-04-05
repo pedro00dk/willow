@@ -5,6 +5,7 @@ import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { InputEditor } from './components/editor/InputEditor'
+import { Graph } from './components/graph/Graph'
 import { SplitPane } from './components/SplitPane'
 
 const styles = {
@@ -49,7 +50,7 @@ function Body() {
                     <CodeEditor />
                     <InputEditor />
                 </SplitPane>
-                <div>Graph</div>
+                <Graph />
             </SplitPane>
         </div>
     )
