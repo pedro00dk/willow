@@ -24,7 +24,9 @@ export function InputEditor() {
         editor.setFontSize('1rem')
         editor.renderer.setShowGutter(false)
 
-        const onChange = (change: ace.EditorChangeEvent) => dispatch(inputActions.set(editor.session.doc.getAllLines()))
+        const onChange = (change: ace.EditorChangeEvent) =>
+            dispatch(inputActions.set(editor.session.doc.getAllLines().slice(0, -1)))
+
         editor.on('change', onChange)
         return () => editor.off('change', onChange)
     }, [editor])
@@ -37,7 +39,7 @@ export function InputEditor() {
                 .filter(marker => marker.id > 2)
                 .forEach(marker => editor.session.removeMarker(marker.id))
         else
-            [...Array(editor.session.getLength()).keys()].forEach(line =>
+            [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
                 editor.session.addMarker(new Range(line, 0, line, 1), styles.readonly, 'fullLine', false)
             )
     }, [debug])
