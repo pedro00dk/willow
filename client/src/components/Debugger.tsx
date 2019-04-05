@@ -26,17 +26,20 @@ export function Debugger() {
     const dispatch = useDispatch()
     const { debug } = useRedux(state => ({ debug: state.debug }))
 
+    console.log(debug)
+
     React.useEffect(() => {
         if (debug.fetching || debug.responses.length === 0) return
         const lastResponse = debug.responses[debug.responses.length - 1]
         const lastEvent = lastResponse.events[lastResponse.events.length - 1]
+
         if (!!debug.error) afterError(dispatch)
         else if (debug.stopped) afterStop(dispatch)
         else if (!!lastEvent.started) afterStart(dispatch)
         else if (!!lastEvent.threw) afterThrew(dispatch)
         else if (!!lastEvent.locked) afterLocked(dispatch)
         else if (!!lastEvent.inspected && lastEvent.inspected.frame.finish) afterFinish(dispatch)
-    }, [debug])
+    }, [debug.error, debug.responses, debug.stopped])
 
     const availability = getAvailableActions(debug)
     return (
@@ -84,8 +87,9 @@ function callStop(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
     dispatch(debugActions.stop())
 }
 
-function afterStart(dispatch: Parameters<AsyncAction>[0]) {
-    dispatch(debugActions.step('continue'))
+async function afterStart(dispatch: Parameters<AsyncAction>[0]) {
+    await dispatch(debugActions.input())
+    await dispatch(debugActions.step('continue'))
     console.log('after start')
 }
 
@@ -94,8 +98,8 @@ function afterThrew(dispatch: Parameters<AsyncAction>[0]) {
     console.log('after threw')
 }
 
-function afterLocked(dispatch: Parameters<AsyncAction>[0]) {
-    //
+async function afterLocked(dispatch: Parameters<AsyncAction>[0]) {
+    await dispatch(debugActions.stop())
     console.log('after locked')
 }
 
