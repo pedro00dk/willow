@@ -1,4 +1,5 @@
 import * as ace from 'brace'
+import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { actions as breakpointActions } from '../../reducers/breakpoint'
@@ -14,11 +15,11 @@ import 'brace/mode/python'
 import 'brace/mode/text'
 import 'brace/theme/chrome'
 
-const styles = {
+const classes = {
     breakpoint: css({ backgroundColor: 'lightcoral' }),
-    [MarkerType.HIGHLIGHT]: css({ position: 'absolute', backgroundColor: 'lightblue' }),
-    [MarkerType.WARNING]: css({ position: 'absolute', backgroundColor: 'lightyellow' }),
-    [MarkerType.ERROR]: css({ position: 'absolute', backgroundColor: 'lightcoral' })
+    [MarkerType.HIGHLIGHT]: cn('position-absolute', css({ backgroundColor: 'lightblue' })),
+    [MarkerType.WARNING]: cn('position-absolute', css({ backgroundColor: 'lightyellow' })),
+    [MarkerType.ERROR]: cn('position-absolute', css({ backgroundColor: 'lightcoral' }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -72,8 +73,8 @@ export function CodeEditor() {
     React.useEffect(() => {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
-        decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, styles.breakpoint))
-        breakpoint.lines.forEach(line => editor.session.addGutterDecoration(line, styles.breakpoint))
+        decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, classes.breakpoint))
+        breakpoint.lines.forEach(line => editor.session.addGutterDecoration(line, classes.breakpoint))
     }, [breakpoint.lines])
 
     React.useEffect(() => {
@@ -83,7 +84,7 @@ export function CodeEditor() {
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
         markers.markers.forEach(marker =>
-            editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), styles[marker.type], 'fullLine', false)
+            editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), classes[marker.type], 'fullLine', false)
         )
     }, [markers.markers])
 

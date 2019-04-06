@@ -4,8 +4,7 @@ import * as React from 'react'
 import { actions as languageActions } from '../reducers/language'
 import { useDispatch, useRedux } from '../reducers/Store'
 
-const styles = {
-    group: cn('d-flex input-group ml-3', css({ width: 'auto' })),
+const classes = {
     button: cn('d-inline-flex align-items-center btn btn-outline-secondary', css({ width: '8rem' })),
     select: cn('custom-select', css({ flex: '0 1 auto !important', width: '8rem !important' }))
 }
@@ -20,14 +19,14 @@ export function LanguageSelector() {
     }, [])
 
     return (
-        <div className={styles.group}>
+        <div className='d-flex input-group w-auto ml-3'>
             <div
                 className='input-group-prepend'
                 onClick={() => dispatch(languageActions.fetch())}
                 onMouseEnter={() => setMouseOver(true)}
                 onMouseLeave={() => setMouseOver(false)}
             >
-                <button className={styles.button}>
+                <button className={classes.button}>
                     <span className='flex-fill'>
                         {!language.fetching ? (!mouseOver ? 'Language' : 'Reload') : 'Loading'}
                     </span>
@@ -35,7 +34,7 @@ export function LanguageSelector() {
                 </button>
             </div>
             <select
-                className={styles.select}
+                className={classes.select}
                 disabled={debug.debugging}
                 defaultValue={language.languages[language.selected]}
                 onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}

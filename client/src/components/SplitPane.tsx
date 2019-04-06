@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { default as ReactSplitPane, Props as ReactSplitPaneProps } from 'react-split-pane'
 
-const styles = {
+const classes = {
     resizer: css({ background: 'black', backgroundClip: 'padding-box', opacity: 0.15 }),
     resizerHorizontal: css({
         height: 12,
@@ -43,11 +43,11 @@ export function SplitPane(props: Props) {
         <ReactSplitPane
             className={props.className}
             resizerClassName={cn(
-                styles.resizer,
-                props.resizable ? styles.resizerHover : undefined,
+                classes.resizer,
+                props.resizable ? classes.resizerHover : undefined,
                 props.split === 'vertical'
-                    ? [styles.resizerVertical, props.resizable ? styles.resizerVerticalHover : undefined]
-                    : [styles.resizerHorizontal, props.resizable ? styles.resizerHorizontalHover : undefined]
+                    ? [classes.resizerVertical, props.resizable ? classes.resizerVerticalHover : undefined]
+                    : [classes.resizerHorizontal, props.resizable ? classes.resizerHorizontalHover : undefined]
             )}
             split={props.split}
             allowResize={props.resizable}

@@ -1,12 +1,13 @@
 import * as ace from 'brace'
+import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, MemoTextEditor } from './TextEditor'
 
-const styles = {
-    readonly: css({ position: 'absolute', backgroundColor: 'ghostwhite' })
+const classes = {
+    readonly: cn('position-absolute', css({ backgroundColor: 'ghostwhite' }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -40,7 +41,7 @@ export function InputEditor() {
                 .forEach(marker => editor.session.removeMarker(marker.id))
         else
             [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
-                editor.session.addMarker(new Range(line, 0, line, 1), styles.readonly, 'fullLine', false)
+                editor.session.addMarker(new Range(line, 0, line, 1), classes.readonly, 'fullLine', false)
             )
     }, [debug])
 
