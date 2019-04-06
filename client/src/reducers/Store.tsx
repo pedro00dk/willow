@@ -4,55 +4,36 @@ import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as BreakpointReducer } from './breakpoint'
 import { reducer as CodeReducer } from './code'
 import { reducer as DebugReducer } from './debug'
+import { reducer as GraphReducer } from './graph'
 import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
 import { reducer as MarkerReducer } from './marker'
 import { reducer as SessionReducer } from './session'
 
-export type State = {
-    breakpoint: Parameters<typeof BreakpointReducer>[0]
-    code: Parameters<typeof CodeReducer>[0]
-    debug: Parameters<typeof DebugReducer>[0]
-    input: Parameters<typeof InputReducer>[0]
-    language: Parameters<typeof LanguageReducer>[0]
-    markers: Parameters<typeof MarkerReducer>[0]
-    session: Parameters<typeof SessionReducer>[0]
+const reducers = {
+    breakpoint: BreakpointReducer,
+    code: CodeReducer,
+    debug: DebugReducer,
+    graph: GraphReducer,
+    input: InputReducer,
+    language: LanguageReducer,
+    marker: MarkerReducer,
+    session: SessionReducer
 }
 
-export type Action =
-    | Parameters<typeof BreakpointReducer>[1]
-    | Parameters<typeof CodeReducer>[1]
-    | Parameters<typeof DebugReducer>[1]
-    | Parameters<typeof InputReducer>[1]
-    | Parameters<typeof LanguageReducer>[1]
-    | Parameters<typeof MarkerReducer>[1]
-    | Parameters<typeof SessionReducer>[1]
+export type State = { [property in keyof typeof reducers]: Parameters<typeof reducers[property]>[0] }
 
-export type SubState = Partial<
-    Pick<State, 'breakpoint'> &
-        Pick<State, 'code'> &
-        Pick<State, 'debug'> &
-        Pick<State, 'input'> &
-        Pick<State, 'language'> &
-        Pick<State, 'markers'> &
-        Pick<State, 'session'>
->
+export type Action = {
+    [property in keyof typeof reducers]: Parameters<typeof reducers[property]>[1]
+}[keyof typeof reducers]
+
+export type SubState = Partial<State>
 
 export type AsyncAction<R = void> = ThunkAction<Promise<R>, State, void, Action>
 
 const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware<State, Action, void>))
 const reduxStoreCreator = reduxStoreEnhancer(Redux.createStore)
-const reduxStore = reduxStoreCreator(
-    Redux.combineReducers<State, Action>({
-        breakpoint: BreakpointReducer,
-        code: CodeReducer,
-        debug: DebugReducer,
-        input: InputReducer,
-        language: LanguageReducer,
-        markers: MarkerReducer,
-        session: SessionReducer
-    })
-)
+const reduxStore = reduxStoreCreator(Redux.combineReducers<State, Action>(reducers))
 const storeContext = React.createContext<typeof reduxStore>(undefined)
 
 export function Store(props: { children?: React.ReactNode }) {
