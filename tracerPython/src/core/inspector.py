@@ -28,6 +28,7 @@ class Inspector:
 
         frame_file = FrameUtil.file(frame)
         frames = [frame for frame in frames if not only_frame_file or FrameUtil.is_file(frame, frame_file)]
+        frames.reverse()
         stack = [{'name': FrameUtil.name(frame), 'line': FrameUtil.line(frame)} for frame in frames]
         return stack, frames
 
@@ -35,7 +36,7 @@ class Inspector:
         module = FrameUtil.module(frames[-1])
         heap = {}
         classes = set()
-        for i, frame in enumerate(frames[::-1]):
+        for i, frame in enumerate(frames):
             scope_variables = FrameUtil.locals(frame)
             scope_references = [
                 (name, self.inspect_obj(scope_variables[name], heap, classes, module))
