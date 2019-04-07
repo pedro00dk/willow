@@ -74,12 +74,17 @@ export class TracerProcess implements Tracer {
         log.info(TracerProcess.name, 'stop')
         this.checkState('started')
         this.state = 'stopped'
-        this.requests$.next(
-            protocol.TracerRequest.create({
-                actions: [protocol.Action.create({ stop: protocol.Action.Stop.create() })]
-            })
-        )
-        // this.actions$.complete() // the process shall stop automatically (this call will force stop/kill)
+
+        // sends a stop request to the tracer server
+        // (may crash if the process terminate by itself before send the request)
+        // this.requests$.next(
+        //     protocol.TracerRequest.create({
+        //         actions: [protocol.Action.create({ stop: protocol.Action.Stop.create() })]
+        //     })
+        // )
+
+        // kills the process
+        this.requests$.complete()
     }
 
     async step(count: number = 1) {
