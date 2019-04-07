@@ -18,6 +18,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const set = (lines: string[]): Action => ({ type: 'input/set', payload: { lines } })
+function set(lines: string[]): Action {
+    return { type: 'input/set', payload: { lines } }
+}
 
 export const actions = { set }

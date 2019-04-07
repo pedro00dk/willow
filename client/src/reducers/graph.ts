@@ -28,7 +28,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const loadStack = (): AsyncAction => {
+function loadStack(): AsyncAction {
     return async (dispatch, getState) => {
         const { debug } = getState()
         const stack: State['stack'] = { 0: { id: 0, name: '', steps: 0, parentScope: undefined, subScopes: [0] } }

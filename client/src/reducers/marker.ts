@@ -24,6 +24,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const set = (markers: { line: number; type: MarkerType }[]): Action => ({ type: 'marker/set', payload: { markers } })
+function set(markers: { line: number; type: MarkerType }[]): Action {
+    return { type: 'marker/set', payload: { markers } }
+}
 
 export const actions = { set }

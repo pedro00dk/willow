@@ -26,7 +26,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const fetch = (): AsyncAction => {
+function fetch(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'session/fetch' })
         try {

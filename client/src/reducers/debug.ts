@@ -67,7 +67,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const start = (): AsyncAction => {
+function start(): AsyncAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/start' })
         try {
@@ -84,7 +84,7 @@ const start = (): AsyncAction => {
     }
 }
 
-const stop = (): AsyncAction => {
+function stop(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'debug/stop' })
         try {
@@ -96,7 +96,7 @@ const stop = (): AsyncAction => {
     }
 }
 
-const step = (action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction => {
+function step(action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'debug/step' })
         try {
@@ -116,7 +116,7 @@ const step = (action: 'step' | 'stepOver' | 'stepOut' | 'continue'): AsyncAction
     }
 }
 
-const input = (): AsyncAction => {
+function input(): AsyncAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/input' })
         try {
@@ -129,7 +129,7 @@ const input = (): AsyncAction => {
     }
 }
 
-const setBreakpoints = (): AsyncAction => {
+function setBreakpoints(): AsyncAction {
     return async (dispatch, getState) => {
         dispatch({ type: 'debug/setBreakpoints' })
         try {

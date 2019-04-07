@@ -37,7 +37,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const fetch = (): AsyncAction => {
+function fetch(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'language/fetch' })
         try {
@@ -49,6 +49,8 @@ const fetch = (): AsyncAction => {
     }
 }
 
-const select = (selected: number): Action => ({ type: 'language/select', payload: { selected } })
+function select(selected: number): Action {
+    return { type: 'language/select', payload: { selected } }
+}
 
 export const actions = { fetch, select }

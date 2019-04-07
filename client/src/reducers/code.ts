@@ -24,8 +24,12 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const set = (code: string[]): Action => ({ type: 'code/setCode', payload: { code } })
+function set(code: string[]): Action {
+    return { type: 'code/setCode', payload: { code } }
+}
 
-const setMain = (main: string): Action => ({ type: 'code/setMain', payload: { main } })
+function setMain(main: string): Action {
+    return { type: 'code/setMain', payload: { main } }
+}
 
 export const actions = { set, setMain }
