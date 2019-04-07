@@ -10,7 +10,7 @@ type State = {
     readonly markers: ReadonlySet<{ line: number; type: MarkerType }>
 }
 
-type Action = { type: 'marker/set'; payload: { markers: { line: number; type: MarkerType }[] } }
+type Action = { type: 'marker/set'; payload: { markers: (State['markers'] extends ReadonlySet<infer T> ? T : any)[] } }
 
 const initialState: State = {
     markers: new Set()

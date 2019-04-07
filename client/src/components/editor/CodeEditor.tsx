@@ -33,10 +33,10 @@ function syntaxSupport(language: string) {
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoint, language, markers } = useRedux(state => ({
+    const { breakpoint, language, marker } = useRedux(state => ({
         breakpoint: state.breakpoint,
         language: state.language,
-        markers: state.markers
+        marker: state.marker
     }))
 
     React.useEffect(() => {
@@ -83,10 +83,10 @@ export function CodeEditor() {
         Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
-        markers.markers.forEach(marker =>
+        marker.markers.forEach(marker =>
             editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), classes[marker.type], 'fullLine', false)
         )
-    }, [markers.markers])
+    }, [marker.markers])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }
