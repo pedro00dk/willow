@@ -1913,6 +1913,9 @@ export namespace Action {
 
     /** Properties of a Step. */
     interface IStep {
+
+        /** Step count */
+        count?: (number|null);
     }
 
     /** Represents a Step. */
@@ -1923,6 +1926,9 @@ export namespace Action {
          * @param [properties] Properties to set
          */
         constructor(properties?: Action.IStep);
+
+        /** Step count. */
+        public count: number;
 
         /**
          * Creates a new Step instance using the specified properties.

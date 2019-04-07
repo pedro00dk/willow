@@ -14,9 +14,11 @@ message Action {
       bytes tar = 3;
     }
   }
-  message Stop {}  // Stops the tracer process at any moment.
-  message Step {}  // Sends a step request to the tracer.
-  message Input {  // Sends input to the tracer process.
+  message Stop {} // Stops the tracer process at any moment.
+  message Step {  // Sends a step request to the tracer.
+    int32 count = 1;
+  }
+  message Input { // Sends input to the tracer process.
     repeated string lines = 1;
   }
   oneof action {

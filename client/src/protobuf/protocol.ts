@@ -243,9 +243,11 @@ export namespace Action {
     }
 
     export interface IStep {
+        count?: (number|null);
     }
 
     export class Step implements IStep {
+        public count: number;
     }
 
     export interface IInput {

@@ -86,7 +86,7 @@ public final class Tracer {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 actions_ = new java.util.ArrayList<Tracer.Action>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -95,7 +95,7 @@ public final class Tracer {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -109,7 +109,7 @@ public final class Tracer {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           actions_ = java.util.Collections.unmodifiableList(actions_);
         }
         this.unknownFields = unknownFields.build();
@@ -209,11 +209,10 @@ public final class Tracer {
       }
       Tracer.TracerRequest other = (Tracer.TracerRequest) obj;
 
-      boolean result = true;
-      result = result && getActionsList()
-          .equals(other.getActionsList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getActionsList()
+          .equals(other.getActionsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -399,7 +398,7 @@ public final class Tracer {
         Tracer.TracerRequest result = new Tracer.TracerRequest(this);
         int from_bitField0_ = bitField0_;
         if (actionsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             actions_ = java.util.Collections.unmodifiableList(actions_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -413,35 +412,35 @@ public final class Tracer {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -514,7 +513,7 @@ public final class Tracer {
       private java.util.List<Tracer.Action> actions_ =
         java.util.Collections.emptyList();
       private void ensureActionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           actions_ = new java.util.ArrayList<Tracer.Action>(actions_);
           bitField0_ |= 0x00000001;
          }
@@ -743,7 +742,7 @@ public final class Tracer {
           actionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               Tracer.Action, Tracer.Action.Builder, Tracer.ActionOrBuilder>(
                   actions_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           actions_ = null;
@@ -753,7 +752,7 @@ public final class Tracer {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -961,7 +960,7 @@ public final class Tracer {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1085,7 +1084,7 @@ public final class Tracer {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -1301,26 +1300,23 @@ public final class Tracer {
         }
         Tracer.Action.Start other = (Tracer.Action.Start) obj;
 
-        boolean result = true;
-        result = result && getMain()
-            .equals(other.getMain());
-        result = result && getSourceCase().equals(
-            other.getSourceCase());
-        if (!result) return false;
+        if (!getMain()
+            .equals(other.getMain())) return false;
+        if (!getSourceCase().equals(other.getSourceCase())) return false;
         switch (sourceCase_) {
           case 2:
-            result = result && getCode()
-                .equals(other.getCode());
+            if (!getCode()
+                .equals(other.getCode())) return false;
             break;
           case 3:
-            result = result && getTar()
-                .equals(other.getTar());
+            if (!getTar()
+                .equals(other.getTar())) return false;
             break;
           case 0:
           default:
         }
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -1525,35 +1521,35 @@ public final class Tracer {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1814,7 +1810,7 @@ public final class Tracer {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -1907,7 +1903,7 @@ public final class Tracer {
                 done = true;
                 break;
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -1976,9 +1972,8 @@ public final class Tracer {
         }
         Tracer.Action.Stop other = (Tracer.Action.Stop) obj;
 
-        boolean result = true;
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -2153,35 +2148,35 @@ public final class Tracer {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2226,7 +2221,7 @@ public final class Tracer {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -2279,8 +2274,17 @@ public final class Tracer {
     public interface StepOrBuilder extends
         // @@protoc_insertion_point(interface_extends:Action.Step)
         com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>int32 count = 1;</code>
+       */
+      int getCount();
     }
     /**
+     * <pre>
+     * Sends a step request to the tracer.
+     * </pre>
+     *
      * Protobuf type {@code Action.Step}
      */
     public  static final class Step extends
@@ -2308,6 +2312,7 @@ public final class Tracer {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
         }
+        int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
             com.google.protobuf.UnknownFieldSet.newBuilder();
         try {
@@ -2318,8 +2323,13 @@ public final class Tracer {
               case 0:
                 done = true;
                 break;
+              case 8: {
+
+                count_ = input.readInt32();
+                break;
+              }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -2350,6 +2360,15 @@ public final class Tracer {
                 Tracer.Action.Step.class, Tracer.Action.Step.Builder.class);
       }
 
+      public static final int COUNT_FIELD_NUMBER = 1;
+      private int count_;
+      /**
+       * <code>int32 count = 1;</code>
+       */
+      public int getCount() {
+        return count_;
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -2364,6 +2383,9 @@ public final class Tracer {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
+        if (count_ != 0) {
+          output.writeInt32(1, count_);
+        }
         unknownFields.writeTo(output);
       }
 
@@ -2373,6 +2395,10 @@ public final class Tracer {
         if (size != -1) return size;
 
         size = 0;
+        if (count_ != 0) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, count_);
+        }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
         return size;
@@ -2388,9 +2414,10 @@ public final class Tracer {
         }
         Tracer.Action.Step other = (Tracer.Action.Step) obj;
 
-        boolean result = true;
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (getCount()
+            != other.getCount()) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -2400,6 +2427,8 @@ public final class Tracer {
         }
         int hash = 41;
         hash = (19 * hash) + getDescriptor().hashCode();
+        hash = (37 * hash) + COUNT_FIELD_NUMBER;
+        hash = (53 * hash) + getCount();
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
         return hash;
@@ -2496,6 +2525,10 @@ public final class Tracer {
         return builder;
       }
       /**
+       * <pre>
+       * Sends a step request to the tracer.
+       * </pre>
+       *
        * Protobuf type {@code Action.Step}
        */
       public static final class Builder extends
@@ -2533,6 +2566,8 @@ public final class Tracer {
         @java.lang.Override
         public Builder clear() {
           super.clear();
+          count_ = 0;
+
           return this;
         }
 
@@ -2559,41 +2594,42 @@ public final class Tracer {
         @java.lang.Override
         public Tracer.Action.Step buildPartial() {
           Tracer.Action.Step result = new Tracer.Action.Step(this);
+          result.count_ = count_;
           onBuilt();
           return result;
         }
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2607,6 +2643,9 @@ public final class Tracer {
 
         public Builder mergeFrom(Tracer.Action.Step other) {
           if (other == Tracer.Action.Step.getDefaultInstance()) return this;
+          if (other.getCount() != 0) {
+            setCount(other.getCount());
+          }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
           return this;
@@ -2635,10 +2674,36 @@ public final class Tracer {
           }
           return this;
         }
+
+        private int count_ ;
+        /**
+         * <code>int32 count = 1;</code>
+         */
+        public int getCount() {
+          return count_;
+        }
+        /**
+         * <code>int32 count = 1;</code>
+         */
+        public Builder setCount(int value) {
+          
+          count_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>int32 count = 1;</code>
+         */
+        public Builder clearCount() {
+          
+          count_ = 0;
+          onChanged();
+          return this;
+        }
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -2757,7 +2822,7 @@ public final class Tracer {
                 break;
               case 10: {
                 java.lang.String s = input.readStringRequireUtf8();
-                if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                   lines_ = new com.google.protobuf.LazyStringArrayList();
                   mutable_bitField0_ |= 0x00000001;
                 }
@@ -2765,7 +2830,7 @@ public final class Tracer {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -2779,7 +2844,7 @@ public final class Tracer {
           throw new com.google.protobuf.InvalidProtocolBufferException(
               e).setUnfinishedMessage(this);
         } finally {
-          if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
             lines_ = lines_.getUnmodifiableView();
           }
           this.unknownFields = unknownFields.build();
@@ -2877,11 +2942,10 @@ public final class Tracer {
         }
         Tracer.Action.Input other = (Tracer.Action.Input) obj;
 
-        boolean result = true;
-        result = result && getLinesList()
-            .equals(other.getLinesList());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getLinesList()
+            .equals(other.getLinesList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -3061,7 +3125,7 @@ public final class Tracer {
         public Tracer.Action.Input buildPartial() {
           Tracer.Action.Input result = new Tracer.Action.Input(this);
           int from_bitField0_ = bitField0_;
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             lines_ = lines_.getUnmodifiableView();
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -3072,35 +3136,35 @@ public final class Tracer {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3156,7 +3220,7 @@ public final class Tracer {
 
         private com.google.protobuf.LazyStringList lines_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         private void ensureLinesIsMutable() {
-          if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (!((bitField0_ & 0x00000001) != 0)) {
             lines_ = new com.google.protobuf.LazyStringArrayList(lines_);
             bitField0_ |= 0x00000001;
            }
@@ -3250,7 +3314,7 @@ public final class Tracer {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -3512,32 +3576,29 @@ public final class Tracer {
       }
       Tracer.Action other = (Tracer.Action) obj;
 
-      boolean result = true;
-      result = result && getActionCase().equals(
-          other.getActionCase());
-      if (!result) return false;
+      if (!getActionCase().equals(other.getActionCase())) return false;
       switch (actionCase_) {
         case 1:
-          result = result && getStart()
-              .equals(other.getStart());
+          if (!getStart()
+              .equals(other.getStart())) return false;
           break;
         case 2:
-          result = result && getStop()
-              .equals(other.getStop());
+          if (!getStop()
+              .equals(other.getStop())) return false;
           break;
         case 3:
-          result = result && getStep()
-              .equals(other.getStep());
+          if (!getStep()
+              .equals(other.getStep())) return false;
           break;
         case 4:
-          result = result && getInput()
-              .equals(other.getInput());
+          if (!getInput()
+              .equals(other.getInput())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3767,35 +3828,35 @@ public final class Tracer {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4420,7 +4481,7 @@ public final class Tracer {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4543,7 +4604,7 @@ public final class Tracer {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 events_ = new java.util.ArrayList<EventOuterClass.Event>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -4552,7 +4613,7 @@ public final class Tracer {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4566,7 +4627,7 @@ public final class Tracer {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           events_ = java.util.Collections.unmodifiableList(events_);
         }
         this.unknownFields = unknownFields.build();
@@ -4666,11 +4727,10 @@ public final class Tracer {
       }
       Tracer.TracerResponse other = (Tracer.TracerResponse) obj;
 
-      boolean result = true;
-      result = result && getEventsList()
-          .equals(other.getEventsList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getEventsList()
+          .equals(other.getEventsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4856,7 +4916,7 @@ public final class Tracer {
         Tracer.TracerResponse result = new Tracer.TracerResponse(this);
         int from_bitField0_ = bitField0_;
         if (eventsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             events_ = java.util.Collections.unmodifiableList(events_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -4870,35 +4930,35 @@ public final class Tracer {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4971,7 +5031,7 @@ public final class Tracer {
       private java.util.List<EventOuterClass.Event> events_ =
         java.util.Collections.emptyList();
       private void ensureEventsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           events_ = new java.util.ArrayList<EventOuterClass.Event>(events_);
           bitField0_ |= 0x00000001;
          }
@@ -5200,7 +5260,7 @@ public final class Tracer {
           eventsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               EventOuterClass.Event, EventOuterClass.Event.Builder, EventOuterClass.EventOrBuilder>(
                   events_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           events_ = null;
@@ -5210,7 +5270,7 @@ public final class Tracer {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5305,15 +5365,15 @@ public final class Tracer {
   static {
     java.lang.String[] descriptorData = {
       "\n\014tracer.proto\032\013event.proto\")\n\rTracerReq" +
-      "uest\022\030\n\007actions\030\001 \003(\0132\007.Action\"\366\001\n\006Actio" +
+      "uest\022\030\n\007actions\030\001 \003(\0132\007.Action\"\205\002\n\006Actio" +
       "n\022\036\n\005start\030\001 \001(\0132\r.Action.StartH\000\022\034\n\004sto" +
       "p\030\002 \001(\0132\014.Action.StopH\000\022\034\n\004step\030\003 \001(\0132\014." +
       "Action.StepH\000\022\036\n\005input\030\004 \001(\0132\r.Action.In" +
       "putH\000\032>\n\005Start\022\014\n\004main\030\001 \001(\t\022\016\n\004code\030\002 \001" +
-      "(\tH\000\022\r\n\003tar\030\003 \001(\014H\000B\010\n\006source\032\006\n\004Stop\032\006\n" +
-      "\004Step\032\026\n\005Input\022\r\n\005lines\030\001 \003(\tB\010\n\006action\"" +
-      "(\n\016TracerResponse\022\026\n\006events\030\001 \003(\0132\006.Even" +
-      "tb\006proto3"
+      "(\tH\000\022\r\n\003tar\030\003 \001(\014H\000B\010\n\006source\032\006\n\004Stop\032\025\n" +
+      "\004Step\022\r\n\005count\030\001 \001(\005\032\026\n\005Input\022\r\n\005lines\030\001" +
+      " \003(\tB\010\n\006action\"(\n\016TracerResponse\022\026\n\006even" +
+      "ts\030\001 \003(\0132\006.Eventb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5357,7 +5417,7 @@ public final class Tracer {
     internal_static_Action_Step_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Action_Step_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "Count", });
     internal_static_Action_Input_descriptor =
       internal_static_Action_descriptor.getNestedTypes().get(3);
     internal_static_Action_Input_fieldAccessorTable = new

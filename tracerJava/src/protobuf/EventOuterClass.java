@@ -198,7 +198,7 @@ public final class EventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -272,7 +272,7 @@ public final class EventOuterClass {
                 done = true;
                 break;
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -341,9 +341,8 @@ public final class EventOuterClass {
         }
         EventOuterClass.Event.Started other = (EventOuterClass.Event.Started) obj;
 
-        boolean result = true;
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -518,35 +517,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -591,7 +590,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -715,7 +714,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -812,14 +811,13 @@ public final class EventOuterClass {
         }
         EventOuterClass.Event.Inspected other = (EventOuterClass.Event.Inspected) obj;
 
-        boolean result = true;
-        result = result && (hasFrame() == other.hasFrame());
+        if (hasFrame() != other.hasFrame()) return false;
         if (hasFrame()) {
-          result = result && getFrame()
-              .equals(other.getFrame());
+          if (!getFrame()
+              .equals(other.getFrame())) return false;
         }
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -1013,35 +1011,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1087,7 +1085,7 @@ public final class EventOuterClass {
           return this;
         }
 
-        private EventOuterClass.Frame frame_ = null;
+        private EventOuterClass.Frame frame_;
         private com.google.protobuf.SingleFieldBuilderV3<
             EventOuterClass.Frame, EventOuterClass.Frame.Builder, EventOuterClass.FrameOrBuilder> frameBuilder_;
         /**
@@ -1206,7 +1204,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -1321,7 +1319,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -1430,11 +1428,10 @@ public final class EventOuterClass {
         }
         EventOuterClass.Event.Printed other = (EventOuterClass.Event.Printed) obj;
 
-        boolean result = true;
-        result = result && getValue()
-            .equals(other.getValue());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getValue()
+            .equals(other.getValue())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -1618,35 +1615,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1764,7 +1761,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -1879,7 +1876,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -1988,11 +1985,10 @@ public final class EventOuterClass {
         }
         EventOuterClass.Event.Locked other = (EventOuterClass.Event.Locked) obj;
 
-        boolean result = true;
-        result = result && getCause()
-            .equals(other.getCause());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getCause()
+            .equals(other.getCause())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -2176,35 +2172,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2322,7 +2318,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -2446,7 +2442,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -2543,14 +2539,13 @@ public final class EventOuterClass {
         }
         EventOuterClass.Event.Threw other = (EventOuterClass.Event.Threw) obj;
 
-        boolean result = true;
-        result = result && (hasException() == other.hasException());
+        if (hasException() != other.hasException()) return false;
         if (hasException()) {
-          result = result && getException()
-              .equals(other.getException());
+          if (!getException()
+              .equals(other.getException())) return false;
         }
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -2744,35 +2739,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2818,7 +2813,7 @@ public final class EventOuterClass {
           return this;
         }
 
-        private EventOuterClass.Exception exception_ = null;
+        private EventOuterClass.Exception exception_;
         private com.google.protobuf.SingleFieldBuilderV3<
             EventOuterClass.Exception, EventOuterClass.Exception.Builder, EventOuterClass.ExceptionOrBuilder> exceptionBuilder_;
         /**
@@ -2937,7 +2932,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -3234,36 +3229,33 @@ public final class EventOuterClass {
       }
       EventOuterClass.Event other = (EventOuterClass.Event) obj;
 
-      boolean result = true;
-      result = result && getEventCase().equals(
-          other.getEventCase());
-      if (!result) return false;
+      if (!getEventCase().equals(other.getEventCase())) return false;
       switch (eventCase_) {
         case 1:
-          result = result && getStarted()
-              .equals(other.getStarted());
+          if (!getStarted()
+              .equals(other.getStarted())) return false;
           break;
         case 2:
-          result = result && getInspected()
-              .equals(other.getInspected());
+          if (!getInspected()
+              .equals(other.getInspected())) return false;
           break;
         case 3:
-          result = result && getPrinted()
-              .equals(other.getPrinted());
+          if (!getPrinted()
+              .equals(other.getPrinted())) return false;
           break;
         case 4:
-          result = result && getLocked()
-              .equals(other.getLocked());
+          if (!getLocked()
+              .equals(other.getLocked())) return false;
           break;
         case 5:
-          result = result && getThrew()
-              .equals(other.getThrew());
+          if (!getThrew()
+              .equals(other.getThrew())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3504,35 +3496,35 @@ public final class EventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4297,7 +4289,7 @@ public final class EventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4453,7 +4445,7 @@ public final class EventOuterClass {
             }
             case 18: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 args_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000002;
               }
@@ -4462,7 +4454,7 @@ public final class EventOuterClass {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
                 traceback_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000004;
               }
@@ -4470,7 +4462,7 @@ public final class EventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4484,10 +4476,10 @@ public final class EventOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           args_ = args_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
           traceback_ = traceback_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -4666,15 +4658,14 @@ public final class EventOuterClass {
       }
       EventOuterClass.Exception other = (EventOuterClass.Exception) obj;
 
-      boolean result = true;
-      result = result && getType()
-          .equals(other.getType());
-      result = result && getArgsList()
-          .equals(other.getArgsList());
-      result = result && getTracebackList()
-          .equals(other.getTracebackList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getType()
+          .equals(other.getType())) return false;
+      if (!getArgsList()
+          .equals(other.getArgsList())) return false;
+      if (!getTracebackList()
+          .equals(other.getTracebackList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4866,12 +4857,12 @@ public final class EventOuterClass {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         result.type_ = type_;
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((bitField0_ & 0x00000002) != 0)) {
           args_ = args_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.args_ = args_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000004) != 0)) {
           traceback_ = traceback_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000004);
         }
@@ -4883,35 +4874,35 @@ public final class EventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5050,7 +5041,7 @@ public final class EventOuterClass {
 
       private com.google.protobuf.LazyStringList args_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureArgsIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           args_ = new com.google.protobuf.LazyStringArrayList(args_);
           bitField0_ |= 0x00000002;
          }
@@ -5144,7 +5135,7 @@ public final class EventOuterClass {
 
       private com.google.protobuf.LazyStringList traceback_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureTracebackIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           traceback_ = new com.google.protobuf.LazyStringArrayList(traceback_);
           bitField0_ |= 0x00000004;
          }
@@ -5238,7 +5229,7 @@ public final class EventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5368,8 +5359,6 @@ public final class EventOuterClass {
     }
     private Frame() {
       type_ = 0;
-      line_ = 0;
-      finish_ = false;
     }
 
     @java.lang.Override
@@ -5452,7 +5441,7 @@ public final class EventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5709,7 +5698,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -5951,38 +5940,34 @@ public final class EventOuterClass {
         }
         EventOuterClass.Frame.Value other = (EventOuterClass.Frame.Value) obj;
 
-        boolean result = true;
-        result = result && getValueCase().equals(
-            other.getValueCase());
-        if (!result) return false;
+        if (!getValueCase().equals(other.getValueCase())) return false;
         switch (valueCase_) {
           case 1:
-            result = result && (getBooleanValue()
-                == other.getBooleanValue());
+            if (getBooleanValue()
+                != other.getBooleanValue()) return false;
             break;
           case 2:
-            result = result && (getIntegerValue()
-                == other.getIntegerValue());
+            if (getIntegerValue()
+                != other.getIntegerValue()) return false;
             break;
           case 3:
-            result = result && (
-                java.lang.Double.doubleToLongBits(getFloatValue())
-                == java.lang.Double.doubleToLongBits(
-                    other.getFloatValue()));
+            if (java.lang.Double.doubleToLongBits(getFloatValue())
+                != java.lang.Double.doubleToLongBits(
+                    other.getFloatValue())) return false;
             break;
           case 4:
-            result = result && getStringValue()
-                .equals(other.getStringValue());
+            if (!getStringValue()
+                .equals(other.getStringValue())) return false;
             break;
           case 5:
-            result = result && (getReference()
-                == other.getReference());
+            if (getReference()
+                != other.getReference()) return false;
             break;
           case 0:
           default:
         }
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -6207,35 +6192,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6522,7 +6507,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -6645,7 +6630,7 @@ public final class EventOuterClass {
                 done = true;
                 break;
               case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                   scopes_ = new java.util.ArrayList<EventOuterClass.Frame.Stack.Scope>();
                   mutable_bitField0_ |= 0x00000001;
                 }
@@ -6654,7 +6639,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -6668,7 +6653,7 @@ public final class EventOuterClass {
           throw new com.google.protobuf.InvalidProtocolBufferException(
               e).setUnfinishedMessage(this);
         } finally {
-          if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
             scopes_ = java.util.Collections.unmodifiableList(scopes_);
           }
           this.unknownFields = unknownFields.build();
@@ -6748,7 +6733,6 @@ public final class EventOuterClass {
           super(builder);
         }
         private Scope() {
-          line_ = 0;
           name_ = "";
           variables_ = java.util.Collections.emptyList();
         }
@@ -6789,7 +6773,7 @@ public final class EventOuterClass {
                   break;
                 }
                 case 34: {
-                  if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                  if (!((mutable_bitField0_ & 0x00000004) != 0)) {
                     variables_ = new java.util.ArrayList<EventOuterClass.Frame.Stack.Scope.Variable>();
                     mutable_bitField0_ |= 0x00000004;
                   }
@@ -6798,7 +6782,7 @@ public final class EventOuterClass {
                   break;
                 }
                 default: {
-                  if (!parseUnknownFieldProto3(
+                  if (!parseUnknownField(
                       input, unknownFields, extensionRegistry, tag)) {
                     done = true;
                   }
@@ -6812,7 +6796,7 @@ public final class EventOuterClass {
             throw new com.google.protobuf.InvalidProtocolBufferException(
                 e).setUnfinishedMessage(this);
           } finally {
-            if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+            if (((mutable_bitField0_ & 0x00000004) != 0)) {
               variables_ = java.util.Collections.unmodifiableList(variables_);
             }
             this.unknownFields = unknownFields.build();
@@ -6923,7 +6907,7 @@ public final class EventOuterClass {
                     break;
                   }
                   default: {
-                    if (!parseUnknownFieldProto3(
+                    if (!parseUnknownField(
                         input, unknownFields, extensionRegistry, tag)) {
                       done = true;
                     }
@@ -7060,16 +7044,15 @@ public final class EventOuterClass {
             }
             EventOuterClass.Frame.Stack.Scope.Variable other = (EventOuterClass.Frame.Stack.Scope.Variable) obj;
 
-            boolean result = true;
-            result = result && getName()
-                .equals(other.getName());
-            result = result && (hasValue() == other.hasValue());
+            if (!getName()
+                .equals(other.getName())) return false;
+            if (hasValue() != other.hasValue()) return false;
             if (hasValue()) {
-              result = result && getValue()
-                  .equals(other.getValue());
+              if (!getValue()
+                  .equals(other.getValue())) return false;
             }
-            result = result && unknownFields.equals(other.unknownFields);
-            return result;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
           }
 
           @java.lang.Override
@@ -7268,35 +7251,35 @@ public final class EventOuterClass {
 
             @java.lang.Override
             public Builder clone() {
-              return (Builder) super.clone();
+              return super.clone();
             }
             @java.lang.Override
             public Builder setField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 java.lang.Object value) {
-              return (Builder) super.setField(field, value);
+              return super.setField(field, value);
             }
             @java.lang.Override
             public Builder clearField(
                 com.google.protobuf.Descriptors.FieldDescriptor field) {
-              return (Builder) super.clearField(field);
+              return super.clearField(field);
             }
             @java.lang.Override
             public Builder clearOneof(
                 com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-              return (Builder) super.clearOneof(oneof);
+              return super.clearOneof(oneof);
             }
             @java.lang.Override
             public Builder setRepeatedField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 int index, java.lang.Object value) {
-              return (Builder) super.setRepeatedField(field, index, value);
+              return super.setRepeatedField(field, index, value);
             }
             @java.lang.Override
             public Builder addRepeatedField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 java.lang.Object value) {
-              return (Builder) super.addRepeatedField(field, value);
+              return super.addRepeatedField(field, value);
             }
             @java.lang.Override
             public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7415,7 +7398,7 @@ public final class EventOuterClass {
               return this;
             }
 
-            private EventOuterClass.Frame.Value value_ = null;
+            private EventOuterClass.Frame.Value value_;
             private com.google.protobuf.SingleFieldBuilderV3<
                 EventOuterClass.Frame.Value, EventOuterClass.Frame.Value.Builder, EventOuterClass.Frame.ValueOrBuilder> valueBuilder_;
             /**
@@ -7534,7 +7517,7 @@ public final class EventOuterClass {
             @java.lang.Override
             public final Builder setUnknownFields(
                 final com.google.protobuf.UnknownFieldSet unknownFields) {
-              return super.setUnknownFieldsProto3(unknownFields);
+              return super.setUnknownFields(unknownFields);
             }
 
             @java.lang.Override
@@ -7721,15 +7704,14 @@ public final class EventOuterClass {
           }
           EventOuterClass.Frame.Stack.Scope other = (EventOuterClass.Frame.Stack.Scope) obj;
 
-          boolean result = true;
-          result = result && (getLine()
-              == other.getLine());
-          result = result && getName()
-              .equals(other.getName());
-          result = result && getVariablesList()
-              .equals(other.getVariablesList());
-          result = result && unknownFields.equals(other.unknownFields);
-          return result;
+          if (getLine()
+              != other.getLine()) return false;
+          if (!getName()
+              .equals(other.getName())) return false;
+          if (!getVariablesList()
+              .equals(other.getVariablesList())) return false;
+          if (!unknownFields.equals(other.unknownFields)) return false;
+          return true;
         }
 
         @java.lang.Override
@@ -7926,7 +7908,7 @@ public final class EventOuterClass {
             result.line_ = line_;
             result.name_ = name_;
             if (variablesBuilder_ == null) {
-              if (((bitField0_ & 0x00000004) == 0x00000004)) {
+              if (((bitField0_ & 0x00000004) != 0)) {
                 variables_ = java.util.Collections.unmodifiableList(variables_);
                 bitField0_ = (bitField0_ & ~0x00000004);
               }
@@ -7941,35 +7923,35 @@ public final class EventOuterClass {
 
           @java.lang.Override
           public Builder clone() {
-            return (Builder) super.clone();
+            return super.clone();
           }
           @java.lang.Override
           public Builder setField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               java.lang.Object value) {
-            return (Builder) super.setField(field, value);
+            return super.setField(field, value);
           }
           @java.lang.Override
           public Builder clearField(
               com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return (Builder) super.clearField(field);
+            return super.clearField(field);
           }
           @java.lang.Override
           public Builder clearOneof(
               com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return (Builder) super.clearOneof(oneof);
+            return super.clearOneof(oneof);
           }
           @java.lang.Override
           public Builder setRepeatedField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               int index, java.lang.Object value) {
-            return (Builder) super.setRepeatedField(field, index, value);
+            return super.setRepeatedField(field, index, value);
           }
           @java.lang.Override
           public Builder addRepeatedField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               java.lang.Object value) {
-            return (Builder) super.addRepeatedField(field, value);
+            return super.addRepeatedField(field, value);
           }
           @java.lang.Override
           public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8144,7 +8126,7 @@ public final class EventOuterClass {
           private java.util.List<EventOuterClass.Frame.Stack.Scope.Variable> variables_ =
             java.util.Collections.emptyList();
           private void ensureVariablesIsMutable() {
-            if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+            if (!((bitField0_ & 0x00000004) != 0)) {
               variables_ = new java.util.ArrayList<EventOuterClass.Frame.Stack.Scope.Variable>(variables_);
               bitField0_ |= 0x00000004;
              }
@@ -8373,7 +8355,7 @@ public final class EventOuterClass {
               variablesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                   EventOuterClass.Frame.Stack.Scope.Variable, EventOuterClass.Frame.Stack.Scope.Variable.Builder, EventOuterClass.Frame.Stack.Scope.VariableOrBuilder>(
                       variables_,
-                      ((bitField0_ & 0x00000004) == 0x00000004),
+                      ((bitField0_ & 0x00000004) != 0),
                       getParentForChildren(),
                       isClean());
               variables_ = null;
@@ -8383,7 +8365,7 @@ public final class EventOuterClass {
           @java.lang.Override
           public final Builder setUnknownFields(
               final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFieldsProto3(unknownFields);
+            return super.setUnknownFields(unknownFields);
           }
 
           @java.lang.Override
@@ -8513,11 +8495,10 @@ public final class EventOuterClass {
         }
         EventOuterClass.Frame.Stack other = (EventOuterClass.Frame.Stack) obj;
 
-        boolean result = true;
-        result = result && getScopesList()
-            .equals(other.getScopesList());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getScopesList()
+            .equals(other.getScopesList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -8703,7 +8684,7 @@ public final class EventOuterClass {
           EventOuterClass.Frame.Stack result = new EventOuterClass.Frame.Stack(this);
           int from_bitField0_ = bitField0_;
           if (scopesBuilder_ == null) {
-            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            if (((bitField0_ & 0x00000001) != 0)) {
               scopes_ = java.util.Collections.unmodifiableList(scopes_);
               bitField0_ = (bitField0_ & ~0x00000001);
             }
@@ -8717,35 +8698,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8818,7 +8799,7 @@ public final class EventOuterClass {
         private java.util.List<EventOuterClass.Frame.Stack.Scope> scopes_ =
           java.util.Collections.emptyList();
         private void ensureScopesIsMutable() {
-          if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (!((bitField0_ & 0x00000001) != 0)) {
             scopes_ = new java.util.ArrayList<EventOuterClass.Frame.Stack.Scope>(scopes_);
             bitField0_ |= 0x00000001;
            }
@@ -9047,7 +9028,7 @@ public final class EventOuterClass {
             scopesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 EventOuterClass.Frame.Stack.Scope, EventOuterClass.Frame.Stack.Scope.Builder, EventOuterClass.Frame.Stack.ScopeOrBuilder>(
                     scopes_,
-                    ((bitField0_ & 0x00000001) == 0x00000001),
+                    ((bitField0_ & 0x00000001) != 0),
                     getParentForChildren(),
                     isClean());
             scopes_ = null;
@@ -9057,7 +9038,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -9189,7 +9170,7 @@ public final class EventOuterClass {
                 done = true;
                 break;
               case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                   references_ = com.google.protobuf.MapField.newMapField(
                       ReferencesDefaultEntryHolder.defaultEntry);
                   mutable_bitField0_ |= 0x00000001;
@@ -9202,7 +9183,7 @@ public final class EventOuterClass {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -9316,7 +9297,6 @@ public final class EventOuterClass {
         private Obj() {
           type_ = 0;
           lType_ = "";
-          userDefined_ = false;
           members_ = java.util.Collections.emptyList();
         }
 
@@ -9362,7 +9342,7 @@ public final class EventOuterClass {
                   break;
                 }
                 case 34: {
-                  if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                  if (!((mutable_bitField0_ & 0x00000008) != 0)) {
                     members_ = new java.util.ArrayList<EventOuterClass.Frame.Heap.Obj.Member>();
                     mutable_bitField0_ |= 0x00000008;
                   }
@@ -9371,7 +9351,7 @@ public final class EventOuterClass {
                   break;
                 }
                 default: {
-                  if (!parseUnknownFieldProto3(
+                  if (!parseUnknownField(
                       input, unknownFields, extensionRegistry, tag)) {
                     done = true;
                   }
@@ -9385,7 +9365,7 @@ public final class EventOuterClass {
             throw new com.google.protobuf.InvalidProtocolBufferException(
                 e).setUnfinishedMessage(this);
           } finally {
-            if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            if (((mutable_bitField0_ & 0x00000008) != 0)) {
               members_ = java.util.Collections.unmodifiableList(members_);
             }
             this.unknownFields = unknownFields.build();
@@ -9657,7 +9637,7 @@ public final class EventOuterClass {
                     break;
                   }
                   default: {
-                    if (!parseUnknownFieldProto3(
+                    if (!parseUnknownField(
                         input, unknownFields, extensionRegistry, tag)) {
                       done = true;
                     }
@@ -9782,19 +9762,18 @@ public final class EventOuterClass {
             }
             EventOuterClass.Frame.Heap.Obj.Member other = (EventOuterClass.Frame.Heap.Obj.Member) obj;
 
-            boolean result = true;
-            result = result && (hasKey() == other.hasKey());
+            if (hasKey() != other.hasKey()) return false;
             if (hasKey()) {
-              result = result && getKey()
-                  .equals(other.getKey());
+              if (!getKey()
+                  .equals(other.getKey())) return false;
             }
-            result = result && (hasValue() == other.hasValue());
+            if (hasValue() != other.hasValue()) return false;
             if (hasValue()) {
-              result = result && getValue()
-                  .equals(other.getValue());
+              if (!getValue()
+                  .equals(other.getValue())) return false;
             }
-            result = result && unknownFields.equals(other.unknownFields);
-            return result;
+            if (!unknownFields.equals(other.unknownFields)) return false;
+            return true;
           }
 
           @java.lang.Override
@@ -10003,35 +9982,35 @@ public final class EventOuterClass {
 
             @java.lang.Override
             public Builder clone() {
-              return (Builder) super.clone();
+              return super.clone();
             }
             @java.lang.Override
             public Builder setField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 java.lang.Object value) {
-              return (Builder) super.setField(field, value);
+              return super.setField(field, value);
             }
             @java.lang.Override
             public Builder clearField(
                 com.google.protobuf.Descriptors.FieldDescriptor field) {
-              return (Builder) super.clearField(field);
+              return super.clearField(field);
             }
             @java.lang.Override
             public Builder clearOneof(
                 com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-              return (Builder) super.clearOneof(oneof);
+              return super.clearOneof(oneof);
             }
             @java.lang.Override
             public Builder setRepeatedField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 int index, java.lang.Object value) {
-              return (Builder) super.setRepeatedField(field, index, value);
+              return super.setRepeatedField(field, index, value);
             }
             @java.lang.Override
             public Builder addRepeatedField(
                 com.google.protobuf.Descriptors.FieldDescriptor field,
                 java.lang.Object value) {
-              return (Builder) super.addRepeatedField(field, value);
+              return super.addRepeatedField(field, value);
             }
             @java.lang.Override
             public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10080,7 +10059,7 @@ public final class EventOuterClass {
               return this;
             }
 
-            private EventOuterClass.Frame.Value key_ = null;
+            private EventOuterClass.Frame.Value key_;
             private com.google.protobuf.SingleFieldBuilderV3<
                 EventOuterClass.Frame.Value, EventOuterClass.Frame.Value.Builder, EventOuterClass.Frame.ValueOrBuilder> keyBuilder_;
             /**
@@ -10197,7 +10176,7 @@ public final class EventOuterClass {
               return keyBuilder_;
             }
 
-            private EventOuterClass.Frame.Value value_ = null;
+            private EventOuterClass.Frame.Value value_;
             private com.google.protobuf.SingleFieldBuilderV3<
                 EventOuterClass.Frame.Value, EventOuterClass.Frame.Value.Builder, EventOuterClass.Frame.ValueOrBuilder> valueBuilder_;
             /**
@@ -10316,7 +10295,7 @@ public final class EventOuterClass {
             @java.lang.Override
             public final Builder setUnknownFields(
                 final com.google.protobuf.UnknownFieldSet unknownFields) {
-              return super.setUnknownFieldsProto3(unknownFields);
+              return super.setUnknownFields(unknownFields);
             }
 
             @java.lang.Override
@@ -10527,16 +10506,15 @@ public final class EventOuterClass {
           }
           EventOuterClass.Frame.Heap.Obj other = (EventOuterClass.Frame.Heap.Obj) obj;
 
-          boolean result = true;
-          result = result && type_ == other.type_;
-          result = result && getLType()
-              .equals(other.getLType());
-          result = result && (getUserDefined()
-              == other.getUserDefined());
-          result = result && getMembersList()
-              .equals(other.getMembersList());
-          result = result && unknownFields.equals(other.unknownFields);
-          return result;
+          if (type_ != other.type_) return false;
+          if (!getLType()
+              .equals(other.getLType())) return false;
+          if (getUserDefined()
+              != other.getUserDefined()) return false;
+          if (!getMembersList()
+              .equals(other.getMembersList())) return false;
+          if (!unknownFields.equals(other.unknownFields)) return false;
+          return true;
         }
 
         @java.lang.Override
@@ -10739,7 +10717,7 @@ public final class EventOuterClass {
             result.lType_ = lType_;
             result.userDefined_ = userDefined_;
             if (membersBuilder_ == null) {
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+              if (((bitField0_ & 0x00000008) != 0)) {
                 members_ = java.util.Collections.unmodifiableList(members_);
                 bitField0_ = (bitField0_ & ~0x00000008);
               }
@@ -10754,35 +10732,35 @@ public final class EventOuterClass {
 
           @java.lang.Override
           public Builder clone() {
-            return (Builder) super.clone();
+            return super.clone();
           }
           @java.lang.Override
           public Builder setField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               java.lang.Object value) {
-            return (Builder) super.setField(field, value);
+            return super.setField(field, value);
           }
           @java.lang.Override
           public Builder clearField(
               com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return (Builder) super.clearField(field);
+            return super.clearField(field);
           }
           @java.lang.Override
           public Builder clearOneof(
               com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return (Builder) super.clearOneof(oneof);
+            return super.clearOneof(oneof);
           }
           @java.lang.Override
           public Builder setRepeatedField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               int index, java.lang.Object value) {
-            return (Builder) super.setRepeatedField(field, index, value);
+            return super.setRepeatedField(field, index, value);
           }
           @java.lang.Override
           public Builder addRepeatedField(
               com.google.protobuf.Descriptors.FieldDescriptor field,
               java.lang.Object value) {
-            return (Builder) super.addRepeatedField(field, value);
+            return super.addRepeatedField(field, value);
           }
           @java.lang.Override
           public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11005,7 +10983,7 @@ public final class EventOuterClass {
           private java.util.List<EventOuterClass.Frame.Heap.Obj.Member> members_ =
             java.util.Collections.emptyList();
           private void ensureMembersIsMutable() {
-            if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+            if (!((bitField0_ & 0x00000008) != 0)) {
               members_ = new java.util.ArrayList<EventOuterClass.Frame.Heap.Obj.Member>(members_);
               bitField0_ |= 0x00000008;
              }
@@ -11234,7 +11212,7 @@ public final class EventOuterClass {
               membersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                   EventOuterClass.Frame.Heap.Obj.Member, EventOuterClass.Frame.Heap.Obj.Member.Builder, EventOuterClass.Frame.Heap.Obj.MemberOrBuilder>(
                       members_,
-                      ((bitField0_ & 0x00000008) == 0x00000008),
+                      ((bitField0_ & 0x00000008) != 0),
                       getParentForChildren(),
                       isClean());
               members_ = null;
@@ -11244,7 +11222,7 @@ public final class EventOuterClass {
           @java.lang.Override
           public final Builder setUnknownFields(
               final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFieldsProto3(unknownFields);
+            return super.setUnknownFields(unknownFields);
           }
 
           @java.lang.Override
@@ -11424,11 +11402,10 @@ public final class EventOuterClass {
         }
         EventOuterClass.Frame.Heap other = (EventOuterClass.Frame.Heap) obj;
 
-        boolean result = true;
-        result = result && internalGetReferences().equals(
-            other.internalGetReferences());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!internalGetReferences().equals(
+            other.internalGetReferences())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -11637,35 +11614,35 @@ public final class EventOuterClass {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11836,7 +11813,7 @@ public final class EventOuterClass {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -12064,29 +12041,28 @@ public final class EventOuterClass {
       }
       EventOuterClass.Frame other = (EventOuterClass.Frame) obj;
 
-      boolean result = true;
-      result = result && type_ == other.type_;
-      result = result && (getLine()
-          == other.getLine());
-      result = result && (getFinish()
-          == other.getFinish());
-      result = result && (hasException() == other.hasException());
+      if (type_ != other.type_) return false;
+      if (getLine()
+          != other.getLine()) return false;
+      if (getFinish()
+          != other.getFinish()) return false;
+      if (hasException() != other.hasException()) return false;
       if (hasException()) {
-        result = result && getException()
-            .equals(other.getException());
+        if (!getException()
+            .equals(other.getException())) return false;
       }
-      result = result && (hasStack() == other.hasStack());
+      if (hasStack() != other.hasStack()) return false;
       if (hasStack()) {
-        result = result && getStack()
-            .equals(other.getStack());
+        if (!getStack()
+            .equals(other.getStack())) return false;
       }
-      result = result && (hasHeap() == other.hasHeap());
+      if (hasHeap() != other.hasHeap()) return false;
       if (hasHeap()) {
-        result = result && getHeap()
-            .equals(other.getHeap());
+        if (!getHeap()
+            .equals(other.getHeap())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12326,35 +12302,35 @@ public final class EventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12512,7 +12488,7 @@ public final class EventOuterClass {
         return this;
       }
 
-      private EventOuterClass.Exception exception_ = null;
+      private EventOuterClass.Exception exception_;
       private com.google.protobuf.SingleFieldBuilderV3<
           EventOuterClass.Exception, EventOuterClass.Exception.Builder, EventOuterClass.ExceptionOrBuilder> exceptionBuilder_;
       /**
@@ -12629,7 +12605,7 @@ public final class EventOuterClass {
         return exceptionBuilder_;
       }
 
-      private EventOuterClass.Frame.Stack stack_ = null;
+      private EventOuterClass.Frame.Stack stack_;
       private com.google.protobuf.SingleFieldBuilderV3<
           EventOuterClass.Frame.Stack, EventOuterClass.Frame.Stack.Builder, EventOuterClass.Frame.StackOrBuilder> stackBuilder_;
       /**
@@ -12746,7 +12722,7 @@ public final class EventOuterClass {
         return stackBuilder_;
       }
 
-      private EventOuterClass.Frame.Heap heap_ = null;
+      private EventOuterClass.Frame.Heap heap_;
       private com.google.protobuf.SingleFieldBuilderV3<
           EventOuterClass.Frame.Heap, EventOuterClass.Frame.Heap.Builder, EventOuterClass.Frame.HeapOrBuilder> heapBuilder_;
       /**
@@ -12865,7 +12841,7 @@ public final class EventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override

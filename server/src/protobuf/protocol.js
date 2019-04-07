@@ -4632,6 +4632,7 @@ export const Action = $root.Action = (() => {
          * Properties of a Step.
          * @memberof Action
          * @interface IStep
+         * @property {number|null} [count] Step count
          */
 
         /**
@@ -4648,6 +4649,14 @@ export const Action = $root.Action = (() => {
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
+
+        /**
+         * Step count.
+         * @member {number} count
+         * @memberof Action.Step
+         * @instance
+         */
+        Step.prototype.count = 0;
 
         /**
          * Creates a new Step instance using the specified properties.
@@ -4673,6 +4682,8 @@ export const Action = $root.Action = (() => {
         Step.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
+            if (message.count != null && message.hasOwnProperty("count"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int32(message.count);
             return writer;
         };
 
@@ -4707,6 +4718,9 @@ export const Action = $root.Action = (() => {
             while (reader.pos < end) {
                 let tag = reader.uint32();
                 switch (tag >>> 3) {
+                case 1:
+                    message.count = reader.int32();
+                    break;
                 default:
                     reader.skipType(tag & 7);
                     break;
@@ -4742,6 +4756,9 @@ export const Action = $root.Action = (() => {
         Step.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
+            if (message.count != null && message.hasOwnProperty("count"))
+                if (!$util.isInteger(message.count))
+                    return "count: integer expected";
             return null;
         };
 
@@ -4756,7 +4773,10 @@ export const Action = $root.Action = (() => {
         Step.fromObject = function fromObject(object) {
             if (object instanceof $root.Action.Step)
                 return object;
-            return new $root.Action.Step();
+            let message = new $root.Action.Step();
+            if (object.count != null)
+                message.count = object.count | 0;
+            return message;
         };
 
         /**
@@ -4768,8 +4788,15 @@ export const Action = $root.Action = (() => {
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        Step.toObject = function toObject() {
-            return {};
+        Step.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            let object = {};
+            if (options.defaults)
+                object.count = 0;
+            if (message.count != null && message.hasOwnProperty("count"))
+                object.count = message.count;
+            return object;
         };
 
         /**
