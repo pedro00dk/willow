@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { ScopeNode } from '../../reducers/graph'
+import { isStackTreeNode, StackTreeNode } from '../../reducers/graph'
 import { useRedux } from '../../reducers/Store'
 
 const callNodeColors = ['khaki', 'greenyellow', 'palegreen', 'aquamarine', 'skyblue', 'mediumpurple', 'pink']
@@ -38,17 +38,17 @@ export function Stack() {
         })
         return () => clearInterval(interval)
     }, [computedWidth])
-
+    
+    console.log(graph)
+    
     return (
         <div ref={stackRef} className='d-flex flex-row align-items-start flex-nowrap h-100 w-100'>
-            {graph.stack && (
-                <CallNode node={graph.stack[0].subScopes[1] as ScopeNode} depth={0} computedWidth={computedWidth} />
-            )}
+            {graph.stackTree && <CallNode node={graph.stackTree} depth={0} computedWidth={computedWidth} />}
         </div>
     )
 }
 
-function CallNode(props: { node: ScopeNode; depth: number; computedWidth?: number }) {
+function CallNode(props: { node: StackTreeNode; depth: number; computedWidth?: number }) {
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
     return (
         <div className={classes.callNode.container}>
@@ -57,14 +57,13 @@ function CallNode(props: { node: ScopeNode; depth: number; computedWidth?: numbe
             </div>
             {computedWidth >= 2 && (
                 <div className='d-flex flex-row'>
-                    {props.node.subScopes.map((subScope, i) => {
-                        const steps = typeof subScope === 'number' ? subScope : subScope.steps
-                        const subNodeProportion = steps / props.node.steps
+                    {props.node.children.map((subScope, i) => {
+                        const subNodeProportion = subScope.steps / props.node.steps
                         const subNodeComputedWidth = subNodeProportion * computedWidth
                         const subNodePercentWidth = `${subNodeProportion * 100}%`
                         return (
                             <div key={i} style={{ width: subNodePercentWidth }}>
-                                {typeof subScope !== 'number' && (
+                                {isStackTreeNode(subScope) && (
                                     <CallNode
                                         node={subScope}
                                         depth={props.depth + 1}

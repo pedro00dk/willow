@@ -1,73 +1,87 @@
 import { Reducer } from 'redux'
 import * as protocol from '../protobuf/protocol'
-import { AsyncAction } from './Store'
+import { AsyncAction, State as StoreState } from './Store'
 
-export type ScopeNode = {
-    id: number
+export type StackTreeNode = {
     name: string
     steps: number
-    parentScope: ScopeNode
-    subScopes: (number | ScopeNode)[]
+    children: (StackTreeNode | StackTreeLeaf)[]
+}
+
+export type StackTreeLeaf = {
+    steps: number
+    framesIndices: number[]
+}
+
+export function isStackTreeNode(nodeOrLeaf: StackTreeNode | StackTreeLeaf): nodeOrLeaf is StackTreeNode {
+    return (nodeOrLeaf as StackTreeNode).name != undefined
 }
 
 type State = {
-    readonly stack: { [id: number]: ScopeNode }
+    readonly framesIndices: protocol.IFrame[]
+    readonly stackTree: StackTreeNode
 }
 
-type Action = { type: 'graph/loadStack'; payload: { stack: State['stack'] } }
+type Action = { type: 'graph/loadGraph'; payload: { framesIndices: protocol.IFrame[]; stackTree: StackTreeNode } }
 
 const initialState: State = {
-    stack: undefined
+    framesIndices: undefined,
+    stackTree: undefined
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
-        case 'graph/loadStack':
+        case 'graph/loadGraph':
             return { ...state, ...action.payload }
     }
     return state
 }
 
-function loadStack(): AsyncAction {
+function loadFramesIndices(debug: StoreState['debug']) {
+    return debug.responses
+        .flatMap(response => response.events)
+        .filter(event => !!event.inspected)
+        .map(event => event.inspected.frame)
+}
+function loadStackTree(framesIndices: protocol.IFrame[]) {
+    const treeBase: StackTreeNode = { name: '', steps: 0, children: [] }
+    const treeChildrenStack = [treeBase]
+    framesIndices //
+        .forEach((frame, i) => {
+            const scope = frame.stack.scopes[frame.stack.scopes.length - 1]
+            const lastChild = treeChildrenStack[treeChildrenStack.length - 1]
+            if (frame.type === protocol.Frame.Type.CALL) {
+                const startLeaf: StackTreeLeaf = { steps: 0, framesIndices: [i] }
+                const childNode: StackTreeNode = { name: scope.name, steps: 0, children: [startLeaf] }
+                lastChild.children.push(childNode)
+                treeChildrenStack.push(childNode)
+            } else if (frame.type === protocol.Frame.Type.LINE) {
+                lastChild.steps += 1
+                const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackTreeLeaf
+                lastLeaf.steps += 1
+                lastLeaf.framesIndices.push(i)
+            } else if (frame.type === protocol.Frame.Type.EXCEPTION) {
+                // TODO
+            } else if (frame.type === protocol.Frame.Type.RETURN) {
+                const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackTreeLeaf
+                lastLeaf.framesIndices.push(i)
+                const lastChildParent = treeChildrenStack[treeChildrenStack.length - 2]
+                lastChildParent.steps += lastChild.steps
+                const newParentLeaf: StackTreeLeaf = { steps: 0, framesIndices: [] }
+                lastChildParent.children.push(newParentLeaf)
+                treeChildrenStack.pop()
+            }
+        })
+    return treeBase.children[0] as StackTreeNode
+}
+
+function loadGraph(): AsyncAction {
     return async (dispatch, getState) => {
         const { debug } = getState()
-        const stack: State['stack'] = { 0: { id: 0, name: '', steps: 0, parentScope: undefined, subScopes: [0] } }
-        let scopeNodeRef = stack[0]
-        debug.responses //
-            .flatMap(response => response.events)
-            .filter(event => !!event.inspected)
-            .forEach(event => {
-                const scopes = event.inspected.frame.stack.scopes
-                const lastScope = scopes[scopes.length - 1]
-                switch (event.inspected.frame.type) {
-                    case protocol.Frame.Type.CALL:
-                        const scopeNode: ScopeNode = {
-                            id: 0,
-                            name: lastScope.name,
-                            steps: 0,
-                            parentScope: scopeNodeRef,
-                            subScopes: [0]
-                        }
-                        scopeNodeRef.subScopes.push(scopeNode)
-                        scopeNodeRef = scopeNode
-                        break
-                    case protocol.Frame.Type.LINE:
-                        scopeNodeRef.steps += 1
-                        ;(scopeNodeRef.subScopes[scopeNodeRef.subScopes.length - 1] as number) += 1
-                        break
-                    case protocol.Frame.Type.EXCEPTION:
-                        // TODO
-                        break
-                    case protocol.Frame.Type.RETURN:
-                        scopeNodeRef.subScopes.push(0)
-                        scopeNodeRef.parentScope.steps += scopeNodeRef.steps
-                        scopeNodeRef.parentScope.subScopes.push(0)
-                        scopeNodeRef = scopeNodeRef.parentScope
-                        break
-                }
-            })
-        dispatch({ type: 'graph/loadStack', payload: { stack } })
+        const framesIndices = loadFramesIndices(debug)
+        const stackTree = loadStackTree(framesIndices)
+        dispatch({ type: 'graph/loadGraph', payload: { framesIndices, stackTree } })
     }
 }
 
-export const actions = { loadStack }
+export const actions = { loadGraph }
