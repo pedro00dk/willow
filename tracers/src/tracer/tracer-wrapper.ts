@@ -34,10 +34,10 @@ export class TracerWrapper implements Tracer {
         return this.internalTracer.stop()
     }
 
-    async step() {
+    async step(count: number = 1) {
         log.verbose(TracerWrapper.name, 'step')
         try {
-            const results = await applyResponseProcessorStack(this.processors, () => this.internalTracer.step())
+            const results = await applyResponseProcessorStack(this.processors, () => this.internalTracer.step(count))
             this.updatePreviousInspectedEvent(results)
             return results
         } catch (error) {
@@ -80,16 +80,16 @@ export class TracerWrapper implements Tracer {
         return responses
     }
 
-    async continue() {
+    async continue(ignoreBreakpoints: boolean = false) {
         log.info(TracerWrapper.name, 'continue')
         const responses = protocol.TracerResponses.create({ responses: [] })
         while (true) {
-            const nextResponse = await this.step()
+            const nextResponse = await this.step(!ignoreBreakpoints ? 1 : 2 ** 31 - 1)
             responses.responses.push(nextResponse)
             const currentLine = this.previousInspectedEvent ? this.previousInspectedEvent.frame.line : undefined
             if (
                 this.getState() === 'stopped' ||
-                this.breakpoints.has(currentLine) ||
+                !ignoreBreakpoints && this.breakpoints.has(currentLine) ||
                 !!nextResponse.events[nextResponse.events.length - 1].locked
             )
                 break

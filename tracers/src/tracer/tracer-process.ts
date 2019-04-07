@@ -82,13 +82,13 @@ export class TracerProcess implements Tracer {
         // this.actions$.complete() // the process shall stop automatically (this call will force stop/kill)
     }
 
-    async step() {
+    async step(count: number = 1) {
         log.verbose(TracerProcess.name, 'step')
         this.checkState('started')
         const eventsPromise = this.responses$.pipe(rxOps.take(2)).toPromise()
         this.requests$.next(
             protocol.TracerRequest.create({
-                actions: [protocol.Action.create({ step: protocol.Action.Step.create() })]
+                actions: [protocol.Action.create({ step: protocol.Action.Step.create({ count }) })]
             })
         )
         const response = await eventsPromise
