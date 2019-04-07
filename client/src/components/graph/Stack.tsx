@@ -50,8 +50,6 @@ export function Stack() {
 
 function CallNode(props: { node: ScopeNode; depth: number; computedWidth?: number }) {
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
-    console.log('here')
-    console.log(props.node)
     return (
         <div className={classes.callNode.container}>
             <div className={classes.callNode.scope} style={styles.callNode.scope(computedWidth, props.depth)}>
