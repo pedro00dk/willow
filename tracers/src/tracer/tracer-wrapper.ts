@@ -80,16 +80,16 @@ export class TracerWrapper implements Tracer {
         return responses
     }
 
-    async continue(ignoreBreakpoints: boolean = false) {
+    async continue(ignoreBreakpoints: boolean = false, stepCount: number = 1) {
         log.info(TracerWrapper.name, 'continue')
         const responses = protocol.TracerResponses.create({ responses: [] })
         while (true) {
-            const nextResponse = await this.step(!ignoreBreakpoints ? 1 : 2 ** 31 - 1)
+            const nextResponse = await this.step(!ignoreBreakpoints ? 1 : stepCount)
             responses.responses.push(nextResponse)
             const currentLine = this.previousInspectedEvent ? this.previousInspectedEvent.frame.line : undefined
             if (
                 this.getState() === 'stopped' ||
-                !ignoreBreakpoints && this.breakpoints.has(currentLine) ||
+                (!ignoreBreakpoints && this.breakpoints.has(currentLine)) ||
                 !!nextResponse.events[nextResponse.events.length - 1].locked
             )
                 break

@@ -146,7 +146,7 @@ export class TracersSkeleton {
     }
 
     async continue(request: protocol.Id): Promise<protocol.TracerResponses> {
-        const responses = await this.checkGetSessionTracer(request.id).continue(true)
+        const responses = await this.checkGetSessionTracer(request.id).continue(true, 100)
         this.removeTracerIfStopped(request.id)
         return responses
     }

@@ -11,7 +11,7 @@ export interface Tracer {
     step(count?: number): Promise<protocol.TracerResponse>
     stepOver?(): Promise<protocol.TracerResponses>
     stepOut?(): Promise<protocol.TracerResponses>
-    continue?(ignoreBreakpoints: boolean): Promise<protocol.TracerResponses>
+    continue?(ignoreBreakpoints: boolean, stepCount: number): Promise<protocol.TracerResponses>
     input(input: protocol.Action.Input): void
     getBreakpoints?(): protocol.Breakpoints
     setBreakpoints?(breakpoints: protocol.Breakpoints): void
