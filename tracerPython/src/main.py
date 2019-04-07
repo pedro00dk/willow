@@ -137,6 +137,8 @@ def event_message_to_event_protocol(event_message: message.Message):
                             if isinstance(value, int) and abs(value) < 9223372036854775808 else
                         event_pb2.Frame.Value(stringValue=str(value)) if isinstance(value, int) else
                         event_pb2.Frame.Value(floatValue=value) if isinstance(value, float) else
+                        event_pb2.Frame.Value(stringValue=str(value)) if isinstance(value, type(None)) else
+                        event_pb2.Frame.Value(stringValue=value) if isinstance(value, complex) else
                         event_pb2.Frame.Value(stringValue=value) if isinstance(value, str) else
                         event_pb2.Frame.Value(reference=value[0])
                     )
@@ -160,19 +162,27 @@ def event_message_to_event_protocol(event_message: message.Message):
                 members=[
                     event_pb2.Frame.Heap.Obj.Member(
                         key=event_pb2.Frame.Value(booleanValue=key) if isinstance(key, bool) else
-                        event_pb2.Frame.Value(integerValue=key) if isinstance(key, int) else
+                        event_pb2.Frame.Value(integerValue=key)
+                            if isinstance(key, int) and abs(key) < 9223372036854775808 else
+                        event_pb2.Frame.Value(stringValue=str(key)) if isinstance(key, int) else
                         event_pb2.Frame.Value(floatValue=key) if isinstance(key, float) else
+                        event_pb2.Frame.Value(stringValue=str(key)) if isinstance(key, type(None)) else
+                        event_pb2.Frame.Value(stringValue=key) if isinstance(key, complex) else
                         event_pb2.Frame.Value(stringValue=key) if isinstance(key, str) else
                         event_pb2.Frame.Value(reference=key[0]),
                         value=event_pb2.Frame.Value(booleanValue=value) if isinstance(value, bool) else
-                        event_pb2.Frame.Value(integerValue=value) if isinstance(value, int) else
+                        event_pb2.Frame.Value(integerValue=value)
+                            if isinstance(value, int) and abs(value) < 9223372036854775808 else
+                        event_pb2.Frame.Value(stringValue=str(value)) if isinstance(value, int) else
                         event_pb2.Frame.Value(floatValue=value) if isinstance(value, float) else
+                        event_pb2.Frame.Value(stringValue=str(value)) if isinstance(value, type(None)) else
+                        event_pb2.Frame.Value(stringValue=value) if isinstance(value, complex) else
                         event_pb2.Frame.Value(stringValue=value) if isinstance(value, str) else
                         event_pb2.Frame.Value(reference=value[0])
                     )
                     for key, value in obj['members']
                 ]
-            ))
+            )) #if obj is not None else 
             for reference, obj in event_message.value['heap'].items()
         ]
     elif event_message.name == message.Event.PRINTED:
