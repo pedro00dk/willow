@@ -47,20 +47,24 @@ class Client:
         self._action_queue = None
         self._event_queue = None
 
-    def step(self):
+    def step(self, count: int = 1):
         if not self.is_tracer_running():
             raise AssertionError('tracer stopped')
 
-        self._action_queue.put(message.Message(message.Action.STEP))
         events = []
-        while True:
-            event = self._event_queue.get()
-            events.append(event)
-            if event.name in {message.Event.INSPECTED, message.Event.THREW, message.Event.LOCKED}:
-                break
+        for i in range(count):
+            self._action_queue.put(message.Message(message.Action.STEP))
+            while True:
+                event = self._event_queue.get()
+                events.append(event)
+                if event.name in {message.Event.INSPECTED, message.Event.THREW, message.Event.LOCKED}:
+                    break
 
-        if event.name == message.Event.INSPECTED and event.value['finish'] or event.name == message.Event.THREW:
-            self.stop()
+            if event.name == message.Event.INSPECTED and event.value['finish'] or event.name == message.Event.THREW:
+                self.stop()
+                break
+            elif event.name == message.Event.LOCKED:
+                break
 
         return events
 

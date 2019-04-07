@@ -26,12 +26,16 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
         request = read_input(in_mode)
         if not request.actions[0].HasField('start'):
             raise Exception('unexpected action')
-        main = request.actions[0].start.main
-        code = request.actions[0].start.code
     else:
-        start_data = json.loads(read_input(in_mode, 'start {json(["main", "code"])}:\n'))
+        start_data = json.loads(read_input(in_mode, 'start => ["main", "code"]:\n'))
         main = start_data[0]
         code = start_data[1]
+        request = tracer_pb2.TracerRequest(actions=[
+            tracer_pb2.Action(start=tracer_pb2.Action.Start(main=main, code=code))
+        ])
+    
+    main = request.actions[0].start.main
+    code = request.actions[0].start.code
 
     if not main or len(main.strip()) == 0:
         main = '<script>'
@@ -52,29 +56,45 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
             write_output(out_mode, events)
             if events[-1].name == message.Event.LOCKED:
                 tracer.input(['input'])
-        else:
-            if in_mode == 'proto':
-                request = read_input(in_mode)
-                action = request.actions[0].WhichOneof('action')
-                value = [*request.actions[0].input.lines] if action == 'input' else ''
-            else:
-                action_data = read_input(in_mode, 'action {"stop", "step", "input" json(["line"*])}:\n')
-                split_index = action_data.find(' ')
-                action = action_data[:split_index if split_index != -1 else None]
-                value = action_data[split_index + 1: 0 if split_index == -1 else None]
+            continue
 
+        if in_mode == 'proto':
+            request = read_input(in_mode)
+        else:
+            action_data = read_input(in_mode, 'action => {"stop" | "step count?" | "input ["line"*]?}:\n')
+            split_index = action_data.find(' ')
+            action = action_data[:split_index if split_index != -1 else None]
+            value = action_data[split_index + 1: 0 if split_index == -1 else None]
             if action == 'stop':
-                try:
-                    tracer.stop()
-                except Exception:
-                    pass
+                request = tracer_pb2.TracerRequest(actions=[
+                    tracer_pb2.Action(stop=tracer_pb2.Action.Stop())
+                ])
             elif action == 'step':
-                events = tracer.step()
-                write_output(out_mode, events)
+                request = tracer_pb2.TracerRequest(actions=[
+                    tracer_pb2.Action(step=tracer_pb2.Action.Step(count=int(value) if len(value) > 0 else 1))
+                ])
             elif action == 'input':
-                tracer.input(value if isinstance(value, list) else json.loads(value) if len(value) > 0 else [])
+                request = tracer_pb2.TracerRequest(actions=[
+                    tracer_pb2.Action(
+                        input=tracer_pb2.Action.Input(lines=json.loads(value) if len(value) > 0 else [])
+                    )
+                ])
             else:
                 raise Exception('unexpected action')
+
+        action = request.actions[0].WhichOneof('action')
+        if action == 'stop':
+            try:
+                tracer.stop()
+            except Exception:
+                pass
+        elif action == 'step':
+            events = tracer.step(request.actions[0].step.count)
+            write_output(out_mode, events)
+        elif action == 'input':
+            tracer.input([*request.actions[0].input.lines])
+        else:
+            raise Exception('unexpected action')
 
 
 def read_input(mode: str, prompt: str = ''):
