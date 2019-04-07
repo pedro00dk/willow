@@ -84,10 +84,7 @@ def run(auto: bool, in_mode: str, out_mode: str, test: bool):
 
         action = request.actions[0].WhichOneof('action')
         if action == 'stop':
-            try:
-                tracer.stop()
-            except Exception:
-                pass
+            tracer.stop()
         elif action == 'step':
             events = tracer.step(request.actions[0].step.count)
             write_output(out_mode, events)
