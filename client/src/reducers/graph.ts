@@ -1,7 +1,8 @@
 import { Reducer } from 'redux'
 import * as protocol from '../protobuf/protocol'
+import { AsyncAction } from './Store'
 
-type ScopeNode = {
+export type ScopeNode = {
     id: number
     name: string
     steps: number
@@ -13,54 +14,60 @@ type State = {
     readonly stack: { [id: number]: ScopeNode }
 }
 
-type Action = { type: 'graph/setStack'; payload: { stack: { [id: number]: ScopeNode } } }
+type Action = { type: 'graph/loadStack'; payload: { stack: State['stack'] } }
 
 const initialState: State = {
-    stack: {}
+    stack: undefined
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
-        case 'graph/setStack':
+        case 'graph/loadStack':
             return { ...state, ...action.payload }
     }
     return state
 }
 
-const setStack = (events: protocol.Event[]): Action => {
-    const inspectedEvents = events.filter(event => !!event.inspected)
-    const stack: State['stack'] = { 0: { id: 0, name: '', steps: 0, parentScope: undefined, subScopes: [] } }
-    let scopeNodeRef = stack[0]
-    inspectedEvents.forEach(event => {
-        const scopes = event.inspected.frame.stack.scopes
-        const lastScope = scopes[scopes.length - 1]
-        switch (event.inspected.frame.type) {
-            case protocol.Frame.Type.CALL:
-                const scopeNode: ScopeNode = {
-                    id: 0,
-                    name: lastScope.name,
-                    steps: 0,
-                    parentScope: scopeNodeRef,
-                    subScopes: [0]
+const loadStack = (): AsyncAction => {
+    return async (dispatch, getState) => {
+        const { debug } = getState()
+        const stack: State['stack'] = { 0: { id: 0, name: '', steps: 0, parentScope: undefined, subScopes: [0] } }
+        let scopeNodeRef = stack[0]
+        debug.responses //
+            .flatMap(response => response.events)
+            .filter(event => !!event.inspected)
+            .forEach(event => {
+                const scopes = event.inspected.frame.stack.scopes
+                const lastScope = scopes[scopes.length - 1]
+                switch (event.inspected.frame.type) {
+                    case protocol.Frame.Type.CALL:
+                        const scopeNode: ScopeNode = {
+                            id: 0,
+                            name: lastScope.name,
+                            steps: 0,
+                            parentScope: scopeNodeRef,
+                            subScopes: [0]
+                        }
+                        scopeNodeRef.subScopes.push(scopeNode)
+                        scopeNodeRef = scopeNode
+                        break
+                    case protocol.Frame.Type.LINE:
+                        scopeNodeRef.steps += 1
+                        ;(scopeNodeRef.subScopes[scopeNodeRef.subScopes.length - 1] as number) += 1
+                        break
+                    case protocol.Frame.Type.EXCEPTION:
+                        // TODO
+                        break
+                    case protocol.Frame.Type.RETURN:
+                        scopeNodeRef.subScopes.push(0)
+                        scopeNodeRef.parentScope.steps += scopeNodeRef.steps
+                        scopeNodeRef.parentScope.subScopes.push(0)
+                        scopeNodeRef = scopeNodeRef.parentScope
+                        break
                 }
-                scopeNodeRef.subScopes.push(scopeNode)
-                scopeNodeRef = scopeNode
-                break
-            case protocol.Frame.Type.LINE:
-                scopeNodeRef.steps += 1
-                ;(scopeNodeRef.subScopes[scopeNodeRef.subScopes.length - 1] as number)++
-                break
-            case protocol.Frame.Type.EXCEPTION:
-            // TODO
-                break
-            case protocol.Frame.Type.RETURN:
-                scopeNodeRef.subScopes.push(0)
-                scopeNodeRef = scopeNodeRef.parentScope
-                scopeNodeRef.subScopes.push(0)
-                break
-        }
-    })
-    return { type: 'graph/setStack', payload: { stack } }
+            })
+        dispatch({ type: 'graph/loadStack', payload: { stack } })
+    }
 }
 
-export const actions = { toggle: setStack }
+export const actions = { loadStack }

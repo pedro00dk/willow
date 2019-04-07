@@ -8,6 +8,7 @@ import stepOutImg from '../../public/buttons/stepOut.png'
 import stepOverImg from '../../public/buttons/stepOver.png'
 import stopImg from '../../public/buttons/stop.png'
 import { actions as debugActions } from '../reducers/debug'
+import { actions as graphActions } from '../reducers/graph'
 import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
@@ -124,7 +125,7 @@ async function afterLocked(dispatch: Parameters<AsyncAction>[0]) {
 }
 
 function afterFinish(dispatch: Parameters<AsyncAction>[0]) {
-    //
+    dispatch(graphActions.loadStack())    
     console.log('after finished')
 }
 

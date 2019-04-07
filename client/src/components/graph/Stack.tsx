@@ -1,12 +1,8 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-
-type ScopeNode = {
-    name: string
-    steps: number
-    subScopes: (number | ScopeNode)[]
-}
+import { ScopeNode } from '../../reducers/graph'
+import { useRedux } from '../../reducers/Store'
 
 const callNodeColors = ['khaki', 'greenyellow', 'palegreen', 'aquamarine', 'skyblue', 'mediumpurple', 'pink']
 
@@ -31,25 +27,7 @@ const styles = {
 }
 
 export function Stack() {
-    const scopeNode: ScopeNode = {
-        name: '<script>',
-        steps: 18,
-        subScopes: [
-            4,
-            {
-                name: 'add',
-                steps: 6,
-                subScopes: [
-                    2,
-                    { name: 'test', steps: 4, subScopes: [{ name: 'into', steps: 1, subScopes: [1] }, 1, 1, 1] }
-                ]
-            },
-            2,
-            { name: 'remove', steps: 4, subScopes: [4] },
-            2
-        ]
-    }
-
+    const { graph } = useRedux(state => ({ graph: state.graph }))
     const stackRef = React.useRef<HTMLDivElement>()
     const [computedWidth, setComputedWidth] = React.useState(Infinity)
 
@@ -63,14 +41,17 @@ export function Stack() {
 
     return (
         <div ref={stackRef} className='d-flex flex-row align-items-start flex-nowrap h-100 w-100'>
-            <CallNode node={scopeNode} depth={0} computedWidth={computedWidth} />
+            {graph.stack && (
+                <CallNode node={graph.stack[0].subScopes[1] as ScopeNode} depth={0} computedWidth={computedWidth} />
+            )}
         </div>
     )
 }
 
 function CallNode(props: { node: ScopeNode; depth: number; computedWidth?: number }) {
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
-
+    console.log('here')
+    console.log(props.node)
     return (
         <div className={classes.callNode.container}>
             <div className={classes.callNode.scope} style={styles.callNode.scope(computedWidth, props.depth)}>
