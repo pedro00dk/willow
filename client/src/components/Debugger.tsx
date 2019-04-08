@@ -125,7 +125,8 @@ async function afterLocked(dispatch: Parameters<AsyncAction>[0]) {
 }
 
 function afterFinish(dispatch: Parameters<AsyncAction>[0]) {
-    dispatch(graphActions.loadGraph())    
+    dispatch(graphActions.loadGraph())
+    dispatch(graphActions.setIndex(0))
     console.log('after finished')
 }
 

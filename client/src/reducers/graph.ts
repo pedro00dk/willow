@@ -20,19 +20,28 @@ export function isStackTreeNode(nodeOrLeaf: StackTreeNode | StackTreeLeaf): node
 type State = {
     readonly framesIndices: protocol.IFrame[]
     readonly stackTree: StackTreeNode
+    readonly index: number
 }
 
-type Action = { type: 'graph/loadGraph'; payload: { framesIndices: protocol.IFrame[]; stackTree: StackTreeNode } }
+type Action =
+    | { type: 'graph/loadGraph'; payload: { framesIndices: protocol.IFrame[]; stackTree: StackTreeNode } }
+    | { type: 'graph/setIndex'; payload: { index: number } }
 
 const initialState: State = {
     framesIndices: undefined,
-    stackTree: undefined
+    stackTree: undefined,
+    index: undefined
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'graph/loadGraph':
-            return { ...state, ...action.payload }
+            return { ...initialState, ...action.payload }
+        case 'graph/setIndex':
+            const index = !state.framesIndices
+                ? undefined
+                : Math.min(Math.max(0, action.payload.index), state.framesIndices.length - 1)
+            return { ...state, index }
     }
     return state
 }
@@ -84,4 +93,8 @@ function loadGraph(): AsyncAction {
     }
 }
 
-export const actions = { loadGraph }
+function setIndex(index: number): Action {
+    return { type: 'graph/setIndex', payload: { index } }
+}
+
+export const actions = { loadGraph, setIndex }
