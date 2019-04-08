@@ -4,7 +4,12 @@ import * as React from 'react'
 import { default as ReactSplitPane, Props as ReactSplitPaneProps } from 'react-split-pane'
 
 const classes = {
-    resizer: css({ background: 'black', backgroundClip: 'padding-box', opacity: 0.15 }),
+    resizer: css({
+        background: 'black',
+        backgroundClip: 'padding-box',
+        opacity: 0.15,
+        ':hover': { transition: 'all 0.5s ease' }
+    }),
     resizerHorizontal: css({
         height: 12,
         width: '100%',
@@ -19,7 +24,6 @@ const classes = {
         borderLeft: '4px solid white',
         borderRight: '4px solid white'
     }),
-    resizerHover: css({ ':hover': { transition: 'all 0.5s ease' } }),
     resizerHorizontalHover: css({
         ':hover': { borderTop: '4px solid gray', borderBottom: '4px solid gray', cursor: 'row-resize' }
     }),
@@ -44,7 +48,6 @@ export function SplitPane(props: Props) {
             className={props.className}
             resizerClassName={cn(
                 classes.resizer,
-                props.resizable ? classes.resizerHover : undefined,
                 props.split === 'vertical'
                     ? [classes.resizerVertical, props.resizable ? classes.resizerVerticalHover : undefined]
                     : [classes.resizerHorizontal, props.resizable ? classes.resizerHorizontalHover : undefined]
