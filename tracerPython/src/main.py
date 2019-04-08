@@ -134,7 +134,7 @@ def event_message_to_event_protocol(event_message: message.Message):
         event.started.SetInParent()
     elif event_message.name == message.Event.INSPECTED:
         event.inspected.frame.type = event_pb2.Frame.Type.Value(event_message.value['type'].upper())
-        event.inspected.frame.line = event_message.value['stack'][0]['line']
+        event.inspected.frame.line = event_message.value['stack'][-1]['line']
         event.inspected.frame.finish = event_message.value['finish']
         if event_message.value['exception'] is not None:
             event.inspected.frame.exception.type = event_message.value['exception']['type']
