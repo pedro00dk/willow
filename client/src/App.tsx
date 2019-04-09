@@ -5,6 +5,7 @@ import logo from '../public/logo.svg'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { InputEditor } from './components/editor/InputEditor'
+import { OutputEditor } from './components/editor/OutputEditor'
 import { Graph } from './components/graph/Graph'
 import { SplitPane } from './components/SplitPane'
 
@@ -45,10 +46,20 @@ function Body() {
                     split='horizontal'
                     base='70%'
                     left={50}
-                    right={-50}
+                    right={-100}
                 >
                     <CodeEditor />
-                    <InputEditor />
+                    <SplitPane
+                        className='d-flex position-relative'
+                        resizable
+                        split='horizontal'
+                        base='35%'
+                        left={50}
+                        right={-50}
+                    >
+                        <InputEditor />
+                        <OutputEditor />
+                    </SplitPane>
                 </SplitPane>
                 <Graph />
             </SplitPane>
