@@ -52,13 +52,11 @@ function loadStack(): AsyncAction {
                 const childNode: StackNode = { name: scope.name, steps: 0, children: [startLeaf] }
                 lastChild.children.push(childNode)
                 treeChildrenStack.push(childNode)
-            } else if (frame.type === protocol.Frame.Type.LINE) {
+            } else if (frame.type === protocol.Frame.Type.LINE || frame.type === protocol.Frame.Type.EXCEPTION) {
                 lastChild.steps += 1
                 const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackLeaf
                 lastLeaf.steps += 1
                 lastLeaf.framesIndices.push(i)
-            } else if (frame.type === protocol.Frame.Type.EXCEPTION) {
-                // TODO
             } else if (frame.type === protocol.Frame.Type.RETURN) {
                 const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackLeaf
                 lastLeaf.framesIndices.push(i)
