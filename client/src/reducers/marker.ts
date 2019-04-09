@@ -1,13 +1,9 @@
 import { Reducer } from 'redux'
+import * as protocol from '../protobuf/protocol'
 
 export type MarkerLine = {
     line: number
-    type: MarkerType
-}
-
-export enum MarkerType {
-    HIGHLIGHT,
-    ERROR
+    type: protocol.Frame.Type
 }
 
 type State = MarkerLine[]

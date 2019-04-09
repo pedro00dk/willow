@@ -4,10 +4,9 @@ import * as React from 'react'
 import playImg from '../../public/buttons/play.png'
 import stepImg from '../../public/buttons/stepInto.png'
 import stopImg from '../../public/buttons/stop.png'
-import * as protocol from '../protobuf/protocol'
 import { actions as debugInterfaceActions } from '../reducers/debug/interface'
 import { actions as debugReferenceActions } from '../reducers/debug/reference'
-import { actions as markerActions, MarkerType } from '../reducers/marker'
+import { actions as markerActions } from '../reducers/marker'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
@@ -37,15 +36,7 @@ export function Debugger() {
         dispatch(() => {
             if (debugResponse.steps.length === 0) return
             const debugFrame = debugResponse.steps[debugReference].frame
-            dispatch(
-                markerActions.set([
-                    {
-                        line: debugFrame.line,
-                        type:
-                            debugFrame.type === protocol.Frame.Type.EXCEPTION ? MarkerType.ERROR : MarkerType.HIGHLIGHT
-                    }
-                ])
-            )
+            dispatch(markerActions.set([{ line: debugFrame.line, type: debugFrame.type }]))
         })
     }, [debugReference, debugResponse])
 

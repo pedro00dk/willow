@@ -3,9 +3,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
+import * as protocol from '../../protobuf/protocol'
 import { actions as breakpointActions } from '../../reducers/breakpoint'
 import { actions as codeActions } from '../../reducers/code'
-import { MarkerType } from '../../reducers/marker'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorGutterLayer, EditorMarker, EditorMouseEvent, MemoTextEditor } from './TextEditor'
 
@@ -18,8 +18,10 @@ import 'brace/theme/chrome'
 
 const classes = {
     breakpoint: css({ backgroundColor: colors.error }),
-    [MarkerType.HIGHLIGHT]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
-    [MarkerType.ERROR]: cn('position-absolute', css({ backgroundColor: colors.error }))
+    [protocol.Frame.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Frame.Type.CALL]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Frame.Type.RETURN]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Frame.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
 }
 
 const { Range } = ace.acequire('ace/range') as {

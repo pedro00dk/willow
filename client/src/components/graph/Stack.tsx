@@ -24,10 +24,10 @@ const classes = {
         container: cn(
             'd-flex flex-column w-100',
             css({
-                background: 'radial-gradient(ellipse at top, lightblue 20%, transparent 30%)',
+                background: `radial-gradient(ellipse at top, ${colors.highlight1} 20%, transparent 30%)`,
                 height: '0.7rem',
                 ':hover': {
-                    background: 'radial-gradient(ellipse at top, lightblue 50%, transparent 60%)'
+                    background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)`
                 }
             })
         )
@@ -44,7 +44,9 @@ const styles = {
     },
     leaf: {
         selected: (selected: boolean) =>
-            selected ? { background: 'radial-gradient(ellipse at top, blue 50%, transparent 60%)' } : undefined
+            selected
+                ? { background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)` }
+                : undefined
     }
 }
 
