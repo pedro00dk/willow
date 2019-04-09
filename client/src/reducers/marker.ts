@@ -7,7 +7,6 @@ export type MarkerLine = {
 
 export enum MarkerType {
     HIGHLIGHT,
-    WARNING,
     ERROR
 }
 

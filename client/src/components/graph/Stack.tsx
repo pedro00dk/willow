@@ -1,11 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { colors } from '../../colors'
 import { actions as debugReferenceActions } from '../../reducers/debug/reference'
 import { isStackNode, StackLeaf, StackNode } from '../../reducers/debug/stack'
 import { useDispatch, useRedux } from '../../reducers/Store'
-
-const callNodeColors = ['khaki', 'greenyellow', 'palegreen', 'aquamarine', 'skyblue', 'mediumpurple', 'pink']
 
 const classes = {
     node: {
@@ -38,7 +37,7 @@ const classes = {
 const styles = {
     node: {
         scope: (width: number, depth: number) => ({
-            backgroundColor: callNodeColors[depth % callNodeColors.length],
+            backgroundColor: colors.lightScale[depth % colors.lightScale.length],
             borderWidth: `1px ${width >= 5 ? 1 : 0}px 0px 0px`,
             opacity: width >= 20 ? 1 : width >= 10 ? 0.75 : 0.5
         })

@@ -2,6 +2,7 @@ import * as ace from 'brace'
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { colors } from '../../colors'
 import { actions as breakpointActions } from '../../reducers/breakpoint'
 import { actions as codeActions } from '../../reducers/code'
 import { MarkerType } from '../../reducers/marker'
@@ -16,10 +17,9 @@ import 'brace/mode/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    breakpoint: css({ backgroundColor: 'lightcoral' }),
-    [MarkerType.HIGHLIGHT]: cn('position-absolute', css({ backgroundColor: 'lightblue' })),
-    [MarkerType.WARNING]: cn('position-absolute', css({ backgroundColor: 'lightyellow' })),
-    [MarkerType.ERROR]: cn('position-absolute', css({ backgroundColor: 'lightcoral' }))
+    breakpoint: css({ backgroundColor: colors.error }),
+    [MarkerType.HIGHLIGHT]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [MarkerType.ERROR]: cn('position-absolute', css({ backgroundColor: colors.error }))
 }
 
 const { Range } = ace.acequire('ace/range') as {

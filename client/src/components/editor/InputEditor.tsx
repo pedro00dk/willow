@@ -2,12 +2,13 @@ import * as ace from 'brace'
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { colors } from '../../colors'
 import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, MemoTextEditor } from './TextEditor'
 
 const classes = {
-    readonly: cn('position-absolute', css({ backgroundColor: 'ghostwhite' }))
+    readonly: cn('position-absolute', css({ backgroundColor: colors.highlight1 }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
