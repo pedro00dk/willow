@@ -67,7 +67,11 @@ function Node(props: { node: StackNode; depth: number; computedWidth?: number })
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
     return (
         <div className={classes.node.container}>
-            <div className={classes.node.scope} style={styles.node.scope(computedWidth, props.depth)}>
+            <div
+                className={classes.node.scope}
+                style={styles.node.scope(computedWidth, props.depth)}
+                title={props.node.name}
+            >
                 {computedWidth >= 20 ? props.node.name : '\u200b'}
             </div>
             {computedWidth >= 2 && (
