@@ -35,8 +35,8 @@ export function Debugger() {
 
     React.useEffect(() => {
         dispatch(() => {
-            if (debugResponse.frames.length === 0) return
-            const debugFrame = debugResponse.frames[debugReference]
+            if (debugResponse.steps.length === 0) return
+            const debugFrame = debugResponse.steps[debugReference].frame
             dispatch(
                 markerActions.set([
                     {
@@ -47,7 +47,7 @@ export function Debugger() {
                 ])
             )
         })
-    }, [debugReference, debugResponse.frames])
+    }, [debugReference, debugResponse])
 
     console.log('debugger')
     console.log(debugInterface)
@@ -75,18 +75,18 @@ export function Debugger() {
             />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResponse.frames.length > 0, 90)}
+                style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, 90)}
                 src={stepImg}
                 title='step back'
                 onClick={() => dispatch(debugReferenceActions.set(Math.max(0, debugReference - 1)))}
             />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResponse.frames.length > 0, -90)}
+                style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, -90)}
                 src={stepImg}
                 title='step forward'
                 onClick={() =>
-                    dispatch(debugReferenceActions.set(Math.min(debugReference + 1, debugResponse.frames.length - 1)))
+                    dispatch(debugReferenceActions.set(Math.min(debugReference + 1, debugResponse.steps.length - 1)))
                 }
             />
         </div>

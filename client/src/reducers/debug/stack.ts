@@ -44,7 +44,8 @@ function loadStack(): AsyncAction {
         const { debugResponse } = getState()
         const treeBase: StackNode = { name: '', steps: 0, children: [] }
         const treeChildrenStack = [treeBase]
-        debugResponse.frames.forEach((frame, i) => {
+        debugResponse.steps.forEach((step, i) => {
+            const frame = step.frame
             const scope = frame.stack.scopes[frame.stack.scopes.length - 1]
             const lastChild = treeChildrenStack[treeChildrenStack.length - 1]
             if (frame.type === protocol.Frame.Type.CALL) {

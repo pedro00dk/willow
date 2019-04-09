@@ -3,10 +3,8 @@ import * as protocol from '../../protobuf/protocol'
 
 type State = {
     readonly responses: protocol.ITracerResponse[]
-    readonly frames: protocol.IFrame[]
-    readonly prints: string[]
-    readonly order: (protocol.IFrame | string)[]
-    readonly lines: { [line: number]: { frames: number[]; prints: number[] } }
+    readonly steps: { frame: protocol.IFrame; prints: string[] }[]
+    readonly lines: { [line: number]: number[] }
     readonly locked: protocol.Event.ILocked
     readonly threw: protocol.Event.IThrew
 }
@@ -15,9 +13,7 @@ type Action = { type: 'debug/response/set'; payload: State }
 
 const initialState: State = {
     responses: [],
-    frames: [],
-    prints: [],
-    order: [],
+    steps: [],
     lines: {},
     locked: undefined,
     threw: undefined
@@ -32,35 +28,34 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 }
 
 function set(responses: protocol.ITracerResponse[]): Action {
-    const frames: State['frames'] = []
-    const prints: State['prints'] = []
-    const order: State['order'] = []
+    const steps: State['steps'] = []
     const lines: State['lines'] = []
     let locked: State['locked']
     let threw: State['threw']
-    const cache = { printsStack: [] as string[] }
+    let prints: string[] = []
     responses
         .flatMap(response => response.events)
         .forEach(event => {
             if (!!event.locked) return (locked = event.locked)
             if (!!event.threw) return (threw = event.threw)
-            if (!!event.printed) return cache.printsStack.push(event.printed.value)
+            if (!!event.printed) return prints.push(event.printed.value)
             if (!event.inspected) return
             const frame = event.inspected.frame
-            if (!lines[frame.line]) lines[frame.line] = { frames: [], prints: [] }
-            order.push(...cache.printsStack)
-            order.push(frame)
-            cache.printsStack.forEach(print => lines[frame.line].prints.push(prints.push(print) - 1))
-            cache.printsStack = []
-            lines[frame.line].frames.push(frames.push(frame) - 1)
+            const line = frame.line
+            if (!lines[line]) lines[line] = []
+            const step = { frame, prints }
+            prints = []
+            const index = steps.push(step) - 1
+            lines[line].push(index)
         })
-    if (cache.printsStack.length > 0) {
-        const lastFrame = frames[frames.length - 1]
-        order.push(...cache.printsStack)
-        cache.printsStack.forEach(print => lines[lastFrame.line].prints.push(prints.push(print) - 1))
-        cache.printsStack = []
+    if (prints.length > 0) {
+        const lastStep = steps[steps.length - 1]
+        const line = !!lastStep ? lastStep.frame.line : 0
+        const step = { frame: lastStep.frame, prints }
+        const index = steps.push(step) - 1
+        lines[line].push(index)
     }
-    return { type: 'debug/response/set', payload: { responses, frames, prints, order, lines, locked, threw } }
+    return { type: 'debug/response/set', payload: { responses, steps, lines, locked, threw } }
 }
 
 export const actions = { set }
