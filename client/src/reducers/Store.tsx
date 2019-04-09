@@ -9,7 +9,6 @@ import { reducer as DebugResponseReducer } from './debug/response'
 import { reducer as DebugStackReducer } from './debug/stack'
 import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
-import { reducer as MarkerReducer } from './marker'
 import { reducer as SessionReducer } from './session'
 
 const reducers = {
@@ -21,7 +20,6 @@ const reducers = {
     debugStack: DebugStackReducer,
     input: InputReducer,
     language: LanguageReducer,
-    marker: MarkerReducer,
     session: SessionReducer
 }
 

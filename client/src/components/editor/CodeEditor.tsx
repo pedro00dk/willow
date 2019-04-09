@@ -35,10 +35,11 @@ function syntaxSupport(language: string) {
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoint, language, marker } = useRedux(state => ({
+    const { breakpoint, debugReference, debugResponse, language } = useRedux(state => ({
         breakpoint: state.breakpoint,
-        language: state.language,
-        marker: state.marker
+        debugResponse: state.debugResponse,
+        debugReference: state.debugReference,
+        language: state.language
     }))
 
     React.useEffect(() => {
@@ -80,15 +81,20 @@ export function CodeEditor() {
     }, [breakpoint])
 
     React.useEffect(() => {
-        if (!editor) return
+        if (!editor || debugResponse.steps.length === 0) return
         const aceMarkers = editor.session.getMarkers(false) as EditorMarker[]
         Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
-        marker.forEach(marker =>
-            editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), classes[marker.type], 'fullLine', false)
+
+        const debugFrame = debugResponse.steps[debugReference].frame
+        editor.session.addMarker(
+            new Range(debugFrame.line, 0, debugFrame.line, 1),
+            classes[debugFrame.type],
+            'fullLine',
+            false
         )
-    }, [marker])
+    }, [debugReference, debugResponse])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

@@ -6,7 +6,6 @@ import stepImg from '../../public/buttons/stepInto.png'
 import stopImg from '../../public/buttons/stop.png'
 import { actions as debugInterfaceActions } from '../reducers/debug/interface'
 import { actions as debugReferenceActions } from '../reducers/debug/reference'
-import { actions as markerActions } from '../reducers/marker'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
@@ -31,14 +30,6 @@ export function Debugger() {
         debugResponse: state.debugResponse,
         debugStack: state.debugStack
     }))
-
-    React.useEffect(() => {
-        dispatch(() => {
-            if (debugResponse.steps.length === 0) return
-            const debugFrame = debugResponse.steps[debugReference].frame
-            dispatch(markerActions.set([{ line: debugFrame.line, type: debugFrame.type }]))
-        })
-    }, [debugReference, debugResponse])
 
     console.log('debugger')
     console.log(debugInterface)
