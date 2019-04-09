@@ -2,8 +2,11 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import playImg from '../../public/buttons/play.png'
+import stepImg from '../../public/buttons/stepInto.png'
+import stopImg from '../../public/buttons/stop.png'
 import * as protocol from '../protobuf/protocol'
 import { actions as debugInterfaceActions } from '../reducers/debug/interface'
+import { actions as debugReferenceActions } from '../reducers/debug/reference'
 import { actions as markerActions, MarkerType } from '../reducers/marker'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
@@ -15,7 +18,10 @@ const classes = {
 }
 
 const styles = {
-    image: (available: boolean) => (available ? { cursor: 'pointer' } : { filter: 'grayscale(80%)' })
+    image: (available: boolean, rotation: number = 0) => ({
+        transform: `rotate(${rotation}deg)`,
+        ...(available ? { cursor: 'pointer' } : { filter: 'grayscale(80%)' })
+    })
 }
 
 export function Debugger() {
@@ -59,6 +65,29 @@ export function Debugger() {
                 src={playImg}
                 title={'inspect'}
                 onClick={() => dispatch(debugInterfaceActions.inspect())}
+            />
+            <img
+                className={classes.image}
+                style={styles.image(debugInterface.fetching)}
+                src={stopImg}
+                title='stop'
+                onClick={() => dispatch(debugInterfaceActions.forceStop())}
+            />
+            <img
+                className={classes.image}
+                style={styles.image(!debugInterface.fetching && debugResponse.frames.length > 0, 90)}
+                src={stepImg}
+                title='step back'
+                onClick={() => dispatch(debugReferenceActions.set(Math.max(0, debugReference - 1)))}
+            />
+            <img
+                className={classes.image}
+                style={styles.image(!debugInterface.fetching && debugResponse.frames.length > 0, -90)}
+                src={stepImg}
+                title='step forward'
+                onClick={() =>
+                    dispatch(debugReferenceActions.set(Math.min(debugReference + 1, debugResponse.frames.length - 1)))
+                }
             />
         </div>
     )
