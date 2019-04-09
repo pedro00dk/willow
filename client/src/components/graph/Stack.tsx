@@ -12,7 +12,13 @@ const classes = {
         container: 'd-flex flex-column w-100',
         scope: cn(
             'text-truncate',
-            css({ borderStyle: 'solid', borderColor: 'transparent', backgroundClip: 'padding-box', fontSize: '0.7rem' })
+            css({
+                borderStyle: 'solid',
+                borderColor: 'transparent',
+                backgroundClip: 'padding-box',
+                cursor: 'default',
+                fontSize: '0.7rem'
+            })
         )
     },
     leaf: {
