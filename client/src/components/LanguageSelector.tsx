@@ -12,7 +12,7 @@ const classes = {
 export function LanguageSelector() {
     const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
-    const { debug, language } = useRedux(state => ({ debug: state.debug, language: state.language }))
+    const { debug, language } = useRedux(state => ({ debug: state.debugInterface, language: state.language }))
 
     React.useEffect(() => {
         dispatch(languageActions.fetch())

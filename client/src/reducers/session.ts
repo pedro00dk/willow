@@ -17,6 +17,7 @@ const initialState: State = {
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
+    console.log('action', action)
     switch (action.type) {
         case 'session/fetch':
             if (!!action.payload) return { ...state, fetching: false, session: action.payload.session }

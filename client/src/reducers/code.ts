@@ -1,35 +1,21 @@
 import { Reducer } from 'redux'
 
-type State = {
-    readonly main: string
-    readonly code: string[]
-}
+type State = string[]
 
-type Action =
-    | { type: 'code/setCode'; payload: { code: string[] } }
-    | { type: 'code/setMain'; payload: { main: string } }
+type Action = { type: 'code/set'; payload: string[] }
 
-const initialState: State = {
-    main: undefined,
-    code: []
-}
+const initialState: State = []
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
-        case 'code/setCode':
-            return { ...state, ...action.payload }
-        case 'code/setMain':
-            return { ...state, ...action.payload }
+        case 'code/set':
+            return action.payload
     }
     return state
 }
 
 function set(code: string[]): Action {
-    return { type: 'code/setCode', payload: { code } }
+    return { type: 'code/set', payload: code }
 }
 
-function setMain(main: string): Action {
-    return { type: 'code/setMain', payload: { main } }
-}
-
-export const actions = { set, setMain }
+export const actions = { set }

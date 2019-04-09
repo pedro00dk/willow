@@ -10,29 +10,23 @@ type State = {
 }
 type Action =
     | { type: 'language/fetch'; payload?: { languages: string[] }; error?: string }
-    | { type: 'language/select'; payload: { selected: number } }
+    | { type: 'language/select'; payload: number }
 
 const initialState: State = {
     fetching: false,
     languages: [],
-    selected: undefined,
+    selected: 0,
     error: undefined
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'language/fetch':
-            if (!!action.payload)
-                return {
-                    ...state,
-                    fetching: false,
-                    languages: action.payload.languages,
-                    selected: action.payload.languages.length > 0 ? 0 : undefined
-                }
+            if (!!action.payload) return { ...state, fetching: false, languages: action.payload.languages }
             if (!!action.error) return { ...state, fetching: false, error: action.error }
             return { ...initialState, fetching: true }
         case 'language/select':
-            return { ...state, ...action.payload }
+            return { ...state, selected: action.payload }
     }
     return state
 }
@@ -50,7 +44,7 @@ function fetch(): AsyncAction {
 }
 
 function select(selected: number): Action {
-    return { type: 'language/select', payload: { selected } }
+    return { type: 'language/select', payload: selected }
 }
 
 export const actions = { fetch, select }

@@ -74,8 +74,8 @@ export function CodeEditor() {
         if (!editor) return
         const decorations = (editor.session as any).$decorations as string[]
         decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, classes.breakpoint))
-        breakpoint.lines.forEach(line => editor.session.addGutterDecoration(line, classes.breakpoint))
-    }, [breakpoint.lines])
+        breakpoint.forEach(line => editor.session.addGutterDecoration(line, classes.breakpoint))
+    }, [breakpoint])
 
     React.useEffect(() => {
         if (!editor) return
@@ -83,10 +83,10 @@ export function CodeEditor() {
         Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
-        marker.markers.forEach(marker =>
+        marker.forEach(marker =>
             editor.session.addMarker(new Range(marker.line, 0, marker.line, 1), classes[marker.type], 'fullLine', false)
         )
-    }, [marker.markers])
+    }, [marker])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

@@ -1,8 +1,8 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { actions as graphActions, isStackTreeNode, StackTreeLeaf, StackTreeNode } from '../../reducers/graph'
-import { actions as markerActions, MarkerType } from '../../reducers/marker'
+import { actions as debugReferenceActions } from '../../reducers/debug/reference'
+import { isStackNode, StackLeaf, StackNode } from '../../reducers/debug/stack'
 import { useDispatch, useRedux } from '../../reducers/Store'
 
 const callNodeColors = ['khaki', 'greenyellow', 'palegreen', 'aquamarine', 'skyblue', 'mediumpurple', 'pink']
@@ -44,7 +44,7 @@ const styles = {
 }
 
 export function Stack() {
-    const { graph } = useRedux(state => ({ graph: state.graph }))
+    const { debugStack } = useRedux(state => ({ debugStack: state.debugStack }))
     const stackRef = React.useRef<HTMLDivElement>()
     const [computedWidth, setComputedWidth] = React.useState(Infinity)
 
@@ -56,16 +56,14 @@ export function Stack() {
         return () => clearInterval(interval)
     }, [computedWidth])
 
-    console.log(graph)
-
     return (
         <div ref={stackRef} className='d-flex flex-row align-items-start flex-nowrap h-100 w-100'>
-            {graph.stackTree && <Node node={graph.stackTree} depth={0} computedWidth={computedWidth} />}
+            {!!debugStack.tree && <Node node={debugStack.tree} depth={0} computedWidth={computedWidth} />}
         </div>
     )
 }
 
-function Node(props: { node: StackTreeNode; depth: number; computedWidth?: number }) {
+function Node(props: { node: StackNode; depth: number; computedWidth?: number }) {
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
     return (
         <div className={classes.node.container}>
@@ -80,7 +78,7 @@ function Node(props: { node: StackTreeNode; depth: number; computedWidth?: numbe
                         const childPercentWidth = `${proportion * 100}%`
                         return (
                             <div key={i} style={{ width: childPercentWidth }}>
-                                {isStackTreeNode(child) ? (
+                                {isStackNode(child) ? (
                                     <Node node={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
                                 ) : (
                                     <Leaf leaf={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
@@ -94,20 +92,15 @@ function Node(props: { node: StackTreeNode; depth: number; computedWidth?: numbe
     )
 }
 
-function Leaf(props: { leaf: StackTreeLeaf; depth: number; computedWidth?: number }) {
+function Leaf(props: { leaf: StackLeaf; depth: number; computedWidth?: number }) {
     const dispatch = useDispatch()
-    const { graph } = useRedux(state => ({ graph: state.graph }))
-    const selected = props.leaf.framesIndices.includes(graph.index)
+    const { debugReference } = useRedux(state => ({ debugReference: state.debugReference }))
+    const selected = props.leaf.framesIndices.includes(debugReference)
     return (
         <div
             className={classes.leaf.container}
             style={styles.leaf.selected(selected)}
-            onClick={() => {
-                dispatch(graphActions.setIndex(props.leaf.framesIndices[0]))
-                dispatch(
-                    markerActions.set([{ line: graph.framesIndices[graph.index].line, type: MarkerType.HIGHLIGHT }])
-                )
-            }}
+            onClick={() => dispatch(debugReferenceActions.set(props.leaf.framesIndices[0]))}
         />
     )
 }

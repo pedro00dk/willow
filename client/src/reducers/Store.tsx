@@ -1,20 +1,24 @@
 import * as React from 'react'
 import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
-import { reducer as BreakpointReducer } from './breakpoint'
+import { reducer as BreakpointsReducer } from './breakpoint'
 import { reducer as CodeReducer } from './code'
-import { reducer as DebugReducer } from './debug'
-import { reducer as GraphReducer } from './graph'
+import { reducer as DebugInterfaceReducer } from './debug/interface'
+import { reducer as DebugReferenceReducer } from './debug/reference'
+import { reducer as DebugResponseReducer } from './debug/response'
+import { reducer as DebugStackReducer } from './debug/stack'
 import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
 import { reducer as MarkerReducer } from './marker'
 import { reducer as SessionReducer } from './session'
 
 const reducers = {
-    breakpoint: BreakpointReducer,
+    breakpoint: BreakpointsReducer,
     code: CodeReducer,
-    debug: DebugReducer,
-    graph: GraphReducer,
+    debugInterface: DebugInterfaceReducer,
+    debugReference: DebugReferenceReducer,
+    debugResponse: DebugResponseReducer,
+    debugStack: DebugStackReducer,
     input: InputReducer,
     language: LanguageReducer,
     marker: MarkerReducer,

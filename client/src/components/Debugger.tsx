@@ -2,14 +2,8 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import playImg from '../../public/buttons/play.png'
-import restartImg from '../../public/buttons/restart.png'
-import stepIntoImg from '../../public/buttons/stepInto.png'
-import stepOutImg from '../../public/buttons/stepOut.png'
-import stepOverImg from '../../public/buttons/stepOver.png'
-import stopImg from '../../public/buttons/stop.png'
-import { actions as debugActions } from '../reducers/debug'
-import { actions as graphActions } from '../reducers/graph'
-import { AsyncAction, State, useDispatch, useRedux } from '../reducers/Store'
+import { actions as debugInterfaceActions } from '../reducers/debug/interface'
+import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
 const classes = {
@@ -24,118 +18,30 @@ const styles = {
 
 export function Debugger() {
     const dispatch = useDispatch()
-    const { debug } = useRedux(state => ({ debug: state.debug }))
+    const { debugInterface, debugResponse, debugReference, debugStack } = useRedux(state => ({
+        debugInterface: state.debugInterface,
+        debugReference: state.debugReference,
+        debugResponse: state.debugResponse,
+        debugStack: state.debugStack
+    }))
 
-    console.log(debug)
+    console.log('debugger')
+    console.log(debugInterface)
+    console.log(debugResponse)
+    console.log(debugReference)
+    console.log(debugStack)
+    console.log('-------')
 
-    React.useEffect(() => {
-        if (debug.fetching || debug.responses.length === 0) return
-        const lastResponse = debug.responses[debug.responses.length - 1]
-        const lastEvent = lastResponse.events[lastResponse.events.length - 1]
-
-        if (!!debug.error) afterError(dispatch)
-        else if (debug.stopped) afterStop(dispatch)
-        else if (!!lastEvent.started) afterStart(dispatch)
-        else if (!!lastEvent.threw) afterThrew(dispatch)
-        else if (!!lastEvent.locked) afterLocked(dispatch)
-        else if (!!lastEvent.inspected && lastEvent.inspected.frame.finish) afterFinish(dispatch)
-    }, [debug.error, debug.responses, debug.stopped])
-
-    const availability = getAvailableActions(debug)
     return (
         <div className='d-flex flex-row align-items-center shadow-sm mb-1'>
             <LanguageSelector />
             <img
                 className={classes.image}
-                style={styles.image(availability.start)}
+                style={styles.image(!debugInterface.fetching)}
                 src={playImg}
-                title={!debug.debugging ? 'start' : 'continue'}
-                onClick={() => callStart(dispatch, debug)}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(false)}
-                src={stepOverImg}
-                title='step over'
-                onClick={() => undefined}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(false)}
-                src={stepIntoImg}
-                title='step into'
-                onClick={() => undefined}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(false)}
-                src={stepOutImg}
-                title='step out'
-                onClick={() => undefined}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(availability.stop)}
-                src={restartImg}
-                title='restart'
-                onClick={async () => {
-                    await callStop(dispatch, debug)
-                    await callStart(dispatch, debug)
-                }}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(availability.stop)}
-                src={stopImg}
-                title='stop'
-                onClick={() => callStop(dispatch, debug)}
+                title={'inspect'}
+                onClick={() => dispatch(debugInterfaceActions.inspect())}
             />
         </div>
     )
-}
-
-function getAvailableActions(debug: State['debug']) {
-    return { start: !debug.fetching, step: debug.debugging && !debug.fetching, stop: debug.debugging }
-}
-
-function callStart(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
-    if (!getAvailableActions(debug).start) return
-    dispatch(debugActions.start())
-}
-
-function callStop(dispatch: Parameters<AsyncAction>[0], debug: State['debug']) {
-    if (!getAvailableActions(debug).stop) return
-    dispatch(debugActions.stop())
-}
-
-async function afterStart(dispatch: Parameters<AsyncAction>[0]) {
-    await dispatch(debugActions.input())
-    await dispatch(debugActions.step('continue'))
-    console.log('after start')
-}
-
-function afterThrew(dispatch: Parameters<AsyncAction>[0]) {
-    //
-    console.log('after threw')
-}
-
-async function afterLocked(dispatch: Parameters<AsyncAction>[0]) {
-    await dispatch(debugActions.stop())
-    console.log('after locked')
-}
-
-function afterFinish(dispatch: Parameters<AsyncAction>[0]) {
-    dispatch(graphActions.loadGraph())
-    dispatch(graphActions.setIndex(0))
-    console.log('after finished')
-}
-
-function afterStop(dispatch: Parameters<AsyncAction>[0]) {
-    //
-    console.log('after stop')
-}
-
-function afterError(dispatch: Parameters<AsyncAction>[0]) {
-    //
-    console.log('after error')
 }
