@@ -22,7 +22,7 @@ export function OutputEditor() {
         if (!editor) return
         editor.session.doc.setValue(
             debugResponse.steps
-                .filter((step, i) => i > debugReference)
+                .filter((step, i) => i <= debugReference)
                 .flatMap(step => step.prints)
                 .join('')
         )
