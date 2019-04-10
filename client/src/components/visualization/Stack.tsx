@@ -79,7 +79,7 @@ export function Stack() {
     return (
         <div
             ref={stackRef}
-            className='d-flex flex-row align-items-start flex-nowrap overflow-auto h-25 w-100'
+            className='d-flex flex-row align-items-start flex-nowrap overflow-auto w-100'
             onKeyDown={event => {
                 const currentScopes = debugResponse.steps[debugReference].frame.stack.scopes
                 if (event.key === 'ArrowRight') {
