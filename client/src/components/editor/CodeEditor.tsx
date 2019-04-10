@@ -16,11 +16,20 @@ import 'brace/mode/python'
 import 'brace/mode/text'
 import 'brace/theme/chrome'
 
+import callImg from '../../../public/editor/call.svg'
+import returnImg from '../../../public/editor/return.svg'
+
 const classes = {
     breakpoint: css({ backgroundColor: colors.error }),
     [protocol.Frame.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
-    [protocol.Frame.Type.CALL]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
-    [protocol.Frame.Type.RETURN]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Frame.Type.CALL]: cn(
+        'position-absolute',
+        css({ background: `${colors.highlight1} url(${callImg}) no-repeat right center` })
+    ),
+    [protocol.Frame.Type.RETURN]: cn(
+        'position-absolute',
+        css({ background: `${colors.highlight1} url(${returnImg}) no-repeat right center` })
+    ),
     [protocol.Frame.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
 }
 
