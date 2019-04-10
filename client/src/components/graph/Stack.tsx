@@ -8,7 +8,6 @@ import { useDispatch, useRedux } from '../../reducers/Store'
 
 const classes = {
     node: {
-        container: 'd-flex flex-column w-100',
         scope: {
             nonTerminal: cn(
                 'text-truncate w-100',
@@ -60,7 +59,12 @@ const styles = {
 }
 
 export function Stack() {
-    const { debugStack } = useRedux(state => ({ debugStack: state.debugStack }))
+    const dispatch = useDispatch()
+    const { debugReference, debugResponse, debugStack } = useRedux(state => ({
+        debugReference: state.debugReference,
+        debugResponse: state.debugResponse,
+        debugStack: state.debugStack
+    }))
     const stackRef = React.useRef<HTMLDivElement>()
     const [computedWidth, setComputedWidth] = React.useState(Infinity)
 
@@ -73,21 +77,70 @@ export function Stack() {
     }, [computedWidth])
 
     return (
-        <div ref={stackRef} className='d-flex flex-row align-items-start flex-nowrap h-100 w-100'>
-            {!!debugStack.tree && <Node node={debugStack.tree} depth={0} computedWidth={computedWidth} />}
+        <div
+            ref={stackRef}
+            className='d-flex flex-row align-items-start flex-nowrap h-auto w-100'
+            onKeyDown={event => {
+                const currentScopes = debugResponse.steps[debugReference].frame.stack.scopes
+                if (event.key === 'ArrowRight') {
+                    const siblingOrRelativeIndices = debugResponse.steps
+                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                        .filter(({ scopes, index }) => index > debugReference)
+                    dispatch(
+                        debugReferenceActions.set(
+                            siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
+                        )
+                    )
+                } else if (event.key === 'ArrowLeft') {
+                    const siblingOrRelativeIndices = debugResponse.steps
+                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                        .filter(({ scopes, index }) => index < debugReference)
+                    dispatch(
+                        debugReferenceActions.set(
+                            siblingOrRelativeIndices.length > 0
+                                ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
+                                : debugReference
+                        )
+                    )
+                } else if (event.key === 'ArrowUp') {
+                    const siblingOrRelativeIndices = debugResponse.steps
+                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                        .filter(({ scopes, index }) => index < debugReference && scopes.length <= currentScopes.length)
+                    dispatch(
+                        debugReferenceActions.set(
+                            siblingOrRelativeIndices.length > 0
+                                ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
+                                : debugReference
+                        )
+                    )
+                } else if (event.key === 'ArrowDown') {
+                    const siblingOrRelativeIndices = debugResponse.steps
+                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                        .filter(({ scopes, index }) => index > debugReference && scopes.length <= currentScopes.length)
+                    dispatch(
+                        debugReferenceActions.set(
+                            siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
+                        )
+                    )
+                }
+            }}
+            tabIndex={0}
+        >
+            {!!debugStack.tree && (
+                <Node node={debugStack.tree} reference={debugReference} depth={0} computedWidth={computedWidth} />
+            )}
         </div>
     )
 }
 
-function Node(props: { node: StackNode; depth: number; computedWidth?: number }) {
+function Node(props: { node: StackNode; reference: number; depth: number; computedWidth?: number }) {
     const dispatch = useDispatch()
-    const { debugReference } = useRedux(state => ({ debugReference: state.debugReference }))
-    const selected = debugReference >= props.node.steps.from && debugReference <= props.node.steps.to
+    const selected = props.reference >= props.node.steps.from && props.reference <= props.node.steps.to
     const terminal = props.node.children.length === 0
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
 
     return (
-        <div className={classes.node.container}>
+        <div className='d-flex flex-column w-100'>
             {props.node.steps.from != undefined && (
                 <div
                     className={terminal ? classes.node.scope.terminal : classes.node.scope.nonTerminal}
@@ -107,7 +160,12 @@ function Node(props: { node: StackNode; depth: number; computedWidth?: number })
                         const childPercentWidth = `${proportion * 100}%`
                         return (
                             <div key={i} style={{ width: childPercentWidth }}>
-                                <Node node={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
+                                <Node
+                                    node={child}
+                                    reference={props.reference}
+                                    depth={props.depth + 1}
+                                    computedWidth={childComputedWidth}
+                                />
                             </div>
                         )
                     })}
