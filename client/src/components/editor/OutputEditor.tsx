@@ -20,7 +20,7 @@ export function OutputEditor() {
     }, [editor])
 
     React.useEffect(() => {
-        if (!editor && !!debugResponse.steps) return
+        if (!editor) return
         const currentStep = debugResponse.steps[debugReference]
         const previousStep = debugResponse.steps[debugReference - 1]
         const exceptionTraceback =
@@ -30,12 +30,13 @@ export function OutputEditor() {
             previousStep.frame.type === protocol.Frame.Type.EXCEPTION
                 ? previousStep.frame.exception.traceback.join('')
                 : ''
+        const lockedMessage = !!debugResponse.locked ? `Program locked, cause: ${debugResponse.locked.cause}` : ''
         const threwTraceback = !!debugResponse.threw ? debugResponse.threw.exception.traceback.join('') : ''
         editor.session.doc.setValue(
             `${debugResponse.steps
                 .filter((step, i) => i <= debugReference)
                 .flatMap(step => step.prints)
-                .join('')}${exceptionTraceback}${threwTraceback}
+                .join('')}${exceptionTraceback}${lockedMessage}${threwTraceback}
             `
         )
     }, [debugReference, debugResponse])
