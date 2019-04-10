@@ -6,8 +6,8 @@ import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { InputEditor } from './components/editor/InputEditor'
 import { OutputEditor } from './components/editor/OutputEditor'
-import { Graph } from './components/graph/Graph'
 import { SplitPane } from './components/SplitPane'
+import { Visualization } from './components/visualization/Visualization'
 
 const styles = {
     navbarLogo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
@@ -61,7 +61,7 @@ function Body() {
                         <OutputEditor />
                     </SplitPane>
                 </SplitPane>
-                <Graph />
+                <Visualization />
             </SplitPane>
         </div>
     )
