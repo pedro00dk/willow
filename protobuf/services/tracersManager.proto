@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "tracer.proto";
+
+/*
+The specification for a tracer manager service.
+Tracers managers stores the informations of available tracers and its languages
+and create/execute new tracers.
+*/
+service Tracers {
+  rpc languages(Empty) returns (Languages);
+  rpc trace(Trace) returns (Result);
+}
+
+message Empty {}
+
+message Languages { repeated string languages = 1; }
