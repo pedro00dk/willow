@@ -79,49 +79,57 @@ export function Stack() {
     return (
         <div
             ref={stackRef}
-            className='d-flex flex-row align-items-start flex-nowrap h-auto w-100'
+            className='d-flex flex-row align-items-start flex-nowrap overflow-auto h-25 w-100'
             onKeyDown={event => {
                 const currentScopes = debugResponse.steps[debugReference].frame.stack.scopes
                 if (event.key === 'ArrowRight') {
-                    const siblingOrRelativeIndices = debugResponse.steps
-                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                        .filter(({ scopes, index }) => index > debugReference)
-                    dispatch(
-                        debugReferenceActions.set(
-                            siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
+                    if (!event.ctrlKey) {
+                        const siblingOrRelativeIndices = debugResponse.steps
+                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                            .filter(({ scopes, index }) => index > debugReference)
+                        dispatch(
+                            debugReferenceActions.set(
+                                siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
+                            )
                         )
-                    )
+                    } else {
+                        const siblingOrRelativeIndices = debugResponse.steps
+                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                            .filter(
+                                ({ scopes, index }) => index > debugReference && scopes.length <= currentScopes.length
+                            )
+                        dispatch(
+                            debugReferenceActions.set(
+                                siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
+                            )
+                        )
+                    }
                 } else if (event.key === 'ArrowLeft') {
-                    const siblingOrRelativeIndices = debugResponse.steps
-                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                        .filter(({ scopes, index }) => index < debugReference)
-                    dispatch(
-                        debugReferenceActions.set(
-                            siblingOrRelativeIndices.length > 0
-                                ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
-                                : debugReference
+                    if (!event.ctrlKey) {
+                        const siblingOrRelativeIndices = debugResponse.steps
+                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                            .filter(({ scopes, index }) => index < debugReference)
+                        dispatch(
+                            debugReferenceActions.set(
+                                siblingOrRelativeIndices.length > 0
+                                    ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
+                                    : debugReference
+                            )
                         )
-                    )
-                } else if (event.key === 'ArrowUp') {
-                    const siblingOrRelativeIndices = debugResponse.steps
-                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                        .filter(({ scopes, index }) => index < debugReference && scopes.length <= currentScopes.length)
-                    dispatch(
-                        debugReferenceActions.set(
-                            siblingOrRelativeIndices.length > 0
-                                ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
-                                : debugReference
+                    } else {
+                        const siblingOrRelativeIndices = debugResponse.steps
+                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
+                            .filter(
+                                ({ scopes, index }) => index < debugReference && scopes.length <= currentScopes.length
+                            )
+                        dispatch(
+                            debugReferenceActions.set(
+                                siblingOrRelativeIndices.length > 0
+                                    ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
+                                    : debugReference
+                            )
                         )
-                    )
-                } else if (event.key === 'ArrowDown') {
-                    const siblingOrRelativeIndices = debugResponse.steps
-                        .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                        .filter(({ scopes, index }) => index > debugReference && scopes.length <= currentScopes.length)
-                    dispatch(
-                        debugReferenceActions.set(
-                            siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
-                        )
-                    )
+                    }
                 }
             }}
             tabIndex={0}
