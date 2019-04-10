@@ -20,20 +20,23 @@ export function OutputEditor() {
     }, [editor])
 
     React.useEffect(() => {
-        if (!editor) return
+        if (!editor && !!debugResponse.steps) return
         const currentStep = debugResponse.steps[debugReference]
         const previousStep = debugResponse.steps[debugReference - 1]
-        const exceptionTraceback = currentStep.frame.finish && !!previousStep && previousStep.frame.type === protocol.Frame.Type.EXCEPTION ?
-        previousStep.frame.exception.traceback.join('')
-        : ''
+        const exceptionTraceback =
+            !!currentStep &&
+            currentStep.frame.finish &&
+            !!previousStep &&
+            previousStep.frame.type === protocol.Frame.Type.EXCEPTION
+                ? previousStep.frame.exception.traceback.join('')
+                : ''
+        const threwTraceback = !!debugResponse.threw ? debugResponse.threw.exception.traceback.join('') : ''
         editor.session.doc.setValue(
             `${debugResponse.steps
                 .filter((step, i) => i <= debugReference)
                 .flatMap(step => step.prints)
-                .join('')
-            }${exceptionTraceback}
+                .join('')}${exceptionTraceback}${threwTraceback}
             `
-                
         )
     }, [debugReference, debugResponse])
 
