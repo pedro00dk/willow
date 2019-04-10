@@ -3,50 +3,59 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
 import { actions as debugReferenceActions } from '../../reducers/debug/reference'
-import { isStackNode, StackLeaf, StackNode } from '../../reducers/debug/stack'
+import { StackNode } from '../../reducers/debug/stack'
 import { useDispatch, useRedux } from '../../reducers/Store'
 
 const classes = {
     node: {
         container: 'd-flex flex-column w-100',
-        scope: cn(
-            'text-truncate',
-            css({
-                borderStyle: 'solid',
-                borderColor: 'transparent',
-                backgroundClip: 'padding-box',
-                cursor: 'default',
-                fontSize: '0.7rem'
-            })
-        )
-    },
-    leaf: {
-        container: cn(
-            'd-flex flex-column w-100',
-            css({
-                background: `radial-gradient(ellipse at top, ${colors.highlight1} 20%, transparent 30%)`,
-                height: '0.7rem',
-                ':hover': {
-                    background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)`
-                }
-            })
-        )
+        scope: {
+            nonTerminal: cn(
+                'text-truncate w-100',
+                css({
+                    borderStyle: 'solid',
+                    borderColor: 'transparent',
+                    backgroundClip: 'padding-box',
+                    cursor: 'default',
+                    fontSize: '0.7rem',
+                    opacity: 0.7,
+                    ':hover': {
+                        borderColor: `${colors.grayScale[3]} !important`
+                    }
+                })
+            ),
+            terminal: cn(
+                'text-truncate',
+                css({
+                    borderStyle: 'solid',
+                    borderColor: 'transparent',
+                    backgroundClip: 'content-box !important',
+                    cursor: 'default',
+                    fontSize: '0.7rem',
+                    background: `radial-gradient(ellipse at top, ${colors.highlight1} 20%, transparent 30%)`,
+                    ':hover': {
+                        background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)`
+                    }
+                })
+            )
+        }
     }
 }
 
 const styles = {
     node: {
-        scope: (width: number, depth: number) => ({
-            backgroundColor: colors.lightScale[depth % colors.lightScale.length],
-            borderWidth: `1px ${width >= 5 ? 1 : 0}px 0px 0px`,
+        scope: (terminal: boolean, selected: boolean, width: number, depth: number) => ({
+            ...(terminal
+                ? { background: `radial-gradient(ellipse at top, ${colors.highlight1} 20%, transparent 30%)` }
+                : { backgroundColor: colors.lightScale[depth % colors.lightScale.length], opacity: '0.75' }),
+            ...(selected
+                ? terminal
+                    ? { background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)` }
+                    : { borderColor: colors.grayScale[1] }
+                : undefined),
+            borderWidth: 0.5,
             opacity: width >= 20 ? 1 : width >= 10 ? 0.75 : 0.5
         })
-    },
-    leaf: {
-        selected: (selected: boolean) =>
-            selected
-                ? { background: `radial-gradient(ellipse at top, ${colors.highlight0} 50%, transparent 60%)` }
-                : undefined
     }
 }
 
@@ -71,47 +80,39 @@ export function Stack() {
 }
 
 function Node(props: { node: StackNode; depth: number; computedWidth?: number }) {
+    const dispatch = useDispatch()
+    const { debugReference } = useRedux(state => ({ debugReference: state.debugReference }))
+    const selected = debugReference >= props.node.steps.from && debugReference <= props.node.steps.to
+    const terminal = props.node.children.length === 0
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
+
     return (
         <div className={classes.node.container}>
-            <div
-                className={classes.node.scope}
-                style={styles.node.scope(computedWidth, props.depth)}
-                title={props.node.name}
-            >
-                {computedWidth >= 20 ? props.node.name : '\u200b'}
-            </div>
-            {computedWidth >= 2 && (
+            {props.node.steps.from != undefined && (
+                <div
+                    className={terminal ? classes.node.scope.terminal : classes.node.scope.nonTerminal}
+                    style={styles.node.scope(terminal, selected, computedWidth, props.depth)}
+                    title={props.node.name}
+                    onClick={() => dispatch(debugReferenceActions.set(props.node.steps.from))}
+                >
+                    {!terminal && computedWidth >= 20 ? props.node.name : '\u200b'}
+                </div>
+            )}
+            {!terminal && computedWidth >= 4 && (
                 <div className='d-flex flex-row'>
                     {props.node.children.map((child, i) => {
-                        const proportion = child.steps / props.node.steps
+                        const proportion =
+                            (child.steps.to - child.steps.from + 1) / (props.node.steps.to - props.node.steps.from + 1)
                         const childComputedWidth = proportion * computedWidth
                         const childPercentWidth = `${proportion * 100}%`
                         return (
                             <div key={i} style={{ width: childPercentWidth }}>
-                                {isStackNode(child) ? (
-                                    <Node node={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
-                                ) : (
-                                    <Leaf leaf={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
-                                )}
+                                <Node node={child} depth={props.depth + 1} computedWidth={childComputedWidth} />
                             </div>
                         )
                     })}
                 </div>
             )}
         </div>
-    )
-}
-
-function Leaf(props: { leaf: StackLeaf; depth: number; computedWidth?: number }) {
-    const dispatch = useDispatch()
-    const { debugReference } = useRedux(state => ({ debugReference: state.debugReference }))
-    const selected = props.leaf.framesIndices.includes(debugReference)
-    return (
-        <div
-            className={classes.leaf.container}
-            style={styles.leaf.selected(selected)}
-            onClick={() => dispatch(debugReferenceActions.set(props.leaf.framesIndices[0]))}
-        />
     )
 }

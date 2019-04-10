@@ -3,5 +3,6 @@ export const colors = {
     highlight1: 'lightcyan',
     warning: 'lightyellow',
     error: 'lightcoral',
-    lightScale: ['lemonchiffon', 'greenyellow', 'palegreen', 'aquamarine', 'lightskyblue', 'plum', 'lightpink']
+    lightScale: ['lemonchiffon', 'greenyellow', 'palegreen', 'aquamarine', 'lightskyblue', 'plum', 'lightpink'],
+    grayScale: ['lightgrey', 'silver', 'darkgray', 'gray', 'dimgray']
 }

@@ -4,21 +4,8 @@ import { AsyncAction } from '../Store'
 
 export type StackNode = {
     name: string
-    steps: number
-    children: (StackNode | StackLeaf)[]
-}
-
-export type StackLeaf = {
-    steps: number
-    framesIndices: number[]
-}
-
-export function isStackNode(nodeOrLeaf: StackNode | StackLeaf): nodeOrLeaf is StackNode {
-    return (nodeOrLeaf as StackNode).name != undefined
-}
-
-export function isStackLeaf(nodeOrLeaf: StackNode | StackLeaf): nodeOrLeaf is StackLeaf {
-    return !!(nodeOrLeaf as StackLeaf).framesIndices
+    steps: { from: number; to: number }
+    children: StackNode[]
 }
 
 type State = {
@@ -42,29 +29,35 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 function loadStack(): AsyncAction {
     return async (dispatch, getState) => {
         const { debugResponse } = getState()
-        const treeBase: StackNode = { name: '', steps: 0, children: [] }
+        const treeBase: StackNode = { name: '', steps: { from: 0, to: 0 }, children: [] }
         const treeChildrenStack = [treeBase]
         debugResponse.steps.forEach((step, i) => {
             const frame = step.frame
             const scope = frame.stack.scopes[frame.stack.scopes.length - 1]
-            const lastChild = treeChildrenStack[treeChildrenStack.length - 1]
+            const lastNonTerminalChild = treeChildrenStack[treeChildrenStack.length - 1]
+
             if (frame.type === protocol.Frame.Type.CALL) {
-                const startLeaf: StackLeaf = { steps: 0, framesIndices: [i] }
-                const childNode: StackNode = { name: scope.name, steps: 0, children: [startLeaf] }
-                lastChild.children.push(childNode)
-                treeChildrenStack.push(childNode)
+                const callNode: StackNode = { name: scope.name, steps: { from: i, to: i }, children: [] }
+                const terminalNode: StackNode = { name: undefined, steps: { from: i, to: i }, children: [] }
+                callNode.children.push(terminalNode)
+                lastNonTerminalChild.children.push(callNode)
+                treeChildrenStack.push(callNode)
             } else if (frame.type === protocol.Frame.Type.LINE || frame.type === protocol.Frame.Type.EXCEPTION) {
-                lastChild.steps += 1
-                const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackLeaf
-                lastLeaf.steps += 1
-                lastLeaf.framesIndices.push(i)
+                const terminalNode = lastNonTerminalChild.children[lastNonTerminalChild.children.length - 1]
+                if (terminalNode.steps.from == undefined) terminalNode.steps.from = i
+                terminalNode.steps.to = i
             } else if (frame.type === protocol.Frame.Type.RETURN) {
-                const lastLeaf = lastChild.children[lastChild.children.length - 1] as StackLeaf
-                lastLeaf.framesIndices.push(i)
-                const lastChildParent = treeChildrenStack[treeChildrenStack.length - 2]
-                lastChildParent.steps += lastChild.steps
-                const newParentLeaf: StackLeaf = { steps: 0, framesIndices: [] }
-                lastChildParent.children.push(newParentLeaf)
+                const terminalNode = lastNonTerminalChild.children[lastNonTerminalChild.children.length - 1]
+                if (terminalNode.steps.from == undefined) terminalNode.steps.from = i
+                terminalNode.steps.to = i
+                lastNonTerminalChild.steps.to = i
+                const previousNonTerminalChild = treeChildrenStack[treeChildrenStack.length - 2]
+                const previousTerminalNode: StackNode = {
+                    name: undefined,
+                    steps: { from: undefined, to: undefined },
+                    children: []
+                }
+                previousNonTerminalChild.children.push(previousTerminalNode)
                 treeChildrenStack.pop()
             }
         })
