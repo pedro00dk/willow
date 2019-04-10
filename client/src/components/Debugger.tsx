@@ -60,16 +60,14 @@ export function Debugger() {
                 style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, 90)}
                 src={stepImg}
                 title='step back'
-                onClick={() => dispatch(debugReferenceActions.set(Math.max(0, debugReference - 1)))}
+                onClick={() => dispatch(debugReferenceActions.set(debugReference - 1))}
             />
             <img
                 className={classes.image}
                 style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, -90)}
                 src={stepImg}
                 title='step forward'
-                onClick={() =>
-                    dispatch(debugReferenceActions.set(Math.min(debugReference + 1, debugResponse.steps.length - 1)))
-                }
+                onClick={() => dispatch(debugReferenceActions.set(debugReference + 1))}
             />
         </div>
     )

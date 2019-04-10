@@ -1,4 +1,5 @@
 import { Reducer } from 'redux'
+import { AsyncAction } from '../Store'
 
 type State = number
 
@@ -14,8 +15,11 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-function set(index: number): Action {
-    return { type: 'debug/reference/set', payload: index }
+function set(index: number): AsyncAction {
+    return async (dispatch, getState) => {
+        const { debugResponse } = getState()
+        dispatch({ type: 'debug/reference/set', payload: Math.max(0, Math.min(index, debugResponse.steps.length - 1)) })
+    }
 }
 
 export const actions = { set }
