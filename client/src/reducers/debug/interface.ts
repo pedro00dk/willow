@@ -2,6 +2,7 @@ import { Reducer } from 'redux'
 import * as protocol from '../../protobuf/protocol'
 import { serverApi } from '../../server'
 import { AsyncAction } from '../Store'
+import { actions as debugHeapActions } from './heap'
 import { actions as debugReferenceActions } from './reference'
 import { actions as debugResponseActions } from './response'
 import { actions as debugStackActions } from './stack'
@@ -64,6 +65,7 @@ function inspect(): AsyncAction {
             dispatch({ type: 'debug/interface/inspect', payload: { finished } })
             dispatch(debugResponseActions.set(responses))
             dispatch(debugReferenceActions.set(0))
+            dispatch(debugHeapActions.loadGraph())
             dispatch(debugStackActions.loadStack())
         } catch (error) {
             dispatch({

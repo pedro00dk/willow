@@ -3,6 +3,7 @@ import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as BreakpointsReducer } from './breakpoint'
 import { reducer as CodeReducer } from './code'
+import { reducer as DebugHeapReducer } from './debug/heap'
 import { reducer as DebugInterfaceReducer } from './debug/interface'
 import { reducer as DebugReferenceReducer } from './debug/reference'
 import { reducer as DebugResponseReducer } from './debug/response'
@@ -14,6 +15,7 @@ import { reducer as SessionReducer } from './session'
 const reducers = {
     breakpoint: BreakpointsReducer,
     code: CodeReducer,
+    debugHeap: DebugHeapReducer,
     debugInterface: DebugInterfaceReducer,
     debugReference: DebugReferenceReducer,
     debugResponse: DebugResponseReducer,
