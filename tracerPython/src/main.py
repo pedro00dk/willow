@@ -28,7 +28,7 @@ def main():
         )
 
     t = tracer.Tracer(trace)
-    result = t.trace()
+    result = t.run()
 
     if arguments.out_mode == 'proto':
         serialized = result.SerializeToString()

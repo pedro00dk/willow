@@ -1,28 +1,10 @@
 command=$1
 
 case $command in
-    setup)
-        python -m venv .venv
-        ;;
-    activate)
-        . ./.venv/bin/activate
-        ;;
-    install)
-        shift
-        if [ "$#" -eq '0' ]
-        then
-            ./.venv/bin/pip install --requirement ./requirements.txt
-        else
-            packages="$@"
-            ./.venv/bin/pip install "$packages"
-            for package in $packages
-            do
-                if [ -z $(grep $package ./requirements.txt) ]
-                then
-                    echo $package >> ./requirements.txt
-                fi
-            done
-        fi
+    build)
+        rm -r ./.venv
+        python -m venv ./.venv
+        ./.venv/bin/pip install -r ./requirements.txt
         ;;
     protobuf)
         mkdir -p ./src/protobuf && protoc --python_out=./src/protobuf --proto_path=../protobuf/ ../protobuf/*.proto

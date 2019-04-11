@@ -26,7 +26,7 @@ class Tracer:
         self._exec_call_frame = None  # base frame (exec function call)
         self._print_cache = []
 
-    def trace(self):
+    def run(self):
         globals = scope.sandbox_globals(self._filename)
         globals['__builtins__']['input'] = HookedInput(self._input_hook)
         globals['__builtins__']['print'] = HookedPrint(self._print_hook)
