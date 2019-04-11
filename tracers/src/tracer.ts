@@ -1,50 +1,30 @@
 import * as cp from 'child_process'
+import * as log from 'npmlog'
 import * as protobuf from 'protobufjs'
 import * as rx from 'rxjs'
 import * as rxOps from 'rxjs/operators'
+import * as protocol from './protobuf/protocol'
 
 /**
- * Creates and connects to a process providing easy access to observable buffers. The consumed process stream must
- * generate length delimiters using var_int32 encoding. The generated buffers will always contain an entire data
- * section.
+ * Spawns and connects to a tracer process.
  */
-export class ProtoProcess {
-    private stdin$_: rx.Subject<protobuf.Writer>
-    private stdout$_: rx.Observable<protobuf.Reader>
-    private stderr$_: rx.Observable<string>
+export class Tracer {
+    constructor(
+        private readonly command: string,
+        private readonly shell: string,
+        private readonly trace: protocol.Trace
+    ) {}
 
-    get stdin$() {
-        return this.stdin$_
-    }
-    get stdout$() {
-        return this.stdout$_
-    }
-    get stderr$() {
-        return this.stderr$_
-    }
-
-    constructor(private readonly command: string) {}
-
-    isRunning() {
-        return this.stdin$ && !this.stdin$.closed
-    }
-
-    spawnProcess() {
-        if (this.isRunning()) throw new Error('process running')
-        const instance = cp.spawn(this.command, { shell: '/bin/sh' })
+    async run() {
+        log.info(Tracer.name, 'run')
+        const tracer = cp.spawn(this.command, { shell: this.shell })
         const stop$ = rx //
-            .merge(rx.fromEvent(instance, 'error'), rx.fromEvent(instance, 'exit'))
+            .merge(rx.fromEvent(tracer, 'error'), rx.fromEvent(tracer, 'exit'))
             .pipe(rxOps.take(1))
-        this.stdin$_ = new rx.Subject()
-        this.stdin$_ //
+
+        const stdout$ = rx
+            .fromEvent<Buffer>(tracer.stdout, 'data')
             .pipe(rxOps.takeUntil(stop$))
-            .subscribe(
-                next => instance.stdin.write(next.finish()),
-                error => (!instance.killed ? instance.kill() : undefined),
-                () => (!instance.killed ? instance.kill() : undefined)
-            )
-        this.stdout$_ = rx //
-            .fromEvent<Buffer>(instance.stdout, 'data')
             .pipe(
                 rxOps.map(buffer => new protobuf.Reader(buffer)),
                 rxOps.scan<protobuf.Reader>(
@@ -70,13 +50,34 @@ export class ProtoProcess {
                 rxOps.map(
                     buffers => new protobuf.Reader(Buffer.concat(buffers.slice(0, -1).map(buffer => buffer.buf)))
                 ),
-                rxOps.takeUntil(stop$)
+                rxOps.map(reader => protocol.Result.decode(reader, reader.fixed32()))
             )
-        this.stderr$_ = rx //
-            .fromEvent<Buffer>(instance.stderr, 'data')
+
+        const stderr$ = rx
+            .fromEvent<Buffer>(tracer.stderr, 'data')
+            .pipe(rxOps.takeUntil(stop$))
             .pipe(
                 rxOps.map(buffer => buffer.toString('utf8')),
-                rxOps.takeUntil(stop$)
+                rxOps.map(text => `tracer process stderr:\n${text}`)
             )
+
+        const result$ = rx.merge(stdout$, stderr$)
+        const resultPromise = result$.pipe(rxOps.take(1)).toPromise()
+
+        const traceWriter = protocol.Trace.encode(this.trace)
+        const lengthWriter = protobuf.Writer.create().fixed32(traceWriter.len)
+        tracer.stdin.write(lengthWriter.finish())
+        tracer.stdin.write(traceWriter.finish())
+
+        const result = await resultPromise
+
+        if (!tracer.killed) tracer.kill()
+
+        if (typeof result === 'string') {
+            log.info(Tracer.name, 'run', 'raised', result)
+            throw new Error(result)
+        }
+        log.info(Tracer.name, 'run', 'done')
+        return result
     }
 }

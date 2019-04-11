@@ -4,20 +4,18 @@ import { Server } from './server'
 
 function main() {
     const parser = yargs //
-        .usage('Http API for CLI tracers') // not being used as usage, but description
+        .usage('Http API for CLI tracers')
         .alias('h', 'help')
         .hide('version')
-        .option('mode', { default: 'proto', choices: ['json', 'proto'], description: 'The server mode' })
         .option('port', { default: 8000, description: 'Set the server port' })
         .option('tracer', { array: true, description: 'Tracer <language> <command>', nargs: 2, string: true })
-    const argumentS = parser.argv
-    const port = argumentS.port
-    const mode = argumentS.mode as 'json' | 'proto'
-    const tracers = [...Array(argumentS.tracer ? argumentS.tracer.length / 2 : 0)] //
-        .map((_, i) => [argumentS.tracer[i * 2], argumentS.tracer[i * 2 + 1]] as [string, string])
+    const arguments_ = parser.argv
+    const port = arguments_.port
+    const tracers = [...Array(arguments_.tracer ? arguments_.tracer.length / 2 : 0)] //
+        .map((_, i) => [arguments_.tracer[i * 2], arguments_.tracer[i * 2 + 1]] as [string, string])
         .reduce((acc, [language, command]) => ({ ...acc, [language]: command }), {} as { [language: string]: string })
     log.info(main.name, 'cli', { port, tracers })
-    new Server(port, mode, tracers).listen()
+    new Server(port, tracers).listen()
 }
 
 if (!module.parent) main()
