@@ -57,7 +57,7 @@ class Tracer:
             self._result.steps.add().threw.cause = 'not enough input'
             raise UserWarning()
 
-        step = self._result.steps.add(
+        self._result.steps.add(
             snapshot=self._inspector.inspect(frame, event, args, self._exec_call_frame),
             prints=self._print_cache
         )
