@@ -37,7 +37,7 @@ message Snapshot {
   bool finish = 2;
   Exception exception = 3;
   repeated Scope stack = 4;
-  map<string, Object> heap = 5;
+  map<string, Obj> heap = 5;
 }
 
 /*
@@ -83,12 +83,12 @@ message Value {
 }
 
 /*
-Every object must have its generic type, a languge type, if its type was defined
+Every Obj must have its generic type, a languge type, if its type was defined
 in the traced program and a list of members.
-Object members may have values with references to another objects that must also
+Obj members may have values with references to another objects that must also
 be in the heap.
 */
-message Object {
+message Obj {
   /*
   Types of heap objects.
   */
@@ -103,7 +103,7 @@ message Object {
     OTHER = 7;
   }
 
-  Object.Type type = 1;
+  Obj.Type type = 1;
   string languageType = 2;
   bool userDefined = 3;
   repeated Member members = 4;
