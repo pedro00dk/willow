@@ -9,9 +9,14 @@ and create/execute new tracers.
 */
 service Tracers {
   rpc languages(Empty) returns (Languages);
-  rpc trace(Trace) returns (Result);
+  rpc trace(TraceRequest) returns (Result);
 }
 
 message Empty {}
 
 message Languages { repeated string languages = 1; }
+
+message TraceRequest {
+  Trace trace = 1;
+  string language = 2;
+}
