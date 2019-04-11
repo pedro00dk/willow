@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0esnapshot.proto\"J\n\x04Step\x12\x1b\n\x08snapshot\x18\x01 \x01(\x0b\x32\t.Snapshot\x12\x15\n\x05threw\x18\x02 \x01(\x0b\x32\x06.Threw\x12\x0e\n\x06prints\x18\x03 \x03(\t\"\xfe\x01\n\x08Snapshot\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.Snapshot.Type\x12\x0e\n\x06\x66inish\x18\x02 \x01(\x08\x12\x1d\n\texception\x18\x03 \x01(\x0b\x32\n.Exception\x12\x15\n\x05stack\x18\x04 \x03(\x0b\x32\x06.Scope\x12!\n\x04heap\x18\x05 \x03(\x0b\x32\x13.Snapshot.HeapEntry\x1a\x34\n\tHeapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x16\n\x05value\x18\x02 \x01(\x0b\x32\x07.Object:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"A\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\tvariables\x18\x03 \x03(\x0b\x32\t.Variable\"/\n\x08Variable\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\x05value\x18\x02 \x01(\x0b\x32\x06.Value\"\x7f\n\x05Value\x12\x11\n\x07\x62oolean\x18\x01 \x01(\x08H\x00\x12\x11\n\x07integer\x18\x02 \x01(\x03H\x00\x12\x0f\n\x05\x66loat\x18\x03 \x01(\x01H\x00\x12\x10\n\x06string\x18\x04 \x01(\tH\x00\x12\x0f\n\x05other\x18\x05 \x01(\tH\x00\x12\x13\n\treference\x18\x06 \x01(\tH\x00\x42\x07\n\x05value\"\xc5\x01\n\x06Object\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.Object.Type\x12\x14\n\x0clanguageType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\x18\n\x07members\x18\x04 \x03(\x0b\x32\x07.Member\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\"4\n\x06Member\x12\x13\n\x03key\x18\x01 \x01(\x0b\x32\x06.Value\x12\x15\n\x05value\x18\x02 \x01(\x0b\x32\x06.Value\"5\n\x05Threw\x12\x1d\n\texception\x18\x01 \x01(\x0b\x32\n.Exception\x12\r\n\x05\x63\x61use\x18\x02 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x0esnapshot.proto\"J\n\x04Step\x12\x1b\n\x08snapshot\x18\x01 \x01(\x0b\x32\t.Snapshot\x12\x15\n\x05threw\x18\x02 \x01(\x0b\x32\x06.Threw\x12\x0e\n\x06prints\x18\x03 \x03(\t\"\xfb\x01\n\x08Snapshot\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.Snapshot.Type\x12\x0e\n\x06\x66inish\x18\x02 \x01(\x08\x12\x1d\n\texception\x18\x03 \x01(\x0b\x32\n.Exception\x12\x15\n\x05stack\x18\x04 \x03(\x0b\x32\x06.Scope\x12!\n\x04heap\x18\x05 \x03(\x0b\x32\x13.Snapshot.HeapEntry\x1a\x31\n\tHeapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x13\n\x05value\x18\x02 \x01(\x0b\x32\x04.Obj:\x02\x38\x01\"5\n\x04Type\x12\x08\n\x04LINE\x10\x00\x12\x08\n\x04\x43\x41LL\x10\x01\x12\n\n\x06RETURN\x10\x02\x12\r\n\tEXCEPTION\x10\x03\":\n\tException\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x02 \x03(\t\x12\x11\n\ttraceback\x18\x03 \x03(\t\"A\n\x05Scope\x12\x0c\n\x04line\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1c\n\tvariables\x18\x03 \x03(\x0b\x32\t.Variable\"/\n\x08Variable\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\x05value\x18\x02 \x01(\x0b\x32\x06.Value\"\x7f\n\x05Value\x12\x11\n\x07\x62oolean\x18\x01 \x01(\x08H\x00\x12\x11\n\x07integer\x18\x02 \x01(\x03H\x00\x12\x0f\n\x05\x66loat\x18\x03 \x01(\x01H\x00\x12\x10\n\x06string\x18\x04 \x01(\tH\x00\x12\x0f\n\x05other\x18\x05 \x01(\tH\x00\x12\x13\n\treference\x18\x06 \x01(\tH\x00\x42\x07\n\x05value\"\xbf\x01\n\x03Obj\x12\x17\n\x04type\x18\x01 \x01(\x0e\x32\t.Obj.Type\x12\x14\n\x0clanguageType\x18\x02 \x01(\t\x12\x13\n\x0buserDefined\x18\x03 \x01(\x08\x12\x18\n\x07members\x18\x04 \x03(\x0b\x32\x07.Member\"Z\n\x04Type\x12\t\n\x05\x41RRAY\x10\x00\x12\t\n\x05TUPLE\x10\x01\x12\t\n\x05\x41LIST\x10\x02\x12\t\n\x05LLIST\x10\x03\x12\x08\n\x04HMAP\x10\x04\x12\x08\n\x04TMAP\x10\x05\x12\x07\n\x03SET\x10\x06\x12\t\n\x05OTHER\x10\x07\"4\n\x06Member\x12\x13\n\x03key\x18\x01 \x01(\x0b\x32\x06.Value\x12\x15\n\x05value\x18\x02 \x01(\x0b\x32\x06.Value\"5\n\x05Threw\x12\x1d\n\texception\x18\x01 \x01(\x0b\x32\n.Exception\x12\r\n\x05\x63\x61use\x18\x02 \x01(\tb\x06proto3')
 )
 
 
@@ -50,14 +50,14 @@ _SNAPSHOT_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=296,
-  serialized_end=349,
+  serialized_start=293,
+  serialized_end=346,
 )
 _sym_db.RegisterEnumDescriptor(_SNAPSHOT_TYPE)
 
-_OBJECT_TYPE = _descriptor.EnumDescriptor(
+_OBJ_TYPE = _descriptor.EnumDescriptor(
   name='Type',
-  full_name='Object.Type',
+  full_name='Obj.Type',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -96,10 +96,10 @@ _OBJECT_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=764,
-  serialized_end=854,
+  serialized_start=755,
+  serialized_end=845,
 )
-_sym_db.RegisterEnumDescriptor(_OBJECT_TYPE)
+_sym_db.RegisterEnumDescriptor(_OBJ_TYPE)
 
 
 _STEP = _descriptor.Descriptor(
@@ -181,7 +181,7 @@ _SNAPSHOT_HEAPENTRY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=242,
-  serialized_end=294,
+  serialized_end=291,
 )
 
 _SNAPSHOT = _descriptor.Descriptor(
@@ -240,7 +240,7 @@ _SNAPSHOT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=95,
-  serialized_end=349,
+  serialized_end=346,
 )
 
 
@@ -284,8 +284,8 @@ _EXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=351,
-  serialized_end=409,
+  serialized_start=348,
+  serialized_end=406,
 )
 
 
@@ -329,8 +329,8 @@ _SCOPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=411,
-  serialized_end=476,
+  serialized_start=408,
+  serialized_end=473,
 )
 
 
@@ -367,8 +367,8 @@ _VARIABLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=478,
-  serialized_end=525,
+  serialized_start=475,
+  serialized_end=522,
 )
 
 
@@ -436,41 +436,41 @@ _VALUE = _descriptor.Descriptor(
       name='value', full_name='Value.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=527,
-  serialized_end=654,
+  serialized_start=524,
+  serialized_end=651,
 )
 
 
-_OBJECT = _descriptor.Descriptor(
-  name='Object',
-  full_name='Object',
+_OBJ = _descriptor.Descriptor(
+  name='Obj',
+  full_name='Obj',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='type', full_name='Object.type', index=0,
+      name='type', full_name='Obj.type', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='languageType', full_name='Object.languageType', index=1,
+      name='languageType', full_name='Obj.languageType', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='userDefined', full_name='Object.userDefined', index=2,
+      name='userDefined', full_name='Obj.userDefined', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='members', full_name='Object.members', index=3,
+      name='members', full_name='Obj.members', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -481,7 +481,7 @@ _OBJECT = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _OBJECT_TYPE,
+    _OBJ_TYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -489,8 +489,8 @@ _OBJECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=657,
-  serialized_end=854,
+  serialized_start=654,
+  serialized_end=845,
 )
 
 
@@ -527,8 +527,8 @@ _MEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=856,
-  serialized_end=908,
+  serialized_start=847,
+  serialized_end=899,
 )
 
 
@@ -565,13 +565,13 @@ _THREW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=910,
-  serialized_end=963,
+  serialized_start=901,
+  serialized_end=954,
 )
 
 _STEP.fields_by_name['snapshot'].message_type = _SNAPSHOT
 _STEP.fields_by_name['threw'].message_type = _THREW
-_SNAPSHOT_HEAPENTRY.fields_by_name['value'].message_type = _OBJECT
+_SNAPSHOT_HEAPENTRY.fields_by_name['value'].message_type = _OBJ
 _SNAPSHOT_HEAPENTRY.containing_type = _SNAPSHOT
 _SNAPSHOT.fields_by_name['type'].enum_type = _SNAPSHOT_TYPE
 _SNAPSHOT.fields_by_name['exception'].message_type = _EXCEPTION
@@ -598,9 +598,9 @@ _VALUE.fields_by_name['other'].containing_oneof = _VALUE.oneofs_by_name['value']
 _VALUE.oneofs_by_name['value'].fields.append(
   _VALUE.fields_by_name['reference'])
 _VALUE.fields_by_name['reference'].containing_oneof = _VALUE.oneofs_by_name['value']
-_OBJECT.fields_by_name['type'].enum_type = _OBJECT_TYPE
-_OBJECT.fields_by_name['members'].message_type = _MEMBER
-_OBJECT_TYPE.containing_type = _OBJECT
+_OBJ.fields_by_name['type'].enum_type = _OBJ_TYPE
+_OBJ.fields_by_name['members'].message_type = _MEMBER
+_OBJ_TYPE.containing_type = _OBJ
 _MEMBER.fields_by_name['key'].message_type = _VALUE
 _MEMBER.fields_by_name['value'].message_type = _VALUE
 _THREW.fields_by_name['exception'].message_type = _EXCEPTION
@@ -610,7 +610,7 @@ DESCRIPTOR.message_types_by_name['Exception'] = _EXCEPTION
 DESCRIPTOR.message_types_by_name['Scope'] = _SCOPE
 DESCRIPTOR.message_types_by_name['Variable'] = _VARIABLE
 DESCRIPTOR.message_types_by_name['Value'] = _VALUE
-DESCRIPTOR.message_types_by_name['Object'] = _OBJECT
+DESCRIPTOR.message_types_by_name['Obj'] = _OBJ
 DESCRIPTOR.message_types_by_name['Member'] = _MEMBER
 DESCRIPTOR.message_types_by_name['Threw'] = _THREW
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -665,12 +665,12 @@ Value = _reflection.GeneratedProtocolMessageType('Value', (_message.Message,), d
   ))
 _sym_db.RegisterMessage(Value)
 
-Object = _reflection.GeneratedProtocolMessageType('Object', (_message.Message,), dict(
-  DESCRIPTOR = _OBJECT,
+Obj = _reflection.GeneratedProtocolMessageType('Obj', (_message.Message,), dict(
+  DESCRIPTOR = _OBJ,
   __module__ = 'snapshot_pb2'
-  # @@protoc_insertion_point(class_scope:Object)
+  # @@protoc_insertion_point(class_scope:Obj)
   ))
-_sym_db.RegisterMessage(Object)
+_sym_db.RegisterMessage(Obj)
 
 Member = _reflection.GeneratedProtocolMessageType('Member', (_message.Message,), dict(
   DESCRIPTOR = _MEMBER,

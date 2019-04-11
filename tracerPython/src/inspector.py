@@ -80,18 +80,18 @@ class Inspector:
         if reference in snapshot.heap:
             return snapshot_pb2.Value(reference=reference)
 
-        generic_type = snapshot_pb2.Object.Type.Value('OTHER')
+        generic_type = snapshot_pb2.Obj.Type.Value('OTHER')
         language_type = type(obj).__name__
         user_defined = False
         members = None
 
         if isinstance(obj, (tuple, list, set)):
-            generic_type = snapshot_pb2.Object.Type.Value('TUPLE') if isinstance(obj, tuple) else \
-                snapshot_pb2.Object.Type.Value('ALIST') if isinstance(obj, list) else \
-                snapshot_pb2.Object.Type.Value('SET')
+            generic_type = snapshot_pb2.Obj.Type.Value('TUPLE') if isinstance(obj, tuple) else \
+                snapshot_pb2.Obj.Type.Value('ALIST') if isinstance(obj, list) else \
+                snapshot_pb2.Obj.Type.Value('SET')
             members = [*enumerate(obj)]
         elif isinstance(obj, dict):
-            generic_type = snapshot_pb2.Object.Type.Value('HMAP')
+            generic_type = snapshot_pb2.Obj.Type.Value('HMAP')
             members = [*obj.items()]
         elif isinstance(obj, (*classes,)):
             user_defined = True
@@ -103,11 +103,11 @@ class Inspector:
         if members is not None:
             # known object type
             # add reference to heap graph (it has to be added before other objects inspections)
-            heapObject = snapshot.heap[reference]
-            heapObject.type = generic_type
-            heapObject.languageType = language_type
-            heapObject.userDefined = user_defined
-            heapObject.members.extend([
+            heapObj = snapshot.heap[reference]
+            heapObj.type = generic_type
+            heapObj.languageType = language_type
+            heapObj.userDefined = user_defined
+            heapObj.members.extend([
                 snapshot_pb2.Member(key=self._inspect_object(snapshot, key, classes, module),
                                     value=self._inspect_object(snapshot, value, classes, module))
                 for key, value in members
