@@ -13,7 +13,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from . import event_pb2 as event__pb2
+from . import snapshot_pb2 as snapshot__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -21,124 +21,37 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0ctracer.proto\x1a\x0b\x65vent.proto\")\n\rTracerRequest\x12\x18\n\x07\x61\x63tions\x18\x01 \x03(\x0b\x32\x07.Action\"\x85\x02\n\x06\x41\x63tion\x12\x1e\n\x05start\x18\x01 \x01(\x0b\x32\r.Action.StartH\x00\x12\x1c\n\x04stop\x18\x02 \x01(\x0b\x32\x0c.Action.StopH\x00\x12\x1c\n\x04step\x18\x03 \x01(\x0b\x32\x0c.Action.StepH\x00\x12\x1e\n\x05input\x18\x04 \x01(\x0b\x32\r.Action.InputH\x00\x1a>\n\x05Start\x12\x0c\n\x04main\x18\x01 \x01(\t\x12\x0e\n\x04\x63ode\x18\x02 \x01(\tH\x00\x12\r\n\x03tar\x18\x03 \x01(\x0cH\x00\x42\x08\n\x06source\x1a\x06\n\x04Stop\x1a\x15\n\x04Step\x12\r\n\x05\x63ount\x18\x01 \x01(\x05\x1a\x16\n\x05Input\x12\r\n\x05lines\x18\x01 \x03(\tB\x08\n\x06\x61\x63tion\"(\n\x0eTracerResponse\x12\x16\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x06.Eventb\x06proto3')
+  serialized_pb=_b('\n\x0ctracer.proto\x1a\x0esnapshot.proto\"5\n\x05Trace\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\r\n\x05input\x18\x02 \x01(\t\x12\r\n\x05steps\x18\x03 \x01(\x05\"\x1e\n\x06Result\x12\x14\n\x05steps\x18\x01 \x03(\x0b\x32\x05.Stepb\x06proto3')
   ,
-  dependencies=[event__pb2.DESCRIPTOR,])
+  dependencies=[snapshot__pb2.DESCRIPTOR,])
 
 
 
 
-_TRACERREQUEST = _descriptor.Descriptor(
-  name='TracerRequest',
-  full_name='TracerRequest',
+_TRACE = _descriptor.Descriptor(
+  name='Trace',
+  full_name='Trace',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='actions', full_name='TracerRequest.actions', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=29,
-  serialized_end=70,
-)
-
-
-_ACTION_START = _descriptor.Descriptor(
-  name='Start',
-  full_name='Action.Start',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='main', full_name='Action.Start.main', index=0,
+      name='source', full_name='Trace.source', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='code', full_name='Action.Start.code', index=1,
+      name='input', full_name='Trace.input', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='tar', full_name='Action.Start.tar', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='source', full_name='Action.Start.source',
-      index=0, containing_type=None, fields=[]),
-  ],
-  serialized_start=207,
-  serialized_end=269,
-)
-
-_ACTION_STOP = _descriptor.Descriptor(
-  name='Stop',
-  full_name='Action.Stop',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=271,
-  serialized_end=277,
-)
-
-_ACTION_STEP = _descriptor.Descriptor(
-  name='Step',
-  full_name='Action.Step',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='count', full_name='Action.Step.count', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      name='steps', full_name='Trace.steps', index=2,
+      number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -155,104 +68,20 @@ _ACTION_STEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=279,
-  serialized_end=300,
+  serialized_start=32,
+  serialized_end=85,
 )
 
-_ACTION_INPUT = _descriptor.Descriptor(
-  name='Input',
-  full_name='Action.Input',
+
+_RESULT = _descriptor.Descriptor(
+  name='Result',
+  full_name='Result',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='lines', full_name='Action.Input.lines', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=302,
-  serialized_end=324,
-)
-
-_ACTION = _descriptor.Descriptor(
-  name='Action',
-  full_name='Action',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='start', full_name='Action.start', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='stop', full_name='Action.stop', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='step', full_name='Action.step', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='input', full_name='Action.input', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_ACTION_START, _ACTION_STOP, _ACTION_STEP, _ACTION_INPUT, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='action', full_name='Action.action',
-      index=0, containing_type=None, fields=[]),
-  ],
-  serialized_start=73,
-  serialized_end=334,
-)
-
-
-_TRACERRESPONSE = _descriptor.Descriptor(
-  name='TracerResponse',
-  full_name='TracerResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='events', full_name='TracerResponse.events', index=0,
+      name='steps', full_name='Result.steps', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -270,95 +99,28 @@ _TRACERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=336,
-  serialized_end=376,
+  serialized_start=87,
+  serialized_end=117,
 )
 
-_TRACERREQUEST.fields_by_name['actions'].message_type = _ACTION
-_ACTION_START.containing_type = _ACTION
-_ACTION_START.oneofs_by_name['source'].fields.append(
-  _ACTION_START.fields_by_name['code'])
-_ACTION_START.fields_by_name['code'].containing_oneof = _ACTION_START.oneofs_by_name['source']
-_ACTION_START.oneofs_by_name['source'].fields.append(
-  _ACTION_START.fields_by_name['tar'])
-_ACTION_START.fields_by_name['tar'].containing_oneof = _ACTION_START.oneofs_by_name['source']
-_ACTION_STOP.containing_type = _ACTION
-_ACTION_STEP.containing_type = _ACTION
-_ACTION_INPUT.containing_type = _ACTION
-_ACTION.fields_by_name['start'].message_type = _ACTION_START
-_ACTION.fields_by_name['stop'].message_type = _ACTION_STOP
-_ACTION.fields_by_name['step'].message_type = _ACTION_STEP
-_ACTION.fields_by_name['input'].message_type = _ACTION_INPUT
-_ACTION.oneofs_by_name['action'].fields.append(
-  _ACTION.fields_by_name['start'])
-_ACTION.fields_by_name['start'].containing_oneof = _ACTION.oneofs_by_name['action']
-_ACTION.oneofs_by_name['action'].fields.append(
-  _ACTION.fields_by_name['stop'])
-_ACTION.fields_by_name['stop'].containing_oneof = _ACTION.oneofs_by_name['action']
-_ACTION.oneofs_by_name['action'].fields.append(
-  _ACTION.fields_by_name['step'])
-_ACTION.fields_by_name['step'].containing_oneof = _ACTION.oneofs_by_name['action']
-_ACTION.oneofs_by_name['action'].fields.append(
-  _ACTION.fields_by_name['input'])
-_ACTION.fields_by_name['input'].containing_oneof = _ACTION.oneofs_by_name['action']
-_TRACERRESPONSE.fields_by_name['events'].message_type = event__pb2._EVENT
-DESCRIPTOR.message_types_by_name['TracerRequest'] = _TRACERREQUEST
-DESCRIPTOR.message_types_by_name['Action'] = _ACTION
-DESCRIPTOR.message_types_by_name['TracerResponse'] = _TRACERRESPONSE
+_RESULT.fields_by_name['steps'].message_type = snapshot__pb2._STEP
+DESCRIPTOR.message_types_by_name['Trace'] = _TRACE
+DESCRIPTOR.message_types_by_name['Result'] = _RESULT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-TracerRequest = _reflection.GeneratedProtocolMessageType('TracerRequest', (_message.Message,), dict(
-  DESCRIPTOR = _TRACERREQUEST,
+Trace = _reflection.GeneratedProtocolMessageType('Trace', (_message.Message,), dict(
+  DESCRIPTOR = _TRACE,
   __module__ = 'tracer_pb2'
-  # @@protoc_insertion_point(class_scope:TracerRequest)
+  # @@protoc_insertion_point(class_scope:Trace)
   ))
-_sym_db.RegisterMessage(TracerRequest)
+_sym_db.RegisterMessage(Trace)
 
-Action = _reflection.GeneratedProtocolMessageType('Action', (_message.Message,), dict(
-
-  Start = _reflection.GeneratedProtocolMessageType('Start', (_message.Message,), dict(
-    DESCRIPTOR = _ACTION_START,
-    __module__ = 'tracer_pb2'
-    # @@protoc_insertion_point(class_scope:Action.Start)
-    ))
-  ,
-
-  Stop = _reflection.GeneratedProtocolMessageType('Stop', (_message.Message,), dict(
-    DESCRIPTOR = _ACTION_STOP,
-    __module__ = 'tracer_pb2'
-    # @@protoc_insertion_point(class_scope:Action.Stop)
-    ))
-  ,
-
-  Step = _reflection.GeneratedProtocolMessageType('Step', (_message.Message,), dict(
-    DESCRIPTOR = _ACTION_STEP,
-    __module__ = 'tracer_pb2'
-    # @@protoc_insertion_point(class_scope:Action.Step)
-    ))
-  ,
-
-  Input = _reflection.GeneratedProtocolMessageType('Input', (_message.Message,), dict(
-    DESCRIPTOR = _ACTION_INPUT,
-    __module__ = 'tracer_pb2'
-    # @@protoc_insertion_point(class_scope:Action.Input)
-    ))
-  ,
-  DESCRIPTOR = _ACTION,
+Result = _reflection.GeneratedProtocolMessageType('Result', (_message.Message,), dict(
+  DESCRIPTOR = _RESULT,
   __module__ = 'tracer_pb2'
-  # @@protoc_insertion_point(class_scope:Action)
+  # @@protoc_insertion_point(class_scope:Result)
   ))
-_sym_db.RegisterMessage(Action)
-_sym_db.RegisterMessage(Action.Start)
-_sym_db.RegisterMessage(Action.Stop)
-_sym_db.RegisterMessage(Action.Step)
-_sym_db.RegisterMessage(Action.Input)
-
-TracerResponse = _reflection.GeneratedProtocolMessageType('TracerResponse', (_message.Message,), dict(
-  DESCRIPTOR = _TRACERRESPONSE,
-  __module__ = 'tracer_pb2'
-  # @@protoc_insertion_point(class_scope:TracerResponse)
-  ))
-_sym_db.RegisterMessage(TracerResponse)
+_sym_db.RegisterMessage(Result)
 
 
 # @@protoc_insertion_point(module_scope)
