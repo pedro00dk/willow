@@ -1,6 +1,4 @@
-package core.util;
-
-import protobuf.EventOuterClass;
+import protobuf.SnapshotOuterClass;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -13,22 +11,22 @@ import java.util.stream.IntStream;
 /**
  * Processes throwable objects.
  */
-public final class ThrowableUtil {
+public final class Util {
 
-    private ThrowableUtil() {
+    private Util() {
     }
 
     /**
      * Extracts the throwable data in a map.
      */
-    public static EventOuterClass.Exception.Builder dump(Throwable throwable) {
+    public static SnapshotOuterClass.Exception.Builder dump(Throwable throwable) {
         return dump(throwable, Set.of());
     }
 
     /**
      * Extracts the throwable data in a map.
      */
-    public static EventOuterClass.Exception.Builder dump(Throwable throwable, Set<Integer> removeLines) {
+    public static SnapshotOuterClass.Exception.Builder dump(Throwable throwable, Set<Integer> removeLines) {
         var tracebackWriter = new StringWriter();
         throwable.printStackTrace(new PrintWriter(tracebackWriter, true));
 
@@ -40,7 +38,7 @@ public final class ThrowableUtil {
                 .mapToObj(formattedTraceback::get)
                 .collect(Collectors.toList());
 
-        return EventOuterClass.Exception.newBuilder()
+        return SnapshotOuterClass.Exception.newBuilder()
                 .setType(throwable.getClass().getName())
                 .addAllArgs(List.of(throwable.getMessage() != null ? throwable.getMessage() : ""))
                 .addAllTraceback(filteredTraceback);
@@ -50,8 +48,8 @@ public final class ThrowableUtil {
     /**
      * Creates the exception data form the received fields.
      */
-    public static EventOuterClass.Exception.Builder dump(String clazz, List<String> args, String traceback) {
-        return EventOuterClass.Exception.newBuilder()
+    public static SnapshotOuterClass.Exception.Builder dump(String clazz, List<String> args, String traceback) {
+        return SnapshotOuterClass.Exception.newBuilder()
                 .setType(clazz)
                 .addAllArgs(args)
                 .addAllTraceback(

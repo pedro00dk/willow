@@ -1,5 +1,3 @@
-package core.exec;
-
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.VirtualMachine;
@@ -9,10 +7,11 @@ import com.sun.jdi.event.ThreadStartEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.StepRequest;
 import com.sun.tools.jdi.VirtualMachineManagerImpl;
-import core.FrameProcessor;
-import core.Project;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,25 +21,15 @@ import java.util.stream.Collectors;
  * Executes a compiled project.
  */
 public class Executor {
-    private Project project;
-    private FrameProcessor frameProcessor;
+    private Path path;
+    private String filename;
+    private TraceProcessor traceProcessor;
     private VirtualMachine vm;
 
-    public Executor(Project project, FrameProcessor frameProcessor) {
-        this.project = project;
-        this.frameProcessor = frameProcessor;
-    }
-
-    public boolean isRunning() {
-        return vm != null;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public FrameProcessor getFrameProcessor() {
-        return frameProcessor;
+    public Executor(Path path, String filename, TraceProcessor traceProcessor) {
+        this.path = path;
+        this.filename = filename;
+        this.traceProcessor = traceProcessor;
     }
 
     public void execute() throws Exception {
@@ -51,23 +40,19 @@ public class Executor {
         var vmStdout = vm.process().getInputStream();
         var vmStderr = vm.process().getErrorStream();
 
-        while (true) {
-            try {
+        vmStdin.write(traceProcessor.getInput());
+
+        boolean continueTracing = true;
+        try {
+            while (continueTracing) {
                 vm.resume();
-
-                var eventSet = vm.eventQueue().remove();
-                /*
-                // input hook TODO check better strategies (not working well)
-                var eventSet = vm.eventQueue().remove(100);
-                while (eventSet == null) {
-                    vmStdin.write((frameProcessor.inputHook() + "\n").getBytes());
-                    vmStdin.flush();
-                    eventSet = vm.eventQueue().remove(100);
+                var eventSet = vm.eventQueue().remove(1000);
+                if (eventSet == null) {
+                    continueTracing = traceProcessor.onLocked("not enough input or slow function call");
+                    if (continueTracing) continue;
+                    break;
                 }
-                */
-
                 for (var event : eventSet) {
-
                     // interrupt not allowed threads
                     if (event instanceof ThreadStartEvent &&
                             !allowedThreadsNames.contains(((ThreadStartEvent) event).thread().name()))
@@ -76,42 +61,36 @@ public class Executor {
                     // print hooks
                     var printAvailable = vmStdout.available();
                     if (printAvailable > 0)
-                        frameProcessor.printHook(new String(vmStdout.readNBytes(printAvailable)));
+                        traceProcessor.printHook(new String(vmStdout.readNBytes(printAvailable)));
                     var errorAvailable = vmStderr.available();
                     if (errorAvailable > 0)
-                        frameProcessor.printHook(new String(vmStderr.readNBytes(errorAvailable)));
+                        traceProcessor.printHook(new String(vmStderr.readNBytes(errorAvailable)));
 
                     // trace
-                    var continueTracing = frameProcessor.trace(event);
+                    continueTracing = traceProcessor.trace(event);
                     if (!continueTracing) {
+                        // throws precipitated VMDisconnectedException on next queue.remove call
                         vm.exit(0);
-                        // breaks only internal loop to stop event set iterator
-                        // throws precipitated VMDisconnectedException without reading the rest of the events
+                        // breaks only internal loop to stop the eventSet iterator
                         break;
                     }
                 }
-            } catch (VMDisconnectedException e) {
-                throw new RuntimeException(e);
             }
+        } catch (VMDisconnectedException e) {
+            if (continueTracing) throw new RuntimeException(e);
         }
     }
 
     private void startVirtualMachine() throws IOException, IllegalConnectorArgumentsException, VMStartException {
-        if (!project.isCompiled()) throw new IllegalStateException("project not compiled");
-        if (isRunning()) throw new IllegalStateException("executor already running");
-
+        if (vm != null) throw new IllegalStateException("executor already running");
+        var srcPath = Paths.get(path.toString(), "src/");
+        var binPath = Paths.get(path.toString(), "bin/");
         var vmm = VirtualMachineManagerImpl.virtualMachineManager();
         var connector = vmm.defaultConnector();
-
         var connectorArguments = connector.defaultArguments();
-        connectorArguments.get(ConnectorArguments.SUSPEND.arg).setValue("true");
-        connectorArguments.get(ConnectorArguments.OPTIONS.arg).setValue(
-                "-cp \"" + project.getBinPath().toAbsolutePath().toString() + "\""
-        );
-        connectorArguments.get(ConnectorArguments.MAIN.arg).setValue(
-                project.getFilename().substring(0, project.getFilename().lastIndexOf('.'))
-        );
-
+        connectorArguments.get("suspend").setValue("true");
+        connectorArguments.get("options").setValue("-cp \"" + binPath.toAbsolutePath().toString() + "\"");
+        connectorArguments.get("main").setValue(filename.substring(0, filename.indexOf('.')));
         vm = connector.launch(connectorArguments);
     }
 
@@ -133,7 +112,7 @@ public class Executor {
         var threadDeathRequest = vm.eventRequestManager().createThreadDeathRequest();
         threadDeathRequest.setSuspendPolicy(EventRequest.SUSPEND_NONE);
 
-        var classNames = project.getClasses();
+        var classNames = getProjectClasses(path);
 
         var methodEntryRequests = classNames.stream()
                 .map(c -> {
@@ -174,6 +153,7 @@ public class Executor {
                     return exceptionRequest;
                 })
                 .collect(Collectors.toList());
+
         // TODO implement step into try blocks
 
         vmDeathRequest.enable();
@@ -185,5 +165,17 @@ public class Executor {
         exceptionRequests.forEach(EventRequest::enable);
 
         return allowedThreadsNames;
+    }
+
+    private List<String> getProjectClasses(Path path) {
+        var binPath = Paths.get(path.toString(), "bin/");
+        try {
+            return Files.list(binPath)
+                    .map(p -> p.getFileName().toString())
+                    .map(s -> s.substring(0, s.lastIndexOf('.')))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            return List.of();
+        }
     }
 }
