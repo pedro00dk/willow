@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as ReactDom from 'react-dom'
 import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as BreakpointsReducer } from './breakpoint'
