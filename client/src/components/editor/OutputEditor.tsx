@@ -6,9 +6,9 @@ import { MemoTextEditor } from './TextEditor'
 
 export function OutputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
-    const { debugReference, debugResponse } = useRedux(state => ({
-        debugReference: state.debugReference,
-        debugResponse: state.debugResponse
+    const { debugIndexer, debugResult } = useRedux(state => ({
+        debugIndexer: state.debugIndexer,
+        debugResult: state.debugResult
     }))
 
     React.useEffect(() => {
@@ -21,25 +21,29 @@ export function OutputEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        const currentStep = debugResponse.steps[debugReference]
-        const previousStep = debugResponse.steps[debugReference - 1]
-        const exceptionTraceback =
-            !!currentStep &&
-            currentStep.frame.finish &&
-            !!previousStep &&
-            previousStep.frame.type === protocol.Frame.Type.EXCEPTION
-                ? previousStep.frame.exception.traceback.join('')
-                : ''
-        const lockedMessage = !!debugResponse.locked ? `Program locked, cause: ${debugResponse.locked.cause}` : ''
-        const threwTraceback = !!debugResponse.threw ? debugResponse.threw.exception.traceback.join('') : ''
         editor.session.doc.setValue(
-            `${debugResponse.steps
-                .filter((step, i) => i <= debugReference)
-                .flatMap(step => step.prints)
-                .join('')}${exceptionTraceback}${lockedMessage}${threwTraceback}
-            `
+            debugResult.steps
+                .filter((step, i) => i <= debugIndexer)
+                .map((step, i) => {
+                    const snapshot = step.snapshot
+                    const previousSnapshot = !!debugResult.steps[i - 1] ? debugResult.steps[i - 1].snapshot : undefined
+                    const tracedThrew =
+                        !!snapshot &&
+                        snapshot.finish &&
+                        !!previousSnapshot &&
+                        previousSnapshot.type === protocol.Snapshot.Type.EXCEPTION
+                            ? previousSnapshot.exception.traceback.join('')
+                            : ''
+                    const tracerThrew = !!step.threw
+                        ? !!step.threw.exception
+                            ? step.threw.exception.traceback.join('')
+                            : step.threw.cause
+                        : ''
+                    return `${step.prints}${tracedThrew}${tracerThrew}`
+                })
+                .join('')
         )
-    }, [debugReference, debugResponse])
+    }, [debugIndexer, debugResult])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

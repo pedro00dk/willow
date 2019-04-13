@@ -21,16 +21,16 @@ import returnImg from '../../../public/editor/return.svg'
 
 const classes = {
     breakpoint: css({ backgroundColor: colors.error }),
-    [protocol.Frame.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
-    [protocol.Frame.Type.CALL]: cn(
+    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Snapshot.Type.CALL]: cn(
         'position-absolute',
         css({ background: `${colors.highlight1} url(${callImg}) no-repeat right center` })
     ),
-    [protocol.Frame.Type.RETURN]: cn(
+    [protocol.Snapshot.Type.RETURN]: cn(
         'position-absolute',
         css({ background: `${colors.highlight1} url(${returnImg}) no-repeat right center` })
     ),
-    [protocol.Frame.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
+    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -44,10 +44,10 @@ function syntaxSupport(language: string) {
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoint, debugReference, debugResponse, language } = useRedux(state => ({
+    const { breakpoint, debugResult, debugIndexer, language } = useRedux(state => ({
         breakpoint: state.breakpoint,
-        debugResponse: state.debugResponse,
-        debugReference: state.debugReference,
+        debugIndexer: state.debugIndexer,
+        debugResult: state.debugResult,
         language: state.language
     }))
 
@@ -90,20 +90,17 @@ export function CodeEditor() {
     }, [breakpoint])
 
     React.useEffect(() => {
-        if (!editor || debugResponse.steps.length === 0) return
+        if (!editor || debugResult.steps.length === 0) return
         const aceMarkers = editor.session.getMarkers(false) as EditorMarker[]
         Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
 
-        const debugFrame = debugResponse.steps[debugReference].frame
-        editor.session.addMarker(
-            new Range(debugFrame.line, 0, debugFrame.line, 1),
-            classes[debugFrame.type],
-            'fullLine',
-            false
-        )
-    }, [debugReference, debugResponse])
+        const snapshot = debugResult.steps[debugIndexer].snapshot
+        if (!snapshot) return
+        const line = snapshot.stack[snapshot.stack.length - 1].line
+        editor.session.addMarker(new Range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
+    }, [debugIndexer, debugResult])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

@@ -1,58 +1,38 @@
-export interface IEvent {
-    started?: (Event.IStarted|null);
-    inspected?: (Event.IInspected|null);
-    printed?: (Event.IPrinted|null);
-    locked?: (Event.ILocked|null);
-    threw?: (Event.IThrew|null);
+export interface IStep {
+    snapshot?: (ISnapshot|null);
+    threw?: (IThrew|null);
+    prints?: (string[]|null);
 }
 
-export class Event implements IEvent {
-    public started?: (Event.IStarted|null);
-    public inspected?: (Event.IInspected|null);
-    public printed?: (Event.IPrinted|null);
-    public locked?: (Event.ILocked|null);
-    public threw?: (Event.IThrew|null);
-    public event?: ("started"|"inspected"|"printed"|"locked"|"threw");
+export class Step implements IStep {
+    public snapshot?: (ISnapshot|null);
+    public threw?: (IThrew|null);
+    public prints: string[];
 }
 
-export namespace Event {
+export interface ISnapshot {
+    type?: (Snapshot.Type|null);
+    finish?: (boolean|null);
+    exception?: (IException|null);
+    stack?: (IScope[]|null);
+    heap?: ({ [k: string]: IObj }|null);
+}
 
-    export interface IStarted {
-    }
+export class Snapshot implements ISnapshot {
+    public type: Snapshot.Type;
+    public finish: boolean;
+    public exception?: (IException|null);
+    public stack: IScope[];
+    public heap: { [k: string]: IObj };
+}
 
-    export class Started implements IStarted {
-    }
+export namespace Snapshot {
 
-    export interface IInspected {
-        frame?: (IFrame|null);
-    }
-
-    export class Inspected implements IInspected {
-        public frame?: (IFrame|null);
-    }
-
-    export interface IPrinted {
-        value?: (string|null);
-    }
-
-    export class Printed implements IPrinted {
-        public value: string;
-    }
-
-    export interface ILocked {
-        cause?: (string|null);
-    }
-
-    export class Locked implements ILocked {
-        public cause: string;
-    }
-
-    export interface IThrew {
-        exception?: (IException|null);
-    }
-
-    export class Threw implements IThrew {
-        public exception?: (IException|null);
+    export enum Type {
+        LINE = 0,
+        CALL = 1,
+        RETURN = 2,
+        EXCEPTION = 3
     }
 }
 
@@ -68,201 +48,111 @@ export class Exception implements IException {
     public traceback: string[];
 }
 
-export interface IFrame {
-    type?: (Frame.Type|null);
+export interface IScope {
     line?: (number|null);
-    finish?: (boolean|null);
-    exception?: (IException|null);
-    stack?: (Frame.IStack|null);
-    heap?: (Frame.IHeap|null);
+    name?: (string|null);
+    variables?: (IVariable[]|null);
 }
 
-export class Frame implements IFrame {
-    public type: Frame.Type;
+export class Scope implements IScope {
     public line: number;
-    public finish: boolean;
-    public exception?: (IException|null);
-    public stack?: (Frame.IStack|null);
-    public heap?: (Frame.IHeap|null);
+    public name: string;
+    public variables: IVariable[];
 }
 
-export namespace Frame {
+export interface IVariable {
+    name?: (string|null);
+    value?: (IValue|null);
+}
+
+export class Variable implements IVariable {
+    public name: string;
+    public value?: (IValue|null);
+}
+
+export interface IValue {
+    boolean?: (boolean|null);
+    integer?: (number|Long|null);
+    float?: (number|null);
+    string?: (string|null);
+    other?: (string|null);
+    reference?: (string|null);
+}
+
+export class Value implements IValue {
+    public boolean: boolean;
+    public integer: (number|Long);
+    public float: number;
+    public string: string;
+    public other: string;
+    public reference: string;
+    public value?: ("boolean"|"integer"|"float"|"string"|"other"|"reference");
+}
+
+export interface IObj {
+    type?: (Obj.Type|null);
+    languageType?: (string|null);
+    userDefined?: (boolean|null);
+    members?: (IMember[]|null);
+}
+
+export class Obj implements IObj {
+    public type: Obj.Type;
+    public languageType: string;
+    public userDefined: boolean;
+    public members: IMember[];
+}
+
+export namespace Obj {
 
     export enum Type {
-        LINE = 0,
-        CALL = 1,
-        RETURN = 2,
-        EXCEPTION = 3
-    }
-
-    export interface IValue {
-        booleanValue?: (boolean|null);
-        integerValue?: (number|Long|null);
-        floatValue?: (number|null);
-        stringValue?: (string|null);
-        reference?: (number|Long|null);
-    }
-
-    export class Value implements IValue {
-        public booleanValue: boolean;
-        public integerValue: (number|Long);
-        public floatValue: number;
-        public stringValue: string;
-        public reference: (number|Long);
-        public value?: ("booleanValue"|"integerValue"|"floatValue"|"stringValue"|"reference");
-    }
-
-    export interface IStack {
-        scopes?: (Frame.Stack.IScope[]|null);
-    }
-
-    export class Stack implements IStack {
-        public scopes: Frame.Stack.IScope[];
-    }
-
-    export namespace Stack {
-
-        export interface IScope {
-            line?: (number|null);
-            name?: (string|null);
-            variables?: (Frame.Stack.Scope.IVariable[]|null);
-        }
-
-        export class Scope implements IScope {
-            public line: number;
-            public name: string;
-            public variables: Frame.Stack.Scope.IVariable[];
-        }
-
-        export namespace Scope {
-
-            export interface IVariable {
-                name?: (string|null);
-                value?: (Frame.IValue|null);
-            }
-
-            export class Variable implements IVariable {
-                public name: string;
-                public value?: (Frame.IValue|null);
-            }
-        }
-    }
-
-    export interface IHeap {
-        references?: ({ [k: string]: Frame.Heap.IObj }|null);
-    }
-
-    export class Heap implements IHeap {
-        public references: { [k: string]: Frame.Heap.IObj };
-    }
-
-    export namespace Heap {
-
-        export interface IObj {
-            type?: (Frame.Heap.Obj.Type|null);
-            lType?: (string|null);
-            userDefined?: (boolean|null);
-            members?: (Frame.Heap.Obj.IMember[]|null);
-        }
-
-        export class Obj implements IObj {
-            public type: Frame.Heap.Obj.Type;
-            public lType: string;
-            public userDefined: boolean;
-            public members: Frame.Heap.Obj.IMember[];
-        }
-
-        export namespace Obj {
-
-            export enum Type {
-                ARRAY = 0,
-                TUPLE = 1,
-                ALIST = 2,
-                LLIST = 3,
-                HMAP = 4,
-                TMAP = 5,
-                SET = 6,
-                OTHER = 7
-            }
-
-            export interface IMember {
-                key?: (Frame.IValue|null);
-                value?: (Frame.IValue|null);
-            }
-
-            export class Member implements IMember {
-                public key?: (Frame.IValue|null);
-                public value?: (Frame.IValue|null);
-            }
-        }
+        ARRAY = 0,
+        TUPLE = 1,
+        ALIST = 2,
+        LLIST = 3,
+        HMAP = 4,
+        TMAP = 5,
+        SET = 6,
+        OTHER = 7
     }
 }
 
-export interface ITracerRequest {
-    actions?: (IAction[]|null);
+export interface IMember {
+    key?: (IValue|null);
+    value?: (IValue|null);
 }
 
-export class TracerRequest implements ITracerRequest {
-    public actions: IAction[];
+export class Member implements IMember {
+    public key?: (IValue|null);
+    public value?: (IValue|null);
 }
 
-export interface IAction {
-    start?: (Action.IStart|null);
-    stop?: (Action.IStop|null);
-    step?: (Action.IStep|null);
-    input?: (Action.IInput|null);
+export interface IThrew {
+    exception?: (IException|null);
+    cause?: (string|null);
 }
 
-export class Action implements IAction {
-    public start?: (Action.IStart|null);
-    public stop?: (Action.IStop|null);
-    public step?: (Action.IStep|null);
-    public input?: (Action.IInput|null);
-    public action?: ("start"|"stop"|"step"|"input");
+export class Threw implements IThrew {
+    public exception?: (IException|null);
+    public cause: string;
 }
 
-export namespace Action {
-
-    export interface IStart {
-        main?: (string|null);
-        code?: (string|null);
-        tar?: (Uint8Array|null);
-    }
-
-    export class Start implements IStart {
-        public main: string;
-        public code: string;
-        public tar: Uint8Array;
-        public source?: ("code"|"tar");
-    }
-
-    export interface IStop {
-    }
-
-    export class Stop implements IStop {
-    }
-
-    export interface IStep {
-        count?: (number|null);
-    }
-
-    export class Step implements IStep {
-        public count: number;
-    }
-
-    export interface IInput {
-        lines?: (string[]|null);
-    }
-
-    export class Input implements IInput {
-        public lines: string[];
-    }
+export interface ITrace {
+    source?: (string|null);
+    input?: (string|null);
+    steps?: (number|null);
 }
 
-export interface ITracerResponse {
-    events?: (IEvent[]|null);
+export class Trace implements ITrace {
+    public source: string;
+    public input: string;
+    public steps: number;
 }
 
-export class TracerResponse implements ITracerResponse {
-    public events: IEvent[];
+export interface IResult {
+    steps?: (IStep[]|null);
+}
+
+export class Result implements IResult {
+    public steps: IStep[];
 }

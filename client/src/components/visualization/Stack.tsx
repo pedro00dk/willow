@@ -2,7 +2,8 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
-import { actions as debugReferenceActions } from '../../reducers/debug/reference'
+import * as protocol from '../../protobuf/protocol'
+import { actions as debugIndexerActions } from '../../reducers/debug/indexer'
 import { StackNode } from '../../reducers/debug/stack'
 import { useDispatch, useRedux } from '../../reducers/Store'
 
@@ -60,9 +61,9 @@ const styles = {
 
 export function Stack() {
     const dispatch = useDispatch()
-    const { debugReference, debugResponse, debugStack } = useRedux(state => ({
-        debugReference: state.debugReference,
-        debugResponse: state.debugResponse,
+    const { debugIndexer, debugResult, debugStack } = useRedux(state => ({
+        debugIndexer: state.debugIndexer,
+        debugResult: state.debugResult,
         debugStack: state.debugStack
     }))
     const stackRef = React.useRef<HTMLDivElement>()
@@ -72,7 +73,7 @@ export function Stack() {
         const interval = setInterval(() => {
             if (!stackRef.current || stackRef.current.clientWidth === computedWidth) return
             setComputedWidth(stackRef.current.clientWidth)
-        })
+        }, 50)
         return () => clearInterval(interval)
     }, [computedWidth])
 
@@ -81,69 +82,41 @@ export function Stack() {
             ref={stackRef}
             className='d-flex flex-row align-items-start flex-nowrap overflow-auto w-100'
             onKeyDown={event => {
-                const currentScopes = debugResponse.steps[debugReference].frame.stack.scopes
-                if (event.key === 'ArrowRight') {
-                    if (!event.ctrlKey) {
-                        const siblingOrRelativeIndices = debugResponse.steps
-                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                            .filter(({ scopes, index }) => index > debugReference)
-                        dispatch(
-                            debugReferenceActions.set(
-                                siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
-                            )
-                        )
-                    } else {
-                        const siblingOrRelativeIndices = debugResponse.steps
-                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                            .filter(
-                                ({ scopes, index }) => index > debugReference && scopes.length <= currentScopes.length
-                            )
-                        dispatch(
-                            debugReferenceActions.set(
-                                siblingOrRelativeIndices.length > 0 ? siblingOrRelativeIndices[0].index : debugReference
-                            )
-                        )
-                    }
-                } else if (event.key === 'ArrowLeft') {
-                    if (!event.ctrlKey) {
-                        const siblingOrRelativeIndices = debugResponse.steps
-                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                            .filter(({ scopes, index }) => index < debugReference)
-                        dispatch(
-                            debugReferenceActions.set(
-                                siblingOrRelativeIndices.length > 0
-                                    ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
-                                    : debugReference
-                            )
-                        )
-                    } else {
-                        const siblingOrRelativeIndices = debugResponse.steps
-                            .map((step, i) => ({ scopes: step.frame.stack.scopes, index: i }))
-                            .filter(
-                                ({ scopes, index }) => index < debugReference && scopes.length <= currentScopes.length
-                            )
-                        dispatch(
-                            debugReferenceActions.set(
-                                siblingOrRelativeIndices.length > 0
-                                    ? siblingOrRelativeIndices[siblingOrRelativeIndices.length - 1].index
-                                    : debugReference
-                            )
-                        )
-                    }
-                }
+                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+                const previousFilter = (index: number) => index < debugIndexer
+                const nextFilter = (index: number) => index > debugIndexer
+                const indexFilter = event.key === 'ArrowLeft' ? previousFilter : nextFilter
+
+                const currentStep = debugResult.steps[debugIndexer]
+                const anyFamilyFilter = (step: protocol.IStep) => true
+                const siblingParentFilter = (step: protocol.IStep) =>
+                    !!step.snapshot && !!currentStep.snapshot
+                        ? step.snapshot.stack.length <= currentStep.snapshot.stack.length
+                        : true
+                const familyFilter = !event.ctrlKey ? anyFamilyFilter : siblingParentFilter
+
+                const resultSelector = <T extends {}>(array: T[]) =>
+                    array.length > 0 ? (event.key === 'ArrowLeft' ? array[array.length - 1] : array[0]) : debugIndexer
+
+                const selectedIndices = debugResult.steps
+                    .map((step, i) => ({ step, i }))
+                    .filter(({ step, i }) => familyFilter(step) && indexFilter(i))
+                    .map(({ i }) => i)
+
+                dispatch(debugIndexerActions.set(resultSelector(selectedIndices)))
             }}
             tabIndex={0}
         >
             {!!debugStack.tree && (
-                <Node node={debugStack.tree} reference={debugReference} depth={0} computedWidth={computedWidth} />
+                <Node node={debugStack.tree} indexer={debugIndexer} depth={0} computedWidth={computedWidth} />
             )}
         </div>
     )
 }
 
-function Node(props: { node: StackNode; reference: number; depth: number; computedWidth?: number }) {
+function Node(props: { node: StackNode; indexer: number; depth: number; computedWidth?: number }) {
     const dispatch = useDispatch()
-    const selected = props.reference >= props.node.steps.from && props.reference <= props.node.steps.to
+    const selected = props.indexer >= props.node.steps.from && props.indexer <= props.node.steps.to
     const terminal = props.node.children.length === 0
     const computedWidth = !props.computedWidth ? Infinity : props.computedWidth
 
@@ -154,7 +127,7 @@ function Node(props: { node: StackNode; reference: number; depth: number; comput
                     className={terminal ? classes.node.scope.terminal : classes.node.scope.nonTerminal}
                     style={styles.node.scope(terminal, selected, computedWidth, props.depth)}
                     title={props.node.name}
-                    onClick={() => dispatch(debugReferenceActions.set(props.node.steps.from))}
+                    onClick={() => dispatch(debugIndexerActions.set(props.node.steps.from))}
                 >
                     {!terminal && computedWidth >= 20 ? props.node.name : '\u200b'}
                 </div>
@@ -170,7 +143,7 @@ function Node(props: { node: StackNode; reference: number; depth: number; comput
                             <div key={i} style={{ width: childPercentWidth }}>
                                 <Node
                                     node={child}
-                                    reference={props.reference}
+                                    indexer={props.indexer}
                                     depth={props.depth + 1}
                                     computedWidth={childComputedWidth}
                                 />

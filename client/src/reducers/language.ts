@@ -35,8 +35,8 @@ function fetch(): AsyncAction {
     return async dispatch => {
         dispatch({ type: 'language/fetch' })
         try {
-            const languages = (await serverApi.get('/tracers/getLanguages')).data as { languages: string[] }
-            dispatch({ type: 'language/fetch', payload: { languages: languages.languages } })
+            const languages = (await serverApi.post('/tracer/languages')).data as string[]
+            dispatch({ type: 'language/fetch', payload: { languages } })
         } catch (error) {
             dispatch({ type: 'language/fetch', error: !!error.response ? error.response.data : error.toString() })
         }

@@ -3,9 +3,8 @@ import { css } from 'emotion'
 import * as React from 'react'
 import playImg from '../../public/buttons/play.png'
 import stepImg from '../../public/buttons/stepInto.png'
-import stopImg from '../../public/buttons/stop.png'
+import { actions as debugIndexerActions } from '../reducers/debug/indexer'
 import { actions as debugInterfaceActions } from '../reducers/debug/interface'
-import { actions as debugReferenceActions } from '../reducers/debug/reference'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
@@ -24,19 +23,20 @@ const styles = {
 
 export function Debugger() {
     const dispatch = useDispatch()
-    const { debugInterface, debugResponse, debugReference, debugStack } = useRedux(state => ({
+    const { debugInterface, debugIndexer, debugResult, debugStack } = useRedux(state => ({
+        debugIndexer: state.debugIndexer,
         debugInterface: state.debugInterface,
-        debugReference: state.debugReference,
-        debugResponse: state.debugResponse,
+        debugResult: state.debugResult,
         debugStack: state.debugStack
     }))
 
+    console.log('--\n--\n--')
     console.log('debugger')
     console.log(debugInterface)
-    console.log(debugResponse)
-    console.log(debugReference)
+    console.log(debugResult)
+    console.log(debugIndexer)
     console.log(debugStack)
-    console.log('-------')
+    console.log('--\n--\n--')
 
     return (
         <div className='d-flex flex-row align-items-center shadow-sm mb-1'>
@@ -50,24 +50,17 @@ export function Debugger() {
             />
             <img
                 className={classes.image}
-                style={styles.image(debugInterface.fetching)}
-                src={stopImg}
-                title='stop'
-                onClick={() => dispatch(debugInterfaceActions.forceStop())}
-            />
-            <img
-                className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, 90)}
+                style={styles.image(!debugInterface.fetching && debugResult.steps.length > 0, 90)}
                 src={stepImg}
                 title='step back'
-                onClick={() => dispatch(debugReferenceActions.set(debugReference - 1))}
+                onClick={() => dispatch(debugIndexerActions.set(debugIndexer - 1))}
             />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResponse.steps.length > 0, -90)}
+                style={styles.image(!debugInterface.fetching && debugResult.steps.length > 0, -90)}
                 src={stepImg}
                 title='step forward'
-                onClick={() => dispatch(debugReferenceActions.set(debugReference + 1))}
+                onClick={() => dispatch(debugIndexerActions.set(debugIndexer + 1))}
             />
         </div>
     )

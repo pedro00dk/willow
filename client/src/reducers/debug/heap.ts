@@ -5,7 +5,7 @@ type State = {
     heap: {}
 }
 
-type Action = { type: 'debug/heap/loadHeap'; payload: State }
+type Action = { type: 'debug/heap/load'; payload: State }
 
 const initialState: State = {
     heap: undefined
@@ -13,7 +13,7 @@ const initialState: State = {
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
-        case 'debug/heap/loadHeap':
+        case 'debug/heap/load':
             return { ...state, ...action.payload }
     }
     return state
@@ -21,12 +21,9 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 
 function loadGraph(): AsyncAction {
     return async (dispatch, getState) => {
-        const { debugResponse } = getState()
-        debugResponse.steps.forEach((step, i) => {
-            const frame = step.frame
-            console.log(frame.heap.references)
-        })
-        dispatch({ type: 'debug/heap/loadHeap', payload: undefined })
+        const { debugResult } = getState()
+        debugResult.steps.forEach((step, i) => console.log(step))
+        dispatch({ type: 'debug/heap/load', payload: undefined })
     }
 }
 
