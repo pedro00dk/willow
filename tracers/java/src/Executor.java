@@ -41,6 +41,7 @@ public class Executor {
         var vmStderr = vm.process().getErrorStream();
 
         vmStdin.write(traceProcessor.getInput());
+        vmStdin.flush();
 
         boolean continueTracing = true;
         try {
