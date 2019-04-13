@@ -34,7 +34,7 @@
         "protobuf": "mkdir -p ./src/protobuf && pbjs -t static-module --es6 -o ./src/protobuf/protocol.js -p ../protobuf/ -- ../protobuf/*.proto && pbts --no-comments -o ./src/protobuf/protocol.ts -- ./src/protobuf/protocol.js && rm ./src/protobuf/protocol.js && sed -i -r -e '/^.*(import|constructor|public toJSON|public static).*$/d' -e 's/([^t]) (class|interface|enum|namespace)/\\1 export \\2/g' -- ./src/protobuf/protocol.ts",
         "build": "parcel build --no-cache --no-source-maps --public-url ./ -d ./dist/build -- $npm_package_main",
         "start": "SERVER_ADDRESS=$npm_package_config_server parcel serve --no-cache -d ./dist/ -p 8000 -- $npm_package_main",
-        "serve": "npm run build-production && http-server -p 8000 -- ./dist/build",
-        "serve-proxy": "npm run build-production && http-server -p 8000 --proxy $SERVER_PROXY -- ./dist/build"
+        "serve": "npm run build && http-server -p 8000 -- ./dist/build",
+        "serve-proxy": "npm run build && http-server -p 8000 --proxy $SERVER_PROXY -- ./dist/build"
     }
 }
