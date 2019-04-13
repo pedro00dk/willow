@@ -82,13 +82,10 @@ export class Tracer {
                 throw new Error(result)
             }
             log.info(Tracer.name, 'run', 'returned')
-            console.log('ok', result)
             return result
         } catch(error) {
-            console.log('error', error)
             throw error
         } finally {
-            console.log('finally')
             if (!tracer.killed) tracer.kill()
         }
     }

@@ -60,7 +60,7 @@ export class Server {
                     this.shell,
                     protocol.Trace.create({ source, input, steps }),
                     this.timeout
-                )
+                ).run()
                 res.send(result)
                 log.info(Server.name, req.path, 'ok')
             } catch (error) {
@@ -69,6 +69,7 @@ export class Server {
                 log.info(Server.name, req.path, 'error', error.message)
             }
         })
+        this.server.use('/tracer', tracersRouter)
     }
 
     listen() {
