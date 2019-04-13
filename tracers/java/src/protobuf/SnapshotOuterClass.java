@@ -1111,7 +1111,7 @@ public final class SnapshotOuterClass {
   /**
    * <pre>
    *Snapshots contains the memory of a program.
-   *They store type of event, if the program ended, any exception raised, the
+   *They store theyselves type, if the program ended, any exception raised, the
    *current stack/heap of the program.
    * </pre>
    *
@@ -1779,7 +1779,7 @@ public final class SnapshotOuterClass {
     /**
      * <pre>
      *Snapshots contains the memory of a program.
-     *They store type of event, if the program ended, any exception raised, the
+     *They store theyselves type, if the program ended, any exception raised, the
      *current stack/heap of the program.
      * </pre>
      *

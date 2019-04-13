@@ -3,7 +3,7 @@ syntax = "proto3";
 import "snapshot.proto";
 
 /*
-Protocol for Tracer requests and responses.
+Protocol for Tracer requests and results.
 */
 
 /*
