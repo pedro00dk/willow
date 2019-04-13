@@ -11,7 +11,7 @@
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "debug"],
-            "args": ["--", "--mode", "${input:mode}", "--port", "${input:port}"],
+            "args": ["--", "--port", "${input:port}"],
             "port": 9229
         },
         {
@@ -24,15 +24,9 @@
     ],
     "inputs": [
         {
-            "id": "mode",
-            "type": "promptString",
-            "default": "proto",
-            "description": "mode"
-        },
-        {
             "id": "port",
             "type": "promptString",
-            "default": "8002",
+            "default": "8000",
             "description": "port"
         }
     ]
