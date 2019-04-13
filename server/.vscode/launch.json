@@ -11,7 +11,7 @@
             "console": "integratedTerminal",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "debug"],
-            "args": ["--", "--port", "${input:port}", "--tracers", "${input:tracers}"],
+            "args": ["--", "--mode", "${input:mode}", "--port", "${input:port}"],
             "port": 9229
         },
         {
@@ -24,22 +24,16 @@
     ],
     "inputs": [
         {
+            "id": "mode",
+            "type": "promptString",
+            "default": "proto",
+            "description": "mode"
+        },
+        {
             "id": "port",
             "type": "promptString",
-            "default": "8001",
+            "default": "8002",
             "description": "port"
-        },
-        {
-            "id": "secret",
-            "type": "promptString",
-            "default": "secret",
-            "description": "secret"
-        },
-        {
-            "id": "tracers",
-            "type": "promptString",
-            "default": "http://localhost:8002",
-            "description": "tracers"
         }
     ]
 }

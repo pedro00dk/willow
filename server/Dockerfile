@@ -2,6 +2,10 @@ FROM node:alpine
 
 WORKDIR /app
 
+RUN apk update &&\
+    apk add docker &&\
+    rm -rf /var/cache/apk/*
+
 ADD ./package.json ./
 
 RUN npm install
@@ -21,5 +25,5 @@ ADD ./src ./src
 ADD ./test ./test
 
 
-ENTRYPOINT [ "npm", "run", "start" ]
+ENTRYPOINT [ "npm", "run", "start-base" ]
 CMD [ "--", "--help" ]

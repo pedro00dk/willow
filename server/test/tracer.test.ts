@@ -14,12 +14,12 @@ const tracers = process.argv
 Object.values(tracers).forEach(({ language, command, working, broken }) => {
     describe(`tracer -- ${language}`, () => {
         test('run working', () => {
-            const tracer = new Tracer(command, 'sh', working)
+            const tracer = new Tracer(command, 'sh', working, 5)
             expect(tracer.run()).resolves.toBeDefined()
         })
 
         test('run broken', async () => {
-            const tracer = new Tracer(command, 'sh', broken)
+            const tracer = new Tracer(command, 'sh', broken, 5)
             await expect(tracer.run()).resolves.toBeDefined()
         })
     })

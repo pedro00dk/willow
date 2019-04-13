@@ -12,7 +12,8 @@ export class Tracer {
     constructor(
         private readonly command: string,
         private readonly shell: string,
-        private readonly trace: protocol.Trace
+        private readonly trace: protocol.Trace,
+        private readonly timeout: number
     ) {}
 
     async run() {
@@ -62,22 +63,33 @@ export class Tracer {
             )
 
         const result$ = rx.merge(stdout$, stderr$)
-        const resultPromise = result$.pipe(rxOps.take(1)).toPromise()
+        const resultPromise = result$ //
+            .pipe(
+                rxOps.take(1),
+                rxOps.timeout(this.timeout * 1000)
+            )
+            .toPromise()
 
         const traceWriter = protocol.Trace.encode(this.trace)
         const lengthWriter = protobuf.Writer.create().fixed32(traceWriter.len)
         tracer.stdin.write(lengthWriter.finish())
         tracer.stdin.write(traceWriter.finish())
 
-        const result = await resultPromise
-
-        if (!tracer.killed) tracer.kill()
-
-        if (typeof result === 'string') {
-            log.info(Tracer.name, 'run', 'raised', result)
-            throw new Error(result)
+        try {
+            const result = await resultPromise
+            if (typeof result === 'string') {
+                log.info(Tracer.name, 'run', 'threw', result)
+                throw new Error(result)
+            }
+            log.info(Tracer.name, 'run', 'returned')
+            console.log('ok', result)
+            return result
+        } catch(error) {
+            console.log('error', error)
+            throw error
+        } finally {
+            console.log('finally')
+            if (!tracer.killed) tracer.kill()
         }
-        log.info(Tracer.name, 'run', 'done')
-        return result
     }
 }
