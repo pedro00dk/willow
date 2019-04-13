@@ -2,7 +2,7 @@ command=$1
 
 case $command in
     build)
-        rm -r ./.venv
+        rm -r ./.venv || true
         python -m venv ./.venv
         ./.venv/bin/pip install -r ./requirements.txt
         ;;
