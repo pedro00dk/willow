@@ -6,7 +6,7 @@ ADD ./res ./res
 ADD ./src ./src
 ADD ./package.sh ./
 
-RUN source package.sh build
+RUN . package.sh build
 
 ENTRYPOINT ["sh", "package.sh", "start"]
 CMD ["--help"]

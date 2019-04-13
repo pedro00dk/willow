@@ -3,7 +3,7 @@ FROM python:alpine
 WORKDIR /app
 ADD ./package.sh ./requirements.txt ./
 
-RUN source package.sh build
+RUN . package.sh build
 
 ADD ./res ./res
 ADD ./src ./src
