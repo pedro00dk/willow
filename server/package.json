@@ -26,8 +26,8 @@
         "yargs": "13.2.2"
     },
     "config": {
-        "java_tracer": "cd ../tracerJava/ && . ./package.sh start",
-        "python_tracer": "cd ../tracerPython/ && . ./package.sh start"
+        "java_tracer": "cd ../tracers/java/ && . ./package.sh start",
+        "python_tracer": "cd ../tracers/python/ && . ./package.sh start"
     },
     "scripts": {
         "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json -e ./src/protobuf/protocol.ts && prettier --config ./.prettierrc.js -c --write ./src/**/!\\(protocol\\)?\\(.d\\).ts* && shopt -u extglob globstar",

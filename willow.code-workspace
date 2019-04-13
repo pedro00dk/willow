@@ -7,10 +7,7 @@
             "path": "server"
         },
         {
-            "path": "tracerJava"
-        },
-        {
-            "path": "tracerPython"
+            "path": "tracers"
         },
         {
             "path": "."
