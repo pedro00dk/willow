@@ -61,7 +61,7 @@ export class Server {
                     protocol.Trace.create({ source, input, steps }),
                     this.timeout
                 ).run()
-                res.send(result)
+                res.send(protocol.Result.toObject(result, { defaults: true, json: true, oneofs: true }))
                 log.info(Server.name, req.path, 'ok')
             } catch (error) {
                 res.status(400)
