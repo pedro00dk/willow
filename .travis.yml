@@ -6,7 +6,7 @@ jobs:
         #
         ### test ###
         - stage: test
-          name: server
+          name: bare metal
           before_install:
               - nvm install v11.12.0
               - nvm use v11.12.0
@@ -23,11 +23,7 @@ jobs:
               - cd ../../server/
               - npm install
           script: npm run test
-        #
-        #
-        ### test_docker ###
-        - stage: test_docker
-          name: server
+        - name: docker
           install:
               - cd ./tracers/java/
               - docker image build --tag willow:java .
@@ -52,59 +48,55 @@ jobs:
               - gcloud config set compute/zone $GCLOUD_PROJECT_ZONE
               - gcloud config list
               - |
-                gcloud compute instances create willow-instance \
-                    --service-account=$GCLOUD_SERVICE_ACCOUNT_NAME \
-                    --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=n1-standard-1 \
-                    --subnet=default --tags=http-server,https-server --boot-disk-size=10GB || true
+                  gcloud compute instances create willow-instance \
+                      --service-account=$GCLOUD_SERVICE_ACCOUNT_NAME \
+                      --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=n1-standard-1 \
+                      --subnet=default --tags=http-server --boot-disk-size=10GB || true
               - |
-                gcloud compute firewall-rules create default-allow-http \
-                --action=ALLOW --rules=tcp:80 --target-tags=http-server || true
-              - |
-                gcloud compute firewall-rules create default-allow-https \
-                --action=ALLOW --rules=tcp:443 --target-tags=https-server || true
+                  gcloud compute firewall-rules create default-allow-http-extra \
+                  --action=ALLOW --rules=tcp:80-8000 --target-tags=http-server || true
           install:
               - |
-                echo '
-                set -ev
-                rm -fr ./willow/ || true
-                git clone https://github.com/pedro00dk/willow
-                cd ./willow/
-                # kill and remove any running containers
-                docker container kill $(docker container ls --all --quiet) || true
-                docker container rm $(docker container ls --all --quiet) || true
-                # create images
-                cd ./server/
-                docker image build --tag willow:server .
-                cd ../tracerJava/
-                docker image build --tag willow:tracerJava .
-                cd ../tracerPython/
-                docker image build --tag willow:tracerPython .
-                cd ../tracers/
-                docker image build --tag willow:tracers .
-                # clean dangling images
-                docker image prune --force
-                # starting containers
-                docker container run --name willow_tracers --network bridge --rm --detach --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint npm \
-                    -- \
-                    willow:tracers \
-                    run start-base \
-                    -- \
-                    --port 8002 \
-                    --tracer java "docker run --rm -i willow:tracerJava --in-mode proto" \
-                    --tracer python "docker run --rm -i willow:tracerPython --in-mode proto"
-                sleep 10 # willow_server needs the willow_tracers already running
-                TRACERS_IP=$(docker container inspect --format "{{ .NetworkSettings.IPAddress }}" -- willow_tracers)
-                docker container run --name willow_server --network bridge --rm --detach --interactive --tty --publish 80:8001 \
-                    -- \
-                    willow:server \
-                    -- \
-                    --port 8001 \
-                    --tracers "http://${TRACERS_IP}:8002/tracers"
-                ' > deploy.sh
+                  echo "
+                  set -ev
+                  # kill and remove any running containers
+                  docker container kill $(docker container ls --all --quiet) || true
+                  docker container rm $(docker container ls --all --quiet) || true
+                  # clone project
+                  rm -fr ./willow/ || true
+                  git clone https://github.com/pedro00dk/willow
+                  cd ./willow/
+                  # create (or update) images
+                  cd ./tracers/java/
+                  docker image build --tag willow:java .
+                  cd ../python/
+                  docker image build --tag willow:python .
+                  cd ../../server/
+                  docker image build --tag willow:server .
+                  cd ../client/
+                  docker image build --tag willow:client .
+                  # clean dangling images
+                  docker image prune --force
+                  # start server
+                  docker container run --network host --rm --detach --interactive --tty \
+                      -- \
+                      willow:server \
+                      -- \
+                      --port 8001 \
+                      --tracer java 'docker run --rm -i willow:java --in-mode proto' \
+                      --tracer python 'docker run --rm -i willow:python --in-mode proto'
+
+                  # start client
+                  docker container run --network host --rm --detach --interactive --tty \
+                      --env 'SERVER_PROXY=http://localhost:8001' \
+                      --entrypoint npm \
+                      -- \
+                      willow:client \
+                      run serve-proxy
+                  " > deploy.sh
               - gcloud compute ssh willow-instance -- sh -c "$(cat deploy.sh)"
 
 stages:
     - name: test
-    - name: test_docker
     - name: deploy
       if: branch = deploy
