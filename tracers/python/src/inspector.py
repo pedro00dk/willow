@@ -102,7 +102,7 @@ class Inspector:
 
         if members is not None:
             # known object type
-            # add reference to heap graph (it has to be added before other objects inspections)
+            # add reference to snapshot heap (it has to be added before other objects inspections)
             heapObj = snapshot.heap[reference]
             heapObj.type = generic_type
             heapObj.languageType = language_type
@@ -116,4 +116,4 @@ class Inspector:
         else:
             # unknown object type
             # instead of inspecting unknown objects, I decided to inspect its type
-            return self._inspect_object(type(obj), heap, classes, module)
+            return self._inspect_object(snapshot, type(obj), classes, module)
