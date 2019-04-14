@@ -3,13 +3,13 @@ import * as protocol from '../../protobuf/protocol'
 import { AsyncAction } from '../Store'
 
 export type StackNode = {
-    name: string
-    steps: { from: number; to: number }
-    children: StackNode[]
+    readonly name: string
+    readonly steps: { from: number; to: number }
+    readonly children: StackNode[]
 }
 
 type State = {
-    tree: StackNode
+    readonly tree: StackNode
 }
 
 type Action = { type: 'debug/stack/load'; payload: State }
