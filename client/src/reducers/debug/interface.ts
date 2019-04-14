@@ -42,7 +42,7 @@ function inspect(): AsyncAction {
             dispatch({ type: 'debug/interface/trace', payload: {} })
             dispatch(debugIndexerActions.set(0))
             dispatch(debugResultActions.set(result))
-            dispatch(debugHeapActions.loadGraph())
+            dispatch(debugHeapActions.load())
             dispatch(debugStackActions.load())
         } catch (error) {
             dispatch({
