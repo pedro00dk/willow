@@ -32,22 +32,20 @@ function load(): AsyncAction {
         const tree: StackNode = { name: '', steps: { from: 0, to: 0 }, children: [] }
         const treePath = [tree]
         debugResult.steps.forEach((step, i) => {
-            const lastNode = treePath[treePath.length - 1]
             const snapshot = step.snapshot
+            const lastNode = treePath[treePath.length - 1]
             if (!snapshot) {
-                const lastLeaf = treePath.length > 1 ? lastNode.children[lastNode.children.length - 1] : undefined
-                if (lastLeaf) treePath.forEach(node => (node.steps.to = lastLeaf.steps.to))
+                const name = !!step.threw.exception ? step.threw.exception.type : step.threw.cause
                 const threwNode: StackNode = {
-                    name: '#THREW#',
+                    name,
                     steps: { from: i, to: i },
                     children: [{ name: undefined, steps: { from: i, to: i }, children: [] }]
                 }
                 tree.children.push(threwNode)
                 tree.steps.to = i
                 return
-            }
-            const scope = snapshot.stack[snapshot.stack.length - 1]
-            if (snapshot.type === protocol.Snapshot.Type.CALL) {
+            } else if (snapshot.type === protocol.Snapshot.Type.CALL) {
+                const scope = snapshot.stack[snapshot.stack.length - 1]
                 const callNode: StackNode = { name: scope.name, steps: { from: i, to: i }, children: [] }
                 const callLeaf: StackNode = { name: undefined, steps: { from: i, to: i }, children: [] }
                 callNode.children.push(callLeaf)
@@ -55,7 +53,7 @@ function load(): AsyncAction {
                 treePath.forEach(node => (node.steps.to = i))
                 treePath.push(callNode)
             } else {
-                // creates a new leaf if the previous leaf has any child (it happens after a RETURN)
+                // creates a new leaf if the previous leaf does not have any child (it happens after a RETURN)
                 const createLeaf = lastNode.children[lastNode.children.length - 1].children.length > 0
                 if (createLeaf) lastNode.children.push({ name: undefined, steps: { from: i, to: i }, children: [] })
                 //
