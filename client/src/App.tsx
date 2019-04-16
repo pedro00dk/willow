@@ -9,9 +9,11 @@ import { OutputEditor } from './components/editor/OutputEditor'
 import { SplitPane } from './components/SplitPane'
 import { Visualization } from './components/visualization/Visualization'
 
-const styles = {
-    navbarLogo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
-    navbarText: css({ fontSize: '2rem' })
+const classes = {
+    header: {
+        logo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
+        text: cn('ml-2', css({ fontSize: '2rem' }))
+    }
 }
 
 export function App() {
@@ -28,8 +30,8 @@ function Header() {
     return (
         <nav className='navbar navbar-expand navbar-light shadow-sm static-top'>
             <a className='d-flex flex-row align-items-center navbar-brand' href='#'>
-                <img src={logo} className={styles.navbarLogo} />
-                <span className={cn('ml-2', styles.navbarText)}>Willow</span>
+                <img src={logo} className={classes.header.logo} />
+                <span className={classes.header.text}>Willow</span>
             </a>
         </nav>
     )

@@ -29,7 +29,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 function load(): AsyncAction {
     return async (dispatch, getState) => {
         const { debugResult } = getState()
-        const tree: StackNode = { name: '', steps: { from: 0, to: 0 }, children: [] }
+        const tree: StackNode = { name: undefined, steps: { from: 0, to: 0 }, children: [] }
         const treePath = [tree]
         debugResult.steps.forEach((step, i) => {
             const snapshot = step.snapshot
