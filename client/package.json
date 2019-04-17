@@ -21,6 +21,7 @@
         "classnames": "2.2.6",
         "emotion": "10.0.9",
         "react": "16.8.6",
+        "react-contextmenu": "2.11.0",
         "react-dom": "16.8.6",
         "react-split-pane": "0.1.87",
         "redux": "4.0.1",

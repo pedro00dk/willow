@@ -8,6 +8,9 @@ export type ObjNode = {
     languageType: string
     userDefined: boolean
     members: { key: boolean | number | string | ObjNode; value: boolean | number | string | ObjNode }[]
+    drawing: {
+        position: { x: number; y: number }
+    }
 }
 
 export type Heap = { [reference: string]: ObjNode }
@@ -44,7 +47,8 @@ function load(): AsyncAction {
                     type: obj.type,
                     languageType: obj.languageType,
                     userDefined: obj.userDefined,
-                    members: []
+                    members: [],
+                    drawing: { position: { x: 0, y: 0 } }
                 }
             })
             Object.entries(heap).forEach(([reference, objNode]) => {
