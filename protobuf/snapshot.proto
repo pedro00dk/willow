@@ -70,15 +70,13 @@ message Variable {
 /*
 Represents the programs values.
 They shall be one of the folowing ones.
+Types like boolean, null, or integers larger than what a double can fit (+- 2 ** 53 - 1) must use string representation.
 */
 message Value {
   oneof value {
-    bool boolean = 1;
-    int32 integer = 2;
-    double float = 3;
-    string string = 4;
-    string other = 5;
-    string reference = 6;
+    double number = 1;
+    string string = 2;
+    string reference = 3;
   }
 }
 

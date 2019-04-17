@@ -79,13 +79,13 @@ public final class Inspector {
     }
 
     private static SnapshotOuterClass.Value.Builder inspectObject(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, Value jdiValue, ThreadReference threadReference) {
-        if (jdiValue == null) return SnapshotOuterClass.Value.newBuilder().setOther("null");
+        if (jdiValue == null) return SnapshotOuterClass.Value.newBuilder().setString("null");
         var value = inspectPrimitive(jdiValue);
         if (value != null) return value;
         value = inspectString(jdiValue);
         if (value != null) return value;
 
-        if (!(jdiValue instanceof ObjectReference)) return SnapshotOuterClass.Value.newBuilder().setOther("unknown");
+        if (!(jdiValue instanceof ObjectReference)) return SnapshotOuterClass.Value.newBuilder().setString("unknown");
         var jdiObject = (ObjectReference) jdiValue;
         value = inspectBoxed(jdiObject);
         if (value != null) return value;
@@ -98,23 +98,26 @@ public final class Inspector {
         value = inspectUuserObject(snapshotBuilder, jdiObject, threadReference);
         if (value != null) return value;
 
-        return SnapshotOuterClass.Value.newBuilder().setOther(jdiObject.referenceType().name());
+        return SnapshotOuterClass.Value.newBuilder().setString("type " + jdiObject.referenceType().name());
     }
 
     private static SnapshotOuterClass.Value.Builder inspectPrimitive(Value jdiValue) {
         if (jdiValue instanceof PrimitiveValue) {
             var valueBuilder = SnapshotOuterClass.Value.newBuilder();
-            if (jdiValue instanceof BooleanValue) valueBuilder.setBoolean(((BooleanValue) jdiValue).value());
+            if (jdiValue instanceof BooleanValue)
+                valueBuilder.setString(Boolean.toString(((BooleanValue) jdiValue).value()));
             else if (jdiValue instanceof CharValue)
                 valueBuilder.setString(Character.toString(((CharValue) jdiValue).value()));
-            else if (jdiValue instanceof ByteValue) valueBuilder.setInteger(((ByteValue) jdiValue).value());
-            else if (jdiValue instanceof ShortValue) valueBuilder.setInteger(((ShortValue) jdiValue).value());
-            else if (jdiValue instanceof IntegerValue) valueBuilder.setInteger(((IntegerValue) jdiValue).value());
-            else if (jdiValue instanceof LongValue)
-                valueBuilder.setOther(String.valueOf(((LongValue) jdiValue).value()));
-            else if (jdiValue instanceof FloatValue) valueBuilder.setFloat(((FloatValue) jdiValue).value());
-            else if (jdiValue instanceof DoubleValue) valueBuilder.setFloat(((DoubleValue) jdiValue).value());
-            else return null;
+            else if (jdiValue instanceof ByteValue) valueBuilder.setNumber(((ByteValue) jdiValue).value());
+            else if (jdiValue instanceof ShortValue) valueBuilder.setNumber(((ShortValue) jdiValue).value());
+            else if (jdiValue instanceof IntegerValue) valueBuilder.setNumber(((IntegerValue) jdiValue).value());
+            else if (jdiValue instanceof FloatValue) valueBuilder.setNumber(((FloatValue) jdiValue).value());
+            else if (jdiValue instanceof DoubleValue) valueBuilder.setNumber(((DoubleValue) jdiValue).value());
+            else if (jdiValue instanceof LongValue) {
+                var value = ((LongValue) jdiValue).value();
+                if (Math.abs(value)< Math.pow(2, 53)) valueBuilder.setNumber(value);
+                else valueBuilder.setString(Long.toString(value));
+            } else return null;
             return valueBuilder;
         }
         return null;
@@ -151,7 +154,7 @@ public final class Inspector {
         arrayRef.getValues()
                 .forEach(v -> {
                     var memberBuilder = objBuilder.addMembersBuilder();
-                    memberBuilder.getKeyBuilder().setInteger(memberIndex.getAndIncrement());
+                    memberBuilder.getKeyBuilder().setNumber(memberIndex.getAndIncrement());
                     memberBuilder.setValue(inspectObject(snapshotBuilder, v, threadReference).build());
                 });
         snapshotBuilder.putHeap(reference, objBuilder.build());

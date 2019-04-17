@@ -5314,46 +5314,26 @@ public final class SnapshotOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>bool boolean = 1;</code>
+     * <code>double number = 1;</code>
      */
-    boolean getBoolean();
+    double getNumber();
 
     /**
-     * <code>int32 integer = 2;</code>
-     */
-    int getInteger();
-
-    /**
-     * <code>double float = 3;</code>
-     */
-    double getFloat();
-
-    /**
-     * <code>string string = 4;</code>
+     * <code>string string = 2;</code>
      */
     java.lang.String getString();
     /**
-     * <code>string string = 4;</code>
+     * <code>string string = 2;</code>
      */
     com.google.protobuf.ByteString
         getStringBytes();
 
     /**
-     * <code>string other = 5;</code>
-     */
-    java.lang.String getOther();
-    /**
-     * <code>string other = 5;</code>
-     */
-    com.google.protobuf.ByteString
-        getOtherBytes();
-
-    /**
-     * <code>string reference = 6;</code>
+     * <code>string reference = 3;</code>
      */
     java.lang.String getReference();
     /**
-     * <code>string reference = 6;</code>
+     * <code>string reference = 3;</code>
      */
     com.google.protobuf.ByteString
         getReferenceBytes();
@@ -5364,6 +5344,7 @@ public final class SnapshotOuterClass {
    * <pre>
    *Represents the programs values.
    *They shall be one of the folowing ones.
+   *Types like boolean, null, or integers larger than what a double can fit (+- 2 ** 53 - 1) must use string representation.
    * </pre>
    *
    * Protobuf type {@code Value}
@@ -5404,36 +5385,20 @@ public final class SnapshotOuterClass {
             case 0:
               done = true;
               break;
-            case 8: {
+            case 9: {
               valueCase_ = 1;
-              value_ = input.readBool();
-              break;
-            }
-            case 16: {
-              valueCase_ = 2;
-              value_ = input.readInt32();
-              break;
-            }
-            case 25: {
-              valueCase_ = 3;
               value_ = input.readDouble();
               break;
             }
-            case 34: {
+            case 18: {
               java.lang.String s = input.readStringRequireUtf8();
-              valueCase_ = 4;
+              valueCase_ = 2;
               value_ = s;
               break;
             }
-            case 42: {
+            case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              valueCase_ = 5;
-              value_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-              valueCase_ = 6;
+              valueCase_ = 3;
               value_ = s;
               break;
             }
@@ -5473,12 +5438,9 @@ public final class SnapshotOuterClass {
     private java.lang.Object value_;
     public enum ValueCase
         implements com.google.protobuf.Internal.EnumLite {
-      BOOLEAN(1),
-      INTEGER(2),
-      FLOAT(3),
-      STRING(4),
-      OTHER(5),
-      REFERENCE(6),
+      NUMBER(1),
+      STRING(2),
+      REFERENCE(3),
       VALUE_NOT_SET(0);
       private final int value;
       private ValueCase(int value) {
@@ -5494,12 +5456,9 @@ public final class SnapshotOuterClass {
 
       public static ValueCase forNumber(int value) {
         switch (value) {
-          case 1: return BOOLEAN;
-          case 2: return INTEGER;
-          case 3: return FLOAT;
-          case 4: return STRING;
-          case 5: return OTHER;
-          case 6: return REFERENCE;
+          case 1: return NUMBER;
+          case 2: return STRING;
+          case 3: return REFERENCE;
           case 0: return VALUE_NOT_SET;
           default: return null;
         }
@@ -5515,46 +5474,24 @@ public final class SnapshotOuterClass {
           valueCase_);
     }
 
-    public static final int BOOLEAN_FIELD_NUMBER = 1;
+    public static final int NUMBER_FIELD_NUMBER = 1;
     /**
-     * <code>bool boolean = 1;</code>
+     * <code>double number = 1;</code>
      */
-    public boolean getBoolean() {
+    public double getNumber() {
       if (valueCase_ == 1) {
-        return (java.lang.Boolean) value_;
-      }
-      return false;
-    }
-
-    public static final int INTEGER_FIELD_NUMBER = 2;
-    /**
-     * <code>int32 integer = 2;</code>
-     */
-    public int getInteger() {
-      if (valueCase_ == 2) {
-        return (java.lang.Integer) value_;
-      }
-      return 0;
-    }
-
-    public static final int FLOAT_FIELD_NUMBER = 3;
-    /**
-     * <code>double float = 3;</code>
-     */
-    public double getFloat() {
-      if (valueCase_ == 3) {
         return (java.lang.Double) value_;
       }
       return 0D;
     }
 
-    public static final int STRING_FIELD_NUMBER = 4;
+    public static final int STRING_FIELD_NUMBER = 2;
     /**
-     * <code>string string = 4;</code>
+     * <code>string string = 2;</code>
      */
     public java.lang.String getString() {
       java.lang.Object ref = "";
-      if (valueCase_ == 4) {
+      if (valueCase_ == 2) {
         ref = value_;
       }
       if (ref instanceof java.lang.String) {
@@ -5563,26 +5500,26 @@ public final class SnapshotOuterClass {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (valueCase_ == 4) {
+        if (valueCase_ == 2) {
           value_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>string string = 4;</code>
+     * <code>string string = 2;</code>
      */
     public com.google.protobuf.ByteString
         getStringBytes() {
       java.lang.Object ref = "";
-      if (valueCase_ == 4) {
+      if (valueCase_ == 2) {
         ref = value_;
       }
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        if (valueCase_ == 4) {
+        if (valueCase_ == 2) {
           value_ = b;
         }
         return b;
@@ -5591,56 +5528,13 @@ public final class SnapshotOuterClass {
       }
     }
 
-    public static final int OTHER_FIELD_NUMBER = 5;
+    public static final int REFERENCE_FIELD_NUMBER = 3;
     /**
-     * <code>string other = 5;</code>
-     */
-    public java.lang.String getOther() {
-      java.lang.Object ref = "";
-      if (valueCase_ == 5) {
-        ref = value_;
-      }
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (valueCase_ == 5) {
-          value_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>string other = 5;</code>
-     */
-    public com.google.protobuf.ByteString
-        getOtherBytes() {
-      java.lang.Object ref = "";
-      if (valueCase_ == 5) {
-        ref = value_;
-      }
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        if (valueCase_ == 5) {
-          value_ = b;
-        }
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int REFERENCE_FIELD_NUMBER = 6;
-    /**
-     * <code>string reference = 6;</code>
+     * <code>string reference = 3;</code>
      */
     public java.lang.String getReference() {
       java.lang.Object ref = "";
-      if (valueCase_ == 6) {
+      if (valueCase_ == 3) {
         ref = value_;
       }
       if (ref instanceof java.lang.String) {
@@ -5649,26 +5543,26 @@ public final class SnapshotOuterClass {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (valueCase_ == 6) {
+        if (valueCase_ == 3) {
           value_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>string reference = 6;</code>
+     * <code>string reference = 3;</code>
      */
     public com.google.protobuf.ByteString
         getReferenceBytes() {
       java.lang.Object ref = "";
-      if (valueCase_ == 6) {
+      if (valueCase_ == 3) {
         ref = value_;
       }
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        if (valueCase_ == 6) {
+        if (valueCase_ == 3) {
           value_ = b;
         }
         return b;
@@ -5692,25 +5586,14 @@ public final class SnapshotOuterClass {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (valueCase_ == 1) {
-        output.writeBool(
-            1, (boolean)((java.lang.Boolean) value_));
+        output.writeDouble(
+            1, (double)((java.lang.Double) value_));
       }
       if (valueCase_ == 2) {
-        output.writeInt32(
-            2, (int)((java.lang.Integer) value_));
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
       }
       if (valueCase_ == 3) {
-        output.writeDouble(
-            3, (double)((java.lang.Double) value_));
-      }
-      if (valueCase_ == 4) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, value_);
-      }
-      if (valueCase_ == 5) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, value_);
-      }
-      if (valueCase_ == 6) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, value_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, value_);
       }
       unknownFields.writeTo(output);
     }
@@ -5723,27 +5606,14 @@ public final class SnapshotOuterClass {
       size = 0;
       if (valueCase_ == 1) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(
-              1, (boolean)((java.lang.Boolean) value_));
+          .computeDoubleSize(
+              1, (double)((java.lang.Double) value_));
       }
       if (valueCase_ == 2) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(
-              2, (int)((java.lang.Integer) value_));
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
       }
       if (valueCase_ == 3) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(
-              3, (double)((java.lang.Double) value_));
-      }
-      if (valueCase_ == 4) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, value_);
-      }
-      if (valueCase_ == 5) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, value_);
-      }
-      if (valueCase_ == 6) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, value_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, value_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5763,27 +5633,15 @@ public final class SnapshotOuterClass {
       if (!getValueCase().equals(other.getValueCase())) return false;
       switch (valueCase_) {
         case 1:
-          if (getBoolean()
-              != other.getBoolean()) return false;
+          if (java.lang.Double.doubleToLongBits(getNumber())
+              != java.lang.Double.doubleToLongBits(
+                  other.getNumber())) return false;
           break;
         case 2:
-          if (getInteger()
-              != other.getInteger()) return false;
-          break;
-        case 3:
-          if (java.lang.Double.doubleToLongBits(getFloat())
-              != java.lang.Double.doubleToLongBits(
-                  other.getFloat())) return false;
-          break;
-        case 4:
           if (!getString()
               .equals(other.getString())) return false;
           break;
-        case 5:
-          if (!getOther()
-              .equals(other.getOther())) return false;
-          break;
-        case 6:
+        case 3:
           if (!getReference()
               .equals(other.getReference())) return false;
           break;
@@ -5803,28 +5661,15 @@ public final class SnapshotOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       switch (valueCase_) {
         case 1:
-          hash = (37 * hash) + BOOLEAN_FIELD_NUMBER;
-          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-              getBoolean());
+          hash = (37 * hash) + NUMBER_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+              java.lang.Double.doubleToLongBits(getNumber()));
           break;
         case 2:
-          hash = (37 * hash) + INTEGER_FIELD_NUMBER;
-          hash = (53 * hash) + getInteger();
-          break;
-        case 3:
-          hash = (37 * hash) + FLOAT_FIELD_NUMBER;
-          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-              java.lang.Double.doubleToLongBits(getFloat()));
-          break;
-        case 4:
           hash = (37 * hash) + STRING_FIELD_NUMBER;
           hash = (53 * hash) + getString().hashCode();
           break;
-        case 5:
-          hash = (37 * hash) + OTHER_FIELD_NUMBER;
-          hash = (53 * hash) + getOther().hashCode();
-          break;
-        case 6:
+        case 3:
           hash = (37 * hash) + REFERENCE_FIELD_NUMBER;
           hash = (53 * hash) + getReference().hashCode();
           break;
@@ -5930,6 +5775,7 @@ public final class SnapshotOuterClass {
      * <pre>
      *Represents the programs values.
      *They shall be one of the folowing ones.
+     *Types like boolean, null, or integers larger than what a double can fit (+- 2 ** 53 - 1) must use string representation.
      * </pre>
      *
      * Protobuf type {@code Value}
@@ -6006,15 +5852,6 @@ public final class SnapshotOuterClass {
         if (valueCase_ == 3) {
           result.value_ = value_;
         }
-        if (valueCase_ == 4) {
-          result.value_ = value_;
-        }
-        if (valueCase_ == 5) {
-          result.value_ = value_;
-        }
-        if (valueCase_ == 6) {
-          result.value_ = value_;
-        }
         result.valueCase_ = valueCase_;
         onBuilt();
         return result;
@@ -6065,32 +5902,18 @@ public final class SnapshotOuterClass {
       public Builder mergeFrom(SnapshotOuterClass.Value other) {
         if (other == SnapshotOuterClass.Value.getDefaultInstance()) return this;
         switch (other.getValueCase()) {
-          case BOOLEAN: {
-            setBoolean(other.getBoolean());
-            break;
-          }
-          case INTEGER: {
-            setInteger(other.getInteger());
-            break;
-          }
-          case FLOAT: {
-            setFloat(other.getFloat());
+          case NUMBER: {
+            setNumber(other.getNumber());
             break;
           }
           case STRING: {
-            valueCase_ = 4;
-            value_ = other.value_;
-            onChanged();
-            break;
-          }
-          case OTHER: {
-            valueCase_ = 5;
+            valueCase_ = 2;
             value_ = other.value_;
             onChanged();
             break;
           }
           case REFERENCE: {
-            valueCase_ = 6;
+            valueCase_ = 3;
             value_ = other.value_;
             onChanged();
             break;
@@ -6144,27 +5967,27 @@ public final class SnapshotOuterClass {
 
 
       /**
-       * <code>bool boolean = 1;</code>
+       * <code>double number = 1;</code>
        */
-      public boolean getBoolean() {
+      public double getNumber() {
         if (valueCase_ == 1) {
-          return (java.lang.Boolean) value_;
+          return (java.lang.Double) value_;
         }
-        return false;
+        return 0D;
       }
       /**
-       * <code>bool boolean = 1;</code>
+       * <code>double number = 1;</code>
        */
-      public Builder setBoolean(boolean value) {
+      public Builder setNumber(double value) {
         valueCase_ = 1;
         value_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>bool boolean = 1;</code>
+       * <code>double number = 1;</code>
        */
-      public Builder clearBoolean() {
+      public Builder clearNumber() {
         if (valueCase_ == 1) {
           valueCase_ = 0;
           value_ = null;
@@ -6174,78 +5997,18 @@ public final class SnapshotOuterClass {
       }
 
       /**
-       * <code>int32 integer = 2;</code>
-       */
-      public int getInteger() {
-        if (valueCase_ == 2) {
-          return (java.lang.Integer) value_;
-        }
-        return 0;
-      }
-      /**
-       * <code>int32 integer = 2;</code>
-       */
-      public Builder setInteger(int value) {
-        valueCase_ = 2;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 integer = 2;</code>
-       */
-      public Builder clearInteger() {
-        if (valueCase_ == 2) {
-          valueCase_ = 0;
-          value_ = null;
-          onChanged();
-        }
-        return this;
-      }
-
-      /**
-       * <code>double float = 3;</code>
-       */
-      public double getFloat() {
-        if (valueCase_ == 3) {
-          return (java.lang.Double) value_;
-        }
-        return 0D;
-      }
-      /**
-       * <code>double float = 3;</code>
-       */
-      public Builder setFloat(double value) {
-        valueCase_ = 3;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>double float = 3;</code>
-       */
-      public Builder clearFloat() {
-        if (valueCase_ == 3) {
-          valueCase_ = 0;
-          value_ = null;
-          onChanged();
-        }
-        return this;
-      }
-
-      /**
-       * <code>string string = 4;</code>
+       * <code>string string = 2;</code>
        */
       public java.lang.String getString() {
         java.lang.Object ref = "";
-        if (valueCase_ == 4) {
+        if (valueCase_ == 2) {
           ref = value_;
         }
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          if (valueCase_ == 4) {
+          if (valueCase_ == 2) {
             value_ = s;
           }
           return s;
@@ -6254,19 +6017,19 @@ public final class SnapshotOuterClass {
         }
       }
       /**
-       * <code>string string = 4;</code>
+       * <code>string string = 2;</code>
        */
       public com.google.protobuf.ByteString
           getStringBytes() {
         java.lang.Object ref = "";
-        if (valueCase_ == 4) {
+        if (valueCase_ == 2) {
           ref = value_;
         }
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          if (valueCase_ == 4) {
+          if (valueCase_ == 2) {
             value_ = b;
           }
           return b;
@@ -6275,23 +6038,23 @@ public final class SnapshotOuterClass {
         }
       }
       /**
-       * <code>string string = 4;</code>
+       * <code>string string = 2;</code>
        */
       public Builder setString(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  valueCase_ = 4;
+  valueCase_ = 2;
         value_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string string = 4;</code>
+       * <code>string string = 2;</code>
        */
       public Builder clearString() {
-        if (valueCase_ == 4) {
+        if (valueCase_ == 2) {
           valueCase_ = 0;
           value_ = null;
           onChanged();
@@ -6299,7 +6062,7 @@ public final class SnapshotOuterClass {
         return this;
       }
       /**
-       * <code>string string = 4;</code>
+       * <code>string string = 2;</code>
        */
       public Builder setStringBytes(
           com.google.protobuf.ByteString value) {
@@ -6307,105 +6070,25 @@ public final class SnapshotOuterClass {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        valueCase_ = 4;
+        valueCase_ = 2;
         value_ = value;
         onChanged();
         return this;
       }
 
       /**
-       * <code>string other = 5;</code>
-       */
-      public java.lang.String getOther() {
-        java.lang.Object ref = "";
-        if (valueCase_ == 5) {
-          ref = value_;
-        }
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (valueCase_ == 5) {
-            value_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string other = 5;</code>
-       */
-      public com.google.protobuf.ByteString
-          getOtherBytes() {
-        java.lang.Object ref = "";
-        if (valueCase_ == 5) {
-          ref = value_;
-        }
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          if (valueCase_ == 5) {
-            value_ = b;
-          }
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string other = 5;</code>
-       */
-      public Builder setOther(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  valueCase_ = 5;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string other = 5;</code>
-       */
-      public Builder clearOther() {
-        if (valueCase_ == 5) {
-          valueCase_ = 0;
-          value_ = null;
-          onChanged();
-        }
-        return this;
-      }
-      /**
-       * <code>string other = 5;</code>
-       */
-      public Builder setOtherBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        valueCase_ = 5;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-
-      /**
-       * <code>string reference = 6;</code>
+       * <code>string reference = 3;</code>
        */
       public java.lang.String getReference() {
         java.lang.Object ref = "";
-        if (valueCase_ == 6) {
+        if (valueCase_ == 3) {
           ref = value_;
         }
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          if (valueCase_ == 6) {
+          if (valueCase_ == 3) {
             value_ = s;
           }
           return s;
@@ -6414,19 +6097,19 @@ public final class SnapshotOuterClass {
         }
       }
       /**
-       * <code>string reference = 6;</code>
+       * <code>string reference = 3;</code>
        */
       public com.google.protobuf.ByteString
           getReferenceBytes() {
         java.lang.Object ref = "";
-        if (valueCase_ == 6) {
+        if (valueCase_ == 3) {
           ref = value_;
         }
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          if (valueCase_ == 6) {
+          if (valueCase_ == 3) {
             value_ = b;
           }
           return b;
@@ -6435,23 +6118,23 @@ public final class SnapshotOuterClass {
         }
       }
       /**
-       * <code>string reference = 6;</code>
+       * <code>string reference = 3;</code>
        */
       public Builder setReference(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  valueCase_ = 6;
+  valueCase_ = 3;
         value_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string reference = 6;</code>
+       * <code>string reference = 3;</code>
        */
       public Builder clearReference() {
-        if (valueCase_ == 6) {
+        if (valueCase_ == 3) {
           valueCase_ = 0;
           value_ = null;
           onChanged();
@@ -6459,7 +6142,7 @@ public final class SnapshotOuterClass {
         return this;
       }
       /**
-       * <code>string reference = 6;</code>
+       * <code>string reference = 3;</code>
        */
       public Builder setReferenceBytes(
           com.google.protobuf.ByteString value) {
@@ -6467,7 +6150,7 @@ public final class SnapshotOuterClass {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        valueCase_ = 6;
+        valueCase_ = 3;
         value_ = value;
         onChanged();
         return this;
@@ -9412,18 +9095,16 @@ public final class SnapshotOuterClass {
       "\030\003 \003(\t\"A\n\005Scope\022\014\n\004line\030\001 \001(\005\022\014\n\004name\030\002 " +
       "\001(\t\022\034\n\tvariables\030\003 \003(\0132\t.Variable\"/\n\010Var" +
       "iable\022\014\n\004name\030\001 \001(\t\022\025\n\005value\030\002 \001(\0132\006.Val" +
-      "ue\"\177\n\005Value\022\021\n\007boolean\030\001 \001(\010H\000\022\021\n\007intege" +
-      "r\030\002 \001(\005H\000\022\017\n\005float\030\003 \001(\001H\000\022\020\n\006string\030\004 \001" +
-      "(\tH\000\022\017\n\005other\030\005 \001(\tH\000\022\023\n\treference\030\006 \001(\t" +
-      "H\000B\007\n\005value\"\277\001\n\003Obj\022\027\n\004type\030\001 \001(\0162\t.Obj." +
-      "Type\022\024\n\014languageType\030\002 \001(\t\022\023\n\013userDefine" +
-      "d\030\003 \001(\010\022\030\n\007members\030\004 \003(\0132\007.Member\"Z\n\004Typ" +
-      "e\022\t\n\005ARRAY\020\000\022\t\n\005TUPLE\020\001\022\t\n\005ALIST\020\002\022\t\n\005LL" +
-      "IST\020\003\022\010\n\004HMAP\020\004\022\010\n\004TMAP\020\005\022\007\n\003SET\020\006\022\t\n\005OT" +
-      "HER\020\007\"4\n\006Member\022\023\n\003key\030\001 \001(\0132\006.Value\022\025\n\005" +
-      "value\030\002 \001(\0132\006.Value\"5\n\005Threw\022\035\n\texceptio" +
-      "n\030\001 \001(\0132\n.Exception\022\r\n\005cause\030\002 \001(\tb\006prot" +
-      "o3"
+      "ue\"I\n\005Value\022\020\n\006number\030\001 \001(\001H\000\022\020\n\006string\030" +
+      "\002 \001(\tH\000\022\023\n\treference\030\003 \001(\tH\000B\007\n\005value\"\277\001" +
+      "\n\003Obj\022\027\n\004type\030\001 \001(\0162\t.Obj.Type\022\024\n\014langua" +
+      "geType\030\002 \001(\t\022\023\n\013userDefined\030\003 \001(\010\022\030\n\007mem" +
+      "bers\030\004 \003(\0132\007.Member\"Z\n\004Type\022\t\n\005ARRAY\020\000\022\t" +
+      "\n\005TUPLE\020\001\022\t\n\005ALIST\020\002\022\t\n\005LLIST\020\003\022\010\n\004HMAP\020" +
+      "\004\022\010\n\004TMAP\020\005\022\007\n\003SET\020\006\022\t\n\005OTHER\020\007\"4\n\006Membe" +
+      "r\022\023\n\003key\030\001 \001(\0132\006.Value\022\025\n\005value\030\002 \001(\0132\006." +
+      "Value\"5\n\005Threw\022\035\n\texception\030\001 \001(\0132\n.Exce" +
+      "ption\022\r\n\005cause\030\002 \001(\tb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -9478,7 +9159,7 @@ public final class SnapshotOuterClass {
     internal_static_Value_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Value_descriptor,
-        new java.lang.String[] { "Boolean", "Integer", "Float", "String", "Other", "Reference", "Value", });
+        new java.lang.String[] { "Number", "String", "Reference", "Value", });
     internal_static_Obj_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_Obj_fieldAccessorTable = new

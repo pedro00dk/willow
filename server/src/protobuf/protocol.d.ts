@@ -529,20 +529,11 @@ export class Variable implements IVariable {
 /** Properties of a Value. */
 export interface IValue {
 
-    /** Value boolean */
-    boolean?: (boolean|null);
-
-    /** Value integer */
-    integer?: (number|null);
-
-    /** Value float */
-    float?: (number|null);
+    /** Value number */
+    number?: (number|null);
 
     /** Value string */
     string?: (string|null);
-
-    /** Value other */
-    other?: (string|null);
 
     /** Value reference */
     reference?: (string|null);
@@ -557,26 +548,17 @@ export class Value implements IValue {
      */
     constructor(properties?: IValue);
 
-    /** Value boolean. */
-    public boolean: boolean;
-
-    /** Value integer. */
-    public integer: number;
-
-    /** Value float. */
-    public float: number;
+    /** Value number. */
+    public number: number;
 
     /** Value string. */
     public string: string;
-
-    /** Value other. */
-    public other: string;
 
     /** Value reference. */
     public reference: string;
 
     /** Value value. */
-    public value?: ("boolean"|"integer"|"float"|"string"|"other"|"reference");
+    public value?: ("number"|"string"|"reference");
 
     /**
      * Creates a new Value instance using the specified properties.

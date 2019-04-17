@@ -71,22 +71,16 @@ export class Variable implements IVariable {
 }
 
 export interface IValue {
-    boolean?: (boolean|null);
-    integer?: (number|null);
-    float?: (number|null);
+    number?: (number|null);
     string?: (string|null);
-    other?: (string|null);
     reference?: (string|null);
 }
 
 export class Value implements IValue {
-    public boolean: boolean;
-    public integer: number;
-    public float: number;
+    public number: number;
     public string: string;
-    public other: string;
     public reference: string;
-    public value?: ("boolean"|"integer"|"float"|"string"|"other"|"reference");
+    public value?: ("number"|"string"|"reference");
 }
 
 export interface IObj {

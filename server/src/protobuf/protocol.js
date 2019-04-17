@@ -1379,11 +1379,8 @@ export const Value = $root.Value = (() => {
      * Properties of a Value.
      * @exports IValue
      * @interface IValue
-     * @property {boolean|null} [boolean] Value boolean
-     * @property {number|null} [integer] Value integer
-     * @property {number|null} [float] Value float
+     * @property {number|null} [number] Value number
      * @property {string|null} [string] Value string
-     * @property {string|null} [other] Value other
      * @property {string|null} [reference] Value reference
      */
 
@@ -1403,28 +1400,12 @@ export const Value = $root.Value = (() => {
     }
 
     /**
-     * Value boolean.
-     * @member {boolean} boolean
+     * Value number.
+     * @member {number} number
      * @memberof Value
      * @instance
      */
-    Value.prototype.boolean = false;
-
-    /**
-     * Value integer.
-     * @member {number} integer
-     * @memberof Value
-     * @instance
-     */
-    Value.prototype.integer = 0;
-
-    /**
-     * Value float.
-     * @member {number} float
-     * @memberof Value
-     * @instance
-     */
-    Value.prototype.float = 0;
+    Value.prototype.number = 0;
 
     /**
      * Value string.
@@ -1433,14 +1414,6 @@ export const Value = $root.Value = (() => {
      * @instance
      */
     Value.prototype.string = "";
-
-    /**
-     * Value other.
-     * @member {string} other
-     * @memberof Value
-     * @instance
-     */
-    Value.prototype.other = "";
 
     /**
      * Value reference.
@@ -1455,12 +1428,12 @@ export const Value = $root.Value = (() => {
 
     /**
      * Value value.
-     * @member {"boolean"|"integer"|"float"|"string"|"other"|"reference"|undefined} value
+     * @member {"number"|"string"|"reference"|undefined} value
      * @memberof Value
      * @instance
      */
     Object.defineProperty(Value.prototype, "value", {
-        get: $util.oneOfGetter($oneOfFields = ["boolean", "integer", "float", "string", "other", "reference"]),
+        get: $util.oneOfGetter($oneOfFields = ["number", "string", "reference"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
@@ -1488,18 +1461,12 @@ export const Value = $root.Value = (() => {
     Value.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.boolean != null && message.hasOwnProperty("boolean"))
-            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.boolean);
-        if (message.integer != null && message.hasOwnProperty("integer"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.integer);
-        if (message.float != null && message.hasOwnProperty("float"))
-            writer.uint32(/* id 3, wireType 1 =*/25).double(message.float);
+        if (message.number != null && message.hasOwnProperty("number"))
+            writer.uint32(/* id 1, wireType 1 =*/9).double(message.number);
         if (message.string != null && message.hasOwnProperty("string"))
-            writer.uint32(/* id 4, wireType 2 =*/34).string(message.string);
-        if (message.other != null && message.hasOwnProperty("other"))
-            writer.uint32(/* id 5, wireType 2 =*/42).string(message.other);
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.string);
         if (message.reference != null && message.hasOwnProperty("reference"))
-            writer.uint32(/* id 6, wireType 2 =*/50).string(message.reference);
+            writer.uint32(/* id 3, wireType 2 =*/26).string(message.reference);
         return writer;
     };
 
@@ -1535,21 +1502,12 @@ export const Value = $root.Value = (() => {
             let tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.boolean = reader.bool();
+                message.number = reader.double();
                 break;
             case 2:
-                message.integer = reader.int32();
-                break;
-            case 3:
-                message.float = reader.double();
-                break;
-            case 4:
                 message.string = reader.string();
                 break;
-            case 5:
-                message.other = reader.string();
-                break;
-            case 6:
+            case 3:
                 message.reference = reader.string();
                 break;
             default:
@@ -1588,24 +1546,10 @@ export const Value = $root.Value = (() => {
         if (typeof message !== "object" || message === null)
             return "object expected";
         let properties = {};
-        if (message.boolean != null && message.hasOwnProperty("boolean")) {
+        if (message.number != null && message.hasOwnProperty("number")) {
             properties.value = 1;
-            if (typeof message.boolean !== "boolean")
-                return "boolean: boolean expected";
-        }
-        if (message.integer != null && message.hasOwnProperty("integer")) {
-            if (properties.value === 1)
-                return "value: multiple values";
-            properties.value = 1;
-            if (!$util.isInteger(message.integer))
-                return "integer: integer expected";
-        }
-        if (message.float != null && message.hasOwnProperty("float")) {
-            if (properties.value === 1)
-                return "value: multiple values";
-            properties.value = 1;
-            if (typeof message.float !== "number")
-                return "float: number expected";
+            if (typeof message.number !== "number")
+                return "number: number expected";
         }
         if (message.string != null && message.hasOwnProperty("string")) {
             if (properties.value === 1)
@@ -1613,13 +1557,6 @@ export const Value = $root.Value = (() => {
             properties.value = 1;
             if (!$util.isString(message.string))
                 return "string: string expected";
-        }
-        if (message.other != null && message.hasOwnProperty("other")) {
-            if (properties.value === 1)
-                return "value: multiple values";
-            properties.value = 1;
-            if (!$util.isString(message.other))
-                return "other: string expected";
         }
         if (message.reference != null && message.hasOwnProperty("reference")) {
             if (properties.value === 1)
@@ -1643,16 +1580,10 @@ export const Value = $root.Value = (() => {
         if (object instanceof $root.Value)
             return object;
         let message = new $root.Value();
-        if (object.boolean != null)
-            message.boolean = Boolean(object.boolean);
-        if (object.integer != null)
-            message.integer = object.integer | 0;
-        if (object.float != null)
-            message.float = Number(object.float);
+        if (object.number != null)
+            message.number = Number(object.number);
         if (object.string != null)
             message.string = String(object.string);
-        if (object.other != null)
-            message.other = String(object.other);
         if (object.reference != null)
             message.reference = String(object.reference);
         return message;
@@ -1671,30 +1602,15 @@ export const Value = $root.Value = (() => {
         if (!options)
             options = {};
         let object = {};
-        if (message.boolean != null && message.hasOwnProperty("boolean")) {
-            object.boolean = message.boolean;
+        if (message.number != null && message.hasOwnProperty("number")) {
+            object.number = options.json && !isFinite(message.number) ? String(message.number) : message.number;
             if (options.oneofs)
-                object.value = "boolean";
-        }
-        if (message.integer != null && message.hasOwnProperty("integer")) {
-            object.integer = message.integer;
-            if (options.oneofs)
-                object.value = "integer";
-        }
-        if (message.float != null && message.hasOwnProperty("float")) {
-            object.float = options.json && !isFinite(message.float) ? String(message.float) : message.float;
-            if (options.oneofs)
-                object.value = "float";
+                object.value = "number";
         }
         if (message.string != null && message.hasOwnProperty("string")) {
             object.string = message.string;
             if (options.oneofs)
                 object.value = "string";
-        }
-        if (message.other != null && message.hasOwnProperty("other")) {
-            object.other = message.other;
-            if (options.oneofs)
-                object.value = "other";
         }
         if (message.reference != null && message.hasOwnProperty("reference")) {
             object.reference = message.reference;
