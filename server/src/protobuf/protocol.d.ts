@@ -533,7 +533,7 @@ export interface IValue {
     boolean?: (boolean|null);
 
     /** Value integer */
-    integer?: (number|Long|null);
+    integer?: (number|null);
 
     /** Value float */
     float?: (number|null);
@@ -561,7 +561,7 @@ export class Value implements IValue {
     public boolean: boolean;
 
     /** Value integer. */
-    public integer: (number|Long);
+    public integer: number;
 
     /** Value float. */
     public float: number;

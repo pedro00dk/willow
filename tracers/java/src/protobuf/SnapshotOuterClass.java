@@ -5319,9 +5319,9 @@ public final class SnapshotOuterClass {
     boolean getBoolean();
 
     /**
-     * <code>int64 integer = 2;</code>
+     * <code>int32 integer = 2;</code>
      */
-    long getInteger();
+    int getInteger();
 
     /**
      * <code>double float = 3;</code>
@@ -5411,7 +5411,7 @@ public final class SnapshotOuterClass {
             }
             case 16: {
               valueCase_ = 2;
-              value_ = input.readInt64();
+              value_ = input.readInt32();
               break;
             }
             case 25: {
@@ -5528,13 +5528,13 @@ public final class SnapshotOuterClass {
 
     public static final int INTEGER_FIELD_NUMBER = 2;
     /**
-     * <code>int64 integer = 2;</code>
+     * <code>int32 integer = 2;</code>
      */
-    public long getInteger() {
+    public int getInteger() {
       if (valueCase_ == 2) {
-        return (java.lang.Long) value_;
+        return (java.lang.Integer) value_;
       }
-      return 0L;
+      return 0;
     }
 
     public static final int FLOAT_FIELD_NUMBER = 3;
@@ -5696,8 +5696,8 @@ public final class SnapshotOuterClass {
             1, (boolean)((java.lang.Boolean) value_));
       }
       if (valueCase_ == 2) {
-        output.writeInt64(
-            2, (long)((java.lang.Long) value_));
+        output.writeInt32(
+            2, (int)((java.lang.Integer) value_));
       }
       if (valueCase_ == 3) {
         output.writeDouble(
@@ -5728,8 +5728,8 @@ public final class SnapshotOuterClass {
       }
       if (valueCase_ == 2) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(
-              2, (long)((java.lang.Long) value_));
+          .computeInt32Size(
+              2, (int)((java.lang.Integer) value_));
       }
       if (valueCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
@@ -5809,8 +5809,7 @@ public final class SnapshotOuterClass {
           break;
         case 2:
           hash = (37 * hash) + INTEGER_FIELD_NUMBER;
-          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-              getInteger());
+          hash = (53 * hash) + getInteger();
           break;
         case 3:
           hash = (37 * hash) + FLOAT_FIELD_NUMBER;
@@ -6175,25 +6174,25 @@ public final class SnapshotOuterClass {
       }
 
       /**
-       * <code>int64 integer = 2;</code>
+       * <code>int32 integer = 2;</code>
        */
-      public long getInteger() {
+      public int getInteger() {
         if (valueCase_ == 2) {
-          return (java.lang.Long) value_;
+          return (java.lang.Integer) value_;
         }
-        return 0L;
+        return 0;
       }
       /**
-       * <code>int64 integer = 2;</code>
+       * <code>int32 integer = 2;</code>
        */
-      public Builder setInteger(long value) {
+      public Builder setInteger(int value) {
         valueCase_ = 2;
         value_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int64 integer = 2;</code>
+       * <code>int32 integer = 2;</code>
        */
       public Builder clearInteger() {
         if (valueCase_ == 2) {
@@ -9414,7 +9413,7 @@ public final class SnapshotOuterClass {
       "\001(\t\022\034\n\tvariables\030\003 \003(\0132\t.Variable\"/\n\010Var" +
       "iable\022\014\n\004name\030\001 \001(\t\022\025\n\005value\030\002 \001(\0132\006.Val" +
       "ue\"\177\n\005Value\022\021\n\007boolean\030\001 \001(\010H\000\022\021\n\007intege" +
-      "r\030\002 \001(\003H\000\022\017\n\005float\030\003 \001(\001H\000\022\020\n\006string\030\004 \001" +
+      "r\030\002 \001(\005H\000\022\017\n\005float\030\003 \001(\001H\000\022\020\n\006string\030\004 \001" +
       "(\tH\000\022\017\n\005other\030\005 \001(\tH\000\022\023\n\treference\030\006 \001(\t" +
       "H\000B\007\n\005value\"\277\001\n\003Obj\022\027\n\004type\030\001 \001(\0162\t.Obj." +
       "Type\022\024\n\014languageType\030\002 \001(\t\022\023\n\013userDefine" +

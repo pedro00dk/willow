@@ -59,7 +59,7 @@ class Inspector:
         if isinstance(obj, bool):
             return snapshot_pb2.Value(boolean=obj)
         if isinstance(obj, int):
-            if abs(obj) <= sys.maxsize:
+            if abs(obj) < 2 ** 31:
                 return snapshot_pb2.Value(integer=obj)
             else:
                 return snapshot_pb2.Value(other=str(obj))

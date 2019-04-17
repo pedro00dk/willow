@@ -74,7 +74,7 @@ They shall be one of the folowing ones.
 message Value {
   oneof value {
     bool boolean = 1;
-    int64 integer = 2;
+    int32 integer = 2;
     double float = 3;
     string string = 4;
     string other = 5;

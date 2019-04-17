@@ -72,7 +72,7 @@ export class Variable implements IVariable {
 
 export interface IValue {
     boolean?: (boolean|null);
-    integer?: (number|Long|null);
+    integer?: (number|null);
     float?: (number|null);
     string?: (string|null);
     other?: (string|null);
@@ -81,7 +81,7 @@ export interface IValue {
 
 export class Value implements IValue {
     public boolean: boolean;
-    public integer: (number|Long);
+    public integer: number;
     public float: number;
     public string: string;
     public other: string;

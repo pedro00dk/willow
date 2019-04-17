@@ -110,7 +110,8 @@ public final class Inspector {
             else if (jdiValue instanceof ByteValue) valueBuilder.setInteger(((ByteValue) jdiValue).value());
             else if (jdiValue instanceof ShortValue) valueBuilder.setInteger(((ShortValue) jdiValue).value());
             else if (jdiValue instanceof IntegerValue) valueBuilder.setInteger(((IntegerValue) jdiValue).value());
-            else if (jdiValue instanceof LongValue) valueBuilder.setInteger(((LongValue) jdiValue).value());
+            else if (jdiValue instanceof LongValue)
+                valueBuilder.setOther(String.valueOf(((LongValue) jdiValue).value()));
             else if (jdiValue instanceof FloatValue) valueBuilder.setFloat(((FloatValue) jdiValue).value());
             else if (jdiValue instanceof DoubleValue) valueBuilder.setFloat(((DoubleValue) jdiValue).value());
             else return null;

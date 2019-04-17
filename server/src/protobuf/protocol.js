@@ -1380,7 +1380,7 @@ export const Value = $root.Value = (() => {
      * @exports IValue
      * @interface IValue
      * @property {boolean|null} [boolean] Value boolean
-     * @property {number|Long|null} [integer] Value integer
+     * @property {number|null} [integer] Value integer
      * @property {number|null} [float] Value float
      * @property {string|null} [string] Value string
      * @property {string|null} [other] Value other
@@ -1412,11 +1412,11 @@ export const Value = $root.Value = (() => {
 
     /**
      * Value integer.
-     * @member {number|Long} integer
+     * @member {number} integer
      * @memberof Value
      * @instance
      */
-    Value.prototype.integer = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Value.prototype.integer = 0;
 
     /**
      * Value float.
@@ -1491,7 +1491,7 @@ export const Value = $root.Value = (() => {
         if (message.boolean != null && message.hasOwnProperty("boolean"))
             writer.uint32(/* id 1, wireType 0 =*/8).bool(message.boolean);
         if (message.integer != null && message.hasOwnProperty("integer"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.integer);
+            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.integer);
         if (message.float != null && message.hasOwnProperty("float"))
             writer.uint32(/* id 3, wireType 1 =*/25).double(message.float);
         if (message.string != null && message.hasOwnProperty("string"))
@@ -1538,7 +1538,7 @@ export const Value = $root.Value = (() => {
                 message.boolean = reader.bool();
                 break;
             case 2:
-                message.integer = reader.int64();
+                message.integer = reader.int32();
                 break;
             case 3:
                 message.float = reader.double();
@@ -1597,8 +1597,8 @@ export const Value = $root.Value = (() => {
             if (properties.value === 1)
                 return "value: multiple values";
             properties.value = 1;
-            if (!$util.isInteger(message.integer) && !(message.integer && $util.isInteger(message.integer.low) && $util.isInteger(message.integer.high)))
-                return "integer: integer|Long expected";
+            if (!$util.isInteger(message.integer))
+                return "integer: integer expected";
         }
         if (message.float != null && message.hasOwnProperty("float")) {
             if (properties.value === 1)
@@ -1646,14 +1646,7 @@ export const Value = $root.Value = (() => {
         if (object.boolean != null)
             message.boolean = Boolean(object.boolean);
         if (object.integer != null)
-            if ($util.Long)
-                (message.integer = $util.Long.fromValue(object.integer)).unsigned = false;
-            else if (typeof object.integer === "string")
-                message.integer = parseInt(object.integer, 10);
-            else if (typeof object.integer === "number")
-                message.integer = object.integer;
-            else if (typeof object.integer === "object")
-                message.integer = new $util.LongBits(object.integer.low >>> 0, object.integer.high >>> 0).toNumber();
+            message.integer = object.integer | 0;
         if (object.float != null)
             message.float = Number(object.float);
         if (object.string != null)
@@ -1684,10 +1677,7 @@ export const Value = $root.Value = (() => {
                 object.value = "boolean";
         }
         if (message.integer != null && message.hasOwnProperty("integer")) {
-            if (typeof message.integer === "number")
-                object.integer = options.longs === String ? String(message.integer) : message.integer;
-            else
-                object.integer = options.longs === String ? $util.Long.prototype.toString.call(message.integer) : options.longs === Number ? new $util.LongBits(message.integer.low >>> 0, message.integer.high >>> 0).toNumber() : message.integer;
+            object.integer = message.integer;
             if (options.oneofs)
                 object.value = "integer";
         }
