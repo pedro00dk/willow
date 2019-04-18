@@ -10,17 +10,25 @@ import { SplitPane } from './components/SplitPane'
 import { Visualization } from './components/visualization/Visualization'
 
 const classes = {
+    app: { container: 'd-flex flex-column vh-100 vw-100', spacer: 'p-1' },
     header: {
+        container: 'navbar navbar-expand navbar-light shadow-sm static-top',
+        link: 'd-flex flex-row align-items-center navbar-brand',
         logo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
         text: cn('ml-2', css({ fontSize: '2rem' }))
+    },
+    body: {
+        container: 'd-flex flex-column flex-fill',
+        splitPane: '',
+        pane: ''
     }
 }
 
 export function App() {
     return (
-        <div className={cn('d-flex', 'flex-column', 'vh-100', 'vw-100')}>
+        <div className={classes.app.container}>
             <Header />
-            <div className='pb-2' />
+            <span className={classes.app.spacer} />
             <Body />
         </div>
     )
@@ -28,8 +36,8 @@ export function App() {
 
 function Header() {
     return (
-        <nav className='navbar navbar-expand navbar-light shadow-sm static-top'>
-            <a className='d-flex flex-row align-items-center navbar-brand' href='#'>
+        <nav className={classes.header.container}>
+            <a className={classes.header.link} href='#'>
                 <img src={logo} className={classes.header.logo} />
                 <span className={classes.header.text}>Willow</span>
             </a>
@@ -39,26 +47,12 @@ function Header() {
 
 function Body() {
     return (
-        <div className='d-flex flex-column flex-fill'>
+        <div className={classes.body.container}>
             <Debugger />
-            <SplitPane className='d-flex position-relative' resizable split='vertical' base='35%' left={50} right={-50}>
-                <SplitPane
-                    className='d-flex position-relative'
-                    resizable
-                    split='horizontal'
-                    base='70%'
-                    left={50}
-                    right={-100}
-                >
+            <SplitPane split='vertical' base='30%' left={5} right={-5}>
+                <SplitPane split='horizontal' base='70%' left={5} right={-5}>
                     <CodeEditor />
-                    <SplitPane
-                        className='d-flex position-relative'
-                        resizable
-                        split='horizontal'
-                        base='35%'
-                        left={50}
-                        right={-50}
-                    >
+                    <SplitPane split='horizontal' base='50%' left={5} right={-5}>
                         <InputEditor />
                         <OutputEditor />
                     </SplitPane>

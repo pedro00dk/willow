@@ -4,60 +4,50 @@ import * as React from 'react'
 import { default as ReactSplitPane, Props as ReactSplitPaneProps } from 'react-split-pane'
 
 const classes = {
-    resizer: css({
-        background: 'black',
-        backgroundClip: 'padding-box',
-        opacity: 0.15,
-        ':hover': { transition: 'all 0.5s ease' }
-    }),
-    resizerHorizontal: css({
-        height: 12,
-        width: '100%',
-        margin: '-4px 0 -4px 0',
-        borderTop: '4px solid white',
-        borderBottom: '4px solid white'
-    }),
-    resizerVertical: css({
-        height: '100%',
-        width: 12,
-        margin: '0 -4px 0 -4px',
-        borderLeft: '4px solid white',
-        borderRight: '4px solid white'
-    }),
-    resizerHorizontalHover: css({
-        ':hover': { borderTop: '4px solid gray', borderBottom: '4px solid gray', cursor: 'row-resize' }
-    }),
-    resizerVerticalHover: css({
-        ':hover': { borderLeft: '4px solid gray', borderRight: '4px solid gray', cursor: 'col-resize' }
-    })
+    container: 'd-flex position-relative',
+    pane: 'd-flex position-relative',
+    resizer: {
+        base: cn(
+            'bg-secondary',
+            css({ backgroundClip: 'padding-box', opacity: 0.25, zIndex: 10, transition: 'all 0.25s ease' })
+        ),
+        horizontal: css({
+            height: 12,
+            width: '100%',
+            margin: '-4px 0 -4px 0',
+            borderTop: '4px solid transparent',
+            borderBottom: '4px solid transparent',
+            ':hover': { borderTop: '4px solid lightgray', borderBottom: '4px solid lightgray', cursor: 'row-resize' }
+        }),
+        vertical: css({
+            height: '100%',
+            width: 12,
+            margin: '0 -4px 0 -4px',
+            borderLeft: '4px solid transparent',
+            borderRight: '4px solid transparent',
+            ':hover': { borderLeft: '4px solid lightgray', borderRight: '4px solid lightgray', cursor: 'col-resize' }
+        })
+    }
 }
 
 type Props = {
-    className?: ReactSplitPaneProps['className']
-    resizable?: ReactSplitPaneProps['allowResize']
     split?: ReactSplitPaneProps['split']
     base?: ReactSplitPaneProps['size']
     left?: ReactSplitPaneProps['minSize']
     right?: ReactSplitPaneProps['maxSize']
-    children?: JSX.Element[]
+    children?: React.ReactNode[]
 }
 
 export function SplitPane(props: Props) {
     return (
         <ReactSplitPane
-            className={props.className}
-            resizerClassName={cn(
-                classes.resizer,
-                props.split === 'vertical'
-                    ? [classes.resizerVertical, props.resizable ? classes.resizerVerticalHover : undefined]
-                    : [classes.resizerHorizontal, props.resizable ? classes.resizerHorizontalHover : undefined]
-            )}
+            className={classes.container}
+            resizerClassName={cn(classes.resizer.base, classes.resizer[props.split])}
             split={props.split}
-            allowResize={props.resizable}
             defaultSize={props.base}
             minSize={props.left}
             maxSize={props.right}
-            {...{ paneClassName: 'd-flex' } as any}
+            {...{ paneClassName: classes.pane } as any}
         >
             {props.children}
         </ReactSplitPane>

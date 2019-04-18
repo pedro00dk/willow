@@ -5,7 +5,7 @@ import { Stack } from './Stack'
 
 export function Visualization() {
     return (
-        <SplitPane className='d-flex position-relative' resizable split='horizontal' base='35%' left={50} right={-50}>
+        <SplitPane split='horizontal' base='15%' left={5} right={-5}>
             <Stack />
             <Heap />
         </SplitPane>

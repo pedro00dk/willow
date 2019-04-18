@@ -33,6 +33,8 @@ export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => voi
     React.useEffect(() => {
         if (!editorRef.current) return
         const editor = ace.edit(editorRef.current)
+        editor.setFontSize('1rem')
+        editor.$blockScrolling = Infinity
         setEditor(editor)
         const parentSize = {
             width: editorRef.current.parentElement.clientWidth,
@@ -44,7 +46,7 @@ export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => voi
             if (parentSize.width !== width || parentSize.height !== height) editor.resize()
             parentSize.width = width
             parentSize.height = height
-        }, 2000)
+        },  1000)
         return () => window.clearInterval(checkResizeInterval)
     }, [editorRef])
 

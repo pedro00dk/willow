@@ -8,7 +8,7 @@ import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, MemoTextEditor } from './TextEditor'
 
 const classes = {
-    readonly: cn('position-absolute', css({ backgroundColor: colors.highlight1 }))
+    readonly: cn('position-absolute', css({ backgroundColor: colors.highlight.primary }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -22,8 +22,6 @@ export function InputEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.$blockScrolling = Infinity
-        editor.setFontSize('1rem')
         editor.renderer.setShowGutter(false)
 
         const onChange = (change: ace.EditorChangeEvent) =>
@@ -44,7 +42,7 @@ export function InputEditor() {
             [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
                 editor.session.addMarker(new Range(line, 0, line, 1), classes.readonly, 'fullLine', false)
             )
-    }, [debugInterface.fetching])
+    }, [debugInterface])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

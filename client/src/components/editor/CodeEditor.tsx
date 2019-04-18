@@ -21,14 +21,14 @@ import returnImg from '../../../public/editor/return.svg'
 
 const classes = {
     breakpoint: css({ backgroundColor: colors.error }),
-    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight1 })),
+    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight.secondary })),
     [protocol.Snapshot.Type.CALL]: cn(
         'position-absolute',
-        css({ background: `${colors.highlight1} url(${callImg}) no-repeat right center` })
+        css({ background: `${colors.highlight.secondary} url(${callImg}) no-repeat right center` })
     ),
     [protocol.Snapshot.Type.RETURN]: cn(
         'position-absolute',
-        css({ background: `${colors.highlight1} url(${returnImg}) no-repeat right center` })
+        css({ background: `${colors.highlight.secondary} url(${returnImg}) no-repeat right center` })
     ),
     [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
 }
@@ -53,9 +53,7 @@ export function CodeEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.$blockScrolling = Infinity
         editor.setTheme('ace/theme/chrome')
-        editor.setFontSize('1rem')
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
 
         const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
@@ -95,7 +93,6 @@ export function CodeEditor() {
         Object.values(aceMarkers)
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
-
         const snapshot = debugResult.steps[debugIndexer].snapshot
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line

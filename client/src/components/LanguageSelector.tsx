@@ -5,7 +5,13 @@ import { actions as languageActions } from '../reducers/language'
 import { useDispatch, useRedux } from '../reducers/Store'
 
 const classes = {
-    button: cn('d-inline-flex align-items-center btn btn-outline-secondary', css({ width: '8rem' })),
+    container: 'd-flex input-group w-auto ml-3',
+    reloader: {
+        container: 'input-group-prepend',
+        label: 'flex-fill',
+        spin: 'spinner-grow spinner-grow-sm',
+        button: cn('d-inline-flex align-items-center btn btn-outline-secondary', css({ width: '8rem' }))
+    },
     select: cn('custom-select', css({ flex: '0 1 auto !important', width: '8rem !important' }))
 }
 
@@ -22,18 +28,18 @@ export function LanguageSelector() {
     }, [])
 
     return (
-        <div className='d-flex input-group w-auto ml-3'>
+        <div className={classes.container}>
             <div
-                className='input-group-prepend'
+                className={classes.reloader.container}
                 onClick={() => dispatch(languageActions.fetch())}
                 onMouseEnter={() => setMouseOver(true)}
                 onMouseLeave={() => setMouseOver(false)}
             >
-                <button className={classes.button}>
-                    <span className='flex-fill'>
+                <button className={classes.reloader.button}>
+                    <span className={classes.reloader.label}>
                         {!language.fetching ? (!mouseOver ? 'Language' : 'Reload') : 'Loading'}
                     </span>
-                    {language.fetching && <span className='spinner-grow spinner-grow-sm' />}
+                    {language.fetching && <span className={classes.reloader.spin} />}
                 </button>
             </div>
             <select

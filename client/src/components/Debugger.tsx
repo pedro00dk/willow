@@ -8,7 +8,10 @@ import { actions as debugInterfaceActions } from '../reducers/debug/interface'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
-const classes = { image: cn('m-3', css({ height: '1.5rem', width: '1.5rem' })) }
+const classes = {
+    container: 'd-flex flex-row align-items-center shadow-sm mb-1',
+    image: cn('m-3', css({ height: '1.5rem', width: '1.5rem' }))
+}
 
 const styles = {
     image: (available: boolean, rotation: number = 0) => ({
@@ -26,16 +29,12 @@ export function Debugger() {
         debugStack: state.debugStack
     }))
 
-    console.log('--\n--\n--')
-    console.log('debugger')
-    console.log(debugInterface)
-    console.log(debugResult)
-    console.log(debugIndexer)
-    console.log(debugStack)
-    console.log('--\n--\n--')
+    console.log('--')
+    console.log('debugger', debugInterface, debugResult, debugIndexer, debugStack)
+    console.log('--')
 
     return (
-        <div className='d-flex flex-row align-items-center shadow-sm mb-1'>
+        <div className={classes.container}>
             <LanguageSelector />
             <img
                 className={classes.image}

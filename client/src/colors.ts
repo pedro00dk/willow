@@ -1,8 +1,6 @@
 export const colors = {
-    highlight0: 'lightblue',
-    highlight1: 'lightcyan',
-    warning: 'lightyellow',
+    highlight: { primary: 'lightblue', secondary: 'lightcyan' },
+    gray: { primary: 'darkgray', secondary: 'lightgray' },
     error: 'lightcoral',
-    lightScale: ['lemonchiffon', 'greenyellow', 'palegreen', 'aquamarine', 'lightskyblue', 'plum', 'lightpink'],
-    grayScale: ['lightgrey', 'silver', 'darkgray', 'gray', 'dimgray']
+    lightScale: ['lemonchiffon', 'greenyellow', 'palegreen', 'aquamarine', 'lightskyblue', 'plum', 'lightpink']
 }

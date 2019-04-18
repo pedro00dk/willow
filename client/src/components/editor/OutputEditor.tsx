@@ -13,10 +13,8 @@ export function OutputEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.$blockScrolling = Infinity
-        editor.setReadOnly(true)
-        editor.setFontSize('1rem')
         editor.renderer.setShowGutter(false)
+        editor.setReadOnly(true)
     }, [editor])
 
     React.useEffect(() => {
