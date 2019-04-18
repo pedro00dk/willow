@@ -56,7 +56,7 @@ class Inspector:
         return snapshot
 
     def _inspect_object(self, snapshot: snapshot_pb2.Snapshot, obj, classes: set, module: str):
-        if isinstance(obj, (bool, complex, type(None), str)):
+        if isinstance(obj, (bool, complex, type(None), str, type)):
             return snapshot_pb2.Value(string=str(obj))
         if isinstance(obj, (int, float)):
             if abs(obj) < 2 ** 53:
