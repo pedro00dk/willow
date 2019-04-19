@@ -26,25 +26,25 @@ export type Heap = {
 type State = {
     readonly stack: Stack
     readonly heaps: Heap[]
-    readonly drawTypes: { [reference: string]: string }
+    readonly nodeTypes: { [reference: string]: string }
 }
 
 type Action =
     | { type: 'visualization/load'; payload: { stack: Stack; heaps: Heap[] } }
-    | { type: 'visualization/setDrawType'; payload: { reference: string; type: string } }
+    | { type: 'visualization/setNodeType'; payload: { reference: string; type: string } }
 
 const initialState: State = {
     stack: undefined,
     heaps: [],
-    drawTypes: {}
+    nodeTypes: {}
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'visualization/load':
             return { ...initialState, ...action.payload }
-        case 'visualization/setDrawType':
-            return { ...state, drawTypes: { ...state.drawTypes, [action.payload.reference]: action.payload.type } }
+        case 'visualization/setNodeType':
+            return { ...state, nodeTypes: { ...state.nodeTypes, [action.payload.reference]: action.payload.type } }
     }
     return state
 }
@@ -103,9 +103,9 @@ const buildHeaps = (steps: protocol.IStep[]) => {
                 members: []
             }
         })
-        Object.entries(heap).forEach(([reference, objNode]) => {
+        Object.entries(heap).forEach(([reference, heapObj]) => {
             const obj = step.snapshot.heap[reference]
-            objNode.members = obj.members.map(member => {
+            heapObj.members = obj.members.map(member => {
                 const key =
                     member.key.reference != undefined
                         ? heap[member.key.reference]
@@ -127,7 +127,7 @@ const load = (steps: protocol.IStep[]): Action => ({
 })
 
 const setDrawType = (reference: string, type: string): Action => ({
-    type: 'visualization/setDrawType',
+    type: 'visualization/setNodeType',
     payload: { reference, type }
 })
 
