@@ -17,8 +17,6 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-function toggle(line: number): Action {
-    return { type: 'breakpoint/toggle', payload: line }
-}
+const toggle = (line: number): Action => ({ type: 'breakpoint/toggle', payload: line })
 
 export const actions = { toggle }

@@ -27,15 +27,13 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-function fetch(): AsyncAction {
-    return async dispatch => {
-        dispatch({ type: 'session/fetch' })
-        try {
-            const session = (await serverApi.get('/session')).data as string
-            dispatch({ type: 'session/fetch', payload: { session } })
-        } catch (error) {
-            dispatch({ type: 'session/fetch', error: !!error.response ? error.response.data : error.toString() })
-        }
+const fetch = (): AsyncAction => async dispatch => {
+    dispatch({ type: 'session/fetch' })
+    try {
+        const session = (await serverApi.get('/session')).data as string
+        dispatch({ type: 'session/fetch', payload: { session } })
+    } catch (error) {
+        dispatch({ type: 'session/fetch', error: !!error.response ? error.response.data : error.toString() })
     }
 }
 

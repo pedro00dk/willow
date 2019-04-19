@@ -38,41 +38,37 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-function trace(): AsyncAction {
-    return async (dispatch, getState) => {
-        dispatch({ type: 'tracer/trace' })
-        try {
-            const { code, input, language } = getState()
-            const result = (await serverApi.post<protocol.IResult>('/tracer/trace', {
-                language: language.languages[language.selected],
-                source: code.join('\n'),
-                input: input.join('\n')
-            })).data
+const trace = (): AsyncAction => async (dispatch, getState) => {
+    dispatch({ type: 'tracer/trace' })
+    try {
+        const { code, input, language } = getState()
+        const result = (await serverApi.post<protocol.IResult>('/tracer/trace', {
+            language: language.languages[language.selected],
+            source: code.join('\n'),
+            input: input.join('\n')
+        })).data
 
-            const steps = result.steps
-            const lines: State['lines'] = []
-            result.steps.forEach((step, i) => {
-                if (!step.snapshot) return
-                const line = step.snapshot.stack[step.snapshot.stack.length - 1].line
-                if (!lines[line]) lines[line] = []
-                lines[line].push(i)
-            })
-            dispatch(visualizationActions.load(steps))
-            dispatch({ type: 'tracer/trace', payload: { steps, lines } })
-        } catch (error) {
-            dispatch({
-                type: 'tracer/trace',
-                error: !!error.response ? error.response.data : error.toString()
-            })
-        }
+        const steps = result.steps
+        const lines: State['lines'] = []
+        result.steps.forEach((step, i) => {
+            if (!step.snapshot) return
+            const line = step.snapshot.stack[step.snapshot.stack.length - 1].line
+            if (!lines[line]) lines[line] = []
+            lines[line].push(i)
+        })
+        dispatch(visualizationActions.load(steps))
+        dispatch({ type: 'tracer/trace', payload: { steps, lines } })
+    } catch (error) {
+        dispatch({
+            type: 'tracer/trace',
+            error: !!error.response ? error.response.data : error.toString()
+        })
     }
 }
 
-function setIndex(index: number): AsyncAction {
-    return async (dispatch, getState) => {
-        const { tracer } = getState()
-        dispatch({ type: 'tracer/setIndex', payload: { index: Math.max(0, Math.min(index, tracer.steps.length - 1)) } })
-    }
+const setIndex = (index: number): AsyncAction => async (dispatch, getState) => {
+    const { tracer } = getState()
+    dispatch({ type: 'tracer/setIndex', payload: { index: Math.max(0, Math.min(index, tracer.steps.length - 1)) } })
 }
 
 export const actions = { trace, setIndex }

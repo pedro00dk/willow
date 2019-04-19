@@ -38,7 +38,7 @@ export function Store(props: { children?: React.ReactNode }) {
     return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
 }
 
-function equalStoreSubStates<T extends SubState, U extends SubState>(prev: T, next: U) {
+const equalStoreSubStates = <T extends SubState, U extends SubState>(prev: T, next: U) => {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(next)
@@ -53,13 +53,13 @@ function equalStoreSubStates<T extends SubState, U extends SubState>(prev: T, ne
     )
 }
 
-export function useDispatch() {
+export const useDispatch = () => {
     const store = React.useContext(storeContext)
     if (!store) throw new Error('store context not found')
     return store.dispatch
 }
 
-export function useRedux<T extends SubState>(selector: (state: State) => T) {
+export const useRedux = <T extends SubState>(selector: (state: State) => T) => {
     const store = React.useContext(storeContext)
     if (!store) throw new Error('store context not found')
     const memoSelector = React.useCallback(selector, [])

@@ -49,7 +49,7 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-function buildStack(steps: protocol.IStep[]) {
+const buildStack = (steps: protocol.IStep[]) => {
     const root: Scope = { name: undefined, steps: { from: 0, to: 0 }, children: [] }
     const treePath = [root]
     steps.forEach((step, i) => {
@@ -88,7 +88,7 @@ function buildStack(steps: protocol.IStep[]) {
     return stack
 }
 
-function buildHeaps(steps: protocol.IStep[]) {
+const buildHeaps = (steps: protocol.IStep[]) => {
     const heaps: Heap[] = []
     steps.forEach((step, i) => {
         if (!step.snapshot) return heaps.push(!!heaps[i - 1] ? heaps[i - 1] : {})
@@ -121,14 +121,14 @@ function buildHeaps(steps: protocol.IStep[]) {
     return heaps
 }
 
-function load(steps: protocol.IStep[]): Action {
-    const stack = buildStack(steps)
-    const heaps = buildHeaps(steps)
-    return { type: 'visualization/load', payload: { stack, heaps } }
-}
+const load = (steps: protocol.IStep[]): Action => ({
+    type: 'visualization/load',
+    payload: { stack: buildStack(steps), heaps: buildHeaps(steps) }
+})
 
-function setDrawType(reference: string, type: string): Action {
-    return { type: 'visualization/setDrawType', payload: { reference, type } }
-}
+const setDrawType = (reference: string, type: string): Action => ({
+    type: 'visualization/setDrawType',
+    payload: { reference, type }
+})
 
 export const actions = { load, setDrawType }
