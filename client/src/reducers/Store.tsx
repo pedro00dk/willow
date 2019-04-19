@@ -3,26 +3,20 @@ import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
 import { reducer as BreakpointsReducer } from './breakpoint'
 import { reducer as CodeReducer } from './code'
-import { reducer as DebugHeapReducer } from './debug/heap'
-import { reducer as DebugIndexerReducer } from './debug/indexer'
-import { reducer as DebugInterfaceReducer } from './debug/interface'
-import { reducer as DebugResultReducer } from './debug/result'
-import { reducer as DebugStackReducer } from './debug/stack'
 import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
 import { reducer as SessionReducer } from './session'
+import { reducer as TracerReducer } from './tracer'
+import { reducer as VisualizationReducer } from './visualization'
 
 const reducers = {
     breakpoint: BreakpointsReducer,
     code: CodeReducer,
-    debugHeap: DebugHeapReducer,
-    debugIndexer: DebugIndexerReducer,
-    debugInterface: DebugInterfaceReducer,
-    debugResult: DebugResultReducer,
-    debugStack: DebugStackReducer,
     input: InputReducer,
     language: LanguageReducer,
-    session: SessionReducer
+    session: SessionReducer,
+    tracer: TracerReducer,
+    visualization: VisualizationReducer
 }
 
 export type State = { [property in keyof typeof reducers]: Parameters<typeof reducers[property]>[0] }

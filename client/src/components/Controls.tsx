@@ -3,9 +3,8 @@ import { css } from 'emotion'
 import * as React from 'react'
 import playImg from '../../public/buttons/play.png'
 import stepImg from '../../public/buttons/stepInto.png'
-import { actions as debugIndexerActions } from '../reducers/debug/indexer'
-import { actions as debugInterfaceActions } from '../reducers/debug/interface'
 import { useDispatch, useRedux } from '../reducers/Store'
+import { actions as tracerActions } from '../reducers/tracer'
 import { LanguageSelector } from './LanguageSelector'
 
 const classes = {
@@ -20,17 +19,12 @@ const styles = {
     })
 }
 
-export function Debugger() {
+export function Controls() {
     const dispatch = useDispatch()
-    const { debugInterface, debugIndexer, debugResult, debugStack } = useRedux(state => ({
-        debugIndexer: state.debugIndexer,
-        debugInterface: state.debugInterface,
-        debugResult: state.debugResult,
-        debugStack: state.debugStack
-    }))
+    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     console.log('--')
-    console.log('debugger', debugInterface, debugResult, debugIndexer, debugStack)
+    console.log('tracer', tracer)
     console.log('--')
 
     return (
@@ -38,24 +32,24 @@ export function Debugger() {
             <LanguageSelector />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching)}
+                style={styles.image(!tracer.fetching)}
                 src={playImg}
-                title={'inspect'}
-                onClick={() => dispatch(debugInterfaceActions.inspect())}
+                title={'trace'}
+                onClick={() => dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResult.steps.length > 0, 90)}
+                style={styles.image(!tracer.fetching && tracer.steps.length > 0, 90)}
                 src={stepImg}
                 title='step back'
-                onClick={() => dispatch(debugIndexerActions.set(debugIndexer - 1))}
+                onClick={() => dispatch(tracerActions.setIndex(tracer.index - 1))}
             />
             <img
                 className={classes.image}
-                style={styles.image(!debugInterface.fetching && debugResult.steps.length > 0, -90)}
+                style={styles.image(!tracer.fetching && tracer.steps.length > 0, -90)}
                 src={stepImg}
                 title='step forward'
-                onClick={() => dispatch(debugIndexerActions.set(debugIndexer + 1))}
+                onClick={() => dispatch(tracerActions.setIndex(tracer.index + 1))}
             />
         </div>
     )

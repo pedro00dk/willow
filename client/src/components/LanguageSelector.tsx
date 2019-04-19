@@ -33,10 +33,7 @@ const classes = {
 export function LanguageSelector() {
     const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
-    const { debugInterface, language } = useRedux(state => ({
-        debugInterface: state.debugInterface,
-        language: state.language
-    }))
+    const { language, tracer } = useRedux(state => ({ language: state.language, tracer: state.tracer }))
 
     React.useEffect(() => {
         dispatch(languageActions.fetch())
@@ -59,7 +56,7 @@ export function LanguageSelector() {
             </div>
             <select
                 className={classes.select}
-                disabled={debugInterface.fetching}
+                disabled={tracer.fetching}
                 defaultValue={language.languages[language.selected]}
                 onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
             >

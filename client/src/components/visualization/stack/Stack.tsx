@@ -1,9 +1,9 @@
 import cn from 'classnames'
 import * as React from 'react'
 import * as protocol from '../../../protobuf/protocol'
-import { actions as debugIndexerActions } from '../../../reducers/debug/indexer'
 import { useDispatch, useRedux } from '../../../reducers/Store'
-import { StackNode } from './StackNode'
+import { actions as tracerActions } from '../../../reducers/tracer'
+import { ScopeNode } from './ScopeNode'
 
 const classes = {
     container: cn('d-flex flex-row align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100')
@@ -13,11 +13,7 @@ export function Stack() {
     const stackRef = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
     const dispatch = useDispatch()
-    const { debugIndexer, debugResult, debugStack } = useRedux(state => ({
-        debugIndexer: state.debugIndexer,
-        debugResult: state.debugResult,
-        debugStack: state.debugStack
-    }))
+    const { tracer, visualization } = useRedux(state => ({ tracer: state.tracer, visualization: state.visualization }))
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -28,12 +24,12 @@ export function Stack() {
     }, [width])
 
     const handleStackControls = (event: React.KeyboardEvent) => {
-        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-        const previousFilter = (index: number) => index < debugIndexer
-        const nextFilter = (index: number) => index > debugIndexer
+        if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return
+        const previousFilter = (index: number) => index < tracer.index
+        const nextFilter = (index: number) => index > tracer.index
         const indexFilter = event.key === 'ArrowLeft' ? previousFilter : nextFilter
 
-        const currentStep = debugResult.steps[debugIndexer]
+        const currentStep = tracer.steps[tracer.index]
         const anyFamilyFilter = (step: protocol.IStep) => true
         const siblingParentFilter = (step: protocol.IStep) =>
             !!step.snapshot && !!currentStep.snapshot
@@ -42,19 +38,21 @@ export function Stack() {
         const familyFilter = !event.ctrlKey ? anyFamilyFilter : siblingParentFilter
 
         const resultSelector = <T extends {}>(array: T[]) =>
-            array.length > 0 ? (event.key === 'ArrowLeft' ? array[array.length - 1] : array[0]) : debugIndexer
+            array.length > 0 ? (event.key === 'ArrowLeft' ? array[array.length - 1] : array[0]) : tracer.index
 
-        const selectedIndices = debugResult.steps
+        const selectedIndices = tracer.steps
             .map((step, i) => ({ step, i }))
             .filter(({ step, i }) => familyFilter(step) && indexFilter(i))
             .map(({ i }) => i)
 
-        dispatch(debugIndexerActions.set(resultSelector(selectedIndices)))
+        dispatch(tracerActions.setIndex(resultSelector(selectedIndices)))
     }
 
     return (
         <div ref={stackRef} className={classes.container} onKeyDown={handleStackControls} tabIndex={0}>
-            {!!debugStack.tree && <StackNode node={debugStack.tree} indexer={debugIndexer} depth={0} width={width} />}
+            {tracer.available && (
+                <ScopeNode scope={visualization.stack.root} index={tracer.index} depth={0} width={width} />
+            )}
         </div>
     )
 }

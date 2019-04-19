@@ -18,7 +18,7 @@ const { Range } = ace.acequire('ace/range') as {
 export function InputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { debugInterface } = useRedux(state => ({ debugInterface: state.debugInterface }))
+    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return
@@ -33,8 +33,8 @@ export function InputEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.setReadOnly(debugInterface.fetching)
-        if (!debugInterface.fetching)
+        editor.setReadOnly(tracer.fetching)
+        if (!tracer.fetching)
             Object.values(editor.session.getMarkers(false) as EditorMarker[])
                 .filter(marker => marker.id > 2)
                 .forEach(marker => editor.session.removeMarker(marker.id))
@@ -42,7 +42,7 @@ export function InputEditor() {
             [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
                 editor.session.addMarker(new Range(line, 0, line, 1), classes.marker, 'fullLine', false)
             )
-    }, [debugInterface])
+    }, [tracer])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

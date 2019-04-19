@@ -6,10 +6,7 @@ import { MemoTextEditor } from './TextEditor'
 
 export function OutputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
-    const { debugIndexer, debugResult } = useRedux(state => ({
-        debugIndexer: state.debugIndexer,
-        debugResult: state.debugResult
-    }))
+    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return
@@ -20,11 +17,11 @@ export function OutputEditor() {
     React.useEffect(() => {
         if (!editor) return
         editor.session.doc.setValue(
-            debugResult.steps
-                .filter((step, i) => i <= debugIndexer)
+            tracer.steps
+                .filter((step, i) => i <= tracer.index)
                 .map((step, i) => {
                     const snapshot = step.snapshot
-                    const previousSnapshot = !!debugResult.steps[i - 1] ? debugResult.steps[i - 1].snapshot : undefined
+                    const previousSnapshot = !!tracer.steps[i - 1] ? tracer.steps[i - 1].snapshot : undefined
                     const tracedThrew =
                         !!snapshot &&
                         snapshot.finish &&
@@ -41,7 +38,7 @@ export function OutputEditor() {
                 })
                 .join('')
         )
-    }, [debugIndexer, debugResult])
+    }, [tracer])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

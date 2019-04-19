@@ -2,9 +2,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { actions as debugIndexerActions } from '../../../reducers/debug/indexer'
-import { StackNode } from '../../../reducers/debug/stack'
 import { useDispatch } from '../../../reducers/Store'
+import { actions as tracerActions } from '../../../reducers/tracer'
+import { Scope } from '../../../reducers/visualization'
 
 const classes = {
     container: cn('d-flex flex-column', 'w-100'),
@@ -61,14 +61,14 @@ const styles = {
     })
 }
 
-export function StackNode(props: { node: StackNode; indexer: number; depth: number; width: number }) {
+export function ScopeNode(props: { scope: Scope; index: number; depth: number; width: number }) {
     const dispatch = useDispatch()
-    const selected = props.indexer >= props.node.steps.from && props.indexer <= props.node.steps.to
-    const isNode = props.node.children.length !== 0
-    const isRoot = isNode && props.node.name == undefined
+    const selected = props.index >= props.scope.steps.from && props.index <= props.scope.steps.to
+    const isNode = props.scope.children.length !== 0
+    const isRoot = isNode && props.scope.name == undefined
 
-    const computeChildWidth = (child: StackNode) => {
-        const proportion = (child.steps.to - child.steps.from + 1) / (props.node.steps.to - props.node.steps.from + 1)
+    const computeChildWidth = (child: Scope) => {
+        const proportion = (child.steps.to - child.steps.from + 1) / (props.scope.steps.to - props.scope.steps.from + 1)
         return { width: proportion * props.width, percent: `${proportion * 100}%` }
     }
 
@@ -78,19 +78,19 @@ export function StackNode(props: { node: StackNode; indexer: number; depth: numb
                 <div
                     className={cn(classes.scope.base, isNode ? classes.scope.node : classes.scope.leaf)}
                     style={styles.scope(isNode, selected, props.width, props.depth)}
-                    title={props.node.name}
-                    onClick={() => dispatch(debugIndexerActions.set(props.node.steps.from))}
+                    title={props.scope.name}
+                    onClick={() => dispatch(tracerActions.setIndex(props.scope.steps.from))}
                 >
-                    {isNode && props.width >= 20 ? props.node.name : '\u200b'}
+                    {isNode && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>
             )}
             {isNode && props.width >= 5 && (
                 <div className='d-flex flex-row'>
-                    {props.node.children.map((child, i) => {
+                    {props.scope.children.map((child, i) => {
                         const { width, percent } = computeChildWidth(child)
                         return (
                             <div key={i} className={classes.child.parent} style={{ width: percent }}>
-                                <StackNode node={child} indexer={props.indexer} depth={props.depth + 1} width={width} />
+                                <ScopeNode scope={child} index={props.index} depth={props.depth + 1} width={width} />
                             </div>
                         )
                     })}

@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import logo from '../public/logo.svg'
 import { colors } from './colors'
-import { Debugger } from './components/Debugger'
+import { Controls } from './components/Controls'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { InputEditor } from './components/editor/InputEditor'
 import { OutputEditor } from './components/editor/OutputEditor'
@@ -48,7 +48,7 @@ function Header() {
 function Body() {
     return (
         <div className={classes.body.container}>
-            <Debugger />
+            <Controls />
             <SplitPane split='vertical' base='30%' left={5} right={-5}>
                 <SplitPane split='horizontal' base='70%' left={5} right={-5}>
                     <CodeEditor />
