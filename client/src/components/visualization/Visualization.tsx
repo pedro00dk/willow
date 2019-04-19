@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { SplitPane } from '../SplitPane'
 import { Heap } from './heap/Heap'
-import { Stack } from './Stack'
+import { Stack } from './stack/Stack'
 
 export function Visualization() {
     return (
