@@ -9,6 +9,9 @@ import { actions as codeActions } from '../../reducers/code'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorGutterLayer, EditorMarker, EditorMouseEvent, MemoTextEditor } from './TextEditor'
 
+import callImg from '../../../public/editor/call.svg'
+import returnImg from '../../../public/editor/return.svg'
+
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
 import 'brace/mode/java'
@@ -16,21 +19,17 @@ import 'brace/mode/python'
 import 'brace/mode/text'
 import 'brace/theme/chrome'
 
-import callImg from '../../../public/editor/call.svg'
-import returnImg from '../../../public/editor/return.svg'
-
 const classes = {
-    breakpoint: css({ backgroundColor: colors.error }),
-    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.highlight.secondary })),
+    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.primaryBlue.light })),
     [protocol.Snapshot.Type.CALL]: cn(
         'position-absolute',
-        css({ background: `${colors.highlight.secondary} url(${callImg}) no-repeat right center` })
+        css({ background: `${colors.primaryBlue.light} url(${callImg}) no-repeat right` })
     ),
     [protocol.Snapshot.Type.RETURN]: cn(
         'position-absolute',
-        css({ background: `${colors.highlight.secondary} url(${returnImg}) no-repeat right center` })
+        css({ background: `${colors.primaryBlue.light} url(${returnImg}) no-repeat right` })
     ),
-    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.error }))
+    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.secondaryRed.light }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -44,8 +43,7 @@ function syntaxSupport(language: string) {
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { breakpoint, debugResult, debugIndexer, language } = useRedux(state => ({
-        breakpoint: state.breakpoint,
+    const { debugResult, debugIndexer, language } = useRedux(state => ({
         debugIndexer: state.debugIndexer,
         debugResult: state.debugResult,
         language: state.language
@@ -79,13 +77,6 @@ export function CodeEditor() {
         if (!editor) return
         editor.session.setMode(syntaxSupport(language.languages[language.selected]))
     }, [language.selected])
-
-    React.useEffect(() => {
-        if (!editor) return
-        const decorations = (editor.session as any).$decorations as string[]
-        decorations.forEach((decoration, i) => editor.session.removeGutterDecoration(i, classes.breakpoint))
-        breakpoint.forEach(line => editor.session.addGutterDecoration(line, classes.breakpoint))
-    }, [breakpoint])
 
     React.useEffect(() => {
         if (!editor || debugResult.steps.length === 0) return

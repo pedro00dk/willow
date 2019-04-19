@@ -2,31 +2,49 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { default as ReactSplitPane, Props as ReactSplitPaneProps } from 'react-split-pane'
+import { colors } from '../colors'
 
 const classes = {
-    container: 'position-relative d-flex',
-    pane: 'position-relative d-flex',
+    container: cn('position-relative', 'd-flex'),
+    pane: cn('position-relative', 'd-flex'),
     resizer: {
         base: cn(
-            'bg-secondary',
-            css({ backgroundClip: 'padding-box', opacity: 0.25, zIndex: 10, transition: 'all 0.25s ease' })
+            css({
+                background: colors.gray.dark,
+                backgroundClip: 'padding-box',
+                opacity: 0.25,
+                zIndex: 10,
+                transition: 'all 0.25s ease'
+            })
         ),
-        horizontal: css({
-            height: 12,
-            width: '100%',
-            margin: '-4px 0 -4px 0',
-            borderTop: '4px solid transparent',
-            borderBottom: '4px solid transparent',
-            ':hover': { borderTop: '4px solid lightgray', borderBottom: '4px solid lightgray', cursor: 'row-resize' }
-        }),
-        vertical: css({
-            height: '100%',
-            width: 12,
-            margin: '0 -4px 0 -4px',
-            borderLeft: '4px solid transparent',
-            borderRight: '4px solid transparent',
-            ':hover': { borderLeft: '4px solid lightgray', borderRight: '4px solid lightgray', cursor: 'col-resize' }
-        })
+        horizontal: cn(
+            css({
+                width: '100%',
+                height: 12,
+                borderTop: '4px solid transparent',
+                borderBottom: '4px solid transparent',
+                margin: '-4px 0 -4px 0',
+                ':hover': {
+                    borderTop: `4px solid ${colors.gray.light}`,
+                    borderBottom: `4px solid ${colors.gray.light}`,
+                    cursor: 'row-resize'
+                }
+            })
+        ),
+        vertical: cn(
+            css({
+                height: '100%',
+                width: 12,
+                margin: '0 -4px 0 -4px',
+                borderLeft: '4px solid transparent',
+                borderRight: '4px solid transparent',
+                ':hover': {
+                    borderLeft: `4px solid ${colors.gray.light}`,
+                    borderRight: `4px solid ${colors.gray.light}`,
+                    cursor: 'col-resize'
+                }
+            })
+        )
     }
 }
 

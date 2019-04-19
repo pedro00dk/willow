@@ -8,7 +8,7 @@ import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, MemoTextEditor } from './TextEditor'
 
 const classes = {
-    readonly: cn('position-absolute', css({ backgroundColor: colors.highlight.primary }))
+    marker: cn('position-absolute', css({ backgroundColor: colors.primaryBlue.light }))
 }
 
 const { Range } = ace.acequire('ace/range') as {
@@ -40,7 +40,7 @@ export function InputEditor() {
                 .forEach(marker => editor.session.removeMarker(marker.id))
         else
             [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
-                editor.session.addMarker(new Range(line, 0, line, 1), classes.readonly, 'fullLine', false)
+                editor.session.addMarker(new Range(line, 0, line, 1), classes.marker, 'fullLine', false)
             )
     }, [debugInterface])
 

@@ -1,8 +1,9 @@
 import * as ace from 'brace'
+import cn from 'classnames'
 import * as React from 'react'
 
 const classes = {
-    container: 'h-100 w-100'
+    container: cn('w-100 h-100')
 }
 
 export type EditorMouseEvent = {

@@ -2,6 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import logo from '../public/logo.svg'
+import { colors } from './colors'
 import { Debugger } from './components/Debugger'
 import { CodeEditor } from './components/editor/CodeEditor'
 import { InputEditor } from './components/editor/InputEditor'
@@ -10,17 +11,17 @@ import { SplitPane } from './components/SplitPane'
 import { Visualization } from './components/visualization/Visualization'
 
 const classes = {
-    app: { container: 'd-flex flex-column vh-100 vw-100', spacer: 'p-1' },
+    app: {
+        container: cn('d-flex flex-column', 'vw-100 vh-100')
+    },
     header: {
-        container: 'navbar navbar-expand navbar-light shadow-sm static-top',
-        link: 'd-flex flex-row align-items-center navbar-brand',
-        logo: css({ height: '2.5rem', width: '2.5rem', filter: 'invert(1)' }),
-        text: cn('ml-2', css({ fontSize: '2rem' }))
+        container: cn('navbar', 'shadow-sm', css({ background: colors.gray.light })),
+        link: cn('d-flex align-items-center', 'navbar-brand', 'p-0'),
+        logo: cn(css({ width: '2rem', filter: 'invert(1)' })),
+        text: cn('ml-2', css({ color: colors.black, fontSize: '1.5rem' }))
     },
     body: {
-        container: 'd-flex flex-column flex-fill',
-        splitPane: '',
-        pane: ''
+        container: cn('flex-fill', 'd-flex flex-column')
     }
 }
 
@@ -28,7 +29,6 @@ export function App() {
     return (
         <div className={classes.app.container}>
             <Header />
-            <span className={classes.app.spacer} />
             <Body />
         </div>
     )

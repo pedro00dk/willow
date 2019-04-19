@@ -8,12 +8,13 @@ import { StackNode } from '../../reducers/debug/stack'
 import { useDispatch, useRedux } from '../../reducers/Store'
 
 const classes = {
-    stack: { container: 'd-flex flex-row align-items-start flex-nowrap overflow-auto w-100' },
+    stack: { container: cn('d-flex flex-row align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100') },
     node: {
-        container: 'd-flex flex-column w-100',
+        container: cn('d-flex flex-column', 'w-100'),
         scope: {
             base: cn(
-                'text-truncate w-100',
+                'text-truncate',
+                'w-100',
                 css({
                     fontSize: '0.75rem',
                     border: '0.5px transparent solid',
@@ -21,12 +22,14 @@ const classes = {
                     cursor: 'default'
                 })
             ),
-            node: css({ ':hover': { borderColor: `${colors.gray.primary} !important` } }),
-            leaf: css({
-                ':hover': {
-                    background: `radial-gradient(ellipse at top, ${colors.highlight.secondary} 50%, transparent 60%)`
-                }
-            })
+            node: cn(css({ ':hover': { borderColor: `${colors.gray.dark} !important` } })),
+            leaf: cn(
+                css({
+                    ':hover': {
+                        background: `radial-gradient(ellipse at top, ${colors.primaryBlue.light} 50%, transparent 60%)`
+                    }
+                })
+            )
         },
         child: { parent: 'd-flex' }
     }
@@ -36,14 +39,27 @@ const styles = {
     node: {
         scope: (isNode: boolean, selected: boolean, width: number, depth: number) => ({
             ...(isNode
-                ? { backgroundColor: colors.lightScale[depth % colors.lightScale.length] }
+                ? {
+                      backgroundColor:
+                          depth <= 1
+                              ? colors.primaryBlue.main
+                              : depth <= 4
+                              ? colors.primaryBlue.light
+                              : depth <= 7
+                              ? colors.secondaryYellow.light
+                              : depth <= 10
+                              ? colors.secondaryYellow.lighter
+                              : depth <= 13
+                              ? colors.secondaryRed.light
+                              : colors.secondaryRed.lighter
+                  }
                 : {
-                      background: `radial-gradient(ellipse at top, ${colors.highlight.secondary} 20%, transparent 30%)`
+                      background: `radial-gradient(ellipse at top, ${colors.primaryBlue.lighter} 20%, transparent 30%)`
                   }),
-            ...(selected && isNode ? { borderColor: colors.gray.secondary } : undefined),
+            ...(selected && isNode ? { borderColor: colors.gray.light } : undefined),
             ...(selected && !isNode
                 ? {
-                      background: `radial-gradient(ellipse at top, ${colors.highlight.primary} 50%, transparent 60%)`
+                      background: `radial-gradient(ellipse at top, ${colors.primaryBlue.main} 50%, transparent 60%)`
                   }
                 : undefined),
             opacity: width >= 20 ? 1 : width >= 10 ? 0.75 : 0.5

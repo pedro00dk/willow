@@ -9,7 +9,7 @@ import { useDispatch, useRedux } from '../reducers/Store'
 import { LanguageSelector } from './LanguageSelector'
 
 const classes = {
-    container: 'd-flex flex-row align-items-center shadow-sm mb-1',
+    container: cn('d-flex flex-row align-items-center', 'shadow-sm'),
     image: cn('m-3', css({ height: '1.5rem', width: '1.5rem' }))
 }
 

@@ -1,18 +1,33 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { colors } from '../colors'
 import { actions as languageActions } from '../reducers/language'
 import { useDispatch, useRedux } from '../reducers/Store'
 
 const classes = {
-    container: 'd-flex input-group w-auto ml-3',
+    container: cn('d-flex', 'input-group', 'w-auto', 'ml-3'),
     reloader: {
-        container: 'input-group-prepend',
-        label: 'flex-fill',
-        spin: 'spinner-grow spinner-grow-sm',
-        button: cn('d-inline-flex align-items-center btn btn-outline-secondary', css({ width: '8rem' }))
+        container: cn('input-group-prepend'),
+        label: cn('flex-fill'),
+        spin: cn('spinner-grow spinner-grow-sm'),
+        button: cn(
+            'd-inline-flex align-items-center',
+            'btn',
+            'p-1',
+            css({
+                background: colors.gray.light,
+                border: `1px solid ${colors.gray.dark}`,
+                color: colors.black,
+                fontSize: '1rem',
+                width: '7rem',
+                ':hover': {
+                    background: colors.gray.main
+                }
+            })
+        )
     },
-    select: cn('custom-select', css({ flex: '0 1 auto !important', width: '8rem !important' }))
+    select: cn('custom-select', css({ flex: '0 1 auto !important', color: colors.black, width: '6rem !important' }))
 }
 
 export function LanguageSelector() {
