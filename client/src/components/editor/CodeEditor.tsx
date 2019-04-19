@@ -36,9 +36,8 @@ const { Range } = ace.acequire('ace/range') as {
     Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
 }
 
-function syntaxSupport(language: string) {
-    return new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
-}
+const getSyntaxSupport = (language: string) =>
+    new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
@@ -74,7 +73,7 @@ export function CodeEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.session.setMode(syntaxSupport(language.languages[language.selected]))
+        editor.session.setMode(getSyntaxSupport(language.languages[language.selected]))
     }, [language.selected])
 
     React.useEffect(() => {

@@ -61,16 +61,16 @@ const styles = {
     })
 }
 
+const computeChildWidth = (parent: Scope, child: Scope, width: number) => {
+    const proportion = (child.steps.to - child.steps.from + 1) / (parent.steps.to - parent.steps.from + 1)
+    return { width: proportion * width, percent: `${proportion * 100}%` }
+}
+
 export function ScopeNode(props: { scope: Scope; index: number; depth: number; width: number }) {
     const dispatch = useDispatch()
     const selected = props.index >= props.scope.steps.from && props.index <= props.scope.steps.to
     const isNode = props.scope.children.length !== 0
     const isRoot = isNode && props.scope.name == undefined
-
-    const computeChildWidth = (child: Scope) => {
-        const proportion = (child.steps.to - child.steps.from + 1) / (props.scope.steps.to - props.scope.steps.from + 1)
-        return { width: proportion * props.width, percent: `${proportion * 100}%` }
-    }
 
     return (
         <div className={classes.container}>
@@ -87,7 +87,7 @@ export function ScopeNode(props: { scope: Scope; index: number; depth: number; w
             {isNode && props.width >= 5 && (
                 <div className='d-flex flex-row'>
                     {props.scope.children.map((child, i) => {
-                        const { width, percent } = computeChildWidth(child)
+                        const { width, percent } = computeChildWidth(props.scope, child, props.width)
                         return (
                             <div key={i} className={classes.child.parent} style={{ width: percent }}>
                                 <ScopeNode scope={child} index={props.index} depth={props.depth + 1} width={width} />
