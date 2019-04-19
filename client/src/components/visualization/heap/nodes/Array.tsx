@@ -22,24 +22,14 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
-export type Options = {
-    showIndex: boolean
-    maxWidth: number
-}
-
-export const options: Options = {
-    showIndex: true,
-    maxWidth: 50
-}
+export const isSupported = (obj: Obj) =>
+    obj.type === protocol.Obj.Type.ARRAY ||
+    obj.type === protocol.Obj.Type.ALIST ||
+    obj.type === protocol.Obj.Type.LLIST ||
+    obj.type === protocol.Obj.Type.SET
 
 export function Array(props: { obj: Obj; select: (reference: string) => void }) {
-    const supported =
-        props.obj.type === protocol.Obj.Type.ARRAY ||
-        props.obj.type === protocol.Obj.Type.ALIST ||
-        props.obj.type === protocol.Obj.Type.LLIST ||
-        props.obj.type === protocol.Obj.Type.SET
-
-    if (!supported)
+    if (!isSupported(props.obj))
         return (
             <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>not compatible</div>

@@ -23,31 +23,41 @@ const classes = {
     bar: cn(css({ borderBottom: `1px solid ${colors.gray.dark}` }))
 }
 
-export type Options = {
-    mode: 'delta' | 'stair'
-    showIndex: boolean
-    showValues: boolean
-    width: number
-    height: number
+const computeDeltaRatios = (values: number[]) => {
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const delta = max - min !== 0 ? max - min : 1
+    return values.map(value => (value - min) / delta)
 }
 
-export const options: Options = {
-    mode: 'delta',
-    showIndex: true,
-    showValues: true,
-    width: 30,
-    height: 50
+const computeStairRatios = (values: number[]) => {
+    const valuesIndices = values.map((value, i) => [value, i])
+    valuesIndices.sort((a, b) => a[0] - b[0])
+    const sequenceGenerator = { previous: -Infinity, sequence: 0 }
+    const sequenceIndices = valuesIndices.map(([value, i]) => {
+        if (sequenceGenerator.previous !== value) {
+            sequenceGenerator.previous = value
+            return [++sequenceGenerator.sequence, i]
+        }
+        return [sequenceGenerator.sequence, i]
+    })
+    const min = sequenceIndices[0][0]
+    const max = sequenceIndices[sequenceIndices.length - 1][0]
+    const delta = max - min !== 0 ? max - min : 1
+    const ratioIndices = sequenceIndices.map(([value, i]) => [(value - min) / delta, i])
+    ratioIndices.sort((a, b) => a[1] - b[1])
+    return ratioIndices.map(([value, i]) => value)
 }
+
+export const isSupported = (obj: Obj) =>
+    (obj.type === protocol.Obj.Type.ARRAY ||
+        obj.type === protocol.Obj.Type.ALIST ||
+        obj.type === protocol.Obj.Type.LLIST ||
+        obj.type === protocol.Obj.Type.SET) &&
+    obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
 
 export function Bars(props: { obj: Obj; select: (reference: string) => void }) {
-    const supported =
-        (props.obj.type === protocol.Obj.Type.ARRAY ||
-            props.obj.type === protocol.Obj.Type.ALIST ||
-            props.obj.type === protocol.Obj.Type.LLIST ||
-            props.obj.type === protocol.Obj.Type.SET) &&
-        props.obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
-
-    if (!supported)
+    if (!isSupported(props.obj))
         return (
             <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>not compatible</div>
@@ -60,32 +70,6 @@ export function Bars(props: { obj: Obj; select: (reference: string) => void }) {
                 <div className={classes.elements}>empty</div>
             </BaseNode>
         )
-
-    const computeDeltaRatios = (values: number[]) => {
-        const min = Math.min(...values)
-        const max = Math.max(...values)
-        const delta = max - min !== 0 ? max - min : 1
-        return values.map(value => (value - min) / delta)
-    }
-
-    const computeStairRatios = (values: number[]) => {
-        const valuesIndices = values.map((value, i) => [value, i])
-        valuesIndices.sort((a, b) => a[0] - b[0])
-        const sequenceGenerator = { previous: -Infinity, sequence: 0 }
-        const sequenceIndices = valuesIndices.map(([value, i]) => {
-            if (sequenceGenerator.previous !== value) {
-                sequenceGenerator.previous = value
-                return [++sequenceGenerator.sequence, i]
-            }
-            return [sequenceGenerator.sequence, i]
-        })
-        const min = sequenceIndices[0][0]
-        const max = sequenceIndices[sequenceIndices.length - 1][0]
-        const delta = max - min !== 0 ? max - min : 1
-        const ratioIndices = sequenceIndices.map(([value, i]) => [(value - min) / delta, i])
-        ratioIndices.sort((a, b) => a[1] - b[1])
-        return ratioIndices.map(([value, i]) => value)
-    }
 
     // parameters
     const mode: 'delta' | 'stair' = 'delta'
