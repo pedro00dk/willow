@@ -4,8 +4,8 @@ import * as React from 'react'
 import { default as ReactSplitPane, Props as ReactSplitPaneProps } from 'react-split-pane'
 
 const classes = {
-    container: 'd-flex position-relative',
-    pane: 'd-flex position-relative',
+    container: 'position-relative d-flex',
+    pane: 'position-relative d-flex',
     resizer: {
         base: cn(
             'bg-secondary',

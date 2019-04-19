@@ -1,6 +1,10 @@
 import * as ace from 'brace'
 import * as React from 'react'
 
+const classes = {
+    container: 'h-100 w-100'
+}
+
 export type EditorMouseEvent = {
     [props: string]: unknown
     domEvent: MouseEvent
@@ -46,7 +50,7 @@ export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => voi
             if (parentSize.width !== width || parentSize.height !== height) editor.resize()
             parentSize.width = width
             parentSize.height = height
-        },  1000)
+        }, 1000)
         return () => window.clearInterval(checkResizeInterval)
     }, [editorRef])
 
@@ -55,5 +59,5 @@ export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => voi
         props.onEditorUpdate(editor)
     }, [editor])
 
-    return <div ref={editorRef} className='w-100 h-100' />
+    return <div ref={editorRef} className={classes.container} />
 }
