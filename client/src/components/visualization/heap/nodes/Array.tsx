@@ -1,9 +1,9 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../colors'
-import * as protocol from '../../../protobuf/protocol'
-import { ObjNode } from '../../../reducers/debug/heap'
+import { colors } from '../../../../colors'
+import * as protocol from '../../../../protobuf/protocol'
+import { Obj } from '../../../../reducers/visualization'
 import { BaseNode } from './BaseNode'
 
 const classes = {
@@ -22,23 +22,33 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
-export function DefaultArray(props: { node: ObjNode }) {
+export type Options = {
+    showIndex: boolean
+    maxWidth: number
+}
+
+export const options: Options = {
+    showIndex: true,
+    maxWidth: 50
+}
+
+export function Array(props: { obj: Obj }) {
     const supported =
-        props.node.type === protocol.Obj.Type.ARRAY ||
-        props.node.type === protocol.Obj.Type.ALIST ||
-        props.node.type === protocol.Obj.Type.LLIST ||
-        props.node.type === protocol.Obj.Type.SET
+        props.obj.type === protocol.Obj.Type.ARRAY ||
+        props.obj.type === protocol.Obj.Type.ALIST ||
+        props.obj.type === protocol.Obj.Type.LLIST ||
+        props.obj.type === protocol.Obj.Type.SET
 
     if (!supported)
         return (
-            <BaseNode type={props.node.languageType}>
+            <BaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
             </BaseNode>
         )
 
-    if (props.node.members.length === 0)
+    if (props.obj.members.length === 0)
         return (
-            <BaseNode type={props.node.languageType}>
+            <BaseNode obj={props.obj}>
                 <div className={classes.elements}>empty</div>
             </BaseNode>
         )
@@ -48,9 +58,9 @@ export function DefaultArray(props: { node: ObjNode }) {
     const maxWidth = 50
 
     return (
-        <BaseNode type={props.node.languageType}>
+        <BaseNode obj={props.obj}>
             <div className={classes.elements}>
-                {props.node.members.map((member, i) => (
+                {props.obj.members.map((member, i) => (
                     <div key={i} className={classes.element} style={{ maxWidth }} title={`${member.value}`}>
                         {showIndex && <span className={classes.index}>{i}</span>}
                         <span className={classes.value}>{member.value}</span>

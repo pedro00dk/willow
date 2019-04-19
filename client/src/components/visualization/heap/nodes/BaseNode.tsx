@@ -1,7 +1,8 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../colors'
+import { colors } from '../../../../colors'
+import { Obj } from '../../../../reducers/visualization'
 
 const classes = {
     container: cn('position-absolute', 'd-inline-flex flex-column', 'w-auto h-auto', 'p-1'),
@@ -14,10 +15,10 @@ const classes = {
     )
 }
 
-export function BaseNode(props: { type: string; children?: React.ReactNode }) {
+export function BaseNode(props: { obj: Obj; children?: React.ReactNode }) {
     return (
         <div className={classes.container}>
-            <div className={classes.typeContainer}>{props.type}</div>
+            <div className={classes.typeContainer}>{props.obj.languageType}</div>
             <div className={classes.childrenContainer}>{props.children}</div>
         </div>
     )

@@ -1,9 +1,9 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../colors'
-import * as protocol from '../../../protobuf/protocol'
-import { ObjNode } from '../../../reducers/debug/heap'
+import { colors } from '../../../../colors'
+import * as protocol from '../../../../protobuf/protocol'
+import { Obj } from '../../../../reducers/visualization'
 import { BaseNode } from './BaseNode'
 
 const classes = {
@@ -23,24 +23,40 @@ const classes = {
     bar: cn(css({ borderBottom: `1px solid ${colors.gray.dark}` }))
 }
 
-export function NumericArray(props: { node: ObjNode }) {
+export type Options = {
+    mode: 'delta' | 'stair'
+    showIndex: boolean
+    showValues: boolean
+    width: number
+    height: number
+}
+
+export const options: Options = {
+    mode: 'delta',
+    showIndex: true,
+    showValues: true,
+    width: 30,
+    height: 50
+}
+
+export function Bars(props: { obj: Obj }) {
     const supported =
-        (props.node.type === protocol.Obj.Type.ARRAY ||
-            props.node.type === protocol.Obj.Type.ALIST ||
-            props.node.type === protocol.Obj.Type.LLIST ||
-            props.node.type === protocol.Obj.Type.SET) &&
-        props.node.members.every(member => typeof member.value === 'number' && isFinite(member.value))
+        (props.obj.type === protocol.Obj.Type.ARRAY ||
+            props.obj.type === protocol.Obj.Type.ALIST ||
+            props.obj.type === protocol.Obj.Type.LLIST ||
+            props.obj.type === protocol.Obj.Type.SET) &&
+        props.obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
 
     if (!supported)
         return (
-            <BaseNode type={props.node.languageType}>
+            <BaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
             </BaseNode>
         )
 
-    if (props.node.members.length === 0)
+    if (props.obj.members.length === 0)
         return (
-            <BaseNode type={props.node.languageType}>
+            <BaseNode obj={props.obj}>
                 <div className={classes.elements}>empty</div>
             </BaseNode>
         )
@@ -78,11 +94,11 @@ export function NumericArray(props: { node: ObjNode }) {
     const width = 30
     const height = 50
 
-    const values = props.node.members.map(member => member.value as number)
+    const values = props.obj.members.map(member => member.value as number)
     const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeStairRatios(values)
 
     return (
-        <BaseNode type={props.node.languageType}>
+        <BaseNode obj={props.obj}>
             <div className={classes.elements}>
                 {ratios.map((ratio, i) => (
                     <div key={i} className={classes.element} style={{ width }} title={`${values[i]}`}>
