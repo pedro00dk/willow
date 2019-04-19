@@ -4,7 +4,7 @@ import * as React from 'react'
 import { colors } from '../../../../colors'
 import * as protocol from '../../../../protobuf/protocol'
 import { Obj } from '../../../../reducers/visualization'
-import { BaseNode } from './BaseNode'
+import { Node as BaseNode } from './Base'
 
 const classes = {
     elements: cn('d-flex align-items-end'),
@@ -49,6 +49,10 @@ const computeStairRatios = (values: number[]) => {
     return ratioIndices.map(([value, i]) => value)
 }
 
+export const name = 'bars'
+
+export const isDefault = (obj: Obj) => false
+
 export const isSupported = (obj: Obj) =>
     (obj.type === protocol.Obj.Type.ARRAY ||
         obj.type === protocol.Obj.Type.ALIST ||
@@ -56,7 +60,7 @@ export const isSupported = (obj: Obj) =>
         obj.type === protocol.Obj.Type.SET) &&
     obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
 
-export function Bars(props: { obj: Obj; select: (reference: string) => void }) {
+export function Node(props: { obj: Obj; select: (reference: string) => void }) {
     if (!isSupported(props.obj))
         return (
             <BaseNode obj={props.obj} select={props.select}>

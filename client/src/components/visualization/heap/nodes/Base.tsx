@@ -15,7 +15,13 @@ const classes = {
     )
 }
 
-export function BaseNode(props: { obj: Obj; select: (reference: string) => void; children?: React.ReactNode }) {
+export const name = 'base'
+
+export const isDefault = (obj: Obj) => false
+
+export const isSupported = (obj: Obj) => true
+
+export function Node(props: { obj: Obj; select: (reference: string) => void; children?: React.ReactNode }) {
     return (
         <div
             className={classes.container}

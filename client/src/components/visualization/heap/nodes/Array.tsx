@@ -4,7 +4,7 @@ import * as React from 'react'
 import { colors } from '../../../../colors'
 import * as protocol from '../../../../protobuf/protocol'
 import { Obj } from '../../../../reducers/visualization'
-import { BaseNode } from './BaseNode'
+import { Node as BaseNode } from './Base'
 
 const classes = {
     elements: cn('d-flex align-items-center'),
@@ -22,13 +22,17 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
+export const name = 'array'
+
+export const isDefault = (obj: Obj) => obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST
+
 export const isSupported = (obj: Obj) =>
     obj.type === protocol.Obj.Type.ARRAY ||
     obj.type === protocol.Obj.Type.ALIST ||
     obj.type === protocol.Obj.Type.LLIST ||
     obj.type === protocol.Obj.Type.SET
 
-export function Array(props: { obj: Obj; select: (reference: string) => void }) {
+export function Node(props: { obj: Obj; select: (reference: string) => void }) {
     if (!isSupported(props.obj))
         return (
             <BaseNode obj={props.obj} select={props.select}>
