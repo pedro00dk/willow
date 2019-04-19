@@ -15,9 +15,13 @@ const classes = {
     )
 }
 
-export function BaseNode(props: { obj: Obj; children?: React.ReactNode }) {
+export function BaseNode(props: { obj: Obj; select: (reference: string) => void; children?: React.ReactNode }) {
     return (
-        <div className={classes.container}>
+        <div
+            className={classes.container}
+            onClick={() => props.select(props.obj.reference)}
+            onContextMenu={() => props.select(props.obj.reference)}
+        >
             <div className={classes.typeContainer}>{props.obj.languageType}</div>
             <div className={classes.childrenContainer}>{props.children}</div>
         </div>

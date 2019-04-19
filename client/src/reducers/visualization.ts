@@ -1,6 +1,5 @@
 import { Reducer } from 'redux'
 import * as protocol from '../protobuf/protocol'
-import { AsyncAction } from './Store'
 
 export type Scope = {
     readonly name: string
@@ -27,19 +26,25 @@ export type Heap = {
 type State = {
     readonly stack: Stack
     readonly heaps: Heap[]
+    readonly drawTypes: { [reference: string]: string }
 }
 
-type Action = { type: 'visualization/load'; payload: { stack: Stack; heaps: Heap[] } }
+type Action =
+    | { type: 'visualization/load'; payload: { stack: Stack; heaps: Heap[] } }
+    | { type: 'visualization/setDrawType'; payload: { reference: string; type: string } }
 
 const initialState: State = {
     stack: undefined,
-    heaps: []
+    heaps: [],
+    drawTypes: {}
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'visualization/load':
             return { ...initialState, ...action.payload }
+        case 'visualization/setDrawType':
+            return { ...state, drawTypes: { ...state.drawTypes, [action.payload.reference]: action.payload.type } }
     }
     return state
 }
@@ -122,4 +127,8 @@ function load(steps: protocol.IStep[]): Action {
     return { type: 'visualization/load', payload: { stack, heaps } }
 }
 
-export const actions = { load }
+function setDrawType(reference: string, type: string): Action {
+    return { type: 'visualization/setDrawType', payload: { reference, type } }
+}
+
+export const actions = { load, setDrawType }

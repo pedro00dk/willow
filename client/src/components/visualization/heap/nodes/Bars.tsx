@@ -39,7 +39,7 @@ export const options: Options = {
     height: 50
 }
 
-export function Bars(props: { obj: Obj }) {
+export function Bars(props: { obj: Obj; select: (reference: string) => void }) {
     const supported =
         (props.obj.type === protocol.Obj.Type.ARRAY ||
             props.obj.type === protocol.Obj.Type.ALIST ||
@@ -49,14 +49,14 @@ export function Bars(props: { obj: Obj }) {
 
     if (!supported)
         return (
-            <BaseNode obj={props.obj}>
+            <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>not compatible</div>
             </BaseNode>
         )
 
     if (props.obj.members.length === 0)
         return (
-            <BaseNode obj={props.obj}>
+            <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>empty</div>
             </BaseNode>
         )
@@ -98,7 +98,7 @@ export function Bars(props: { obj: Obj }) {
     const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeStairRatios(values)
 
     return (
-        <BaseNode obj={props.obj}>
+        <BaseNode obj={props.obj} select={props.select}>
             <div className={classes.elements}>
                 {ratios.map((ratio, i) => (
                     <div key={i} className={classes.element} style={{ width }} title={`${values[i]}`}>

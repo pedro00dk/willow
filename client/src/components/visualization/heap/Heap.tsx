@@ -10,17 +10,21 @@ const classes = {
 }
 
 export function Heap() {
+    const selectedObjRef = React.useRef<string>(undefined)
     const { tracer, visualization } = useRedux(state => ({
         tracer: state.tracer,
         visualization: state.visualization
     }))
 
     return (
-        <ContextMenuTrigger id='some_unique_identifier'>
+        <ContextMenuTrigger id='heap context menu'>
             <div className={classes.container}>
-                {tracer.available && Object.values(visualization.heaps[tracer.index]).map(node => <Array obj={node} />)}
+                {tracer.available &&
+                    Object.values(visualization.heaps[tracer.index]).map(node => (
+                        <Array obj={node} select={reference => (selectedObjRef.current = reference)} />
+                    ))}
             </div>
-            <ContextMenu id='some_unique_identifier'>
+            <ContextMenu id='heap context menu'>
                 <MenuItem data={{ foo: 'bar' }}>ContextMenu Item 1</MenuItem>
                 <MenuItem data={{ foo: 'bar' }}>ContextMenu Item 2</MenuItem>
                 <MenuItem divider />

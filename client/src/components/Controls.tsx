@@ -23,10 +23,6 @@ export function Controls() {
     const dispatch = useDispatch()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
-    console.log('--')
-    console.log('tracer', tracer)
-    console.log('--')
-
     return (
         <div className={classes.container}>
             <LanguageSelector />

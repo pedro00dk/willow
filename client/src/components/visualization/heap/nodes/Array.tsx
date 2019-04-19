@@ -32,7 +32,7 @@ export const options: Options = {
     maxWidth: 50
 }
 
-export function Array(props: { obj: Obj }) {
+export function Array(props: { obj: Obj; select: (reference: string) => void }) {
     const supported =
         props.obj.type === protocol.Obj.Type.ARRAY ||
         props.obj.type === protocol.Obj.Type.ALIST ||
@@ -41,14 +41,14 @@ export function Array(props: { obj: Obj }) {
 
     if (!supported)
         return (
-            <BaseNode obj={props.obj}>
+            <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>not compatible</div>
             </BaseNode>
         )
 
     if (props.obj.members.length === 0)
         return (
-            <BaseNode obj={props.obj}>
+            <BaseNode obj={props.obj} select={props.select}>
                 <div className={classes.elements}>empty</div>
             </BaseNode>
         )
@@ -58,7 +58,7 @@ export function Array(props: { obj: Obj }) {
     const maxWidth = 50
 
     return (
-        <BaseNode obj={props.obj}>
+        <BaseNode obj={props.obj} select={props.select}>
             <div className={classes.elements}>
                 {props.obj.members.map((member, i) => (
                     <div key={i} className={classes.element} style={{ maxWidth }} title={`${member.value}`}>
