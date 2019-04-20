@@ -19,7 +19,7 @@ const classes = {
                 cursor: 'default'
             })
         ),
-        node: cn(css({ ':hover': { borderColor: `${colors.gray.dark} !important` } })),
+        intermediary: cn(css({ ':hover': { borderColor: `${colors.gray.dark} !important` } })),
         leaf: cn(
             css({
                 ':hover': {
@@ -32,8 +32,8 @@ const classes = {
 }
 
 const styles = {
-    scope: (isNode: boolean, selected: boolean, width: number, depth: number) => ({
-        ...(isNode
+    scope: (isIntermediary: boolean, selected: boolean, width: number, depth: number) => ({
+        ...(isIntermediary
             ? {
                   backgroundColor:
                       depth <= 1
@@ -51,8 +51,8 @@ const styles = {
             : {
                   background: `radial-gradient(ellipse at top, ${colors.primaryBlue.lighter} 20%, transparent 30%)`
               }),
-        ...(selected && isNode ? { borderColor: colors.gray.light } : undefined),
-        ...(selected && !isNode
+        ...(selected && isIntermediary ? { borderColor: colors.gray.light } : undefined),
+        ...(selected && !isIntermediary
             ? {
                   background: `radial-gradient(ellipse at top, ${colors.primaryBlue.main} 50%, transparent 60%)`
               }
@@ -69,22 +69,23 @@ const computeChildWidth = (parent: Scope, child: Scope, width: number) => {
 export function ScopeNode(props: { scope: Scope; index: number; depth: number; width: number }) {
     const dispatch = useDispatch()
     const selected = props.index >= props.scope.steps.from && props.index <= props.scope.steps.to
-    const isNode = props.scope.children.length !== 0
-    const isRoot = isNode && props.scope.name == undefined
+    const isRoot = props.scope.children.length !== 0 && props.scope.name == undefined
+    const isIntermediary = props.scope.children.length !== 0 && !isRoot
+    const isLeaf = !isIntermediary
 
     return (
         <div className={classes.container}>
             {!isRoot && (
                 <div
-                    className={cn(classes.scope.base, isNode ? classes.scope.node : classes.scope.leaf)}
-                    style={styles.scope(isNode, selected, props.width, props.depth)}
+                    className={cn(classes.scope.base, isIntermediary ? classes.scope.intermediary : classes.scope.leaf)}
+                    style={styles.scope(isIntermediary, selected, props.width, props.depth)}
                     title={props.scope.name}
                     onClick={() => dispatch(tracerActions.setIndex(props.scope.steps.from))}
                 >
-                    {isNode && props.width >= 20 ? props.scope.name : '\u200b'}
+                    {isLeaf && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>
             )}
-            {isNode && props.width >= 5 && (
+            {isLeaf && props.width >= 5 && (
                 <div className='d-flex flex-row'>
                     {props.scope.children.map((child, i) => {
                         const { width, percent } = computeChildWidth(props.scope, child, props.width)
