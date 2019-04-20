@@ -56,7 +56,7 @@ export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => voi
     }, [editorRef])
 
     React.useEffect(() => {
-        if (!editor) return
+        if (!editor || !props.onEditorUpdate) return
         props.onEditorUpdate(editor)
     }, [editor])
 

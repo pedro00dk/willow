@@ -10,7 +10,7 @@ type State = {
     readonly steps: protocol.IStep[]
     readonly lines: { [line: number]: number[] }
     readonly index: number
-    readonly error?: string
+    readonly error: string
 }
 
 type Action =
