@@ -126,9 +126,9 @@ const load = (steps: protocol.IStep[]): Action => ({
     payload: { stack: buildStack(steps), heaps: buildHeaps(steps) }
 })
 
-const setDrawType = (reference: string, type: string): Action => ({
+const setNodeType = (reference: string, type: string): Action => ({
     type: 'visualization/setNodeType',
     payload: { reference, type }
 })
 
-export const actions = { load, setDrawType }
+export const actions = { load, setNodeType }
