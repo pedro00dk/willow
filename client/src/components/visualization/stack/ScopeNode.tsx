@@ -71,7 +71,6 @@ export function ScopeNode(props: { scope: Scope; index: number; depth: number; w
     const selected = props.index >= props.scope.steps.from && props.index <= props.scope.steps.to
     const isRoot = props.scope.children.length !== 0 && props.scope.name == undefined
     const isIntermediary = props.scope.children.length !== 0 && !isRoot
-    const isLeaf = !isIntermediary
 
     return (
         <div className={classes.container}>
@@ -82,10 +81,10 @@ export function ScopeNode(props: { scope: Scope; index: number; depth: number; w
                     title={props.scope.name}
                     onClick={() => dispatch(tracerActions.setIndex(props.scope.steps.from))}
                 >
-                    {isLeaf && props.width >= 20 ? props.scope.name : '\u200b'}
+                    {isIntermediary && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>
             )}
-            {isLeaf && props.width >= 5 && (
+            {(isRoot || isIntermediary) && props.width >= 5 && (
                 <div className='d-flex flex-row'>
                     {props.scope.children.map((child, i) => {
                         const { width, percent } = computeChildWidth(props.scope, child, props.width)
