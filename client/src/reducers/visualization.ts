@@ -26,25 +26,36 @@ export type Heap = {
 type State = {
     readonly stack: Stack
     readonly heaps: Heap[]
-    readonly nodeTypes: { [reference: string]: string }
+    readonly objNodes: { [reference: string]: string }
+    readonly typeNodes: { [type: string]: string }
 }
 
 type Action =
     | { type: 'visualization/load'; payload: { stack: Stack; heaps: Heap[] } }
-    | { type: 'visualization/setNodeType'; payload: { reference: string; type: string } }
+    | { type: 'visualization/setObjNode'; payload: { reference: string; node: string } }
+    | { type: 'visualization/setTypeNode'; payload: { type: string; node: string } }
 
 const initialState: State = {
     stack: undefined,
     heaps: [],
-    nodeTypes: {}
+    objNodes: {},
+    typeNodes: {}
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'visualization/load':
             return { ...initialState, ...action.payload }
-        case 'visualization/setNodeType':
-            return { ...state, nodeTypes: { ...state.nodeTypes, [action.payload.reference]: action.payload.type } }
+        case 'visualization/setObjNode':
+            return {
+                ...state,
+                objNodes: { ...state.objNodes, [action.payload.reference]: action.payload.node }
+            }
+        case 'visualization/setTypeNode':
+            return {
+                ...state,
+                typeNodes: { ...state.typeNodes, [action.payload.type]: action.payload.node }
+            }
     }
     return state
 }
@@ -54,33 +65,33 @@ const buildStack = (steps: protocol.IStep[]) => {
     const treePath = [root]
     steps.forEach((step, i) => {
         const snapshot = step.snapshot
-        const lastNode = treePath[treePath.length - 1]
+        const lastScope = treePath[treePath.length - 1]
         if (!snapshot) {
             const name = !!step.threw.exception ? step.threw.exception.type : step.threw.cause
-            const threwNode: Scope = {
+            const threwSyntheticScope: Scope = {
                 name,
                 steps: { from: i, to: i },
                 children: [{ name: undefined, steps: { from: i, to: i }, children: [] }]
             }
-            root.children.push(threwNode)
+            root.children.push(threwSyntheticScope)
             root.steps.to = i
             return
         } else if (snapshot.type === protocol.Snapshot.Type.CALL) {
-            const scope = snapshot.stack[snapshot.stack.length - 1]
-            const callNode: Scope = { name: scope.name, steps: { from: i, to: i }, children: [] }
-            const callLeaf: Scope = { name: undefined, steps: { from: i, to: i }, children: [] }
-            callNode.children.push(callLeaf)
-            lastNode.children.push(callNode)
-            treePath.forEach(node => (node.steps.to = i))
-            treePath.push(callNode)
+            const snapshotStackLastScope = snapshot.stack[snapshot.stack.length - 1]
+            const newScope: Scope = { name: snapshotStackLastScope.name, steps: { from: i, to: i }, children: [] }
+            const leaf: Scope = { name: undefined, steps: { from: i, to: i }, children: [] }
+            newScope.children.push(leaf)
+            lastScope.children.push(newScope)
+            treePath.forEach(scope => (scope.steps.to = i))
+            treePath.push(newScope)
         } else {
-            // creates a new leaf if the previous leaf does not have any child (it happens after a RETURN)
-            const createLeaf = lastNode.children[lastNode.children.length - 1].children.length > 0
-            if (createLeaf) lastNode.children.push({ name: undefined, steps: { from: i, to: i }, children: [] })
+            // creates a new leaf if the current scope does not have an ending leaf child (it happens after a RETURN)
+            const shallCreateLeaf = lastScope.children[lastScope.children.length - 1].children.length > 0
+            if (shallCreateLeaf) lastScope.children.push({ name: undefined, steps: { from: i, to: i }, children: [] })
             //
-            const lastLeaf = lastNode.children[lastNode.children.length - 1]
-            lastLeaf.steps.to = i
-            treePath.forEach(node => (node.steps.to = i))
+            const leaf = lastScope.children[lastScope.children.length - 1]
+            leaf.steps.to = i
+            treePath.forEach(scope => (scope.steps.to = i))
             if (snapshot.type === protocol.Snapshot.Type.RETURN) treePath.pop()
         }
     })
@@ -94,12 +105,12 @@ const buildHeaps = (steps: protocol.IStep[]) => {
         if (!step.snapshot) return heaps.push(!!heaps[i - 1] ? heaps[i - 1] : {})
         const heap: Heap = {}
         heaps.push(heap)
-        Object.entries(step.snapshot.heap).forEach(([reference, obj]) => {
+        Object.entries(step.snapshot.heap).forEach(([reference, snapshotHeapObj]) => {
             heap[reference] = {
                 reference,
-                type: obj.type,
-                languageType: obj.languageType,
-                userDefined: obj.userDefined,
+                type: snapshotHeapObj.type,
+                languageType: snapshotHeapObj.languageType,
+                userDefined: snapshotHeapObj.userDefined,
                 members: []
             }
         })
@@ -126,9 +137,14 @@ const load = (steps: protocol.IStep[]): Action => ({
     payload: { stack: buildStack(steps), heaps: buildHeaps(steps) }
 })
 
-const setNodeType = (reference: string, type: string): Action => ({
-    type: 'visualization/setNodeType',
-    payload: { reference, type }
+const setObjNodeType = (reference: string, node: string): Action => ({
+    type: 'visualization/setObjNode',
+    payload: { reference, node }
 })
 
-export const actions = { load, setNodeType }
+const setTypeNodeType = (type: string, node: string): Action => ({
+    type: 'visualization/setTypeNode',
+    payload: { type, node }
+})
+
+export const actions = { load, setObjNodeType, setTypeNodeType }
