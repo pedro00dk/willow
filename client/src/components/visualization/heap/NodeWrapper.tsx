@@ -9,6 +9,8 @@ import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
 import * as BaseNodes from './BaseNode'
 
+import 'react-contexify/dist/ReactContexify.min.css'
+
 const classes = {
     container: cn('d-inline-flex'),
     selected: cn(css({ background: colors.primaryBlue.lighter }))

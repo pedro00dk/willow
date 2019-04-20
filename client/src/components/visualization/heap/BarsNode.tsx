@@ -53,7 +53,7 @@ const computeFixedRatios = (values: number[]) => {
 const modes = new Set(['delta', 'fixed'])
 
 const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
-    mode: !!options && typeof modes.has(options['mode'] as string) ? (options['mode'] as string) : true,
+    mode: !!options && typeof modes.has(options['mode'] as string) ? (options['mode'] as string) : 'delta',
     showIndex: !!options && typeof options['showIndex'] === 'boolean' ? (options['showIndex'] as boolean) : true,
     showValues: !!options && typeof options['showValues'] === 'boolean' ? (options['showValues'] as boolean) : true,
     width: !!options && typeof options['width'] === 'number' ? (options['width'] as number) : 30,
@@ -109,10 +109,70 @@ export function NodeOptions(props: {
     onOptionsUpdate: (options: { [option: string]: unknown }) => void
 }) {
     const options = getOptionsFromObject(props.options)
-    return <Item>show index</Item>
+
     return (
         <>
-            <Item>max width</Item>
+            <Item>
+                <span>mode</span>
+                <select
+                    value={options.mode}
+                    onChange={event => {
+                        options.mode = event.target.value
+                        props.onOptionsUpdate(options)
+                    }}
+                >
+                    <option value='delta'>delta</option>
+                    <option value='fixed'>fixed</option>
+                </select>
+            </Item>
+            <Item>
+                <span>show index</span>
+                <input
+                    type='checkbox'
+                    checked={options.showIndex}
+                    onChange={event => {
+                        options.showIndex = event.target.checked
+                        props.onOptionsUpdate(options)
+                    }}
+                />
+            </Item>
+            <Item>
+                <span>show values</span>
+                <input
+                    type='checkbox'
+                    checked={options.showValues}
+                    onChange={event => {
+                        options.showValues = event.target.checked
+                        props.onOptionsUpdate(options)
+                    }}
+                />
+            </Item>
+            <Item>
+                <span>width</span>
+                <input
+                    type='range'
+                    min={5}
+                    value={options.width}
+                    max={100}
+                    onChange={event => {
+                        options.width = event.target.valueAsNumber
+                        props.onOptionsUpdate(options)
+                    }}
+                />
+            </Item>
+            <Item>
+                <span>height</span>
+                <input
+                    type='range'
+                    min={5}
+                    value={options.height}
+                    max={200}
+                    onChange={event => {
+                        options.height = event.target.valueAsNumber
+                        props.onOptionsUpdate(options)
+                    }}
+                />
+            </Item>
         </>
     )
 }

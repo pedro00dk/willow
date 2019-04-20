@@ -76,19 +76,29 @@ export function NodeOptions(props: {
     return (
         <>
             <Item>
-                <div className='custom-control custom-checkbox'>
-                    <label className='custom-control-label'>Show index</label>
-                    <input
-                        type='checkbox'
-                        className='custom-control-input'
-                        onChange={event => {
-                            options.showIndex = event.target.checked
-                            props.onOptionsUpdate(options)
-                        }}
-                    />
-                </div>
+                <span>show index</span>
+                <input
+                    type='checkbox'
+                    checked={options.showIndex}
+                    onChange={event => {
+                        options.showIndex = event.target.checked
+                        props.onOptionsUpdate(options)
+                    }}
+                />
             </Item>
-            <Item>max width</Item>
+            <Item>
+                <span>max width</span>
+                <input
+                    type='range'
+                    min={10}
+                    value={options.maxWidth}
+                    max={200}
+                    onChange={event => {
+                        options.maxWidth = event.target.valueAsNumber
+                        props.onOptionsUpdate(options)
+                    }}
+                />
+            </Item>
         </>
     )
 }

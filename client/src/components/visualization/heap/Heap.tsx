@@ -3,8 +3,6 @@ import * as React from 'react'
 import { useDispatch, useRedux } from '../../../reducers/Store'
 import { NodeWrapper } from './NodeWrapper'
 
-import 'react-contexify/dist/ReactContexify.min.css'
-
 const classes = {
     container: cn('d-block', 'w-100 h-100')
 }
