@@ -27,19 +27,25 @@ type State = {
     readonly stack: Stack
     readonly heaps: Heap[]
     readonly objNodes: { [reference: string]: string }
+    readonly objOptions: { [reference: string]: { [option: string]: unknown } }
     readonly typeNodes: { [type: string]: string }
+    readonly typeOptions: { [type: string]: { [option: string]: unknown } }
 }
 
 type Action =
     | { type: 'visualization/load'; payload: { stack: Stack; heaps: Heap[] } }
     | { type: 'visualization/setObjNode'; payload: { reference: string; node: string } }
+    | { type: 'visualization/setObjOptions'; payload: { reference: string; options: { [option: string]: unknown } } }
     | { type: 'visualization/setTypeNode'; payload: { type: string; node: string } }
+    | { type: 'visualization/setTypeOptions'; payload: { type: string; options: { [option: string]: unknown } } }
 
 const initialState: State = {
     stack: undefined,
     heaps: [],
     objNodes: {},
-    typeNodes: {}
+    objOptions: {},
+    typeNodes: {},
+    typeOptions: {}
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
@@ -49,12 +55,24 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
         case 'visualization/setObjNode':
             return {
                 ...state,
-                objNodes: { ...state.objNodes, [action.payload.reference]: action.payload.node }
+                objNodes: { ...state.objNodes, [action.payload.reference]: action.payload.node },
+                objOptions: { ...state.objOptions, [action.payload.reference]: undefined }
+            }
+        case 'visualization/setObjOptions':
+            return {
+                ...state,
+                objOptions: { ...state.objOptions, [action.payload.reference]: action.payload.options }
             }
         case 'visualization/setTypeNode':
             return {
                 ...state,
-                typeNodes: { ...state.typeNodes, [action.payload.type]: action.payload.node }
+                typeNodes: { ...state.typeNodes, [action.payload.type]: action.payload.node },
+                typeOptions: { ...state.objOptions, [action.payload.type]: undefined }
+            }
+        case 'visualization/setTypeOptions':
+            return {
+                ...state,
+                typeOptions: { ...state.objOptions, [action.payload.type]: action.payload.options }
             }
     }
     return state
@@ -142,9 +160,19 @@ const setObjNode = (reference: string, node: string): Action => ({
     payload: { reference, node }
 })
 
+const setObjOptions = (reference: string, options: { [option: string]: unknown }): Action => ({
+    type: 'visualization/setObjOptions',
+    payload: { reference, options }
+})
+
 const setTypeNode = (type: string, node: string): Action => ({
     type: 'visualization/setTypeNode',
     payload: { type, node }
 })
 
-export const actions = { load, setObjNode, setTypeNode }
+const setTypeOptions = (type: string, options: { [option: string]: unknown }): Action => ({
+    type: 'visualization/setTypeOptions',
+    payload: { type, options }
+})
+
+export const actions = { load, setObjNode, setObjOptions, setTypeNode, setTypeOptions }
