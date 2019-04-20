@@ -21,7 +21,11 @@ const classes = {
     }
 }
 
-export function SquareBaseNode(props: { obj: Obj; children?: React.ReactNode }) {
+export function SquareBaseNode(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    children?: React.ReactNode
+}) {
     return (
         <div className={classes.square.container}>
             <span className={classes.square.type}>{props.obj.languageType}</span>
@@ -30,7 +34,11 @@ export function SquareBaseNode(props: { obj: Obj; children?: React.ReactNode }) 
     )
 }
 
-export function CylinderBaseNode(props: { obj: Obj; children?: React.ReactNode }) {
+export function CylinderBaseNode(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    children?: React.ReactNode
+}) {
     return (
         <div className={classes.cylinder.container}>
             <div className={classes.cylinder.type}>{props.obj.languageType}</div>

@@ -1,6 +1,7 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { Item } from 'react-contexify'
 import { colors } from '../../../colors'
 import * as protocol from '../../../protobuf/protocol'
 import { Obj } from '../../../reducers/visualization'
@@ -30,7 +31,7 @@ const computeDeltaRatios = (values: number[]) => {
     return values.map(value => (value - min) / delta)
 }
 
-const computeStairRatios = (values: number[]) => {
+const computeFixedRatios = (values: number[]) => {
     const valuesIndices = values.map((value, i) => [value, i])
     valuesIndices.sort((a, b) => a[0] - b[0])
     const sequenceGenerator = { previous: -Infinity, sequence: 0 }
@@ -49,17 +50,26 @@ const computeStairRatios = (values: number[]) => {
     return ratioIndices.map(([value, i]) => value)
 }
 
+const modes = new Set(['delta', 'fixed'])
+
+const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
+    mode: !!options && typeof modes.has(options['mode'] as string) ? (options['mode'] as string) : true,
+    showIndex: !!options && typeof options['showIndex'] === 'boolean' ? (options['showIndex'] as boolean) : true,
+    showValues: !!options && typeof options['showValues'] === 'boolean' ? (options['showValues'] as boolean) : true,
+    width: !!options && typeof options['width'] === 'number' ? (options['width'] as number) : 30,
+    height: !!options && typeof options['height'] === 'number' ? (options['height'] as number) : 50
+})
+
 export const isDefault = (obj: Obj) => false
 
-export const isSupported = (obj: Obj) =>
-    (obj.type === protocol.Obj.Type.ARRAY ||
-        obj.type === protocol.Obj.Type.ALIST ||
-        obj.type === protocol.Obj.Type.LLIST ||
-        obj.type === protocol.Obj.Type.SET) &&
-    obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
-
-export function BarsNode(props: { obj: Obj }) {
-    if (!isSupported(props.obj))
+export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+    if (
+        (props.obj.type !== protocol.Obj.Type.ARRAY &&
+            props.obj.type !== protocol.Obj.Type.ALIST &&
+            props.obj.type !== protocol.Obj.Type.LLIST &&
+            props.obj.type !== protocol.Obj.Type.SET) ||
+        props.obj.members.some(member => typeof member.value !== 'number' || !isFinite(member.value))
+    )
         return (
             <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
@@ -73,15 +83,10 @@ export function BarsNode(props: { obj: Obj }) {
             </SquareBaseNode>
         )
 
-    // parameters
-    const mode: 'delta' | 'stair' = 'delta'
-    const showIndex = true
-    const showValues = true
-    const width = 30
-    const height = 50
+    const { mode, showIndex, showValues, width, height } = getOptionsFromObject(props.options)
 
     const values = props.obj.members.map(member => member.value as number)
-    const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeStairRatios(values)
+    const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeFixedRatios(values)
 
     return (
         <SquareBaseNode obj={props.obj}>
@@ -95,5 +100,19 @@ export function BarsNode(props: { obj: Obj }) {
                 ))}
             </div>
         </SquareBaseNode>
+    )
+}
+
+export function NodeOptions(props: {
+    obj: Obj
+    options: { [option: string]: unknown }
+    onOptionsUpdate: (options: { [option: string]: unknown }) => void
+}) {
+    const options = getOptionsFromObject(props.options)
+    return <Item>show index</Item>
+    return (
+        <>
+            <Item>max width</Item>
+        </>
     )
 }

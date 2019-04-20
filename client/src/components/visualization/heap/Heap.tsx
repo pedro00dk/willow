@@ -21,10 +21,13 @@ export function Heap() {
         <div className={classes.container}>
             {tracer.available &&
                 Object.values(visualization.heaps[tracer.index]).map(obj => (
-                    <NodeWrapper key={obj.reference}
+                    <NodeWrapper
+                        key={obj.reference}
                         obj={obj}
                         objNode={visualization.objNodes[obj.reference]}
+                        objOptions={visualization.objOptions[obj.reference]}
                         typeNode={visualization.typeNodes[obj.languageType]}
+                        typeOptions={visualization.typeOptions[obj.languageType]}
                     />
                 ))}
         </div>

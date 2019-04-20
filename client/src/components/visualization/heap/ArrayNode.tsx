@@ -1,6 +1,7 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
+import { Item } from 'react-contexify'
 import { colors } from '../../../colors'
 import * as protocol from '../../../protobuf/protocol'
 import { Obj } from '../../../reducers/visualization'
@@ -22,16 +23,20 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
+const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
+    showIndex: !!options && typeof options['showIndex'] === 'boolean' ? (options['showIndex'] as boolean) : true,
+    maxWidth: !!options && typeof options['maxWidth'] === 'number' ? (options['maxWidth'] as number) : 30
+})
+
 export const isDefault = (obj: Obj) => obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST
 
-export const isSupported = (obj: Obj) =>
-    obj.type === protocol.Obj.Type.ARRAY ||
-    obj.type === protocol.Obj.Type.ALIST ||
-    obj.type === protocol.Obj.Type.LLIST ||
-    obj.type === protocol.Obj.Type.SET
-
-export function ArrayNode(props: { obj: Obj }) {
-    if (!isSupported(props.obj))
+export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+    if (
+        props.obj.type !== protocol.Obj.Type.ARRAY &&
+        props.obj.type !== protocol.Obj.Type.ALIST &&
+        props.obj.type !== protocol.Obj.Type.LLIST &&
+        props.obj.type !== protocol.Obj.Type.SET
+    )
         return (
             <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
@@ -45,9 +50,7 @@ export function ArrayNode(props: { obj: Obj }) {
             </SquareBaseNode>
         )
 
-    // parameters
-    const showIndex = true
-    const maxWidth = 50
+    const { showIndex, maxWidth } = getOptionsFromObject(props.options)
 
     return (
         <SquareBaseNode obj={props.obj}>
@@ -60,5 +63,32 @@ export function ArrayNode(props: { obj: Obj }) {
                 ))}
             </div>
         </SquareBaseNode>
+    )
+}
+
+export function NodeOptions(props: {
+    obj: Obj
+    options: { [option: string]: unknown }
+    onOptionsUpdate: (options: { [option: string]: unknown }) => void
+}) {
+    const options = getOptionsFromObject(props.options)
+
+    return (
+        <>
+            <Item>
+                <div className='custom-control custom-checkbox'>
+                    <label className='custom-control-label'>Show index</label>
+                    <input
+                        type='checkbox'
+                        className='custom-control-input'
+                        onChange={event => {
+                            options.showIndex = event.target.checked
+                            props.onOptionsUpdate(options)
+                        }}
+                    />
+                </div>
+            </Item>
+            <Item>max width</Item>
+        </>
     )
 }

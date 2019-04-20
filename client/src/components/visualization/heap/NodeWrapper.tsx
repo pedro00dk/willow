@@ -15,43 +15,73 @@ const classes = {
 }
 
 const nodes = {
-    array: { ...ArrayNode, Node: ArrayNode.ArrayNode },
-    bars: { ...BarsNode, Node: BarsNode.BarsNode }
+    array: ArrayNode,
+    bars: BarsNode
 }
 
 const orderedNodeTypes = ['array', 'bars'] as (keyof typeof nodes)[]
 
-const getDefault = (obj: Obj) =>
-    Object.entries(nodes)
-        .filter(([name, node]) => node.isDefault(obj))
-        .map(([name, node]) => name)[0]
-
-export function NodeWrapper(props: { obj: Obj; objNode: string; typeNode: string }) {
-    const currentNode = (props.objNode != undefined
-        ? props.objNode
-        : props.typeNode != undefined
-        ? props.typeNode
-        : getDefault(props.obj)) as keyof typeof nodes
-
+const getDefaultNode = (obj: Obj) => {
     // tslint:disable-next-line: variable-name
-    const Node = currentNode != undefined ? nodes[currentNode].Node : BaseNodes.SquareBaseNode
+    const DefaultNode = Object.entries(nodes)
+        .filter(([name, node]) => node.isDefault(obj))
+        .map(([name, node]) => node.Node)[0]
+    return !!DefaultNode ? DefaultNode : BaseNodes.SquareBaseNode
+}
+
+const getMainNode = (obj: Obj, objNode: string, typeNode: string) => {
+    const castObjNode = objNode as keyof typeof nodes
+    const castTypeNode = typeNode as keyof typeof nodes
+    // tslint:disable-next-line: variable-name
+    const Node = !!nodes[castObjNode]
+        ? nodes[castObjNode].Node
+        : !!nodes[castTypeNode]
+        ? nodes[castTypeNode].Node
+        : getDefaultNode(obj)
+
+    return Node
+}
+
+export function NodeWrapper(props: {
+    obj: Obj
+    objNode: string
+    objOptions: { [option: string]: unknown }
+    typeNode: string
+    typeOptions: { [option: string]: unknown }
+}) {
+    // tslint:disable-next-line: variable-name
+    const Node = getMainNode(props.obj, props.objNode, props.typeNode)
+    const options =
+        props.objNode != undefined ? props.objOptions : props.typeNode != undefined ? props.typeOptions : undefined
 
     return (
         <>
             <MenuProvider id={props.obj.reference} className={classes.container}>
-                <Node obj={props.obj} />
+                <Node obj={props.obj} options={options} />
             </MenuProvider>
-            <NodeMenu obj={props.obj} objNode={props.objNode} typeNode={props.typeNode} currentNode={currentNode} />
+            <NodeMenu {...props} />
         </>
     )
 }
 
-function NodeMenu(props: { obj: Obj; objNode: string; typeNode: string; currentNode: string }) {
+function NodeMenu(props: {
+    obj: Obj
+    objNode: string
+    objOptions: { [option: string]: unknown }
+    typeNode: string
+    typeOptions: { [option: string]: unknown }
+}) {
     const dispatch = useDispatch()
+    const objNode = props.objNode as keyof typeof nodes
+    const typeNode = props.typeNode as keyof typeof nodes
+    // tslint:disable-next-line: variable-name
+    const ObjNodeOptions = !!nodes[objNode] ? nodes[objNode].NodeOptions : undefined
+    // tslint:disable-next-line: variable-name
+    const TypeNodeOptions = !!nodes[typeNode] ? nodes[typeNode].NodeOptions : undefined
 
     return (
         <Menu id={props.obj.reference}>
-            <Item disabled>{props.currentNode != undefined ? props.currentNode : 'not defined'}</Item>
+            <Item disabled>{objNode != undefined ? objNode : typeNode != undefined ? typeNode : 'default'}</Item>
             <Separator />
             <Submenu label='object node'>
                 {orderedNodeTypes.map(node => (
@@ -88,6 +118,28 @@ function NodeMenu(props: { obj: Obj; objNode: string; typeNode: string; currentN
                 </Item>
             </Submenu>
             <Separator />
+            <Submenu disabled={!ObjNodeOptions} label='object properties'>
+                {!!ObjNodeOptions && (
+                    <ObjNodeOptions
+                        obj={props.obj}
+                        options={props.objOptions}
+                        onOptionsUpdate={options =>
+                            dispatch(visualizationActions.setObjOptions(props.obj.reference, options))
+                        }
+                    />
+                )}
+            </Submenu>
+            <Submenu disabled={!TypeNodeOptions} label='type properties'>
+                {!!TypeNodeOptions && (
+                    <TypeNodeOptions
+                        obj={props.obj}
+                        options={props.objOptions}
+                        onOptionsUpdate={options =>
+                            dispatch(visualizationActions.setTypeOptions(props.obj.languageType, options))
+                        }
+                    />
+                )}
+            </Submenu>
         </Menu>
     )
 }
