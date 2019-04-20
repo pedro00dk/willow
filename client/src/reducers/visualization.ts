@@ -137,14 +137,14 @@ const load = (steps: protocol.IStep[]): Action => ({
     payload: { stack: buildStack(steps), heaps: buildHeaps(steps) }
 })
 
-const setObjNodeType = (reference: string, node: string): Action => ({
+const setObjNode = (reference: string, node: string): Action => ({
     type: 'visualization/setObjNode',
     payload: { reference, node }
 })
 
-const setTypeNodeType = (type: string, node: string): Action => ({
+const setTypeNode = (type: string, node: string): Action => ({
     type: 'visualization/setTypeNode',
     payload: { type, node }
 })
 
-export const actions = { load, setObjNodeType, setTypeNodeType }
+export const actions = { load, setObjNode, setTypeNode }

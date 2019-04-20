@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../../colors'
-import * as protocol from '../../../../protobuf/protocol'
-import { Obj } from '../../../../reducers/visualization'
-import { Node as BaseNode } from './Base'
+import { colors } from '../../../colors'
+import * as protocol from '../../../protobuf/protocol'
+import { Obj } from '../../../reducers/visualization'
+import { SquareBaseNode } from './BaseNode'
 
 const classes = {
     elements: cn('d-flex align-items-end'),
@@ -49,8 +49,6 @@ const computeStairRatios = (values: number[]) => {
     return ratioIndices.map(([value, i]) => value)
 }
 
-export const name = 'bars'
-
 export const isDefault = (obj: Obj) => false
 
 export const isSupported = (obj: Obj) =>
@@ -60,19 +58,19 @@ export const isSupported = (obj: Obj) =>
         obj.type === protocol.Obj.Type.SET) &&
     obj.members.every(member => typeof member.value === 'number' && isFinite(member.value))
 
-export function Node(props: { obj: Obj; select: (reference: string) => void }) {
+export function BarsNode(props: { obj: Obj }) {
     if (!isSupported(props.obj))
         return (
-            <BaseNode obj={props.obj} select={props.select}>
+            <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
-            </BaseNode>
+            </SquareBaseNode>
         )
 
     if (props.obj.members.length === 0)
         return (
-            <BaseNode obj={props.obj} select={props.select}>
+            <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>empty</div>
-            </BaseNode>
+            </SquareBaseNode>
         )
 
     // parameters
@@ -86,7 +84,7 @@ export function Node(props: { obj: Obj; select: (reference: string) => void }) {
     const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeStairRatios(values)
 
     return (
-        <BaseNode obj={props.obj} select={props.select}>
+        <SquareBaseNode obj={props.obj}>
             <div className={classes.elements}>
                 {ratios.map((ratio, i) => (
                     <div key={i} className={classes.element} style={{ width }} title={`${values[i]}`}>
@@ -96,6 +94,6 @@ export function Node(props: { obj: Obj; select: (reference: string) => void }) {
                     </div>
                 ))}
             </div>
-        </BaseNode>
+        </SquareBaseNode>
     )
 }

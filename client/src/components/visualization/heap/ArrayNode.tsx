@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../../colors'
-import * as protocol from '../../../../protobuf/protocol'
-import { Obj } from '../../../../reducers/visualization'
-import { Node as BaseNode } from './Base'
+import { colors } from '../../../colors'
+import * as protocol from '../../../protobuf/protocol'
+import { Obj } from '../../../reducers/visualization'
+import { SquareBaseNode } from './BaseNode'
 
 const classes = {
     elements: cn('d-flex align-items-center'),
@@ -22,8 +22,6 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
-export const name = 'array'
-
 export const isDefault = (obj: Obj) => obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST
 
 export const isSupported = (obj: Obj) =>
@@ -32,19 +30,19 @@ export const isSupported = (obj: Obj) =>
     obj.type === protocol.Obj.Type.LLIST ||
     obj.type === protocol.Obj.Type.SET
 
-export function Node(props: { obj: Obj; select: (reference: string) => void }) {
+export function ArrayNode(props: { obj: Obj }) {
     if (!isSupported(props.obj))
         return (
-            <BaseNode obj={props.obj} select={props.select}>
+            <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>not compatible</div>
-            </BaseNode>
+            </SquareBaseNode>
         )
 
     if (props.obj.members.length === 0)
         return (
-            <BaseNode obj={props.obj} select={props.select}>
+            <SquareBaseNode obj={props.obj}>
                 <div className={classes.elements}>empty</div>
-            </BaseNode>
+            </SquareBaseNode>
         )
 
     // parameters
@@ -52,7 +50,7 @@ export function Node(props: { obj: Obj; select: (reference: string) => void }) {
     const maxWidth = 50
 
     return (
-        <BaseNode obj={props.obj} select={props.select}>
+        <SquareBaseNode obj={props.obj}>
             <div className={classes.elements}>
                 {props.obj.members.map((member, i) => (
                     <div key={i} className={classes.element} style={{ maxWidth }} title={`${member.value}`}>
@@ -61,6 +59,6 @@ export function Node(props: { obj: Obj; select: (reference: string) => void }) {
                     </div>
                 ))}
             </div>
-        </BaseNode>
+        </SquareBaseNode>
     )
 }
