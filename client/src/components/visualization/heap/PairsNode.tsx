@@ -8,7 +8,7 @@ import { Obj } from '../../../reducers/visualization'
 import { SquareBaseNode } from './BaseNode'
 
 const classes = {
-    elements: cn('d-flex flex-column justify-content-center'),
+    elements: cn('d-flex flex-column justify-content-center', 'text-nowrap'),
     element: cn(
         'd-inline-flex',
         css({
@@ -64,7 +64,7 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
                     const key = typeof member.key === 'object' ? '::' : member.key
                     const value = typeof member.value === 'object' ? '::' : member.value
                     return (
-                        <div className={classes.element} title={`${key}`}>
+                        <div key={i} className={classes.element} title={`${key}`}>
                             <div className={classes.key} style={{ width: keyWidth }}>
                                 {key}
                             </div>

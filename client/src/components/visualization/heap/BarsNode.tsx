@@ -8,7 +8,7 @@ import { Obj } from '../../../reducers/visualization'
 import { SquareBaseNode } from './BaseNode'
 
 const classes = {
-    elements: cn('d-flex align-items-end'),
+    elements: cn('d-flex align-items-end', 'text-nowrap'),
     element: cn(
         'd-inline-flex flex-column',
         'px-1',

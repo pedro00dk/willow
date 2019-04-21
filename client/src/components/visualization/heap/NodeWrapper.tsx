@@ -3,12 +3,13 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
-import { useDispatch, useRedux } from '../../../reducers/Store'
+import { useDispatch } from '../../../reducers/Store'
 import { actions as visualizationActions, Obj } from '../../../reducers/visualization'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
 import * as BaseNodes from './BaseNode'
 import * as PairsNode from './PairsNode'
+import * as SingleNode from './SingleNode'
 
 import 'react-contexify/dist/ReactContexify.min.css'
 
@@ -20,10 +21,11 @@ const classes = {
 const nodes = {
     array: ArrayNode,
     bars: BarsNode,
-    pairs: PairsNode
+    pairs: PairsNode,
+    single: SingleNode
 }
 
-const orderedNodeTypes = ['array', 'bars', 'pairs'] as (keyof typeof nodes)[]
+const orderedNodeTypes = ['array', 'bars', 'pairs', 'single'] as (keyof typeof nodes)[]
 
 const getDefaultNode = (obj: Obj) => {
     // tslint:disable-next-line: variable-name

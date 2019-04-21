@@ -10,7 +10,7 @@ const classes = {
         type: cn('px-1', css({ fontSize: '0.5rem' })),
         children: cn('d-flex flex-row justify-content-center', 'rounded', 'p-1', css({ background: colors.gray.light }))
     },
-    cylinder: {
+    ellipsis: {
         container: cn('d-inline-flex flex-column justify-content-center', 'w-auto h-auto', 'p-1'),
         type: cn('px-1', css({ fontSize: '0.5rem' })),
         children: cn(
@@ -34,15 +34,15 @@ export function SquareBaseNode(props: {
     )
 }
 
-export function CylinderBaseNode(props: {
+export function EllipsisBaseNode(props: {
     obj: Obj
     options?: { [option: string]: unknown }
     children?: React.ReactNode
 }) {
     return (
-        <div className={classes.cylinder.container}>
-            <div className={classes.cylinder.type}>{props.obj.languageType}</div>
-            <div className={classes.cylinder.children}>{props.children}</div>
+        <div className={classes.ellipsis.container}>
+            <div className={classes.ellipsis.type}>{props.obj.languageType}</div>
+            <div className={classes.ellipsis.children}>{props.children}</div>
         </div>
     )
 }
