@@ -28,7 +28,8 @@ const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
     maxWidth: !!options && typeof options['maxWidth'] === 'number' ? (options['maxWidth'] as number) : 30
 })
 
-export const isDefault = (obj: Obj) => obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST
+export const isDefault = (obj: Obj) =>
+    obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST || obj.type === protocol.Obj.Type.TUPLE
 
 export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
     if (

@@ -8,6 +8,7 @@ import { actions as visualizationActions, Obj } from '../../../reducers/visualiz
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
 import * as BaseNodes from './BaseNode'
+import * as PairsNode from './PairsNode'
 
 import 'react-contexify/dist/ReactContexify.min.css'
 
@@ -18,10 +19,11 @@ const classes = {
 
 const nodes = {
     array: ArrayNode,
-    bars: BarsNode
+    bars: BarsNode,
+    pairs: PairsNode
 }
 
-const orderedNodeTypes = ['array', 'bars'] as (keyof typeof nodes)[]
+const orderedNodeTypes = ['array', 'bars', 'pairs'] as (keyof typeof nodes)[]
 
 const getDefaultNode = (obj: Obj) => {
     // tslint:disable-next-line: variable-name
