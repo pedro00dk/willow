@@ -12,7 +12,7 @@ const classes = {
     },
     ellipsis: {
         container: cn('d-inline-flex flex-column justify-content-center', 'w-auto h-auto', 'p-1'),
-        type: cn('px-1', css({ fontSize: '0.5rem' })),
+        type: cn('text-center', 'px-1', css({ fontSize: '0.5rem' })),
         children: cn(
             'd-flex flex-row justify-content-center',
             'p-1',
@@ -41,7 +41,7 @@ export function EllipsisBaseNode(props: {
 }) {
     return (
         <div className={classes.ellipsis.container}>
-            <div className={classes.ellipsis.type}>{props.obj.languageType}</div>
+            <span className={classes.ellipsis.type}>{props.obj.languageType}</span>
             <div className={classes.ellipsis.children}>{props.children}</div>
         </div>
     )
