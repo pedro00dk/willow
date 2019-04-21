@@ -29,10 +29,12 @@ public final class Inspector {
                     .clearException();
 
         // Get frames may fail when debugging this debugger
-        var frames = ((LocatableEvent) event).thread().frames();
+        // frames() function returns an immutable list with the scopes in a reversed order
+        var frames = new ArrayList<>(((LocatableEvent) event).thread().frames());
+        Collections.reverse(frames);
         var scopesBuilders = frames.stream()
                 .map(StackFrame::location)
-                .map(l -> snapshotBuilder.addStackBuilder().setLine(l.lineNumber()).setName(l.method().name()))
+                .map(l -> snapshotBuilder.addStackBuilder().setLine(l.lineNumber() - 1).setName(l.method().name()))
                 .collect(Collectors.toList());
 
         var threadReference = frames.get(0).thread();
