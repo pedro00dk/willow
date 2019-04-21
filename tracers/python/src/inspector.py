@@ -56,13 +56,17 @@ class Inspector:
         return snapshot
 
     def _inspect_object(self, snapshot: snapshot_pb2.Snapshot, obj, classes: set, module: str):
-        if isinstance(obj, (bool, complex, type(None), str, type)):
+        if isinstance(obj, (bool, complex, type(None), str)):
             return snapshot_pb2.Value(string=str(obj))
         if isinstance(obj, (int, float)):
             if abs(obj) < 2 ** 53:
                 return snapshot_pb2.Value(number=obj)
             else:
                 return snapshot_pb2.Value(string=str(obj))
+        if isinstance(obj, type):
+            if obj.__module__ == module:
+                classes.add(obj)
+            return snapshot_pb2.Value(string=str(obj))
 
         reference = str(id(obj))
         if reference in snapshot.heap:
