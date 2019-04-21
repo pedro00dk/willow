@@ -156,7 +156,7 @@ function NodeMenu(props: {
                 {!!TypeNodeOptions && (
                     <TypeNodeOptions
                         obj={props.obj}
-                        options={props.objOptions}
+                        options={props.typeOptions}
                         onOptionsUpdate={options =>
                             dispatch(visualizationActions.setTypeOptions(props.obj.languageType, options))
                         }
