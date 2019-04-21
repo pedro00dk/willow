@@ -74,7 +74,7 @@ export function CodeEditor() {
     React.useEffect(() => {
         if (!editor) return
         editor.session.setMode(getSyntaxSupport(language.languages[language.selected]))
-    }, [language.selected])
+    }, [language])
 
     React.useEffect(() => {
         if (!editor) return
