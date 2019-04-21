@@ -1,6 +1,6 @@
 import cn from 'classnames'
 import * as React from 'react'
-import { useDispatch, useRedux } from '../../../reducers/Store'
+import { useRedux } from '../../../reducers/Store'
 import { NodeWrapper } from './NodeWrapper'
 
 const classes = {
@@ -8,8 +8,6 @@ const classes = {
 }
 
 export function Heap() {
-    const selectedObjRef = React.useRef<string>(undefined)
-    const dispatch = useDispatch()
     const { tracer, visualization } = useRedux(state => ({
         tracer: state.tracer,
         visualization: state.visualization

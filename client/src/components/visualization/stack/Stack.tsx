@@ -10,7 +10,7 @@ const classes = {
 }
 
 const computeNextIndex = (event: React.KeyboardEvent, tracer: State['tracer']) => {
-    if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return
+    if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return tracer.index
     const previousFilter = (index: number) => index < tracer.index
     const nextFilter = (index: number) => index > tracer.index
     const indexFilter = event.key === 'ArrowLeft' ? previousFilter : nextFilter
