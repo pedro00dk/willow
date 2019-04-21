@@ -39,7 +39,7 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
     )
         return (
             <SquareBaseNode obj={props.obj}>
-                <div className={classes.elements}>not compatible</div>
+                <div className={classes.elements}>incompatible</div>
             </SquareBaseNode>
         )
 
