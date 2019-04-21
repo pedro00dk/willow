@@ -12,7 +12,7 @@ import * as BaseNodes from './BaseNode'
 import 'react-contexify/dist/ReactContexify.min.css'
 
 const classes = {
-    container: cn('d-inline-flex'),
+    container: cn('position-absolute', 'd-inline-flex'),
     selected: cn(css({ background: colors.primaryBlue.lighter }))
 }
 
@@ -51,18 +51,34 @@ export function NodeWrapper(props: {
     typeNode: string
     typeOptions: { [option: string]: unknown }
 }) {
+    const dragBase = React.useRef({ x: 0, y: 0 })
+    const [translation, setTranslation] = React.useState({ x: 0, y: 0 })
+
     // tslint:disable-next-line: variable-name
     const Node = getMainNode(props.obj, props.objNode, props.typeNode)
     const options =
         props.objNode != undefined ? props.objOptions : props.typeNode != undefined ? props.typeOptions : undefined
 
     return (
-        <>
+        <div
+            className={classes.container}
+            style={{ left: translation.x, top: translation.y }}
+            draggable
+            onDragStart={event => (dragBase.current = { x: event.clientX, y: event.clientY })}
+            onDrag={event => {
+                if (event.clientX === 0 && event.clientY === 0) return
+                setTranslation({
+                    x: translation.x + (event.clientX - dragBase.current.x),
+                    y: translation.y + (event.clientY - dragBase.current.y)
+                })
+                dragBase.current = { x: event.clientX, y: event.clientY }
+            }}
+        >
             <MenuProvider id={props.obj.reference} className={classes.container}>
                 <Node obj={props.obj} options={options} />
             </MenuProvider>
             <NodeMenu {...props} />
-        </>
+        </div>
     )
 }
 
