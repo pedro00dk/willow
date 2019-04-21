@@ -30,6 +30,8 @@ type State = {
     readonly objOptions: { [reference: string]: { [option: string]: unknown } }
     readonly typeNodes: { [type: string]: string }
     readonly typeOptions: { [type: string]: { [option: string]: unknown } }
+    readonly objTranslations: { [reference: string]: { x: number; y: number } }
+    readonly scale: number
 }
 
 type Action =
@@ -38,6 +40,8 @@ type Action =
     | { type: 'visualization/setObjOptions'; payload: { reference: string; options: { [option: string]: unknown } } }
     | { type: 'visualization/setTypeNode'; payload: { type: string; node: string } }
     | { type: 'visualization/setTypeOptions'; payload: { type: string; options: { [option: string]: unknown } } }
+    | { type: 'visualization/setObjTranslation'; payload: { reference: string; translation: { x: number; y: number } } }
+    | { type: 'visualization/setScale'; payload: { scale: number } }
 
 const initialState: State = {
     stack: undefined,
@@ -45,7 +49,9 @@ const initialState: State = {
     objNodes: {},
     objOptions: {},
     typeNodes: {},
-    typeOptions: {}
+    typeOptions: {},
+    objTranslations: {},
+    scale: 1
 }
 
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
@@ -74,6 +80,13 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
                 ...state,
                 typeOptions: { ...state.objOptions, [action.payload.type]: action.payload.options }
             }
+        case 'visualization/setObjTranslation':
+            return {
+                ...state,
+                objTranslations: { ...state.objTranslations, [action.payload.reference]: action.payload.translation }
+            }
+        case 'visualization/setScale':
+            return { ...state, ...action.payload }
     }
     return state
 }
@@ -175,4 +188,11 @@ const setTypeOptions = (type: string, options: { [option: string]: unknown }): A
     payload: { type, options }
 })
 
-export const actions = { load, setObjNode, setObjOptions, setTypeNode, setTypeOptions }
+const setObjTranslation = (reference: string, translation: { x: number; y: number }): Action => ({
+    type: 'visualization/setObjTranslation',
+    payload: { reference, translation }
+})
+
+const setScale = (scale: number): Action => ({ type: 'visualization/setScale', payload: { scale } })
+
+export const actions = { load, setObjNode, setObjOptions, setTypeNode, setTypeOptions, setObjTranslation, setScale }

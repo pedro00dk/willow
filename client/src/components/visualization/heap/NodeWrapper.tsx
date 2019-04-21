@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
-import { useDispatch } from '../../../reducers/Store'
+import { useDispatch, useRedux } from '../../../reducers/Store'
 import { actions as visualizationActions, Obj } from '../../../reducers/visualization'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
@@ -50,6 +50,7 @@ export function NodeWrapper(props: {
     objOptions: { [option: string]: unknown }
     typeNode: string
     typeOptions: { [option: string]: unknown }
+    scale: number
 }) {
     const dragBase = React.useRef({ x: 0, y: 0 })
     const [translation, setTranslation] = React.useState({ x: 0, y: 0 })
@@ -62,7 +63,7 @@ export function NodeWrapper(props: {
     return (
         <div
             className={classes.container}
-            style={{ left: translation.x, top: translation.y }}
+            style={{ left: translation.x, top: translation.y, transform: `scale(${props.scale})` }}
             draggable
             onDragStart={event => (dragBase.current = { x: event.clientX, y: event.clientY })}
             onDrag={event => {
