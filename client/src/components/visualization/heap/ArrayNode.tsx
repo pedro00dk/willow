@@ -55,12 +55,15 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
     return (
         <SquareBaseNode obj={props.obj}>
             <div className={classes.elements}>
-                {props.obj.members.map((member, i) => (
-                    <div key={i} className={classes.element} style={{ maxWidth }} title={`${member.value}`}>
-                        {showIndex && <span className={classes.index}>{i}</span>}
-                        <span className={classes.value}>{member.value}</span>
-                    </div>
-                ))}
+                {props.obj.members.map((member, i) => {
+                    const value = typeof member.value === 'object' ? '::' : member.value
+                    return (
+                        <div key={i} className={classes.element} style={{ maxWidth }} title={`${value}`}>
+                            {showIndex && <span className={classes.index}>{i}</span>}
+                            <span className={classes.value}>{value}</span>
+                        </div>
+                    )
+                })}
             </div>
         </SquareBaseNode>
     )
