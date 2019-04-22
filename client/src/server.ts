@@ -1,4 +1,8 @@
 import * as axios from 'axios'
 
-export const serverAddress = process.env['SERVER_ADDRESS']
-export const serverApi = axios.default.create({ baseURL: serverAddress, withCredentials: true })
+const apiServerAddress = process.env['SERVER']
+const bundleServerIsReverseProxy = process.env['PROXY']
+
+const baseURL = bundleServerIsReverseProxy == undefined ? apiServerAddress : ''
+
+export const serverApi = axios.default.create({ baseURL, withCredentials: true })
