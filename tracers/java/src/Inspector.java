@@ -190,10 +190,8 @@ public final class Inspector {
                     snapshotBuilder,
                     arrayRef,
                     Long.toString(jdiObject.uniqueID()),
-                    ArrayList.class.isAssignableFrom(objClass) || Vector.class.isAssignableFrom(objClass)
-                            ? SnapshotOuterClass.Obj.Type.ALIST
-                            : LinkedList.class.isAssignableFrom(objClass)
-                            ? SnapshotOuterClass.Obj.Type.LLIST
+                    LinkedList.class.isAssignableFrom(objClass) ? SnapshotOuterClass.Obj.Type.LLIST // Only linkedList implementation and subclasses are in fact a linked list
+                            : List.class.isAssignableFrom(objClass) ? SnapshotOuterClass.Obj.Type.ALIST
                             : SnapshotOuterClass.Obj.Type.SET,
                     jdiObject.referenceType().name(),
                     false,
