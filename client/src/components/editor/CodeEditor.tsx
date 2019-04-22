@@ -17,6 +17,9 @@ import 'brace/ext/searchbox'
 import 'brace/mode/java'
 import 'brace/mode/python'
 import 'brace/mode/text'
+import 'brace/snippets/java'
+import 'brace/snippets/python'
+import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
