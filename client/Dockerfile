@@ -19,5 +19,5 @@ RUN echo \
 ADD ./public ./public
 ADD ./src ./src
 
-ENTRYPOINT [ "npm", "run", "start" ]
+ENTRYPOINT [ "npm", "run", "serve-proxy" ]
 CMD [ "--", "--help" ]
