@@ -33,6 +33,7 @@ export const isDefault = (obj: Obj) =>
 
 export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
     if (
+        props.obj.type !== protocol.Obj.Type.TUPLE &&
         props.obj.type !== protocol.Obj.Type.ARRAY &&
         props.obj.type !== protocol.Obj.Type.ALIST &&
         props.obj.type !== protocol.Obj.Type.LLIST &&

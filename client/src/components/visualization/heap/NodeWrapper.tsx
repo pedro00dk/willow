@@ -9,7 +9,7 @@ import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
 import * as BaseNodes from './BaseNode'
 import * as PairsNode from './PairsNode'
-import * as SingleNode from './SingleNode'
+import * as PropertyNode from './PropertyNode'
 
 import 'react-contexify/dist/ReactContexify.min.css'
 
@@ -22,10 +22,10 @@ const nodes = {
     array: ArrayNode,
     bars: BarsNode,
     pairs: PairsNode,
-    single: SingleNode
+    property: PropertyNode
 }
 
-const orderedNodeTypes = ['array', 'bars', 'pairs', 'single'] as (keyof typeof nodes)[]
+const orderedNodeTypes = ['array', 'bars', 'pairs', 'property'] as (keyof typeof nodes)[]
 
 const getDefaultNode = (obj: Obj) => {
     // tslint:disable-next-line: variable-name

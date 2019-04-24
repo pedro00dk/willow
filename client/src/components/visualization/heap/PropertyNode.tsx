@@ -30,11 +30,7 @@ const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
 export const isDefault = (obj: Obj) => false
 
 export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
-    if (
-        props.obj.type !== protocol.Obj.Type.HMAP &&
-        props.obj.type !== protocol.Obj.Type.TMAP &&
-        props.obj.type !== protocol.Obj.Type.OTHER
-    )
+    if (props.obj.type === protocol.Obj.Type.SET)
         return (
             <EllipsisBaseNode obj={props.obj}>
                 <div className={classes.elements}>incompatible</div>
