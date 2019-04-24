@@ -46,7 +46,8 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
             </EllipsisBaseNode>
         )
 
-    const filteredMembers = props.obj.members.filter(member => member.key === memberKey)
+    const filteredMembers = props.obj.members //
+        .filter(member => typeof member.key !== 'object' && member.key.toString() === memberKey)
 
     if (filteredMembers.length === 0)
         return (
