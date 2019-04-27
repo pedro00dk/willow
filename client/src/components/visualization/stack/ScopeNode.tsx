@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { useDispatch } from '../../../reducers/Store'
+import { useDispatch, useRedux } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
 import { Scope } from '../../../reducers/visualization'
 
@@ -28,7 +28,8 @@ const classes = {
             })
         )
     },
-    child: { parent: 'd-flex' }
+    children: cn('d-flex flex-row'),
+    child: cn('d-flex')
 }
 
 const styles = {
@@ -66,9 +67,13 @@ const computeChildWidth = (parent: Scope, child: Scope, width: number) => {
     return { width: proportion * width, percent: `${proportion * 100}%` }
 }
 
-export function ScopeNode(props: { scope: Scope; index: number; depth: number; width: number }) {
+// tslint:disable-next-line: variable-name
+export const MemoScopeNode = React.memo(ScopeNode)
+export function ScopeNode(props: { scope: Scope; depth: number; width: number }) {
     const dispatch = useDispatch()
-    const selected = props.index >= props.scope.steps.from && props.index <= props.scope.steps.to
+    const { selected } = useRedux(state => ({
+        selected: state.tracer.index >= props.scope.steps.from && state.tracer.index <= props.scope.steps.to
+    }))
     const isRoot = props.scope.children.length !== 0 && props.scope.name == undefined
     const isIntermediary = props.scope.children.length !== 0 && !isRoot
 
@@ -85,12 +90,12 @@ export function ScopeNode(props: { scope: Scope; index: number; depth: number; w
                 </div>
             )}
             {(isRoot || isIntermediary) && props.width >= 5 && (
-                <div className='d-flex flex-row'>
+                <div className={classes.children}>
                     {props.scope.children.map((child, i) => {
                         const { width, percent } = computeChildWidth(props.scope, child, props.width)
                         return (
-                            <div key={i} className={classes.child.parent} style={{ width: percent }}>
-                                <ScopeNode scope={child} index={props.index} depth={props.depth + 1} width={width} />
+                            <div key={i} className={classes.child} style={{ width: percent }}>
+                                <MemoScopeNode scope={child} depth={props.depth + 1} width={width} />
                             </div>
                         )
                     })}

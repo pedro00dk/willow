@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as protocol from '../../../protobuf/protocol'
 import { State, useDispatch, useRedux } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
-import { ScopeNode } from './ScopeNode'
+import { MemoScopeNode } from './ScopeNode'
 
 const classes = {
     container: cn('d-flex flex-row align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100')
@@ -37,9 +37,9 @@ export function Stack() {
     const stackRef = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
     const dispatch = useDispatch()
-    const { tracer, visualization } = useRedux(state => ({ tracer: state.tracer, visualization: state.visualization }))
+    const { tracer, stack } = useRedux(state => ({ tracer: state.tracer, stack: state.visualization.stack }))
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const interval = setInterval(() => {
             if (!stackRef.current || stackRef.current.clientWidth === width) return
             setWidth(stackRef.current.clientWidth)
@@ -55,7 +55,7 @@ export function Stack() {
             tabIndex={0}
         >
             {tracer.available && (
-                <ScopeNode scope={visualization.stack.root} index={tracer.index} depth={0} width={width} />
+                <MemoScopeNode scope={stack.root} depth={0} width={width} />
             )}
         </div>
     )
