@@ -47,6 +47,8 @@ const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
 export const isDefault = (obj: Obj) =>
     obj.type === protocol.Obj.Type.HMAP || obj.type === protocol.Obj.Type.TMAP || obj.type === protocol.Obj.Type.OTHER
 
+// tslint:disable-next-line: variable-name
+export const MemoNode = React.memo(Node)
 export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
     if (props.obj.members.length === 0)
         return (

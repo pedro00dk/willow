@@ -21,6 +21,8 @@ const classes = {
     }
 }
 
+// tslint:disable-next-line: variable-name
+export const MemoSquareBaseNode = React.memo(SquareBaseNode)
 export function SquareBaseNode(props: {
     obj: Obj
     options?: { [option: string]: unknown }
@@ -34,6 +36,8 @@ export function SquareBaseNode(props: {
     )
 }
 
+// tslint:disable-next-line: variable-name
+export const MemoEllipsisBaseNode = React.memo(EllipsisBaseNode)
 export function EllipsisBaseNode(props: {
     obj: Obj
     options?: { [option: string]: unknown }

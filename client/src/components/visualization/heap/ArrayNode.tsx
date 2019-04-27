@@ -31,6 +31,8 @@ const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
 export const isDefault = (obj: Obj) =>
     obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST || obj.type === protocol.Obj.Type.TUPLE
 
+// tslint:disable-next-line: variable-name
+export const MemoNode = React.memo(Node)
 export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
     if (
         props.obj.type !== protocol.Obj.Type.TUPLE &&

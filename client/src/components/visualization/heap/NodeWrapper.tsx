@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
-import { useDispatch } from '../../../reducers/Store'
+import { useDispatch, useRedux } from '../../../reducers/Store'
 import { actions as visualizationActions, Obj } from '../../../reducers/visualization'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
@@ -31,8 +31,8 @@ const getDefaultNode = (obj: Obj) => {
     // tslint:disable-next-line: variable-name
     const DefaultNode = Object.entries(nodes)
         .filter(([name, node]) => node.isDefault(obj))
-        .map(([name, node]) => node.Node)[0]
-    return !!DefaultNode ? DefaultNode : BaseNodes.SquareBaseNode
+        .map(([name, node]) => node.MemoNode)[0]
+    return !!DefaultNode ? DefaultNode : BaseNodes.MemoSquareBaseNode
 }
 
 const getMainNode = (obj: Obj, objNode: string, typeNode: string) => {
@@ -40,49 +40,59 @@ const getMainNode = (obj: Obj, objNode: string, typeNode: string) => {
     const castTypeNode = typeNode as keyof typeof nodes
     // tslint:disable-next-line: variable-name
     const Node = !!nodes[castObjNode]
-        ? nodes[castObjNode].Node
+        ? nodes[castObjNode].MemoNode
         : !!nodes[castTypeNode]
-        ? nodes[castTypeNode].Node
+        ? nodes[castTypeNode].MemoNode
         : getDefaultNode(obj)
 
     return Node
 }
 
-export function NodeWrapper(props: {
-    obj: Obj
-    objNode: string
-    objOptions: { [option: string]: unknown }
-    typeNode: string
-    typeOptions: { [option: string]: unknown }
-    scale: number
-}) {
+// tslint:disable-next-line: variable-name
+export const MemoNodeWrapper = React.memo(NodeWrapper)
+export function NodeWrapper(props: { obj: Obj }) {
     const dragBase = React.useRef({ x: 0, y: 0 })
-    const [translation, setTranslation] = React.useState({ x: 0, y: 0 })
+    const dispatch = useDispatch()
+    const { objNode, objOptions, typeNode, typeOptions, translation = { x: 0, y: 0 }, scale } = useRedux(state => ({
+        objNode: state.visualization.objNodes[props.obj.reference],
+        objOptions: state.visualization.objOptions[props.obj.reference],
+        typeNode: state.visualization.typeNodes[props.obj.languageType],
+        typeOptions: state.visualization.typeOptions[props.obj.languageType],
+        translation: state.visualization.objTranslations[props.obj.reference],
+        scale: state.visualization.scale
+    }))
 
     // tslint:disable-next-line: variable-name
-    const Node = getMainNode(props.obj, props.objNode, props.typeNode)
-    const options =
-        props.objNode != undefined ? props.objOptions : props.typeNode != undefined ? props.typeOptions : undefined
+    const Node = getMainNode(props.obj, objNode, typeNode)
+    const options = objNode != undefined ? objOptions : typeNode != undefined ? typeOptions : undefined
 
     return (
         <div
             className={classes.container}
-            style={{ left: translation.x, top: translation.y, transform: `scale(${props.scale})` }}
+            style={{ left: translation.x, top: translation.y, transform: `scale(${scale})` }}
             draggable
             onDragStart={event => (dragBase.current = { x: event.clientX, y: event.clientY })}
             onDrag={event => {
                 if (event.clientX === 0 && event.clientY === 0) return
-                setTranslation({
-                    x: translation.x + (event.clientX - dragBase.current.x),
-                    y: translation.y + (event.clientY - dragBase.current.y)
-                })
+                dispatch(
+                    visualizationActions.setObjTranslation(props.obj.reference, {
+                        x: translation.x + (event.clientX - dragBase.current.x),
+                        y: translation.y + (event.clientY - dragBase.current.y)
+                    })
+                )
                 dragBase.current = { x: event.clientX, y: event.clientY }
             }}
         >
             <MenuProvider id={props.obj.reference} className={classes.container}>
                 <Node obj={props.obj} options={options} />
             </MenuProvider>
-            <NodeMenu {...props} />
+            <NodeMenu
+                obj={props.obj}
+                objNode={objNode}
+                objOptions={objOptions}
+                typeNode={typeNode}
+                typeOptions={typeOptions}
+            />
         </div>
     )
 }
