@@ -4,7 +4,7 @@ import * as protocol from '../../protobuf/protocol'
 import { State, useDispatch, useRedux } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
 import { SplitPane } from '../SplitPane'
-import { Heap } from './heap/Heap'
+import { MemoHeap } from './heap/Heap'
 import { MemoStack } from './stack/Stack'
 
 const classes = {
@@ -47,7 +47,7 @@ export function Visualization() {
         >
             <SplitPane split='horizontal' base='15%' left={5} right={-5}>
                 <MemoStack />
-                <Heap />
+                <MemoHeap />
             </SplitPane>
         </div>
     )

@@ -8,6 +8,8 @@ const classes = {
     container: cn('d-block', 'w-100 h-100')
 }
 
+// tslint:disable-next-line: variable-name
+export const MemoHeap = React.memo(Heap)
 export function Heap() {
     const dispatch = useDispatch()
     const { tracer, visualization } = useRedux(state => ({
