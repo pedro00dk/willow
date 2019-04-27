@@ -25,8 +25,6 @@ export type Action = {
     [property in keyof typeof reducers]: Parameters<typeof reducers[property]>[1]
 }[keyof typeof reducers]
 
-export type SubState = Partial<State>
-
 export type AsyncAction<R = void> = ThunkAction<Promise<R>, State, void, Action>
 
 const reduxStoreEnhancer = Redux.compose(Redux.applyMiddleware(thunk as ThunkMiddleware<State, Action, void>))
@@ -38,19 +36,11 @@ export function Store(props: { children?: React.ReactNode }) {
     return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
 }
 
-const equalStoreSubStates = <T extends SubState, U extends SubState>(prev: T, next: U) => {
+const shallowCompareObjects = <T extends { [key: string]: unknown }>(prev: T, next: { [key: string]: unknown }) => {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(next)
-
-    return (
-        prevKeys.length === nextKeys.length &&
-        nextKeys.reduce(
-            (acc, key) =>
-                acc && (prev as { [key: string]: unknown })[key] === (next as { [key: string]: unknown })[key],
-            true
-        )
-    )
+    return prevKeys.length === nextKeys.length && nextKeys.reduce((acc, key) => acc && prev[key] === next[key], true)
 }
 
 export const useDispatch = () => {
@@ -59,7 +49,7 @@ export const useDispatch = () => {
     return store.dispatch
 }
 
-export const useRedux = <T extends SubState>(selector: (state: State) => T) => {
+export const useRedux = <T extends {}>(selector: (state: State) => T) => {
     const store = React.useContext(storeContext)
     if (!store) throw new Error('store context not found')
     const memoSelector = React.useCallback(selector, [])
@@ -71,7 +61,7 @@ export const useRedux = <T extends SubState>(selector: (state: State) => T) => {
 
         const checkSubStateUpdate = () => {
             const updatedSubState = memoSelector(store.getState())
-            if (didUnsubscribe || equalStoreSubStates(updatedSubState, subStateRef.current)) return
+            if (didUnsubscribe || shallowCompareObjects(updatedSubState, subStateRef.current)) return
             setSubState(updatedSubState)
             subStateRef.current = updatedSubState
         }
