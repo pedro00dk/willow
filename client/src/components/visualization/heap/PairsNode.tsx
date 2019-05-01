@@ -49,7 +49,12 @@ export const isDefault = (obj: Obj) =>
 
 // tslint:disable-next-line: variable-name
 export const MemoNode = React.memo(Node)
-export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+export function Node(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+}) {
     if (props.obj.members.length === 0)
         return (
             <SquareBaseNode obj={props.obj}>
@@ -63,14 +68,36 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
         <SquareBaseNode obj={props.obj}>
             <div className={classes.elements}>
                 {props.obj.members.map((member, i) => {
-                    const key = typeof member.key === 'object' ? '::' : member.key
-                    const value = typeof member.value === 'object' ? '::' : member.value
+                    const keyIsReference = typeof member.key === 'object'
+                    const key = typeof keyIsReference ? '::' : member.key
+                    const valueIsReference = typeof member.value === 'object'
+                    const value = valueIsReference ? '::' : member.value
                     return (
                         <div key={i} className={classes.element} title={`${key}`}>
-                            <div className={classes.key} style={{ width: keyWidth }}>
+                            <div
+                                ref={ref => {
+                                    if (!ref || !keyIsReference) return
+                                    const keyReference = (member.key as Obj).reference
+                                    if (!props.references.current[keyReference])
+                                        props.references.current[keyReference] = [ref]
+                                    else props.references.current[keyReference].push(ref)
+                                }}
+                                className={classes.key}
+                                style={{ width: keyWidth }}
+                            >
                                 {key}
                             </div>
-                            <div className={classes.value} style={{ width: valueWidth }}>
+                            <div
+                                ref={ref => {
+                                    if (!ref || !valueIsReference) return
+                                    const valueReference = (member.value as Obj).reference
+                                    if (!props.references.current[valueReference])
+                                        props.references.current[valueReference] = [ref]
+                                    else props.references.current[valueReference].push(ref)
+                                }}
+                                className={classes.value}
+                                style={{ width: valueWidth }}
+                            >
                                 {value}
                             </div>
                         </div>

@@ -31,7 +31,12 @@ export const isDefault = (obj: Obj) => false
 
 // tslint:disable-next-line: variable-name
 export const MemoNode = React.memo(Node)
-export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+export function Node(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+}) {
     if (props.obj.type === protocol.Obj.Type.SET)
         return (
             <EllipsisBaseNode obj={props.obj}>
@@ -65,14 +70,38 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
         )
 
     const member = filteredMembers[0]
-    const value = typeof member.value === 'object' ? '::' : member.value
+    const isReference = typeof member.value === 'object'
+    const value = isReference ? '::' : member.value
+
+    const referenceMembers = [
+        ...props.obj.members.filter(member => typeof member.key === 'object').map(member => member.key),
+        ...props.obj.members.filter(member => typeof member.value === 'object').map(member => member.value)
+    ]
 
     return (
         <EllipsisBaseNode obj={props.obj}>
-            <div className={classes.elements}>
-                <div className={classes.element} title={`${value}`}>
+            <div
+                ref={ref => {
+                    if (!ref || referenceMembers.length === 0) return
+                    referenceMembers.forEach(obj => {
+                        const reference = (obj as Obj).reference
+                        if (!props.references.current[reference]) props.references.current[reference] = [ref]
+                        else props.references.current[reference].push(ref)
+                    })
+                }}
+                className={classes.elements}
+            >
+                <span
+                    ref={ref => {
+                        if (!ref || !isReference) return
+                        const valueReference = (member.value as Obj).reference
+                        if (!props.references.current[valueReference]) props.references.current[valueReference] = [ref]
+                        else props.references.current[valueReference].push(ref)
+                    }}
+                    className={classes.elements}
+                >
                     {value}
-                </div>
+                </span>
             </div>
         </EllipsisBaseNode>
     )

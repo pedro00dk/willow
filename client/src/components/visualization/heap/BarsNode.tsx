@@ -64,7 +64,12 @@ export const isDefault = (obj: Obj) => false
 
 // tslint:disable-next-line: variable-name
 export const MemoNode = React.memo(Node)
-export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+export function Node(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+}) {
     if (
         (props.obj.type !== protocol.Obj.Type.TUPLE &&
             props.obj.type !== protocol.Obj.Type.ARRAY &&

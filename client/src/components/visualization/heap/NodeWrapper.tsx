@@ -15,6 +15,7 @@ import 'react-contexify/dist/ReactContexify.min.css'
 
 const classes = {
     container: cn('position-absolute', 'd-inline-flex'),
+    nodeContainer: cn('d-inline-flex'),
     selected: cn(css({ background: colors.primaryBlue.lighter }))
 }
 
@@ -50,7 +51,11 @@ const getMainNode = (obj: Obj, objNode: string, typeNode: string) => {
 
 // tslint:disable-next-line: variable-name
 export const MemoNodeWrapper = React.memo(NodeWrapper)
-export function NodeWrapper(props: { obj: Obj }) {
+export function NodeWrapper(props: {
+    obj: Obj
+    objects: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+}) {
     const dragBase = React.useRef({ x: 0, y: 0 })
     const dispatch = useDispatch()
     const { objNode, objOptions, typeNode, typeOptions, translation = { x: 0, y: 0 }, scale } = useRedux(state => ({
@@ -68,6 +73,10 @@ export function NodeWrapper(props: { obj: Obj }) {
 
     return (
         <div
+            ref={ref => {
+                if (!ref) return
+                props.objects.current[props.obj.reference] = ref
+            }}
             className={classes.container}
             style={{ left: translation.x, top: translation.y, transform: `scale(${scale})` }}
             draggable
@@ -83,9 +92,11 @@ export function NodeWrapper(props: { obj: Obj }) {
                 dragBase.current = { x: event.clientX, y: event.clientY }
             }}
         >
-            <MenuProvider id={props.obj.reference} className={classes.container}>
-                <Node obj={props.obj} options={options} />
-            </MenuProvider>
+            <div className={classes.nodeContainer}>
+                <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
+                    <Node obj={props.obj} options={options} objects={props.objects} references={props.references} />
+                </MenuProvider>
+            </div>
             <NodeMenu
                 obj={props.obj}
                 objNode={objNode}

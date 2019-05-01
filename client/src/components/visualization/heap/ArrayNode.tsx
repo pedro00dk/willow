@@ -33,7 +33,12 @@ export const isDefault = (obj: Obj) =>
 
 // tslint:disable-next-line: variable-name
 export const MemoNode = React.memo(Node)
-export function Node(props: { obj: Obj; options?: { [option: string]: unknown } }) {
+export function Node(props: {
+    obj: Obj
+    options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+}) {
     if (
         props.obj.type !== protocol.Obj.Type.TUPLE &&
         props.obj.type !== protocol.Obj.Type.ARRAY &&
@@ -60,11 +65,23 @@ export function Node(props: { obj: Obj; options?: { [option: string]: unknown } 
         <SquareBaseNode obj={props.obj}>
             <div className={classes.elements}>
                 {props.obj.members.map((member, i) => {
-                    const value = typeof member.value === 'object' ? '::' : member.value
+                    const isReference = typeof member.value === 'object'
+                    const value = isReference ? '::' : member.value
                     return (
                         <div key={i} className={classes.element} style={{ maxWidth }} title={`${value}`}>
                             {showIndex && <span className={classes.index}>{i}</span>}
-                            <span className={classes.value}>{value}</span>
+                            <span
+                                ref={ref => {
+                                    if (!ref || !isReference) return
+                                    const valueReference = (member.value as Obj).reference
+                                    if (!props.references.current[valueReference])
+                                        props.references.current[valueReference] = [ref]
+                                    else props.references.current[valueReference].push(ref)
+                                }}
+                                className={classes.value}
+                            >
+                                {value}
+                            </span>
                         </div>
                     )
                 })}

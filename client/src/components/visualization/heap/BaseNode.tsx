@@ -26,6 +26,8 @@ export const MemoSquareBaseNode = React.memo(SquareBaseNode)
 export function SquareBaseNode(props: {
     obj: Obj
     options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
     children?: React.ReactNode
 }) {
     return (
@@ -41,6 +43,8 @@ export const MemoEllipsisBaseNode = React.memo(EllipsisBaseNode)
 export function EllipsisBaseNode(props: {
     obj: Obj
     options?: { [option: string]: unknown }
+    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
+    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
     children?: React.ReactNode
 }) {
     return (
