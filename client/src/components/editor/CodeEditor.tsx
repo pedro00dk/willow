@@ -4,10 +4,9 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
 import * as protocol from '../../protobuf/protocol'
-import { actions as breakpointActions } from '../../reducers/breakpoint'
 import { actions as codeActions } from '../../reducers/code'
 import { useDispatch, useRedux } from '../../reducers/Store'
-import { EditorGutterLayer, EditorMarker, EditorMouseEvent, MemoTextEditor } from './TextEditor'
+import { EditorMarker, MemoTextEditor, range } from './TextEditor'
 
 import callImg from '../../../public/editor/call.svg'
 import returnImg from '../../../public/editor/return.svg'
@@ -35,14 +34,12 @@ const classes = {
     [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.secondaryRed.light }))
 }
 
-const { Range } = ace.acequire('ace/range') as {
-    Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
-}
-
 const getSyntaxSupport = (language: string) =>
     new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
-export function CodeEditor() {
+// tslint:disable-next-line:variable-name
+export const MemoCodeEditor = React.memo(CodeEditor)
+function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({
@@ -57,21 +54,8 @@ export function CodeEditor() {
 
         const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
 
-        const onGutterMouseDown = (event: EditorMouseEvent) => {
-            const gutterLayer = (editor.renderer as any).$gutterLayer as EditorGutterLayer
-            const region = gutterLayer.getRegion(event)
-            if (region !== 'markers') return
-            const line = (event.getDocumentPosition() as ace.Position).row
-            dispatch(breakpointActions.toggle(line))
-        }
-
         editor.on('change', onChange)
-        editor.on('guttermousedown', onGutterMouseDown)
-
-        return () => {
-            editor.off('change', onChange)
-            editor.off('guttermousedown', onGutterMouseDown)
-        }
+        return () => editor.off('change', onChange)
     }, [editor])
 
     React.useEffect(() => {
@@ -90,7 +74,7 @@ export function CodeEditor() {
         const snapshot = tracer.steps[tracer.index].snapshot
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line
-        editor.session.addMarker(new Range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
+        editor.session.addMarker(new range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
     }, [tracer])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />

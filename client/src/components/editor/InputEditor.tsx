@@ -5,20 +5,18 @@ import * as React from 'react'
 import { colors } from '../../colors'
 import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useRedux } from '../../reducers/Store'
-import { EditorMarker, MemoTextEditor } from './TextEditor'
+import { EditorMarker, MemoTextEditor, range } from './TextEditor'
 
 const classes = {
     marker: cn('position-absolute', css({ backgroundColor: colors.primaryBlue.light }))
 }
 
-const { Range } = ace.acequire('ace/range') as {
-    Range: new (startRow: number, startColumn: number, endRow: number, endColumn: number) => ace.Range
-}
-
-export function InputEditor() {
+// tslint:disable-next-line:variable-name
+export const MemoInputEditor = React.memo(InputEditor)
+function InputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
+    const { tracerFetching } = useRedux(state => ({ tracerFetching: state.tracer.fetching }))
 
     React.useEffect(() => {
         if (!editor) return
@@ -33,16 +31,16 @@ export function InputEditor() {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.setReadOnly(tracer.fetching)
-        if (!tracer.fetching)
+        editor.setReadOnly(tracerFetching)
+        if (!tracerFetching)
             Object.values(editor.session.getMarkers(false) as EditorMarker[])
                 .filter(marker => marker.id > 2)
                 .forEach(marker => editor.session.removeMarker(marker.id))
         else
             [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
-                editor.session.addMarker(new Range(line, 0, line, 1), classes.marker, 'fullLine', false)
+                editor.session.addMarker(new range(line, 0, line, 1), classes.marker, 'fullLine', false)
             )
-    }, [tracer])
+    }, [tracerFetching])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
 }

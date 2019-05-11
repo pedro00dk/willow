@@ -29,9 +29,16 @@ export type EditorMarker = {
     range: ace.Range
 }
 
+export const range = ace.acequire('ace/range').Range as new (
+    startRow: number,
+    startColumn: number,
+    endRow: number,
+    endColumn: number
+) => ace.Range
+
 // tslint:disable-next-line: variable-name
 export const MemoTextEditor = React.memo(TextEditor)
-export function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
+function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
     const editorRef = React.useRef<HTMLDivElement>(undefined)
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
 

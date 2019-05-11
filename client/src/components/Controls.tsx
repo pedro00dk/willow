@@ -5,7 +5,7 @@ import playImg from '../../public/buttons/play.png'
 import stepImg from '../../public/buttons/stepInto.png'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { actions as tracerActions } from '../reducers/tracer'
-import { LanguageSelector } from './LanguageSelector'
+import { MemoLanguageSelector } from './LanguageSelector'
 
 const classes = {
     container: cn('d-flex flex-row align-items-center', 'shadow-sm'),
@@ -15,17 +15,19 @@ const classes = {
 const styles = {
     image: (available: boolean, rotation: number = 0) => ({
         transform: `rotate(${rotation}deg)`,
-        ...(available ? { cursor: 'pointer' } : { filter: 'grayscale(80%)' })
+        ...(available ? { cursor: 'pointer' } : { filter: 'grayscale(100%)' })
     })
 }
 
-export function Controls() {
+// tslint:disable-next-line:variable-name
+export const MemoControls = React.memo(Controls)
+function Controls() {
     const dispatch = useDispatch()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     return (
         <div className={classes.container}>
-            <LanguageSelector />
+            <MemoLanguageSelector />
             <img
                 className={classes.image}
                 style={styles.image(!tracer.fetching)}
@@ -35,14 +37,14 @@ export function Controls() {
             />
             <img
                 className={classes.image}
-                style={styles.image(!tracer.fetching && tracer.steps.length > 0, 90)}
+                style={styles.image(tracer.available && tracer.index > 0, 90)}
                 src={stepImg}
                 title='step back'
                 onClick={() => dispatch(tracerActions.setIndex(tracer.index - 1))}
             />
             <img
                 className={classes.image}
-                style={styles.image(!tracer.fetching && tracer.steps.length > 0, -90)}
+                style={styles.image(tracer.available && tracer.index < tracer.steps.length - 1, -90)}
                 src={stepImg}
                 title='step forward'
                 onClick={() => dispatch(tracerActions.setIndex(tracer.index + 1))}

@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as protocol from '../../protobuf/protocol'
 import { State, useDispatch, useRedux } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
-import { SplitPane } from '../SplitPane'
+import { MemoSplitPane } from '../SplitPane'
 import { MemoHeap } from './heap/Heap'
 import { MemoStack } from './stack/Stack'
 
@@ -42,13 +42,17 @@ export function Visualization() {
     return (
         <div
             className={classes.container}
-            onKeyDown={event => dispatch(tracerActions.setIndex(computeNextIndex(event, tracer)))}
+            onKeyDown={event => {
+                const nextIndex = computeNextIndex(event, tracer)
+                if (nextIndex === tracer.index) return
+                dispatch(tracerActions.setIndex(nextIndex))
+            }}
             tabIndex={0}
         >
-            <SplitPane split='horizontal' base='15%' left={5} right={-5}>
+            <MemoSplitPane split='horizontal' base='15%' left={5} right={-5}>
                 <MemoStack />
                 <MemoHeap />
-            </SplitPane>
+            </MemoSplitPane>
         </div>
     )
 }

@@ -8,19 +8,25 @@ type State = {
     readonly fetching: boolean
     readonly available: boolean
     readonly steps: protocol.IStep[]
+    readonly output: string[]
     readonly lines: { [line: number]: number[] }
     readonly index: number
     readonly error: string
 }
 
 type Action =
-    | { type: 'tracer/trace'; payload?: { steps: State['steps']; lines: State['lines'] }; error?: string }
+    | {
+          type: 'tracer/trace'
+          payload?: { steps: protocol.IStep[]; output: string[]; lines: State['lines'] }
+          error?: string
+      }
     | { type: 'tracer/setIndex'; payload: { index: number } }
 
 const initialState: State = {
     fetching: false,
     available: false,
     steps: [],
+    output: [],
     lines: {},
     index: 0,
     error: undefined
@@ -49,15 +55,36 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
         })).data
 
         const steps = result.steps
+        const output: string[] = []
         const lines: State['lines'] = []
         result.steps.forEach((step, i) => {
-            if (!step.snapshot) return
-            const line = step.snapshot.stack[step.snapshot.stack.length - 1].line
+            const snapshot = step.snapshot
+            const previousSnapshot = i !== 0 ? steps[i - 1].snapshot : undefined
+
+            const currentOutput = i !== 0 ? output[i - 1] : ''
+            const codePrints = step.prints.join('')
+            const codeThrew =
+                !!snapshot &&
+                !!previousSnapshot &&
+                snapshot.finish &&
+                previousSnapshot.type === protocol.Snapshot.Type.EXCEPTION
+                    ? previousSnapshot.exception.traceback.join('')
+                    : ''
+            const tracerThrew = !!step.threw
+                ? !!step.threw.exception
+                    ? step.threw.exception.traceback.join('')
+                    : step.threw.cause
+                : ''
+
+            output[i] = `${currentOutput}${codePrints}${codeThrew}${tracerThrew}`
+
+            if (!snapshot) return
+            const line = snapshot.stack[snapshot.stack.length - 1].line
             if (!lines[line]) lines[line] = []
             lines[line].push(i)
         })
         dispatch(visualizationActions.load(steps))
-        dispatch({ type: 'tracer/trace', payload: { steps, lines } })
+        dispatch({ type: 'tracer/trace', payload: { steps, output, lines } })
     } catch (error) {
         dispatch({
             type: 'tracer/trace',

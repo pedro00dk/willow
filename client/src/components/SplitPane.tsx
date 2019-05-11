@@ -48,15 +48,15 @@ const classes = {
     }
 }
 
-type Props = {
+// tslint:disable-next-line:variable-name
+export const MemoSplitPane = React.memo(SplitPane)
+function SplitPane(props: {
     split?: ReactSplitPaneProps['split']
     base?: ReactSplitPaneProps['size']
     left?: ReactSplitPaneProps['minSize']
     right?: ReactSplitPaneProps['maxSize']
     children?: React.ReactNode[]
-}
-
-export function SplitPane(props: Props) {
+}) {
     return (
         <ReactSplitPane
             className={classes.container}

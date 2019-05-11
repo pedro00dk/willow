@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
-import { reducer as BreakpointsReducer } from './breakpoint'
 import { reducer as CodeReducer } from './code'
 import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
@@ -10,7 +9,6 @@ import { reducer as TracerReducer } from './tracer'
 import { reducer as VisualizationReducer } from './visualization'
 
 const reducers = {
-    breakpoint: BreakpointsReducer,
     code: CodeReducer,
     input: InputReducer,
     language: LanguageReducer,

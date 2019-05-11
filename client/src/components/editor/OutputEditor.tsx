@@ -1,10 +1,11 @@
 import * as ace from 'brace'
 import * as React from 'react'
-import * as protocol from '../../protobuf/protocol'
 import { useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
-export function OutputEditor() {
+// tslint:disable-next-line:variable-name
+export const MemoOutputEditor = React.memo(OutputEditor)
+function OutputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
@@ -15,29 +16,9 @@ export function OutputEditor() {
     }, [editor])
 
     React.useEffect(() => {
-        if (!editor) return
-        editor.session.doc.setValue(
-            tracer.steps
-                .filter((step, i) => i <= tracer.index)
-                .map((step, i) => {
-                    const snapshot = step.snapshot
-                    const previousSnapshot = !!tracer.steps[i - 1] ? tracer.steps[i - 1].snapshot : undefined
-                    const tracedThrew =
-                        !!snapshot &&
-                        snapshot.finish &&
-                        !!previousSnapshot &&
-                        previousSnapshot.type === protocol.Snapshot.Type.EXCEPTION
-                            ? previousSnapshot.exception.traceback.join('')
-                            : ''
-                    const tracerThrew = !!step.threw
-                        ? !!step.threw.exception
-                            ? step.threw.exception.traceback.join('')
-                            : step.threw.cause
-                        : ''
-                    return `${step.prints}${tracedThrew}${tracerThrew}`
-                })
-                .join('')
-        )
+        if (!editor || !tracer.available) return
+        editor.session.doc.setValue(tracer.output[tracer.index])
+        editor.scrollToLine(editor.session.getLength(), true, true, undefined)
     }, [tracer])
 
     return <MemoTextEditor onEditorUpdate={setEditor} />
