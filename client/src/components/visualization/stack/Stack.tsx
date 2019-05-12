@@ -12,10 +12,7 @@ export const MemoStack = React.memo(Stack)
 export function Stack() {
     const stackRef = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
-    const { tracerAvailable, stack } = useRedux(state => ({
-        tracerAvailable: state.tracer.available,
-        stack: state.visualization.stack
-    }))
+    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     React.useLayoutEffect(() => {
         const interval = setInterval(() => {
@@ -27,7 +24,7 @@ export function Stack() {
 
     return (
         <div ref={stackRef} className={classes.container}>
-            {tracerAvailable && <MemoScopeNode scope={stack.root} depth={0} width={width} />}
+            {tracer.available && <MemoScopeNode scope={tracer.stack.root} depth={0} width={width} />}
         </div>
     )
 }

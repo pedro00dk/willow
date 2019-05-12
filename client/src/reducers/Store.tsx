@@ -6,15 +6,13 @@ import { reducer as InputReducer } from './input'
 import { reducer as LanguageReducer } from './language'
 import { reducer as SessionReducer } from './session'
 import { reducer as TracerReducer } from './tracer'
-import { reducer as VisualizationReducer } from './visualization'
 
 const reducers = {
     code: CodeReducer,
     input: InputReducer,
     language: LanguageReducer,
     session: SessionReducer,
-    tracer: TracerReducer,
-    visualization: VisualizationReducer
+    tracer: TracerReducer
 }
 
 export type State = { [property in keyof typeof reducers]: Parameters<typeof reducers[property]>[0] }

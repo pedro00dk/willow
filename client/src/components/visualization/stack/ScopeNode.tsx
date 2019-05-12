@@ -4,7 +4,7 @@ import * as React from 'react'
 import { colors } from '../../../colors'
 import { useDispatch, useRedux } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
-import { Scope } from '../../../reducers/visualization'
+import { Scope } from '../../../reducers/tracer'
 
 const classes = {
     container: cn('d-flex flex-column', 'w-100'),

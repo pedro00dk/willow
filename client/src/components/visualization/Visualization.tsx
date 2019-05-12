@@ -37,7 +37,7 @@ const computeNextIndex = (event: React.KeyboardEvent, tracer: State['tracer']) =
 
 export function Visualization() {
     const dispatch = useDispatch()
-    const { tracer } = useRedux(state => ({ tracer: state.tracer, stack: state.visualization.stack }))
+    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     return (
         <div
@@ -51,7 +51,7 @@ export function Visualization() {
         >
             <MemoSplitPane split='horizontal' base='15%' left={5} right={-5}>
                 <MemoStack />
-                <MemoHeap />
+                {/* <MemoHeap /> */}
             </MemoSplitPane>
         </div>
     )
