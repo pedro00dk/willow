@@ -10,7 +10,7 @@ const classes = {
 // tslint:disable-next-line: variable-name
 export const MemoStack = React.memo(Stack)
 export function Stack() {
-    const stackRef = React.useRef<HTMLDivElement>()
+    const stackRef = React.useRef<HTMLElement>()
     const [width, setWidth] = React.useState(0)
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
@@ -23,7 +23,7 @@ export function Stack() {
     }, [width])
 
     return (
-        <div ref={stackRef} className={classes.container}>
+        <div ref={ref => (stackRef.current = ref)} className={classes.container}>
             {tracer.available && <MemoScopeNode scope={tracer.stack.root} depth={0} width={width} />}
         </div>
     )

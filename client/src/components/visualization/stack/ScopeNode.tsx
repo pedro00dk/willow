@@ -104,7 +104,7 @@ export function ScopeNode(props: { scope: Scope; depth: number; width: number })
                     {isIntermediary && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>
             )}
-            {(isRoot || isIntermediary) && props.width >= 5 && (
+            {(isRoot || isIntermediary) && props.width >= 10 && (
                 <div className={classes.children}>
                     {props.scope.children.map((child, i) => {
                         const { width, percent } = computeChildWidth(props.scope, child, props.width)

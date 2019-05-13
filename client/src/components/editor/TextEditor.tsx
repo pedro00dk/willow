@@ -15,8 +15,8 @@ export type EditorMouseEvent = {
 
 export type EditorGutterLayer = {
     [props: string]: unknown
-    $cells: { [props: string]: unknown; element: HTMLDivElement }[]
-    element: HTMLDivElement
+    $cells: { [props: string]: unknown; element: HTMLElement }[]
+    element: HTMLElement
     getRegion: (event: EditorMouseEvent) => 'foldWidgets' | 'markers'
 }
 
@@ -39,7 +39,7 @@ export const range = ace.acequire('ace/range').Range as new (
 // tslint:disable-next-line: variable-name
 export const MemoTextEditor = React.memo(TextEditor)
 function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
-    const editorRef = React.useRef<HTMLDivElement>(undefined)
+    const editorRef = React.useRef<HTMLElement>(undefined)
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
 
     React.useEffect(() => {
@@ -67,5 +67,5 @@ function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
         props.onEditorUpdate(editor)
     }, [editor])
 
-    return <div ref={editorRef} className={classes.container} />
+    return <div ref={ref => (editorRef.current = ref)} className={classes.container} />
 }
