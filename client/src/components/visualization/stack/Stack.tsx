@@ -18,7 +18,7 @@ export function Stack() {
         const interval = setInterval(() => {
             if (!stackRef.current || stackRef.current.clientWidth === width) return
             setWidth(stackRef.current.clientWidth)
-        }, 100)
+        }, 500)
         return () => clearInterval(interval)
     }, [width])
 

@@ -39,15 +39,22 @@ const shallowCompareObjects = <T extends { [key: string]: unknown }>(prev: T, ne
     return prevKeys.length === nextKeys.length && nextKeys.reduce((acc, key) => acc && prev[key] === next[key], true)
 }
 
-export const useDispatch = () => {
+const useStore = () => {
     const store = React.useContext(storeContext)
     if (!store) throw new Error('store context not found')
-    return store.dispatch
+    return store
+}
+
+export const useGetState = () => {
+    return useStore().getState
+}
+
+export const useDispatch = () => {
+    return useStore().dispatch
 }
 
 export const useRedux = <T extends {}>(selector: (state: State) => T) => {
-    const store = React.useContext(storeContext)
-    if (!store) throw new Error('store context not found')
+    const store = useStore()
     const memoSelector = React.useCallback(selector, [])
     const [subState, setSubState] = React.useState(() => memoSelector(store.getState()))
     const subStateRef = React.useRef(subState)

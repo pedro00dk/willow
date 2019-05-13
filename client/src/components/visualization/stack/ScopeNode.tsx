@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { useDispatch, useRedux } from '../../../reducers/Store'
+import { useDispatch, useGetState } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
 import { Scope } from '../../../reducers/tracer'
 
@@ -70,12 +70,27 @@ const computeChildWidth = (parent: Scope, child: Scope, width: number) => {
 // tslint:disable-next-line: variable-name
 export const MemoScopeNode = React.memo(ScopeNode)
 export function ScopeNode(props: { scope: Scope; depth: number; width: number }) {
+    const [selected, setSelected] = React.useState(false)
+    const getState = useGetState()
     const dispatch = useDispatch()
-    const { selected } = useRedux(state => ({
-        selected: state.tracer.index >= props.scope.steps.from && state.tracer.index <= props.scope.steps.to
-    }))
     const isRoot = props.scope.children.length !== 0 && props.scope.name == undefined
     const isIntermediary = props.scope.children.length !== 0 && !isRoot
+
+    React.useLayoutEffect(() => {
+        //
+        const interval = setInterval(() => {
+            const index = getState().tracer.index
+            const updatedSelected = index >= props.scope.steps.from && index <= props.scope.steps.to
+            if (updatedSelected === selected) return
+            setSelected(updatedSelected)
+        }, 500)
+        return () => clearInterval(interval)
+    }, [selected])
+
+    // // useRedux would be ideal, but, with thousands of scope nodes subscriptions, it heavily slows store dispatches
+    // const { selected } = useRedux(state => ({
+    //     selected: state.tracer.index >= props.scope.steps.from && state.tracer.index <= props.scope.steps.to
+    // }))
 
     return (
         <div className={classes.container}>
