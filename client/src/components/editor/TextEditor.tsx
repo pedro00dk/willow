@@ -55,10 +55,11 @@ function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
         const checkResizeInterval = window.setInterval(() => {
             const width = editorRef.current.parentElement.clientWidth
             const height = editorRef.current.parentElement.clientHeight
-            if (parentSize.width !== width || parentSize.height !== height) editor.resize()
+            if (parentSize.width === width && parentSize.height === height) return
             parentSize.width = width
             parentSize.height = height
-        }, 1000)
+            editor.resize()
+        }, 500)
         return () => window.clearInterval(checkResizeInterval)
     }, [editorRef])
 
