@@ -7,8 +7,6 @@ const classes = {
     container: cn('d-flex flex-row align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100')
 }
 
-// tslint:disable-next-line: variable-name
-export const MemoStack = React.memo(Stack)
 export function Stack() {
     const stackRef = React.useRef<HTMLElement>()
     const [width, setWidth] = React.useState(0)

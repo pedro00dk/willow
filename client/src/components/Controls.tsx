@@ -5,7 +5,7 @@ import playImg from '../../public/buttons/play.png'
 import stepImg from '../../public/buttons/stepInto.png'
 import { useDispatch, useRedux } from '../reducers/Store'
 import { actions as tracerActions } from '../reducers/tracer'
-import { MemoLanguageSelector } from './LanguageSelector'
+import { Languages } from './Languages'
 
 const classes = {
     container: cn('d-flex flex-row align-items-center', 'shadow-sm'),
@@ -19,15 +19,13 @@ const styles = {
     })
 }
 
-// tslint:disable-next-line:variable-name
-export const MemoControls = React.memo(Controls)
-function Controls() {
+export function Controls() {
     const dispatch = useDispatch()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     return (
         <div className={classes.container}>
-            <MemoLanguageSelector />
+            <Languages />
             <img
                 className={classes.image}
                 style={styles.image(!tracer.fetching)}

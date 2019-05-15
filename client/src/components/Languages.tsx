@@ -30,9 +30,7 @@ const classes = {
     select: cn('custom-select', css({ flex: '0 1 auto !important', color: colors.black, width: '6rem !important' }))
 }
 
-// tslint:disable-next-line:variable-name
-export const MemoLanguageSelector = React.memo(LanguageSelector)
-function LanguageSelector() {
+export function Languages() {
     const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
     const { language, tracerFetching } = useRedux(state => ({

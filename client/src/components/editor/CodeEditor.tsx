@@ -37,9 +37,7 @@ const classes = {
 const getSyntaxSupport = (language: string) =>
     new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
-// tslint:disable-next-line:variable-name
-export const MemoCodeEditor = React.memo(CodeEditor)
-function CodeEditor() {
+export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({

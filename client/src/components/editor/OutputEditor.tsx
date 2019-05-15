@@ -3,9 +3,7 @@ import * as React from 'react'
 import { useRedux } from '../../reducers/Store'
 import { MemoTextEditor } from './TextEditor'
 
-// tslint:disable-next-line:variable-name
-export const MemoOutputEditor = React.memo(OutputEditor)
-function OutputEditor() {
+export function OutputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 

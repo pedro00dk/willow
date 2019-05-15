@@ -11,9 +11,7 @@ const classes = {
     marker: cn('position-absolute', css({ backgroundColor: colors.primaryBlue.light }))
 }
 
-// tslint:disable-next-line:variable-name
-export const MemoInputEditor = React.memo(InputEditor)
-function InputEditor() {
+export function InputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { tracerFetching } = useRedux(state => ({ tracerFetching: state.tracer.fetching }))
