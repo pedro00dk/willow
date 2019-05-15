@@ -1,11 +1,12 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { Item } from 'react-contexify'
 import { colors } from '../../../colors'
 import * as protocol from '../../../protobuf/protocol'
-import { Obj } from '../../../reducers/visualization'
+import { Obj } from '../../../reducers/tracer'
 import { SquareBaseNode } from './BaseNode'
+import { Link, Node } from './Heap'
+import { BooleanParameter, RangeParameter, SelectParameter } from './Parameters'
 
 const classes = {
     elements: cn('d-flex align-items-end', 'text-nowrap'),
@@ -52,24 +53,25 @@ const computeFixedRatios = (values: number[]) => {
 
 const modes = new Set(['delta', 'fixed'])
 
-const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
-    mode: !!options && typeof modes.has(options['mode'] as string) ? (options['mode'] as string) : 'delta',
-    showIndex: !!options && typeof options['showIndex'] === 'boolean' ? (options['showIndex'] as boolean) : true,
-    showValues: !!options && typeof options['showValues'] === 'boolean' ? (options['showValues'] as boolean) : true,
-    width: !!options && typeof options['width'] === 'number' ? (options['width'] as number) : 30,
-    height: !!options && typeof options['height'] === 'number' ? (options['height'] as number) : 50
-})
+const getParameters = (node: Node) => {
+    const parameters = node.parameters
+
+    return {
+        mode: !!parameters && modes.has(parameters['mode'] as string) ? (parameters['mode'] as string) : 'delta',
+        showIndex:
+            !!parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
+        showValues:
+            !!parameters && typeof parameters['showValues'] === 'boolean'
+                ? (parameters['showValues'] as boolean)
+                : true,
+        width: !!parameters && typeof parameters['width'] === 'number' ? (parameters['width'] as number) : 30,
+        height: !!parameters && typeof parameters['height'] === 'number' ? (parameters['height'] as number) : 50
+    }
+}
 
 export const isDefault = (obj: Obj) => false
 
-// tslint:disable-next-line: variable-name
-export const MemoNode = React.memo(Node)
-export function Node(props: {
-    obj: Obj
-    options?: { [option: string]: unknown }
-    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
-    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
-}) {
+export function Node(props: { obj: Obj; node: Node; link: Link }) {
     if (
         (props.obj.type !== protocol.Obj.Type.TUPLE &&
             props.obj.type !== protocol.Obj.Type.ARRAY &&
@@ -91,8 +93,7 @@ export function Node(props: {
             </SquareBaseNode>
         )
 
-    const { mode, showIndex, showValues, width, height } = getOptionsFromObject(props.options)
-
+    const { mode, showIndex, showValues, width, height } = getParameters(props.node)
     const values = props.obj.members.map(member => member.value as number)
     const ratios = mode === 'delta' ? computeDeltaRatios(values) : computeFixedRatios(values)
 
@@ -111,76 +112,54 @@ export function Node(props: {
     )
 }
 
-export function NodeOptions(props: {
-    obj: Obj
-    options: { [option: string]: unknown }
-    onOptionsUpdate: (options: { [option: string]: unknown }) => void
-}) {
-    const options = getOptionsFromObject(props.options)
+export function Parameters(props: { obj: Obj; node: Node; onChange: () => void }) {
+    const parameters = getParameters(props.node)
 
     return (
         <>
-            <Item>
-                <span>mode</span>
-                <select
-                    value={options.mode}
-                    onChange={event => {
-                        options.mode = event.target.value
-                        props.onOptionsUpdate(options)
-                    }}
-                >
-                    <option value='delta'>delta</option>
-                    <option value='fixed'>fixed</option>
-                </select>
-            </Item>
-            <Item>
-                <span>show index</span>
-                <input
-                    type='checkbox'
-                    checked={options.showIndex}
-                    onChange={event => {
-                        options.showIndex = event.target.checked
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
-            <Item>
-                <span>show values</span>
-                <input
-                    type='checkbox'
-                    checked={options.showValues}
-                    onChange={event => {
-                        options.showValues = event.target.checked
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
-            <Item>
-                <span>width</span>
-                <input
-                    type='range'
-                    min={5}
-                    value={options.width}
-                    max={100}
-                    onChange={event => {
-                        options.width = event.target.valueAsNumber
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
-            <Item>
-                <span>height</span>
-                <input
-                    type='range'
-                    min={5}
-                    value={options.height}
-                    max={200}
-                    onChange={event => {
-                        options.height = event.target.valueAsNumber
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
+            <SelectParameter
+                name={'mode'}
+                value={parameters.mode}
+                options={[...modes]}
+                onChange={value => {
+                    props.node.parameters.mode = value
+                    props.onChange()
+                }}
+            />
+            <BooleanParameter
+                name={'show index'}
+                value={parameters.showIndex}
+                onChange={value => {
+                    props.node.parameters.showIndex = value
+                    props.onChange()
+                }}
+            />
+            <BooleanParameter
+                name={'show values'}
+                value={parameters.showValues}
+                onChange={value => {
+                    props.node.parameters.showValues = value
+                    props.onChange()
+                }}
+            />
+            <RangeParameter
+                name={'width'}
+                value={parameters.width}
+                interval={{ min: 5, max: 100 }}
+                onChange={value => {
+                    props.node.parameters.width = value
+                    props.onChange()
+                }}
+            />
+            <RangeParameter
+                name={'height'}
+                value={parameters.height}
+                interval={{ min: 5, max: 200 }}
+                onChange={value => {
+                    props.node.parameters.height = value
+                    props.onChange()
+                }}
+            />
         </>
     )
 }

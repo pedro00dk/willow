@@ -3,106 +3,97 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
-import { useDispatch, useRedux } from '../../../reducers/Store'
-import { actions as visualizationActions, Obj } from '../../../reducers/visualization'
+import { Obj } from '../../../reducers/tracer'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
-import * as BaseNodes from './BaseNode'
-import * as PairsNode from './PairsNode'
-import * as PropertyNode from './PropertyNode'
+import * as FieldNode from './FieldNode'
+import * as MapNode from './MapNode'
 
 import 'react-contexify/dist/ReactContexify.min.css'
+import { Link, Node, Position } from './Heap'
 
 const classes = {
-    container: cn('position-absolute', 'd-inline-flex'),
+    container: cn('position-absolute', 'd-inline-flex', css({ transition: 'all 0.1s ease' })),
     nodeContainer: cn('d-inline-flex'),
     selected: cn(css({ background: colors.primaryBlue.lighter }))
 }
 
-const nodes = {
+const nodeModules = {
     array: ArrayNode,
     bars: BarsNode,
-    pairs: PairsNode,
-    property: PropertyNode
+    field: FieldNode,
+    map: MapNode
 }
 
-const orderedNodeTypes = ['array', 'bars', 'pairs', 'property'] as (keyof typeof nodes)[]
+const getNodeComponent = (obj: Obj, node: Node, typeNode: Node) => {
+    if (node.name != undefined) return { ...nodeModules[node.name as keyof typeof nodeModules], node }
+    if (typeNode.name != undefined) return { ...nodeModules[typeNode.name as keyof typeof nodeModules], node: typeNode }
 
-const getDefaultNode = (obj: Obj) => {
-    // tslint:disable-next-line: variable-name
-    const DefaultNode = Object.entries(nodes)
-        .filter(([name, node]) => node.isDefault(obj))
-        .map(([name, node]) => node.MemoNode)[0]
-    return !!DefaultNode ? DefaultNode : BaseNodes.MemoSquareBaseNode
+    const defaultModule = Object.entries(nodeModules)
+        .filter(([, node]) => node.isDefault(obj))
+        .map(([, node]) => node)[0]
+
+    return { ...defaultModule, node }
 }
 
-const getMainNode = (obj: Obj, objNode: string, typeNode: string) => {
-    const castObjNode = objNode as keyof typeof nodes
-    const castTypeNode = typeNode as keyof typeof nodes
-    // tslint:disable-next-line: variable-name
-    const Node = !!nodes[castObjNode]
-        ? nodes[castObjNode].MemoNode
-        : !!nodes[castTypeNode]
-        ? nodes[castTypeNode].MemoNode
-        : getDefaultNode(obj)
-
-    return Node
-}
-
-// tslint:disable-next-line: variable-name
-export const MemoNodeWrapper = React.memo(NodeWrapper)
 export function NodeWrapper(props: {
+    updateNodes: React.Dispatch<{}>
     obj: Obj
-    objects: React.MutableRefObject<{ [reference: string]: HTMLElement }>
-    references: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
+    size: { width: number; height: number }
+    scale: { value: number }
+    position: Position
+    node: Node
+    typeNode: Node
+    link: Link
 }) {
-    const dragBase = React.useRef({ x: 0, y: 0 })
-    const dispatch = useDispatch()
-    const { objNode, objOptions, typeNode, typeOptions, translation = { x: 0, y: 0 }, scale } = useRedux(state => ({
-        objNode: state.visualization.objNodes[props.obj.reference],
-        objOptions: state.visualization.objOptions[props.obj.reference],
-        typeNode: state.visualization.typeNodes[props.obj.languageType],
-        typeOptions: state.visualization.typeOptions[props.obj.languageType],
-        translation: state.visualization.objTranslations[props.obj.reference],
-        scale: state.visualization.scale
-    }))
+    const updateNode = React.useState<{}>()[1]
+    const [position, setPosition] = React.useState<{ x: number; y: number }>(props.position.p)
+    const dragAnchor = React.useRef({ x: 0, y: 0 })
 
-    // tslint:disable-next-line: variable-name
-    const Node = getMainNode(props.obj, objNode, typeNode)
-    const options = objNode != undefined ? objOptions : typeNode != undefined ? typeOptions : undefined
+    position.x = Math.max(10, Math.min(position.x, props.size.width - 10))
+    position.y = Math.max(10, Math.min(position.y, props.size.height - 10))
+    props.position.p = position
+    props.position.set = setPosition
+    props.link.length = 0
+
+    const { Node, Parameters, node } = getNodeComponent(props.obj, props.node, props.typeNode)
 
     return (
         <div
-            ref={ref => {
-                if (!ref) return
-                props.objects.current[props.obj.reference] = ref
-            }}
             className={classes.container}
-            style={{ left: translation.x, top: translation.y, transform: `scale(${scale})` }}
+            style={{
+                left: position.x,
+                top: position.y,
+                transformOrigin: '0 0 0',
+                transform: `scale(${props.scale.value}) translate(-50%, -50%)`
+            }}
             draggable
-            onDragStart={event => (dragBase.current = { x: event.clientX, y: event.clientY })}
+            onDragStart={event => (dragAnchor.current = { x: event.clientX, y: event.clientY })}
             onDrag={event => {
                 if (event.clientX === 0 && event.clientY === 0) return
-                dispatch(
-                    visualizationActions.setObjTranslation(props.obj.reference, {
-                        x: translation.x + (event.clientX - dragBase.current.x),
-                        y: translation.y + (event.clientY - dragBase.current.y)
-                    })
-                )
-                dragBase.current = { x: event.clientX, y: event.clientY }
+                setPosition({
+                    x: Math.max(
+                        10,
+                        Math.min(position.x + (event.clientX - dragAnchor.current.x), props.size.width - 10)
+                    ),
+                    y: Math.max(
+                        10,
+                        Math.min(position.y + (event.clientY - dragAnchor.current.y), props.size.height - 10)
+                    )
+                })
+                dragAnchor.current = { x: event.clientX, y: event.clientY }
             }}
         >
-            <div className={classes.nodeContainer}>
-                <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
-                    <Node obj={props.obj} options={options} objects={props.objects} references={props.references} />
-                </MenuProvider>
-            </div>
+            <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
+                <Node obj={props.obj} node={node} link={props.link} />
+            </MenuProvider>
             <NodeMenu
                 obj={props.obj}
-                objNode={objNode}
-                objOptions={objOptions}
-                typeNode={typeNode}
-                typeOptions={typeOptions}
+                node={props.node}
+                typeNode={props.typeNode}
+                onNodeChange={() => updateNode({})}
+                onTypeNodeChange={() => props.updateNodes({})}
+                Parameters={Parameters}
             />
         </div>
     )
@@ -110,80 +101,59 @@ export function NodeWrapper(props: {
 
 function NodeMenu(props: {
     obj: Obj
-    objNode: string
-    objOptions: { [option: string]: unknown }
-    typeNode: string
-    typeOptions: { [option: string]: unknown }
+    node: Node
+    typeNode: Node
+    onNodeChange: () => void
+    onTypeNodeChange: () => void
+    Parameters: (props: { obj: Obj; node: Node; onChange: () => void }) => JSX.Element
 }) {
-    const dispatch = useDispatch()
-    const objNode = props.objNode as keyof typeof nodes
-    const typeNode = props.typeNode as keyof typeof nodes
-    // tslint:disable-next-line: variable-name
-    const ObjNodeOptions = !!nodes[objNode] ? nodes[objNode].NodeOptions : undefined
-    // tslint:disable-next-line: variable-name
-    const TypeNodeOptions = !!nodes[typeNode] ? nodes[typeNode].NodeOptions : undefined
-
     return (
         <Menu id={props.obj.reference}>
-            <Item disabled>{objNode != undefined ? objNode : typeNode != undefined ? typeNode : 'default'}</Item>
+            <Item disabled>
+                {props.node.name != undefined
+                    ? props.node.name
+                    : props.typeNode.name != undefined
+                    ? props.typeNode.name
+                    : 'default'}
+            </Item>
+            {([
+                ['object', props.node, props.onNodeChange],
+                ['type', props.typeNode, props.onTypeNodeChange]
+            ] as const).map(([name, node, onChange]) => (
+                <React.Fragment key={name}>
+                    <Separator />
+                    <Submenu label={name}>
+                        {node.name != undefined && (
+                            <Item
+                                onClick={() => {
+                                    node.name = undefined
+                                    onChange()
+                                }}
+                            >
+                                reset
+                            </Item>
+                        )}
+                        {Object.keys(nodeModules).map(nodeName => (
+                            <Item
+                                key={nodeName}
+                                className={node.name === nodeName ? classes.selected : undefined}
+                                onClick={() => {
+                                    node.name = nodeName
+                                    onChange()
+                                }}
+                            >
+                                {nodeName}
+                            </Item>
+                        ))}
+                    </Submenu>
+                    {node.name != undefined && (
+                        <Submenu disabled={node.name == undefined} label={`${name} properties`}>
+                            <props.Parameters obj={props.obj} node={node} onChange={() => onChange()} />
+                        </Submenu>
+                    )}
+                </React.Fragment>
+            ))}
             <Separator />
-            <Submenu label='object node'>
-                {orderedNodeTypes.map(node => (
-                    <Item
-                        key={node}
-                        className={node === props.objNode ? classes.selected : undefined}
-                        onClick={() => dispatch(visualizationActions.setObjNode(props.obj.reference, node))}
-                    >
-                        {node}
-                    </Item>
-                ))}
-                <Item
-                    key='reset'
-                    onClick={() => dispatch(visualizationActions.setObjNode(props.obj.reference, undefined))}
-                >
-                    reset
-                </Item>
-            </Submenu>
-            <Submenu label='type node'>
-                {orderedNodeTypes.map(node => (
-                    <Item
-                        key={node}
-                        className={node === props.typeNode ? classes.selected : undefined}
-                        onClick={() => dispatch(visualizationActions.setTypeNode(props.obj.languageType, node))}
-                    >
-                        {node}
-                    </Item>
-                ))}
-                <Item
-                    key='reset'
-                    onClick={() => dispatch(visualizationActions.setTypeNode(props.obj.languageType, undefined))}
-                >
-                    reset
-                </Item>
-            </Submenu>
-            <Separator />
-            <Submenu disabled={!ObjNodeOptions} label='object properties'>
-                {!!ObjNodeOptions && (
-                    <ObjNodeOptions
-                        obj={props.obj}
-                        options={props.objOptions}
-                        onOptionsUpdate={options =>
-                            dispatch(visualizationActions.setObjOptions(props.obj.reference, options))
-                        }
-                    />
-                )}
-            </Submenu>
-            <Submenu disabled={!TypeNodeOptions} label='type properties'>
-                {!!TypeNodeOptions && (
-                    <TypeNodeOptions
-                        obj={props.obj}
-                        options={props.typeOptions}
-                        onOptionsUpdate={options =>
-                            dispatch(visualizationActions.setTypeOptions(props.obj.languageType, options))
-                        }
-                    />
-                )}
-            </Submenu>
         </Menu>
     )
 }

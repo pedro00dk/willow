@@ -1,11 +1,12 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { Item } from 'react-contexify'
 import { colors } from '../../../colors'
 import * as protocol from '../../../protobuf/protocol'
-import { Obj } from '../../../reducers/visualization'
+import { Obj } from '../../../reducers/tracer'
 import { SquareBaseNode } from './BaseNode'
+import { Link, Node } from './Heap'
+import { BooleanParameter, RangeParameter } from './Parameters'
 
 const classes = {
     elements: cn('d-flex align-items-center', 'text-nowrap'),
@@ -23,22 +24,21 @@ const classes = {
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
-const getOptionsFromObject = (options: { [option: string]: unknown }) => ({
-    showIndex: !!options && typeof options['showIndex'] === 'boolean' ? (options['showIndex'] as boolean) : true,
-    maxWidth: !!options && typeof options['maxWidth'] === 'number' ? (options['maxWidth'] as number) : 30
-})
+const getParameters = (node: Node) => {
+    const parameters = node.parameters
+
+    return {
+        showIndex:
+            !!parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
+        maxWidth: !!parameters && typeof parameters['maxWidth'] === 'number' ? (parameters['maxWidth'] as number) : 30
+    }
+}
 
 export const isDefault = (obj: Obj) =>
     obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST || obj.type === protocol.Obj.Type.TUPLE
 
 // tslint:disable-next-line: variable-name
-export const MemoNode = React.memo(Node)
-export function Node(props: {
-    obj: Obj
-    options?: { [option: string]: unknown }
-    objects?: React.MutableRefObject<{ [reference: string]: HTMLElement }>
-    references?: React.MutableRefObject<{ [reference: string]: HTMLElement[] }>
-}) {
+export function Node(props: { obj: Obj; node: Node; link: Link }) {
     if (
         props.obj.type !== protocol.Obj.Type.TUPLE &&
         props.obj.type !== protocol.Obj.Type.ARRAY &&
@@ -59,7 +59,7 @@ export function Node(props: {
             </SquareBaseNode>
         )
 
-    const { showIndex, maxWidth } = getOptionsFromObject(props.options)
+    const { showIndex, maxWidth } = getParameters(props.node)
 
     return (
         <SquareBaseNode obj={props.obj}>
@@ -72,11 +72,8 @@ export function Node(props: {
                             {showIndex && <span className={classes.index}>{i}</span>}
                             <span
                                 ref={ref => {
-                                    if (!ref || !isReference) return
-                                    const valueReference = (member.value as Obj).reference
-                                    if (!props.references.current[valueReference])
-                                        props.references.current[valueReference] = [ref]
-                                    else props.references.current[valueReference].push(ref)
+                                    if (!isReference) return
+                                    props.link.push({ ref, target: (member.value as Obj).reference, under: false })
                                 }}
                                 className={classes.value}
                             >
@@ -90,39 +87,28 @@ export function Node(props: {
     )
 }
 
-export function NodeOptions(props: {
-    obj: Obj
-    options: { [option: string]: unknown }
-    onOptionsUpdate: (options: { [option: string]: unknown }) => void
-}) {
-    const options = getOptionsFromObject(props.options)
+export function Parameters(props: { obj: Obj; node: Node; onChange: () => void }) {
+    const parameters = getParameters(props.node)
 
     return (
         <>
-            <Item>
-                <span>show index</span>
-                <input
-                    type='checkbox'
-                    checked={options.showIndex}
-                    onChange={event => {
-                        options.showIndex = event.target.checked
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
-            <Item>
-                <span>max width</span>
-                <input
-                    type='range'
-                    min={10}
-                    value={options.maxWidth}
-                    max={200}
-                    onChange={event => {
-                        options.maxWidth = event.target.valueAsNumber
-                        props.onOptionsUpdate(options)
-                    }}
-                />
-            </Item>
+            <BooleanParameter
+                name={'show index'}
+                value={parameters.showIndex}
+                onChange={value => {
+                    props.node.parameters.showIndex = value
+                    props.onChange()
+                }}
+            />
+            <RangeParameter
+                name={'max width'}
+                value={parameters.maxWidth}
+                interval={{ min: 10, max: 200 }}
+                onChange={value => {
+                    props.node.parameters.maxWidth = value
+                    props.onChange()
+                }}
+            />
         </>
     )
 }
