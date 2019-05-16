@@ -28,7 +28,6 @@ const nodeModules = {
 const getNodeComponent = (obj: Obj, node: Node, typeNode: Node) => {
     if (node.name != undefined) return { ...nodeModules[node.name as keyof typeof nodeModules], node }
     if (typeNode.name != undefined) return { ...nodeModules[typeNode.name as keyof typeof nodeModules], node: typeNode }
-
     const defaultModule = Object.entries(nodeModules)
         .filter(([, node]) => node.isDefault(obj))
         .map(([, node]) => node)[0]
@@ -36,24 +35,53 @@ const getNodeComponent = (obj: Obj, node: Node, typeNode: Node) => {
     return { ...defaultModule, node }
 }
 
+const getLinked = (current: string, links: { [reference: string]: Link }, pool: Set<string>, depth: number) => {
+    if (depth === 0 || pool.has(current)) return
+    pool.add(current)
+    links[current].forEach(({ target }) => getLinked(target, links, pool, depth - 1))
+}
+
+const onDrag = (
+    event: React.DragEvent<HTMLDivElement>,
+    anchor: { x: number; y: number },
+    root: string,
+    rect: ClientRect | DOMRect,
+    positions: { [reference: string]: Position },
+    links: { [reference: string]: Link }
+) => {
+    if (event.clientX === 0 && event.clientY === 0) return
+    const draggedPool = new Set<string>()
+    getLinked(root, links, draggedPool, !event.ctrlKey ? 1 : !event.shiftKey ? 2 : Infinity)
+    draggedPool.forEach(reference => {
+        const position = positions[reference]
+        position.setPosition({
+            x: Math.max(10, Math.min(position.position.x + (event.clientX - anchor.x), rect.width - 10)),
+            y: Math.max(10, Math.min(position.position.y + (event.clientY - anchor.y), rect.height - 10))
+        })
+    })
+}
+
 export function NodeWrapper(props: {
-    updateNodes: React.Dispatch<{}>
     obj: Obj
-    size: { width: number; height: number }
+    rect: ClientRect | DOMRect
     scale: { value: number }
+    positions: { [reference: string]: Position }
+    nodes: { [reference: string]: Node }
+    typeNodes: { [type: string]: Node }
+    links: { [reference: string]: Link }
     position: Position
     node: Node
     typeNode: Node
     link: Link
+    updateNodes: React.Dispatch<{}>
 }) {
     const updateNode = React.useState<{}>()[1]
-    const [position, setPosition] = React.useState<{ x: number; y: number }>(props.position.p)
+    const [position, setPosition] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 })
     const dragAnchor = React.useRef({ x: 0, y: 0 })
 
-    position.x = Math.max(10, Math.min(position.x, props.size.width - 10))
-    position.y = Math.max(10, Math.min(position.y, props.size.height - 10))
-    props.position.p = position
-    props.position.set = setPosition
+    props.position.position.x = position.x = Math.min(Math.max(position.x, 10), props.rect.width - 10)
+    props.position.position.y = position.y = Math.min(Math.max(position.y, 10), props.rect.height - 10)
+    props.position.setPosition = setPosition
     props.link.length = 0
 
     const { Node, Parameters, node } = getNodeComponent(props.obj, props.node, props.typeNode)
@@ -70,17 +98,7 @@ export function NodeWrapper(props: {
             draggable
             onDragStart={event => (dragAnchor.current = { x: event.clientX, y: event.clientY })}
             onDrag={event => {
-                if (event.clientX === 0 && event.clientY === 0) return
-                setPosition({
-                    x: Math.max(
-                        10,
-                        Math.min(position.x + (event.clientX - dragAnchor.current.x), props.size.width - 10)
-                    ),
-                    y: Math.max(
-                        10,
-                        Math.min(position.y + (event.clientY - dragAnchor.current.y), props.size.height - 10)
-                    )
-                })
+                onDrag(event, dragAnchor.current, props.obj.reference, props.rect, props.positions, props.links)
                 dragAnchor.current = { x: event.clientX, y: event.clientY }
             }}
         >

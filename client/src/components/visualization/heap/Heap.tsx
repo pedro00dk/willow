@@ -8,39 +8,40 @@ const classes = {
     line: cn('position-absolute', 'p-0 m-0')
 }
 
-export type Position = { p: { x: number; y: number }; set: (p: { x: number; y: number }) => void }
+export type Position = { position: { x: number; y: number }; setPosition: (p: { x: number; y: number }) => void }
 export type Node = { name: string; parameters: { [option: string]: unknown } }
 export type Link = { ref: HTMLElement; target: string; under: boolean }[]
 
 export function Heap() {
-    const heapRef = React.useRef<HTMLElement>(undefined)
-    const updateHeap = React.useState<{}>()[1]
-    const heapBB = React.useRef<ClientRect | DOMRect>(new DOMRect())
-    const scale = React.useRef({ value: 1 })
-    const positions = React.useRef<{ [reference: string]: Position }>({})
-    const nodes = React.useRef<{ [reference: string]: Node }>({})
-    const typeNodes = React.useRef<{ [type: string]: Node }>({})
-    const links = React.useRef<{ [reference: string]: Link }>({})
+    const ref = React.useRef<HTMLDivElement>()
+    const updateGraph = React.useState<{}>()[1]
+    const rect = React.useRef<ClientRect | DOMRect>()
+    const scale = React.useRef<{ value: number }>()
+    const positions = React.useRef<{ [reference: string]: Position }>()
+    const nodes = React.useRef<{ [reference: string]: Node }>()
+    const typeNodes = React.useRef<{ [type: string]: Node }>()
+    const links = React.useRef<{ [reference: string]: Link }>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
-        if (!heapRef.current) return
+        if (!ref.current) return
         const interval = setInterval(() => {
-            const newHeapBB = heapRef.current.getBoundingClientRect()
+            const newRect = ref.current.getBoundingClientRect()
             if (
-                heapBB.current.left === newHeapBB.left &&
-                heapBB.current.top === newHeapBB.top &&
-                heapBB.current.width === newHeapBB.width &&
-                heapBB.current.height === newHeapBB.height
+                rect.current.left === newRect.left &&
+                rect.current.top === newRect.top &&
+                rect.current.width === newRect.width &&
+                rect.current.height === newRect.height
             )
                 return
-            heapBB.current = newHeapBB
-            updateHeap({})
+            rect.current = newRect
+            updateGraph({})
         }, 500)
         return () => clearInterval(interval)
-    }, [heapRef])
+    }, [ref])
 
     if (!tracer.available) {
+        rect.current = new DOMRect()
         scale.current = { value: 1 }
         positions.current = {}
         nodes.current = {}
@@ -50,19 +51,19 @@ export function Heap() {
 
     return (
         <div
-            ref={ref => (heapRef.current = ref)}
+            ref={ref}
             className={classes.container}
             onWheel={event => {
                 const factor = event.deltaY < 0 ? 0.95 : event.deltaY > 0 ? 1.05 : 1
-                scale.current.value = Math.max(0.5, Math.min(scale.current.value * factor, 4))
-                updateHeap({})
+                scale.current.value = Math.min(Math.max(scale.current.value * factor, 0.5), 4)
+                updateGraph({})
             }}
         >
             {tracer.available && (
                 <>
                     <Nodes
                         tracer={tracer}
-                        heapBB={heapBB.current}
+                        rect={rect.current}
                         scale={scale.current}
                         positions={positions.current}
                         nodes={nodes.current}
@@ -70,7 +71,7 @@ export function Heap() {
                         links={links.current}
                     />
                     <Edges
-                        heapBB={heapBB.current}
+                        rect={rect.current}
                         scale={scale.current}
                         positions={positions.current}
                         links={links.current}
@@ -83,7 +84,7 @@ export function Heap() {
 
 function Nodes(props: {
     tracer: State['tracer']
-    heapBB: ClientRect | DOMRect
+    rect: ClientRect | DOMRect
     scale: { value: number }
     positions: { [reference: string]: Position }
     nodes: { [reference: string]: Node }
@@ -91,36 +92,34 @@ function Nodes(props: {
     links: { [reference: string]: Link }
 }) {
     const updateNodes = React.useState<{}>()[1]
-    const size = { width: props.heapBB.width, height: props.heapBB.height }
 
     Object.keys(props.links).forEach(reference => delete props.links[reference])
-
-    if (!props.tracer.available) return <></>
+    Object.values(props.tracer.heaps[props.tracer.index]).forEach(obj => {
+        if (!props.positions[obj.reference])
+            props.positions[obj.reference] = { position: { x: 0, y: 0 }, setPosition: undefined }
+        if (!props.nodes[obj.reference]) props.nodes[obj.reference] = { name: undefined, parameters: {} }
+        if (!props.typeNodes[obj.languageType]) props.typeNodes[obj.languageType] = { name: undefined, parameters: {} }
+        props.links[obj.reference] = [] as Link
+    })
 
     return (
         <>
             {Object.values(props.tracer.heaps[props.tracer.index]).map(obj => {
-                const position = !!props.positions[obj.reference]
-                    ? props.positions[obj.reference]
-                    : (props.positions[obj.reference] = { p: { x: 0, y: 0 }, set: p => undefined })
-                const node = !!props.nodes[obj.reference]
-                    ? props.nodes[obj.reference]
-                    : (props.nodes[obj.reference] = { name: undefined, parameters: {} })
-                const typeNode = !!props.typeNodes[obj.languageType]
-                    ? props.typeNodes[obj.languageType]
-                    : (props.typeNodes[obj.languageType] = { name: undefined, parameters: {} })
-                const link = (props.links[obj.reference] = [] as Link)
                 return (
                     <NodeWrapper
                         key={obj.reference}
-                        updateNodes={updateNodes}
                         obj={obj}
-                        size={size}
+                        rect={props.rect}
                         scale={props.scale}
-                        position={position}
-                        node={node}
-                        typeNode={typeNode}
-                        link={link}
+                        positions={props.positions}
+                        nodes={props.nodes}
+                        typeNodes={props.typeNodes}
+                        links={props.links}
+                        position={props.positions[obj.reference]}
+                        node={props.nodes[obj.reference]}
+                        typeNode={props.typeNodes[obj.languageType]}
+                        link={props.links[obj.reference]}
+                        updateNodes={updateNodes}
                     />
                 )
             })}
@@ -129,7 +128,7 @@ function Nodes(props: {
 }
 
 function Edges(props: {
-    heapBB: ClientRect | DOMRect
+    rect: ClientRect | DOMRect
     scale: { value: number }
     positions: { [reference: string]: Position }
     links: { [reference: string]: Link }
@@ -149,10 +148,10 @@ function Edges(props: {
                 .map(({ ref, target, under }) => {
                     if (!ref) return <></>
                     const bb = ref.getBoundingClientRect()
-                    const fromX = bb.left + bb.width / 2 - props.heapBB.left
-                    const fromY = bb.top + bb.height / 2 - props.heapBB.top
-                    const toX = props.positions[target].p.x
-                    const toY = props.positions[target].p.y
+                    const fromX = bb.left + bb.width / 2 - props.rect.left
+                    const fromY = bb.top + bb.height / 2 - props.rect.top
+                    const toX = props.positions[target].position.x
+                    const toY = props.positions[target].position.y
                     const length = Math.sqrt((fromX - toX) ** 2 + (fromY - toY) ** 2)
                     const angle = Math.atan2(fromY - toY, fromX - toX)
                     const rotationFixedFromX = (fromX + toX - length) / 2
