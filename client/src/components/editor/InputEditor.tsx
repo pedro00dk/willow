@@ -14,7 +14,7 @@ const classes = {
 export function InputEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { tracerFetching } = useRedux(state => ({ tracerFetching: state.tracer.fetching }))
+    const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
 
     React.useEffect(() => {
         if (!editor) return
@@ -24,21 +24,22 @@ export function InputEditor() {
             dispatch(inputActions.set(editor.session.doc.getAllLines().slice(0, -1)))
 
         editor.on('change', onChange)
+
         return () => editor.off('change', onChange)
     }, [editor])
 
     React.useEffect(() => {
         if (!editor) return
-        editor.setReadOnly(tracerFetching)
-        if (!tracerFetching)
-            Object.values(editor.session.getMarkers(false) as EditorMarker[])
-                .filter(marker => marker.id > 2)
-                .forEach(marker => editor.session.removeMarker(marker.id))
+        editor.setReadOnly(fetching)
+        if (fetching)
+            [...Array(editor.session.doc.getLength() - 1).keys()] //
+                .forEach(line =>
+                    editor.session.addMarker(new range(line, 0, line, 1), classes.marker, 'fullLine', false)
+                )
         else
-            [...Array(editor.session.getLength() - 1).keys()].forEach(line =>
-                editor.session.addMarker(new range(line, 0, line, 1), classes.marker, 'fullLine', false)
-            )
-    }, [tracerFetching])
+            Object.values(editor.session.getMarkers(false) as EditorMarker[]) //
+                .forEach(marker => (marker.id > 2 ? editor.session.removeMarker(marker.id) : undefined))
+    }, [editor, fetching])
 
-    return <MemoTextEditor onEditorUpdate={setEditor} />
+    return <MemoTextEditor onEditor={setEditor} />
 }

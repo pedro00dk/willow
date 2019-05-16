@@ -17,7 +17,7 @@ export function OutputEditor() {
         if (!editor || !tracer.available) return
         editor.session.doc.setValue(tracer.output[tracer.index])
         editor.scrollToLine(editor.session.getLength(), true, true, undefined)
-    }, [tracer])
+    }, [editor, tracer])
 
-    return <MemoTextEditor onEditorUpdate={setEditor} />
+    return <MemoTextEditor onEditor={setEditor} />
 }

@@ -3,7 +3,11 @@ import cn from 'classnames'
 import * as React from 'react'
 
 const classes = {
-    container: cn('w-100 h-100')
+    container: cn('d-flex', 'w-100 h-100')
+}
+
+const styles = {
+    font: '1rem'
 }
 
 export type EditorMouseEvent = {
@@ -38,35 +42,27 @@ export const range = ace.acequire('ace/range').Range as new (
 
 // tslint:disable-next-line: variable-name
 export const MemoTextEditor = React.memo(TextEditor)
-function TextEditor(props: { onEditorUpdate?: (editor: ace.Editor) => void }) {
-    const editorRef = React.useRef<HTMLElement>(undefined)
-    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+function TextEditor(props: { onEditor?: (editor: ace.Editor) => void }) {
+    const ref = React.useRef<HTMLDivElement>()
 
     React.useEffect(() => {
-        if (!editorRef.current) return
-        const editor = ace.edit(editorRef.current)
-        editor.setFontSize('1rem')
+        if (!ref.current) return
+        const editor = ace.edit(ref.current)
+        if (!!props.onEditor) props.onEditor(editor)
+        editor.setFontSize(styles.font)
         editor.$blockScrolling = Infinity
-        setEditor(editor)
-        const parentSize = {
-            width: editorRef.current.parentElement.clientWidth,
-            height: editorRef.current.parentElement.clientHeight
-        }
-        const checkResizeInterval = window.setInterval(() => {
-            const width = editorRef.current.parentElement.clientWidth
-            const height = editorRef.current.parentElement.clientHeight
-            if (parentSize.width === width && parentSize.height === height) return
-            parentSize.width = width
-            parentSize.height = height
+
+        const size = { width: ref.current.clientWidth, height: ref.current.clientHeight }
+
+        const interval = window.setInterval(() => {
+            if (size.width === ref.current.clientWidth && size.height === ref.current.clientHeight) return
+            size.width = ref.current.clientWidth
+            size.height = ref.current.clientHeight
             editor.resize()
         }, 500)
-        return () => window.clearInterval(checkResizeInterval)
-    }, [editorRef])
 
-    React.useEffect(() => {
-        if (!editor || !props.onEditorUpdate) return
-        props.onEditorUpdate(editor)
-    }, [editor])
+        return () => window.clearInterval(interval)
+    }, [ref])
 
-    return <div ref={ref => (editorRef.current = ref)} className={classes.container} />
+    return <div ref={ref} className={classes.container} />
 }

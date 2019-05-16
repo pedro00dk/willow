@@ -22,7 +22,7 @@ import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ backgroundColor: colors.primaryBlue.light })),
+    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ background: colors.primaryBlue.light })),
     [protocol.Snapshot.Type.CALL]: cn(
         'position-absolute',
         css({ background: `${colors.primaryBlue.light} url(${callImg}) no-repeat right` })
@@ -31,7 +31,7 @@ const classes = {
         'position-absolute',
         css({ background: `${colors.primaryBlue.light} url(${returnImg}) no-repeat right` })
     ),
-    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ backgroundColor: colors.secondaryRed.light }))
+    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ background: colors.secondaryRed.light }))
 }
 
 const getSyntaxSupport = (language: string) =>
@@ -40,10 +40,7 @@ const getSyntaxSupport = (language: string) =>
 export function CodeEditor() {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
-    const { language, tracer } = useRedux(state => ({
-        language: state.language,
-        tracer: state.tracer
-    }))
+    const { language, tracer } = useRedux(state => ({ language: state.language, tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return
@@ -53,27 +50,26 @@ export function CodeEditor() {
         const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
 
         editor.on('change', onChange)
+
         return () => editor.off('change', onChange)
     }, [editor])
 
     React.useEffect(() => {
         if (!editor) return
         editor.session.setMode(getSyntaxSupport(language.languages[language.selected]))
-    }, [language])
+    }, [editor, language])
 
     React.useEffect(() => {
         if (!editor) return
-        const aceMarkers = editor.session.getMarkers(false) as EditorMarker[]
-        Object.values(aceMarkers)
-            .filter(marker => marker.id > 2)
-            .forEach(marker => editor.session.removeMarker(marker.id))
-
+        const markers = editor.session.getMarkers(false) as EditorMarker[]
+        Object.values(markers) //
+            .forEach(marker => (marker.id > 2 ? editor.session.removeMarker(marker.id) : undefined))
         if (!tracer.available) return
         const snapshot = tracer.steps[tracer.index].snapshot
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line
         editor.session.addMarker(new range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
-    }, [tracer])
+    }, [editor, tracer])
 
-    return <MemoTextEditor onEditorUpdate={setEditor} />
+    return <MemoTextEditor onEditor={setEditor} />
 }
