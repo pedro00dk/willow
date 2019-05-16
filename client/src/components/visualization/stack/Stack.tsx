@@ -7,22 +7,25 @@ const classes = {
     container: cn('d-flex flex-row align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100')
 }
 
-export function Stack() {
-    const stackRef = React.useRef<HTMLElement>()
+// tslint:disable-next-line:variable-name
+export const MemoStack = React.memo(Stack)
+function Stack() {
+    const ref = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
-    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
+    const { available, stack } = useRedux(state => ({ available: state.tracer.available, stack: state.tracer.stack }))
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         const interval = setInterval(() => {
-            if (!stackRef.current || stackRef.current.clientWidth === width) return
-            setWidth(stackRef.current.clientWidth)
+            if (!ref.current || ref.current.clientWidth === width) return
+            setWidth(ref.current.clientWidth)
         }, 500)
+
         return () => clearInterval(interval)
-    }, [width])
+    }, [ref, width])
 
     return (
-        <div ref={ref => (stackRef.current = ref)} className={classes.container}>
-            {tracer.available && <MemoScopeNode scope={tracer.stack.root} depth={0} width={width} />}
+        <div ref={ref} className={classes.container}>
+            {available && <MemoScopeNode scope={stack.root} depth={0} width={width} />}
         </div>
     )
 }
