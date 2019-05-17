@@ -13,7 +13,7 @@ import 'react-contexify/dist/ReactContexify.min.css'
 import { Link, Node, Position } from './Heap'
 
 const classes = {
-    container: cn('position-absolute', 'd-inline-flex', css({ transition: 'all 0.1s ease' })),
+    container: cn('position-absolute', 'd-inline-flex', css({ transition: 'left 0.1s, top 0.1s, transform 0.1s' })),
     nodeContainer: cn('d-inline-flex'),
     selected: cn(css({ background: colors.primaryBlue.lighter }))
 }
