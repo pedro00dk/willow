@@ -76,7 +76,7 @@ export function NodeWrapper(props: {
     updateNodes: React.Dispatch<{}>
 }) {
     const updateNode = React.useState<{}>()[1]
-    const [position, setPosition] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 })
+    const [position, setPosition] = React.useState<{ x: number; y: number }>(props.position.position)
     const dragAnchor = React.useRef({ x: 0, y: 0 })
 
     props.position.position.x = position.x = Math.min(Math.max(position.x, 10), props.rect.width - 10)
