@@ -108,6 +108,7 @@ function Nodes(props: {
                 return (
                     <NodeWrapper
                         key={obj.reference}
+                        tracer={props.tracer}
                         obj={obj}
                         rect={props.rect}
                         scale={props.scale}

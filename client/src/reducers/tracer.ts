@@ -34,13 +34,23 @@ type State = {
     readonly lines: { [line: number]: number[] }
     readonly stack: Stack
     readonly heaps: Heap[]
+    readonly groups: {
+        [reference: string]: { [reference: string]: { index?: number; ct: number; pr: number; ur: number } }
+    }
     readonly error: string
 }
 
 type Action =
     | {
           type: 'tracer/trace'
-          payload?: { steps: protocol.IStep[]; output: string[]; lines: State['lines']; stack: Stack; heaps: Heap[] }
+          payload?: {
+              steps: protocol.IStep[]
+              output: string[]
+              lines: State['lines']
+              stack: Stack
+              heaps: Heap[]
+              groups: State['groups']
+          }
           error?: string
       }
     | { type: 'tracer/setIndex'; payload: { index: number } }
@@ -54,6 +64,7 @@ const initialState: State = {
     lines: {},
     stack: undefined,
     heaps: [],
+    groups: {},
     error: undefined
 }
 
@@ -141,6 +152,54 @@ const buildHeaps = (steps: protocol.IStep[]) => {
     return heaps
 }
 
+const dfsGroup = (obj: Obj, parent: Obj, edges: { [reference: string]: { ct: number; pr: number; ur: number } }) => {
+    const objEdge = (edges[obj.reference] = { ct: 0, pr: 0, ur: 0 })
+    obj.members.forEach(member => {
+        const value = member.value
+        if (typeof value !== 'object' || value.languageType !== obj.languageType) return
+        const valueEdge = edges[value.reference]
+        objEdge.ct++
+        if (!valueEdge) dfsGroup(value, obj, edges)
+        else if (value === parent) valueEdge.pr++
+        else valueEdge.ur++
+    })
+    return edges
+}
+
+const findGroups = (steps: protocol.IStep[], heaps: Heap[]) => {
+    const groups: {
+        [reference: string]: { [reference: string]: { index?: number; ct: number; pr: number; ur: number } }
+    } = {}
+    heaps.forEach((heap, i) => {
+        const step = steps[i]
+        const snapshot = step.snapshot
+        if (!snapshot) return
+        const references = [
+            ...new Set(
+                snapshot.stack
+                    .flatMap(scope => scope.variables.filter(variable => variable.value.reference != undefined))
+                    .flatMap(variable => [
+                        variable.value.reference,
+                        ...heap[variable.value.reference].members
+                            .filter(member => typeof member.value === 'object')
+                            .map(member => (member.value as Obj).reference)
+                    ])
+            )
+        ]
+
+        references.forEach((reference, j) => {
+            if (!!groups[reference]) return
+            const group = dfsGroup(heap[reference], undefined, {})
+            Object.keys(group).forEach(key => {
+                groups[key] = group
+                groups[key][key].index = j
+            })
+        })
+    })
+
+    return groups
+}
+
 const trace = (): AsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/trace' })
     try {
@@ -182,7 +241,8 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
         })
         const stack = buildStack(steps)
         const heaps = buildHeaps(steps)
-        dispatch({ type: 'tracer/trace', payload: { steps, output, lines, stack, heaps } })
+        const groups = findGroups(steps, heaps)
+        dispatch({ type: 'tracer/trace', payload: { steps, output, lines, stack, heaps, groups } })
     } catch (error) {
         dispatch({ type: 'tracer/trace', error: !!error.response ? error.response.data : error.toString() })
     }

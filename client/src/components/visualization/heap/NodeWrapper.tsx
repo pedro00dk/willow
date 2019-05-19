@@ -3,6 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
+import { State } from '../../../reducers/Store'
 import { Obj } from '../../../reducers/tracer'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
@@ -62,6 +63,7 @@ const onDrag = (
 }
 
 export function NodeWrapper(props: {
+    tracer: State['tracer']
     obj: Obj
     rect: ClientRect | DOMRect
     scale: { value: number }
@@ -104,6 +106,7 @@ export function NodeWrapper(props: {
         >
             <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
                 <Node obj={props.obj} node={node} link={props.link} />
+                {props.tracer.groups[props.obj.reference][props.obj.reference].index}
             </MenuProvider>
             <NodeMenu
                 obj={props.obj}
