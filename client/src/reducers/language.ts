@@ -3,10 +3,10 @@ import { serverApi } from '../server'
 import { AsyncAction } from './Store'
 
 type State = {
-    readonly fetching: boolean
-    readonly languages: string[]
-    readonly selected: number
-    readonly error: string
+    fetching: boolean
+    languages: string[]
+    selected: number
+    error: string
 }
 type Action =
     | { type: 'language/fetch'; payload?: { languages: string[] }; error?: string }

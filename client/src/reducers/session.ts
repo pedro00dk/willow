@@ -3,9 +3,9 @@ import { serverApi } from '../server'
 import { AsyncAction } from './Store'
 
 type State = {
-    readonly session: string
-    readonly fetching: boolean
-    readonly error: string
+    session: string
+    fetching: boolean
+    error: string
 }
 
 type Action = { type: 'session/fetch'; payload?: { session: string }; error?: string }

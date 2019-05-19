@@ -4,13 +4,13 @@ import { serverApi } from '../server'
 import { AsyncAction } from './Store'
 
 export type Scope = {
-    readonly name: string
-    readonly steps: { from: number; to: number }
-    readonly children: Scope[]
+    name: string
+    steps: { from: number; to: number }
+    children: Scope[]
 }
 
 export type Stack = {
-    readonly root: Scope
+    root: Scope
 }
 
 export type Obj = {
@@ -25,19 +25,30 @@ export type Heap = {
     [reference: string]: Obj
 }
 
+export type Data = {
+    index: number
+    depth: number
+    members: Set<string>
+    hasParentEdge: boolean
+    hasNonParentFwdBackCrossCycleEdge: boolean
+    type: 'node' | 'list' | 'tree' | 'unknown'
+}
+
+export type Group = {
+    [reference: string]: Data
+}
+
 type State = {
-    readonly fetching: boolean
-    readonly available: boolean
-    readonly index: number
-    readonly steps: protocol.IStep[]
-    readonly output: string[]
-    readonly lines: { [line: number]: number[] }
-    readonly stack: Stack
-    readonly heaps: Heap[]
-    readonly groups: {
-        [reference: string]: { [reference: string]: { index?: number; ct: number; pr: number; ur: number } }
-    }
-    readonly error: string
+    fetching: boolean
+    available: boolean
+    index: number
+    steps: protocol.IStep[]
+    output: string[]
+    lines: { [line: number]: number[] }
+    stack: Stack
+    heaps: Heap[]
+    groups: Group[]
+    error: string
 }
 
 type Action =
@@ -49,7 +60,7 @@ type Action =
               lines: State['lines']
               stack: Stack
               heaps: Heap[]
-              groups: State['groups']
+              groups: Group[]
           }
           error?: string
       }
@@ -64,7 +75,7 @@ const initialState: State = {
     lines: {},
     stack: undefined,
     heaps: [],
-    groups: {},
+    groups: [],
     error: undefined
 }
 
@@ -152,31 +163,31 @@ const buildHeaps = (steps: protocol.IStep[]) => {
     return heaps
 }
 
-const dfsGroup = (obj: Obj, parent: Obj, edges: { [reference: string]: { ct: number; pr: number; ur: number } }) => {
-    const objEdge = (edges[obj.reference] = { ct: 0, pr: 0, ur: 0 })
-    obj.members.forEach(member => {
-        const value = member.value
-        if (typeof value !== 'object' || value.languageType !== obj.languageType) return
-        const valueEdge = edges[value.reference]
-        objEdge.ct++
-        if (!valueEdge) dfsGroup(value, obj, edges)
-        else if (value === parent) valueEdge.pr++
-        else valueEdge.ur++
-    })
-    return edges
+const dfsGroup = (obj: Obj, parent: Obj, localDepth: number, data: Data) => {
+    data.members.add(obj.reference)
+    if (localDepth > data.depth) data.depth = localDepth
+    obj.members
+        .filter(member => typeof member.value === 'object' && member.value.languageType === obj.languageType)
+        .map(member => {
+            const value = member.value as Obj
+            if (data.members.has(value.reference))
+                if (value === parent) data.hasParentEdge = true
+                else data.hasNonParentFwdBackCrossCycleEdge = true
+            else dfsGroup(value, obj, localDepth + 1, data)
+        })
+    return data
 }
 
-const findGroups = (steps: protocol.IStep[], heaps: Heap[]) => {
-    const groups: {
-        [reference: string]: { [reference: string]: { index?: number; ct: number; pr: number; ur: number } }
-    } = {}
-    heaps.forEach((heap, i) => {
-        const step = steps[i]
-        const snapshot = step.snapshot
-        if (!snapshot) return
+const buildGroups = (steps: protocol.IStep[], heaps: Heap[]) => {
+    const groups: Group[] = []
+    steps.forEach((step, i) => {
+        if (!step.snapshot) return groups.push(!!groups[i - 1] ? groups[i - 1] : {})
+        const group: Group = {}
+        groups.push(group)
+        const heap = heaps[i]
         const references = [
             ...new Set(
-                snapshot.stack
+                step.snapshot.stack
                     .flatMap(scope => scope.variables.filter(variable => variable.value.reference != undefined))
                     .flatMap(variable => [
                         variable.value.reference,
@@ -186,17 +197,27 @@ const findGroups = (steps: protocol.IStep[], heaps: Heap[]) => {
                     ])
             )
         ]
-
-        references.forEach((reference, j) => {
-            if (!!groups[reference]) return
-            const group = dfsGroup(heap[reference], undefined, {})
-            Object.keys(group).forEach(key => {
-                groups[key] = group
-                groups[key][key].index = j
+        references.forEach((reference, i) => {
+            if (!!group[reference]) return
+            const data = dfsGroup(heap[reference], undefined, 1, {
+                index: i,
+                members: new Set(),
+                depth: 0,
+                hasParentEdge: false,
+                hasNonParentFwdBackCrossCycleEdge: false,
+                type: undefined
             })
+            data.type =
+                data.members.size === 1
+                    ? 'node'
+                    : data.members.size <= data.depth && !data.hasNonParentFwdBackCrossCycleEdge
+                    ? 'list'
+                    : !data.hasNonParentFwdBackCrossCycleEdge
+                    ? 'tree'
+                    : 'unknown'
+            data.members.forEach(reference => (group[reference] = data))
         })
     })
-
     return groups
 }
 
@@ -241,7 +262,7 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
         })
         const stack = buildStack(steps)
         const heaps = buildHeaps(steps)
-        const groups = findGroups(steps, heaps)
+        const groups = buildGroups(steps, heaps)
         dispatch({ type: 'tracer/trace', payload: { steps, output, lines, stack, heaps, groups } })
     } catch (error) {
         dispatch({ type: 'tracer/trace', error: !!error.response ? error.response.data : error.toString() })

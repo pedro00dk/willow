@@ -106,7 +106,8 @@ export function NodeWrapper(props: {
         >
             <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
                 <Node obj={props.obj} node={node} link={props.link} />
-                {props.tracer.groups[props.obj.reference][props.obj.reference].index}
+                -i: {props.tracer.groups[props.tracer.index][props.obj.reference].index}
+                - {props.tracer.groups[props.tracer.index][props.obj.reference].type}
             </MenuProvider>
             <NodeMenu
                 obj={props.obj}
