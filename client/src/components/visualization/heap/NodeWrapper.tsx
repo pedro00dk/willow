@@ -40,6 +40,46 @@ const getLinked = (current: string, links: { [reference: string]: Link }, pool: 
     if (depth === 0 || pool.has(current)) return
     pool.add(current)
     links[current].forEach(({ target }) => getLinked(target, links, pool, depth - 1))
+    return pool
+}
+
+const onReposition = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    tracer: State['tracer'],
+    root: string,
+    rect: ClientRect | DOMRect,
+    positions: { [reference: string]: Position },
+    links: { [reference: string]: Link }
+) => {
+    const data = tracer.groups[tracer.index][root]
+    if (!data) return
+
+    const anchor = positions[root].position
+    const space = rect.width - positions[root].position.x
+    const increment = space / data.depth
+    let distance = 0
+    positions[data.base].setPosition({ ...anchor, x: anchor.x + increment * distance })
+    const moved = new Set([data.base])
+    const previousLevel = new Set([data.base])
+    distance++
+    while (previousLevel.size > 0) {
+        const pool = [...previousLevel]
+            .map(reference => {
+                const x = getLinked(reference, links, new Set(), 2)
+                return x
+            })
+            .reduce((acc, n) => {
+                n.forEach(reference => acc.add(reference))
+                return acc
+            }, new Set<string>())
+        pool.forEach(reference => (!data.members.has(reference) ? pool.delete(reference) : undefined))
+        moved.forEach(reference => pool.delete(reference))
+        pool.forEach(reference => moved.add(reference))
+        pool.forEach(reference => positions[reference].setPosition({ ...anchor, x: anchor.x + increment * distance }))
+        previousLevel.clear()
+        pool.forEach(reference => previousLevel.add(reference))
+        distance++
+    }
 }
 
 const onDrag = (
@@ -51,9 +91,8 @@ const onDrag = (
     links: { [reference: string]: Link }
 ) => {
     if (event.clientX === 0 && event.clientY === 0) return
-    const draggedPool = new Set<string>()
-    getLinked(root, links, draggedPool, !event.ctrlKey ? 1 : !event.shiftKey ? 2 : Infinity)
-    draggedPool.forEach(reference => {
+    const pool = getLinked(root, links, new Set(), !event.ctrlKey ? 1 : !event.shiftKey ? 2 : Infinity)
+    pool.forEach(reference => {
         const position = positions[reference]
         position.setPosition({
             x: Math.max(10, Math.min(position.position.x + (event.clientX - anchor.x), rect.width - 10)),
@@ -97,6 +136,9 @@ export function NodeWrapper(props: {
                 transformOrigin: '0 0 0',
                 transform: `scale(${props.scale.value}) translate(-50%, -50%)`
             }}
+            onDoubleClick={event =>
+                onReposition(event, props.tracer, props.obj.reference, props.rect, props.positions, props.links)
+            }
             draggable
             onDragStart={event => (dragAnchor.current = { x: event.clientX, y: event.clientY })}
             onDrag={event => {
@@ -106,8 +148,8 @@ export function NodeWrapper(props: {
         >
             <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
                 <Node obj={props.obj} node={node} link={props.link} />
-                -i: {props.tracer.groups[props.tracer.index][props.obj.reference].index}
-                - {props.tracer.groups[props.tracer.index][props.obj.reference].type}
+                -i: {props.tracer.groups[props.tracer.index][props.obj.reference].index}-{' '}
+                {props.tracer.groups[props.tracer.index][props.obj.reference].type}
             </MenuProvider>
             <NodeMenu
                 obj={props.obj}
