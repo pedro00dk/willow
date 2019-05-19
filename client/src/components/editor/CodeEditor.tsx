@@ -69,6 +69,7 @@ export function CodeEditor() {
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line
         editor.session.addMarker(new range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
+        editor.scrollToLine(line, true, true, undefined)
     }, [editor, tracer])
 
     return <MemoTextEditor onEditor={setEditor} />
