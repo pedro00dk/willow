@@ -26,6 +26,7 @@ export type Heap = {
 }
 
 export type Data = {
+    base: string
     index: number
     depth: number
     members: Set<string>
@@ -200,6 +201,7 @@ const buildGroups = (steps: protocol.IStep[], heaps: Heap[]) => {
         references.forEach((reference, i) => {
             if (!!group[reference]) return
             const data = dfsGroup(heap[reference], undefined, 1, {
+                base: reference,
                 index: i,
                 members: new Set(),
                 depth: 0,
