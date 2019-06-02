@@ -25,7 +25,7 @@ def create_globals(main: str, builtins: set, modules: set, full_halt: bool = Fal
     def halt_imp_function(module, global_scope, local_scope, attributes, level):
         if module not in modules:
             raise ModuleNotFoundError(f'{repr(module)} halted')
-        imp_function(module, global_scope, local_scope, attributes, level)
+        return imp_function(module, global_scope, local_scope, attributes, level)
 
     generated_globals[bts][imp] = halt_imp_function
     return generated_globals
