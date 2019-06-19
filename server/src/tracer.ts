@@ -28,7 +28,7 @@ export class Tracer {
             .pipe(rxOps.takeUntil(stop$))
             .pipe(
                 rxOps.map(buffer => new protobuf.Reader(buffer)),
-                rxOps.scan<protobuf.Reader>(
+                rxOps.scan<protobuf.Reader, protobuf.Reader[]>(
                     (acc, reader) => {
                         if (!acc[acc.length - 1]) {
                             const messageLength = reader.fixed32()
@@ -45,7 +45,7 @@ export class Tracer {
                                 : [...acc, reader]
                         }
                     },
-                    [undefined] as protobuf.Reader[]
+                    [undefined]
                 ),
                 rxOps.filter(buffers => !buffers[buffers.length - 1]),
                 rxOps.map(
