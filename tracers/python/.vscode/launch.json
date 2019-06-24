@@ -11,7 +11,7 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/",
             "program": "${workspaceFolder}/src/main.py",
-            "args": ["--in-mode", "text", "--out-mode", "text", "--test"]
+            "args": ["--pretty"]
         }
     ]
 }

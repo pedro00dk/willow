@@ -26,7 +26,10 @@ class Inspector:
     """
 
     def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
-        snapshot = {'type': None, 'finish': None, 'exception': None, 'stack': [], 'heap': {}}
+        snapshot = {}
+
+        snapshot['type'] = event
+
         current_frame = frame
         frames = []
         while current_frame != exec_call_frame:
@@ -37,6 +40,7 @@ class Inspector:
         frames = [frame for frame in frames if frame.f_code.co_filename == file]
         frames.reverse()
         snapshot['stack'] = [{'line': frame.f_lineno - 1, 'name': frame.f_code.co_name} for frame in frames]
+
         snapshot['heap'] = {}
         module = frames[-1].f_globals['__name__']
         classes = set()
@@ -46,10 +50,6 @@ class Inspector:
                 {'name': name, 'value': self._inspect_object(snapshot, variables[name], classes, module)}
                 for name, value in variables.items() if not name.startswith('_')
             ]
-
-        snapshot['type'] = event
-        snapshot['finish'] = event == 'return' and len(snapshot['stack']) == 1
-        snapshot['exception'] = None if event != 'exception' else exceptionMessage(args[1], args[2])
 
         return snapshot
 
