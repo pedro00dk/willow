@@ -34,8 +34,6 @@
                     "type": "string",
                     "enum": ["line", "call", "return", "exception"]
                 },
-                "finish": { "type": "boolean" },
-                "exception": { "$ref": "#/definitions/exception" },
                 "stack": { "type": "array", "items": { "$ref": "#/definitions/scope" } },
                 "heap": { "type": "object", "additionalProperties": { "$ref": "#/definitions/obj" } }
             },
