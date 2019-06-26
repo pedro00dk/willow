@@ -2,7 +2,6 @@ import * as cors from 'cors'
 import * as express from 'express'
 import * as session from 'express-session'
 import * as log from 'npmlog'
-import * as protocol from './protobuf/protocol'
 import { Tracer } from './tracer'
 
 /**
@@ -42,26 +41,25 @@ export class Server {
             res.send({ session: req.session.id })
         })
 
-        const tracersRouter = express.Router()
-        tracersRouter.post('/languages', (req, res) => {
+        this.server.get('/languages', (req, res) => {
             log.http(Server.name, req.path)
             res.send(Object.keys(this.tracers))
         })
-        tracersRouter.post('/trace', async (req, res) => {
+
+        this.server.post('/trace', async (req, res) => {
+            log.http(Server.name, req.path)
             const language = req.body['language'] as string
             const source = req.body['source'] as string
             const input = req.body['input'] as string
             const steps = this.steps
-            log.http(Server.name, req.path)
+            
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
-                const result = await new Tracer(
-                    this.tracers[language],
-                    this.shell,
-                    protocol.Trace.create({ source, input, steps }),
+                const result = await new Tracer(this.tracers[language], this.shell).run(
+                    { source, input, steps },
                     this.timeout
-                ).run()
-                res.send(protocol.Result.toObject(result, { defaults: true, json: true, oneofs: true }))
+                )
+                res.send(result)
                 log.info(Server.name, req.path, 'ok')
             } catch (error) {
                 res.status(400)
@@ -69,7 +67,6 @@ export class Server {
                 log.info(Server.name, req.path, 'error', error.message)
             }
         })
-        this.server.use('/tracer', tracersRouter)
     }
 
     listen() {

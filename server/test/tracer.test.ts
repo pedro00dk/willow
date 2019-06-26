@@ -1,26 +1,31 @@
-import * as protocol from '../src/protobuf/protocol'
 import { Tracer } from '../src/tracer'
 
-const tracers = process.argv
-    .map((arg, i) => [arg, i] as [string, number])
-    .filter(([arg, i]) => arg === '--tracer')
-    .map(([arg, i]) => ({
-        language: process.argv[i + 1],
-        command: process.argv[i + 2],
-        working: protocol.Trace.create({ source: process.argv[i + 3], input: '', steps: 1000 }),
-        broken: protocol.Trace.create({ source: process.argv[i + 4], input: '', steps: 1000 })
+const tracers = Object.entries(process.env)
+    .filter(([key]) => key.startsWith('TRACER_'))
+    .map(([key, data]) => [key.substring('TRACER_'.length), data.split('#')] as const)
+    .map(([key, data]) => ({
+        language: key.toLowerCase(),
+        command: data[0],
+        working: { source: data[1], input: '', steps: 1000 },
+        broken: { source: data[2], input: '', steps: 1000 }
     }))
 
 Object.values(tracers).forEach(({ language, command, working, broken }) => {
     describe(`tracer -- ${language}`, () => {
-        test('run working', () => {
-            const tracer = new Tracer(command, 'sh', working, 5)
-            expect(tracer.run()).resolves.toBeDefined()
+        test('working code', async () => {
+            await expect(new Tracer(command, 'sh').run(working, 5000)).resolves.toBeDefined()
         })
 
-        test('run broken', async () => {
-            const tracer = new Tracer(command, 'sh', broken, 5)
-            await expect(tracer.run()).resolves.toBeDefined()
+        test('broken code', async () => {
+            await expect(new Tracer(command, 'sh').run(broken, 5000)).resolves.toBeDefined()
+        })
+
+        test('max steps', async () => {
+            await expect(new Tracer(command, 'sh').run({ ...working, steps: 0 }, 5000)).resolves.toBeDefined()
+        })
+
+        test('elapsed timeout', async () => {
+            await expect(new Tracer(command, 'sh').run(working, 0)).resolves.toBeDefined()
         })
     })
 })

@@ -10,9 +10,9 @@ function main() {
         .option('clients', { default: '*', description: 'Client origin (enable CORS)' })
         .option('port', { default: 8000, description: 'Set the server port' })
         .option('secret', { default: 'secret', description: 'The secret for client sessions' })
-        .option('shell', { default: 'sh', description: 'Shell command (or path) to run tracers commands' })
+        .option('shell', { default: 'sh', description: 'Shell path (or command) to run a tracer command' })
         .option('steps', { default: 1000, description: 'Maximum number of a program being traced' })
-        .option('timeout', { default: 8, description: 'Maximum tracer run time (seconds)' })
+        .option('timeout', { default: 8000, description: 'Maximum tracer run time (milliseconds)' })
         .option('tracer', { array: true, description: 'Tracer <language> <command>', nargs: 2, string: true })
 
     const arguments_ = parser.argv
