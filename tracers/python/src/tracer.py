@@ -1,6 +1,7 @@
 import sys
 import types
 import scope
+import traceback
 from inspector import Inspector
 from hooks import HookedInput, HookedPrint
 
