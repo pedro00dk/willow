@@ -1,44 +1,88 @@
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
-import protobuf.SnapshotOuterClass;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+class InspectionResult {
+    JsonObject snapshot;
+    JsonObject threw;
+
+    InspectionResult(JsonObject snapshot) {
+        this(snapshot, null);
+    }
+
+    InspectionResult(JsonObject snapshot, JsonObject threw) {
+        this.snapshot = snapshot;
+        this.threw = threw;
+    }
+}
 
 /**
  * Inspects the received event, building a snapshot from it.
  */
-public final class Inspector {
+class Inspector {
 
-    public SnapshotOuterClass.Snapshot.Builder inspect(Event event, SnapshotOuterClass.Snapshot previousSnapshot) throws IncompatibleThreadStateException {
-        SnapshotOuterClass.Snapshot.Builder snapshotBuilder = SnapshotOuterClass.Snapshot.newBuilder();
-        if (event instanceof MethodEntryEvent)
-            snapshotBuilder.setType(SnapshotOuterClass.Snapshot.Type.CALL);
-        else if (event instanceof MethodExitEvent || event instanceof ThreadDeathEvent)
-            snapshotBuilder.setType(SnapshotOuterClass.Snapshot.Type.RETURN);
-        else if (event instanceof ExceptionEvent)
-            snapshotBuilder.setType(SnapshotOuterClass.Snapshot.Type.EXCEPTION);
-        else
-            snapshotBuilder.setType(SnapshotOuterClass.Snapshot.Type.LINE);
+    InspectionResult inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
+        var snapshot = new JsonObject();
+        snapshot.addProperty(
+                "type",
+                event instanceof MethodEntryEvent
+                        ? "call"
+                        : event instanceof MethodExitEvent || event instanceof ThreadDeathEvent
+                        ? "return"
+                        : event instanceof ExceptionEvent
+                        ? "exception"
+                        : "line"
 
-        if (event instanceof ThreadDeathEvent && previousSnapshot.hasException())
-            return previousSnapshot.toBuilder()
-                    .setType(SnapshotOuterClass.Snapshot.Type.RETURN)
-                    .setFinish(true)
-                    .clearException();
+        );
+
+        if (event instanceof ThreadDeathEvent && previousSnapshot.get("type").getAsString().equals("exception")) {
+            snapshot.add("stack", previousSnapshot.get("stack"));
+            snapshot.add("heap", previousSnapshot.get("stack"));
+
+            var exceptionEvent = (ExceptionEvent) previousEvent;
+            var exceptionMessage = ((StringReference) exceptionEvent
+                    .exception()
+                    .getValue(exceptionEvent.exception().referenceType().fieldByName("detailMessage"))
+            ).value();
+
+            var threw = new JsonObject();
+            threw.add("exception", DumpException.dump(exceptionEvent.exception().referenceType().name()));
+
+            return new InspectionResult(snapshot, threw);
+        }
 
         // Get frames may fail when debugging this debugger
         // frames() function returns an immutable list with the scopes in a reversed order
         var frames = new ArrayList<>(((LocatableEvent) event).thread().frames());
         Collections.reverse(frames);
-        var scopesBuilders = frames.stream()
-                .map(StackFrame::location)
-                .map(l -> snapshotBuilder.addStackBuilder().setLine(l.lineNumber() - 1).setName(l.method().name()))
-                .collect(Collectors.toList());
+        snapshot.add(
+                "stack",
+                frames.stream()
+                        .map(StackFrame::location)
+                        .map(l -> {
+                            var scope = new JsonObject();
+                            scope.addProperty("line", l.lineNumber() - 1);
+                            scope.addProperty("name", l.method().name());
+                            return scope;
+                        })
+                        .collect(
+                                () -> new JsonArray(frames.size()),
+                                JsonArray::add,
+                                (scope0, scope1) -> {
+                                    throw new RuntimeException("parallel stream not allowed");
+                                }
+                        )
+        );
 
+        snapshot.add("heap", new JsonObject());
         var threadReference = frames.get(0).thread();
-        var scopeIndex = new AtomicInteger(0);
+        int[] scopeIndex = {0};
         frames.stream()
                 .map(f -> {
                     try {
@@ -51,238 +95,278 @@ public final class Inspector {
                 // because of this, all variables have to be collected before any evaluation
                 .collect(Collectors.toList())
                 .forEach(e -> {
-                    var visibleVariables = e.getKey();
-                    var variablesValues = e.getValue();
-                    var scopeBuilder = snapshotBuilder.getStackBuilder(scopeIndex.getAndIncrement());
-                    visibleVariables
-                            .forEach(variable -> scopeBuilder.addVariablesBuilder()
-                                    .setName(variable.name())
-                                    .setValue(inspectObject(
-                                            snapshotBuilder, variablesValues.get(variable), threadReference)
-                                    ));
+                    var localVariables = e.getKey();
+                    var values = e.getValue();
+                    var scope = snapshot.get("stack").getAsJsonArray().get(scopeIndex[0]++).getAsJsonObject();
+                    scope.add(
+                            "variables",
+                            localVariables.stream()
+                                    .map(localVariable -> {
+                                        var variable = new JsonObject();
+                                        variable.addProperty("name", localVariable.name());
+                                        variable.add("value", inspectValue(snapshot, values.get(localVariable), threadReference));
+                                        return variable;
+                                    })
+                                    .collect(
+                                            () -> new JsonArray(localVariables.size()),
+                                            JsonArray::add,
+                                            (variable0, variable1) -> {
+                                                throw new RuntimeException("parallel stream not allowed");
+                                            }
+                                    )
+                    );
                 });
 
-        if (snapshotBuilder.getType() == SnapshotOuterClass.Snapshot.Type.EXCEPTION && event instanceof ExceptionEvent) {
-            var exceptionEvent = (ExceptionEvent) event;
-            var exceptionMessage = ((StringReference) exceptionEvent.exception().getValue(
-                    exceptionEvent.exception().referenceType().fieldByName("detailMessage")
-            )).value();
-            snapshotBuilder.setException(Util.dump(
-                    exceptionEvent.exception().referenceType().name(),
-                    List.of(exceptionMessage),
-                    exceptionMessage
-            ));
-        }
-        snapshotBuilder.setFinish(
-                snapshotBuilder.getType() == SnapshotOuterClass.Snapshot.Type.RETURN &&
-                        snapshotBuilder.getStackBuilderList().size() == 1
-        );
-        return snapshotBuilder;
+        return new InspectionResult(snapshot);
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectObject(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, Value jdiValue, ThreadReference threadReference) {
-        if (jdiValue == null) return SnapshotOuterClass.Value.newBuilder().setString("null");
-        var value = inspectPrimitive(jdiValue);
-        if (value != null) return value;
-        value = inspectString(jdiValue);
-        if (value != null) return value;
-
-        if (!(jdiValue instanceof ObjectReference)) return SnapshotOuterClass.Value.newBuilder().setString("unknown");
-        var jdiObject = (ObjectReference) jdiValue;
-        value = inspectBoxed(jdiObject);
-        if (value != null) return value;
-        value = inspectArray(snapshotBuilder, jdiObject, threadReference);
-        if (value != null) return value;
-        value = inspectListOrSet(snapshotBuilder, jdiObject, threadReference);
-        if (value != null) return value;
-        value = inspectMap(snapshotBuilder, jdiObject, threadReference);
-        if (value != null) return value;
-        value = inspectUuserObject(snapshotBuilder, jdiObject, threadReference);
-        if (value != null) return value;
-
-        return SnapshotOuterClass.Value.newBuilder().setString("type " + jdiObject.referenceType().name());
+    private JsonElement inspectValue(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
+        JsonElement value;
+        return jdiValue == null
+                ? new JsonPrimitive("null")
+                : (value = inspectPrimitive(jdiValue)) != null
+                ? value
+                : (value = inspectObject(snapshot, jdiValue, threadReference)) != null
+                ? value
+                : new JsonPrimitive("unknown");
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectPrimitive(Value jdiValue) {
-        if (jdiValue instanceof PrimitiveValue) {
-            var valueBuilder = SnapshotOuterClass.Value.newBuilder();
-            if (jdiValue instanceof BooleanValue)
-                valueBuilder.setString(Boolean.toString(((BooleanValue) jdiValue).value()));
-            else if (jdiValue instanceof CharValue)
-                valueBuilder.setString(Character.toString(((CharValue) jdiValue).value()));
-            else if (jdiValue instanceof ByteValue) valueBuilder.setNumber(((ByteValue) jdiValue).value());
-            else if (jdiValue instanceof ShortValue) valueBuilder.setNumber(((ShortValue) jdiValue).value());
-            else if (jdiValue instanceof IntegerValue) valueBuilder.setNumber(((IntegerValue) jdiValue).value());
-            else if (jdiValue instanceof FloatValue) valueBuilder.setNumber(((FloatValue) jdiValue).value());
-            else if (jdiValue instanceof DoubleValue) valueBuilder.setNumber(((DoubleValue) jdiValue).value());
-            else if (jdiValue instanceof LongValue) {
-                var value = ((LongValue) jdiValue).value();
-                if (Math.abs(value)< Math.pow(2, 53)) valueBuilder.setNumber(value);
-                else valueBuilder.setString(Long.toString(value));
-            } else return null;
-            return valueBuilder;
-        }
-        return null;
+    private JsonElement inspectPrimitive(Value jdiValue) {
+        return jdiValue instanceof PrimitiveValue ?
+                jdiValue instanceof BooleanValue
+                        ? new JsonPrimitive(Boolean.toString(((BooleanValue) jdiValue).value()))
+                        : jdiValue instanceof CharValue
+                        ? new JsonPrimitive(Character.toString(((CharValue) jdiValue).value()))
+                        : jdiValue instanceof ByteValue
+                        ? new JsonPrimitive(((ByteValue) jdiValue).value())
+                        : jdiValue instanceof ShortValue
+                        ? new JsonPrimitive(((ShortValue) jdiValue).value())
+                        : jdiValue instanceof IntegerValue
+                        ? new JsonPrimitive(((IntegerValue) jdiValue).value())
+                        : jdiValue instanceof FloatValue
+                        ? new JsonPrimitive(((FloatValue) jdiValue).value())
+                        : jdiValue instanceof DoubleValue
+                        ? new JsonPrimitive(((DoubleValue) jdiValue).value())
+                        : jdiValue instanceof LongValue
+                        ? Math.abs(((LongValue) jdiValue).value()) < Math.pow(2, 53)
+                        ? new JsonPrimitive(((LongValue) jdiValue).value())
+                        : new JsonPrimitive(Long.toString(((LongValue) jdiValue).value()))
+                        : null
+                : null;
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectString(Value jdiValue) {
-        if (!(jdiValue instanceof StringReference)) return null;
-        return SnapshotOuterClass.Value.newBuilder()
-                .setString(((StringReference) jdiValue).value());
+    private JsonElement inspectObject(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
+        JsonElement value;
+        if (!(jdiValue instanceof ObjectReference)) return null;
+
+        var jdiObjRef = (ObjectReference) jdiValue;
+        return (value = inspectString(jdiObjRef)) != null
+                ? value
+                : (value = inspectBoxed(jdiObjRef)) != null
+                ? value
+                : (value = inspectArray(snapshot, jdiObjRef, threadReference)) != null
+                ? value
+                : (value = inspectCollection(snapshot, jdiObjRef, threadReference)) != null
+                ? value
+                : (value = inspectMap(snapshot, jdiObjRef, threadReference)) != null
+                ? value
+                : (value = inspectUserObject(snapshot, jdiObjRef, threadReference)) != null
+                ? value
+                : new JsonPrimitive("type " + jdiObjRef.referenceType().name());
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectBoxed(ObjectReference jdiObject) {
+    private JsonElement inspectString(ObjectReference jdiObjRef) {
+        return jdiObjRef instanceof StringReference ? new JsonPrimitive(((StringReference) jdiObjRef).value()) : null;
+    }
+
+    private JsonElement inspectBoxed(ObjectReference jdiObjRef) {
         try {
-            var objClass = Class.forName(jdiObject.referenceType().name());
-            if (Boolean.class.isAssignableFrom(objClass) || Character.class.isAssignableFrom(objClass) ||
-                    Byte.class.isAssignableFrom(objClass) || Short.class.isAssignableFrom(objClass) ||
-                    Integer.class.isAssignableFrom(objClass) || Long.class.isAssignableFrom(objClass) ||
-                    Float.class.isAssignableFrom(objClass) || Double.class.isAssignableFrom(objClass)) {
-                var primitiveValue = jdiObject.getValue(jdiObject.referenceType().fieldByName("value"));
-                return inspectPrimitive(primitiveValue);
-            }
+            var jdiObjRefClass = Class.forName(jdiObjRef.referenceType().name());
+            return Boolean.class.isAssignableFrom(jdiObjRefClass) || Character.class.isAssignableFrom(jdiObjRefClass) ||
+                    Byte.class.isAssignableFrom(jdiObjRefClass) || Short.class.isAssignableFrom(jdiObjRefClass) ||
+                    Integer.class.isAssignableFrom(jdiObjRefClass) || Long.class.isAssignableFrom(jdiObjRefClass) ||
+                    Float.class.isAssignableFrom(jdiObjRefClass) || Double.class.isAssignableFrom(jdiObjRefClass)
+                    ? inspectPrimitive(jdiObjRef.getValue(jdiObjRef.referenceType().fieldByName("value")))
+                    : null;
         } catch (ClassNotFoundException e) {
             // array types always throw this exception
         }
         return null;
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectIterable(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, ArrayReference arrayRef, String reference, SnapshotOuterClass.Obj.Type type, String languageType, boolean userDefined, ThreadReference threadReference) {
-        var memberIndex = new AtomicInteger();
+    private JsonElement inspectIterable(JsonObject snapshot, ArrayReference jdiArrRef, String reference, String type, String languageType, ThreadReference threadReference) {
+        var obj = new JsonObject();
         // add reference to heap graph (it has to be added before other objects inspections)
-        snapshotBuilder.putHeap(reference, SnapshotOuterClass.Obj.getDefaultInstance());
-        var objBuilder = SnapshotOuterClass.Obj.newBuilder();
-        objBuilder.setType(type).setLanguageType(languageType).setUserDefined(userDefined);
-        arrayRef.getValues()
-                .forEach(v -> {
-                    var memberBuilder = objBuilder.addMembersBuilder();
-                    memberBuilder.getKeyBuilder().setNumber(memberIndex.getAndIncrement());
-                    memberBuilder.setValue(inspectObject(snapshotBuilder, v, threadReference).build());
-                });
-        snapshotBuilder.putHeap(reference, objBuilder.build());
-        return SnapshotOuterClass.Value.newBuilder().setReference(reference);
-    }
-
-    private static SnapshotOuterClass.Value.Builder inspectArray(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, ObjectReference jdiObject, ThreadReference threadReference) {
-        if (!(jdiObject instanceof ArrayReference)) return null;
-        return inspectIterable(
-                snapshotBuilder,
-                (ArrayReference) jdiObject,
-                Long.toString(jdiObject.uniqueID()),
-                SnapshotOuterClass.Obj.Type.ARRAY,
-                jdiObject.referenceType().name(),
-                false,
-                threadReference
+        snapshot.get("heap").getAsJsonObject().add(reference, obj);
+        obj.addProperty("type", type);
+        obj.addProperty("languageType", languageType);
+        obj.addProperty("userDefined", false);
+        int[] memberIndex = {0};
+        obj.add(
+                "members",
+                jdiArrRef.getValues().stream()
+                        .map(jdiValue -> {
+                            var member = new JsonObject();
+                            member.addProperty("key", memberIndex[0]++);
+                            member.add("value", inspectValue(snapshot, jdiValue, threadReference));
+                            return member;
+                        })
+                        .collect(
+                                () -> new JsonArray(jdiArrRef.length()),
+                                JsonArray::add,
+                                (member0, member1) -> {
+                                    throw new RuntimeException("parallel stream not allowed");
+                                }
+                        )
         );
+        var referenceValue = new JsonArray(1);
+        referenceValue.add(reference);
+        return referenceValue;
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectListOrSet(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, ObjectReference jdiObject, ThreadReference threadReference) {
+    private JsonElement inspectArray(JsonObject snapshot, ObjectReference jdiObjRef, ThreadReference threadReference) {
+        return jdiObjRef instanceof ArrayReference
+                ? inspectIterable(
+                snapshot,
+                (ArrayReference) jdiObjRef,
+                Long.toString(jdiObjRef.uniqueID()),
+                "array",
+                jdiObjRef.referenceType().name(),
+                threadReference
+        )
+                : null;
+    }
+
+    private JsonElement inspectCollection(JsonObject snapshot, ObjectReference jdiObjRef, ThreadReference threadReference) {
         try {
-            var objClass = Class.forName(jdiObject.referenceType().name());
-            if (!List.class.isAssignableFrom(objClass) && !Set.class.isAssignableFrom(objClass)) return null;
-            var arrayRef = (ArrayReference) jdiObject.invokeMethod(
-                    threadReference,
-                    jdiObject.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
-                    List.of(),
-                    ObjectReference.INVOKE_SINGLE_THREADED
-            );
-            return inspectIterable(
-                    snapshotBuilder,
-                    arrayRef,
-                    Long.toString(jdiObject.uniqueID()),
-                    LinkedList.class.isAssignableFrom(objClass) ? SnapshotOuterClass.Obj.Type.LLIST // Only linkedList implementation and subclasses are in fact a linked list
-                            : List.class.isAssignableFrom(objClass) ? SnapshotOuterClass.Obj.Type.ALIST
-                            : SnapshotOuterClass.Obj.Type.SET,
-                    jdiObject.referenceType().name(),
-                    false,
+            var jdiObjRefClass = Class.forName(jdiObjRef.referenceType().name());
+            return Collection.class.isAssignableFrom(jdiObjRefClass)
+                    ? inspectIterable(
+                    snapshot,
+                    (ArrayReference) jdiObjRef.invokeMethod(
+                            threadReference,
+                            jdiObjRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
+                            List.of(),
+                            ObjectReference.INVOKE_SINGLE_THREADED
+                    ),
+                    Long.toString(jdiObjRef.uniqueID()),
+                    LinkedList.class.isAssignableFrom(jdiObjRefClass)
+                            ? "llist"
+                            : List.class.isAssignableFrom(jdiObjRefClass)
+                            ? "alist"
+                            : "set",
+                    jdiObjRef.referenceType().name(),
                     threadReference
-            );
+            )
+                    : null;
         } catch (ClassNotFoundException | InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
             // ignore errors
         }
         return null;
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectMap(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, ObjectReference jdiObject, ThreadReference threadReference) {
+    private JsonElement inspectMap(JsonObject snapshot, ObjectReference jdiObjRef, ThreadReference threadReference) {
         try {
-            var objClass = Class.forName(jdiObject.referenceType().name());
-            if (!(Map.class.isAssignableFrom(objClass))) return null;
-            var setRef = (ObjectReference) jdiObject.invokeMethod(
-                    threadReference,
-                    jdiObject.referenceType().methodsByName("entrySet").get(0),
-                    List.of(),
-                    ObjectReference.INVOKE_SINGLE_THREADED
-            );
-            var arrayRef = (ArrayReference) setRef.invokeMethod(
-                    threadReference,
-                    setRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
-                    List.of(),
-                    ObjectReference.INVOKE_SINGLE_THREADED
-            );
-            var reference = Long.toString(jdiObject.uniqueID());
-            // add reference to heap graph (it has to be added before other objects inspections)
-            snapshotBuilder.putHeap(reference, SnapshotOuterClass.Obj.getDefaultInstance());
-            var objBuilder = SnapshotOuterClass.Obj.newBuilder();
-            objBuilder
-                    .setType(SnapshotOuterClass.Obj.Type.HMAP)
-                    .setLanguageType(jdiObject.referenceType().name())
-                    .setUserDefined(false);
-            arrayRef.getValues().stream()
-                    .map(v -> (ObjectReference) v)
-                    .forEach(v -> {
-                        var memberBuilder = objBuilder.addMembersBuilder();
-                        try {
-                            memberBuilder.setKey(inspectObject(
-                                    snapshotBuilder,
-                                    v.invokeMethod(
-                                            threadReference,
-                                            v.referenceType().methodsByName("getKey").get(0),
-                                            List.of(),
-                                            ObjectReference.INVOKE_SINGLE_THREADED
-                                    ),
-                                    threadReference
-                            ).build());
-                            memberBuilder.setValue(inspectObject(
-                                    snapshotBuilder,
-                                    v.invokeMethod(
-                                            threadReference,
-                                            v.referenceType().methodsByName("getValue").get(0),
-                                            List.of(),
-                                            ObjectReference.INVOKE_SINGLE_THREADED
-                                    ),
-                                    threadReference
-                            ).build());
+            var jdiObjRefClass = Class.forName(jdiObjRef.referenceType().name());
+            if (!Map.class.isAssignableFrom(jdiObjRefClass)) return null;
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-            snapshotBuilder.putHeap(reference, objBuilder.build());
-            return SnapshotOuterClass.Value.newBuilder().setReference(reference);
+            var jdiSetRef = (ObjectReference) jdiObjRef.invokeMethod(
+                    threadReference,
+                    jdiObjRef.referenceType().methodsByName("entrySet").get(0),
+                    List.of(),
+                    ObjectReference.INVOKE_SINGLE_THREADED
+            );
+            var jdiArrRef = (ArrayReference) jdiSetRef.invokeMethod(
+                    threadReference,
+                    jdiSetRef.referenceType().methodsByName("toArray", "()[Ljava/lang/Object;").get(0),
+                    List.of(),
+                    ObjectReference.INVOKE_SINGLE_THREADED
+            );
+            var reference = Long.toString(jdiObjRef.uniqueID());
+            var obj = new JsonObject();
+            // add reference to heap graph (it has to be added before other objects inspections)
+            snapshot.get("heap").getAsJsonObject().add(reference, obj);
+            obj.addProperty("type", "map");
+            obj.addProperty("languageType", jdiObjRef.referenceType().name());
+            obj.addProperty("userDefined", false);
+            obj.add(
+                    "members",
+                    jdiArrRef.getValues().stream()
+                            .map(jdiValue -> {
+                                try {
+                                    var jdiValueEntry = (ObjectReference) jdiValue;
+                                    var jdiValueEntryKey = jdiValueEntry.invokeMethod(
+                                            threadReference,
+                                            jdiValueEntry.referenceType().methodsByName("getKey").get(0),
+                                            List.of(),
+                                            ObjectReference.INVOKE_SINGLE_THREADED
+                                    );
+                                    var jdiValueEntryValue = jdiValueEntry.invokeMethod(
+                                            threadReference,
+                                            jdiValueEntry.referenceType().methodsByName("getValue").get(0),
+                                            List.of(),
+                                            ObjectReference.INVOKE_SINGLE_THREADED
+                                    );
+                                    var member = new JsonObject();
+                                    member.add("key", inspectValue(snapshot, jdiValueEntryKey, threadReference));
+                                    member.add("value", inspectValue(snapshot, jdiValueEntryValue, threadReference));
+                                    return member;
+                                } catch (InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            })
+                            .collect(
+                                    () -> new JsonArray(jdiArrRef.length()),
+                                    JsonArray::add,
+                                    (member0, member1) -> {
+                                        throw new RuntimeException("parallel stream not allowed");
+                                    }
+                            )
+            );
+            var referenceValue = new JsonArray(1);
+            referenceValue.add(reference);
+            return referenceValue;
         } catch (ClassNotFoundException | InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
             // ignore errors
         }
         return null;
     }
 
-    private static SnapshotOuterClass.Value.Builder inspectUuserObject(SnapshotOuterClass.Snapshot.Builder snapshotBuilder, ObjectReference jdiObject, ThreadReference threadReference) {
-        var classReferenceData = jdiObject.referenceType().toString().split(" ");
-        if (!classReferenceData[0].equals("class") || classReferenceData[1].contains(".")) return null;
-        var orderedFields = jdiObject.referenceType().allFields();
-        var fieldsValues = jdiObject.getValues(orderedFields);
-        var reference = Long.toString(jdiObject.uniqueID());
-        // add reference to heap graph (it has to be added before other objects inspections)
-        snapshotBuilder.putHeap(reference, SnapshotOuterClass.Obj.getDefaultInstance());
-        var objBuilder = SnapshotOuterClass.Obj.newBuilder();
-        orderedFields
-                .forEach(f -> {
-                    var memberBuilder = objBuilder.addMembersBuilder();
-                    memberBuilder.getKeyBuilder().setString(f.name());
-                    memberBuilder.setValue(inspectObject(snapshotBuilder, fieldsValues.get(f), threadReference).build());
-                });
+    private JsonElement inspectUserObject(JsonObject snapshot, ObjectReference jdiObjRef, ThreadReference threadReference) {
+        var jdiObjClassRefData = jdiObjRef.referenceType().toString().split(" ");
 
-        snapshotBuilder.putHeap(reference, objBuilder.build());
-        return SnapshotOuterClass.Value.newBuilder().setReference(reference);
+        // check if is a class and is defined in the default package (user defined)
+        if (!jdiObjClassRefData[0].equals("class") || jdiObjClassRefData[1].contains(".")) return null;
+
+        var orderedFields = jdiObjRef.referenceType().allFields();
+        var fieldsValues = jdiObjRef.getValues(orderedFields);
+        var reference = Long.toString(jdiObjRef.uniqueID());
+        var obj = new JsonObject();
+        // add reference to heap graph (it has to be added before other objects inspections)
+        snapshot.get("heap").getAsJsonObject().add(reference, obj);
+        obj.addProperty("type", "map");
+        obj.addProperty("languageType", jdiObjRef.referenceType().name());
+        obj.addProperty("userDefined", true);
+        obj.add(
+                "members",
+                orderedFields.stream()
+                        .map(field -> {
+                            var member = new JsonObject();
+                            member.addProperty("key", field.name());
+                            member.add("value", inspectValue(snapshot, fieldsValues.get(field), threadReference));
+                            return member;
+                        })
+                        .collect(
+                                () -> new JsonArray(orderedFields.size()),
+                                JsonArray::add,
+                                (member0, member1) -> {
+                                    throw new RuntimeException("parallel stream not allowed");
+                                }
+                        )
+        );
+        var referenceValue = new JsonArray(1);
+        referenceValue.add(reference);
+        return referenceValue;
     }
 }
 
