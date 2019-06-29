@@ -73,7 +73,6 @@
             "description": "Exceptions may be from tracer or traced program. They shall contain the exception type, it's creation arguments and traceback.",
             "properties": {
                 "type": { "type": "string" },
-                "args": { "type": "array", "items": { "type": "string" } },
                 "traceback": { "type": "array", "items": { "type": "string" } }
             },
             "additionalProperties": false,
