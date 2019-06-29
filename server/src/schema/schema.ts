@@ -89,6 +89,5 @@ export interface Threw {
  */
 export interface Exception {
     type: string
-    args: string[]
     traceback: string[]
 }

@@ -52,7 +52,7 @@ export class Server {
             const source = req.body['source'] as string
             const input = req.body['input'] as string
             const steps = this.steps
-            
+
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language], this.shell).run(
