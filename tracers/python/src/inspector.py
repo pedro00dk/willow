@@ -3,23 +3,6 @@ import types
 import traceback
 
 
-def exceptionMessage(exception: Exception, with_traceback: types.TracebackType = None, remove_lines: tuple = ()):
-    """
-    Builds exception messages from objects.
-    """
-    formatted_traceback = traceback.format_exception(
-        type(exception),
-        exception,
-        exception.__traceback__ if not with_traceback else with_traceback
-    )
-
-    return {
-        'type': type(exception).__name__,
-        'args': [str(arg) for arg in exception.args],
-        'traceback': [line for i, line in enumerate(formatted_traceback) if i not in remove_lines]
-    }
-
-
 class Inspector:
     """
     Inspects the received frame, building a snapshot from it.
