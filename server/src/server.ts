@@ -1,6 +1,5 @@
 import * as cors from 'cors'
 import * as express from 'express'
-import * as session from 'express-session'
 import * as log from 'npmlog'
 import { Tracer } from './tracer'
 
@@ -16,13 +15,11 @@ export class Server {
         private readonly shell: string,
         private readonly steps: number,
         private readonly timeout: number,
-        clients: string,
-        secret: string
+        clients: string
     ) {
         this.server = express()
         this.server = express()
         this.server.use(express.json())
-        this.server.use(session({ resave: false, saveUninitialized: true, secret }))
         this.server.use(
             cors({
                 origin: (origin, callback) =>
@@ -36,11 +33,6 @@ export class Server {
     }
 
     private configureRoutes() {
-        this.server.get('/session', (req, res) => {
-            log.http(Server.name, req.path)
-            res.send({ session: req.session.id })
-        })
-
         this.server.get('/languages', (req, res) => {
             log.http(Server.name, req.path)
             res.send(Object.keys(this.tracers))
