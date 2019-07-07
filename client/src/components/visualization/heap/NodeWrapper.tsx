@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
-import { Obj } from '../../../reducers/tracer'
+import { ObjNode } from '../../../reducers/tracer'
 import * as ArrayNode from './ArrayNode'
 import * as BarsNode from './BarsNode'
 import * as FieldNode from './FieldNode'
@@ -16,7 +16,7 @@ import { Link, Node, Position } from './Heap'
 const classes = {
     container: cn('position-absolute', 'd-inline-flex', css({ transition: 'left 0.1s, top 0.1s, transform 0.1s' })),
     nodeContainer: cn('d-inline-flex'),
-    selected: cn(css({ background: colors.primaryBlue.lighter }))
+    selected: cn(css({ background: colors.blue.lighter }))
 }
 
 const nodeModules = {
@@ -26,7 +26,7 @@ const nodeModules = {
     map: MapNode
 }
 
-const getNodeComponent = (obj: Obj, node: Node, typeNode: Node) => {
+const getNodeComponent = (obj: ObjNode, node: Node, typeNode: Node) => {
     if (node.name != undefined) return { ...nodeModules[node.name as keyof typeof nodeModules], node }
     if (typeNode.name != undefined) return { ...nodeModules[typeNode.name as keyof typeof nodeModules], node: typeNode }
     const defaultModule = Object.entries(nodeModules)
@@ -103,7 +103,7 @@ const onDrag = (
 
 export function NodeWrapper(props: {
     tracer: State['tracer']
-    obj: Obj
+    obj: ObjNode
     rect: ClientRect | DOMRect
     scale: { value: number }
     positions: { [reference: string]: Position }
@@ -147,8 +147,8 @@ export function NodeWrapper(props: {
             }}
         >
             <MenuProvider className={classes.nodeContainer} id={props.obj.reference}>
-                <Node obj={props.obj} node={node} link={props.link} />
-                -i: {props.tracer.groups[props.tracer.index][props.obj.reference].index}-{' '}
+                <Node objNode={props.obj} node={node} link={props.link} />
+                b: {props.tracer.groups[props.tracer.index][props.obj.reference].base}-{' '}
                 {props.tracer.groups[props.tracer.index][props.obj.reference].type}
             </MenuProvider>
             <NodeMenu
@@ -164,12 +164,12 @@ export function NodeWrapper(props: {
 }
 
 function NodeMenu(props: {
-    obj: Obj
+    obj: ObjNode
     node: Node
     typeNode: Node
     onNodeChange: () => void
     onTypeNodeChange: () => void
-    Parameters: (props: { obj: Obj; node: Node; onChange: () => void }) => JSX.Element
+    Parameters: (props: { obj: ObjNode; node: Node; onChange: () => void }) => JSX.Element
 }) {
     return (
         <Menu id={props.obj.reference}>

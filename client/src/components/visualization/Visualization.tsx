@@ -1,8 +1,8 @@
 import cn from 'classnames'
 import * as React from 'react'
-import * as protocol from '../../protobuf/protocol'
 import { State, useDispatch, useRedux } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
+import * as schema from '../../schema/schema'
 import { SplitPane } from '../SplitPane'
 import { Heap } from './heap/Heap'
 import { MemoStack } from './stack/Stack'
@@ -13,16 +13,12 @@ const classes = {
 
 const computeNextIndex = (event: React.KeyboardEvent, tracer: State['tracer']) => {
     if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return tracer.index
-    const previousFilter = (index: number) => index < tracer.index
-    const nextFilter = (index: number) => index > tracer.index
-    const indexFilter = event.key === 'ArrowLeft' ? previousFilter : nextFilter
-
     const currentStep = tracer.steps[tracer.index]
-    const anyFamilyFilter = (step: protocol.IStep) => true
-    const siblingParentFilter = (step: protocol.IStep) =>
-        !!step.snapshot && !!currentStep.snapshot
-            ? step.snapshot.stack.length <= currentStep.snapshot.stack.length
-            : true
+    
+    const indexFilter = (index: number) => event.key === 'ArrowLeft' ? index < tracer.index : index > tracer.index
+    const anyFamilyFilter = (step: schema.Step) => true
+    const siblingParentFilter = (step: schema.Step) =>
+        step.snapshot && currentStep.snapshot ? step.snapshot.stack.length <= currentStep.snapshot.stack.length : true
     const familyFilter = !event.ctrlKey ? anyFamilyFilter : siblingParentFilter
 
     const resultSelector = <T extends {}>(array: T[]) =>
@@ -51,7 +47,8 @@ export function Visualization() {
         >
             <SplitPane split='horizontal' base='15%' left={5} right={-5}>
                 <MemoStack />
-                <Heap />
+                <div></div>
+                {/* <Heap /> */}
             </SplitPane>
         </div>
     )

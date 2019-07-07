@@ -22,8 +22,8 @@ const initialState: State = {
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'language/fetch':
-            if (!!action.payload) return { ...state, fetching: false, languages: action.payload.languages }
-            if (!!action.error) return { ...state, fetching: false, error: action.error }
+            if (action.payload) return { ...state, fetching: false, languages: action.payload.languages }
+            if (action.error) return { ...state, fetching: false, error: action.error }
             return { ...initialState, fetching: true }
         case 'language/select':
             return { ...state, selected: action.payload }
@@ -34,10 +34,10 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
 const fetch = (): AsyncAction => async dispatch => {
     dispatch({ type: 'language/fetch' })
     try {
-        const languages = (await serverApi.post('/tracer/languages')).data as string[]
+        const languages = (await serverApi.get('/languages')).data as string[]
         dispatch({ type: 'language/fetch', payload: { languages } })
     } catch (error) {
-        dispatch({ type: 'language/fetch', error: !!error.response ? error.response.data : error.toString() })
+        dispatch({ type: 'language/fetch', error: error.response ? error.response.data : error.toString() })
     }
 }
 

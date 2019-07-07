@@ -67,7 +67,7 @@ export function Languages() {
                     <option key={i} value={language} label={language} />
                 ))}
                 {language.languages.length === 0 && (
-                    <option key={-1} value='text' label={language.fetching ? '...' : '!!!'} />
+                    <option key={-1} value='text' label={language.fetching ? '...' : '!'} />
                 )}
             </select>
         </div>

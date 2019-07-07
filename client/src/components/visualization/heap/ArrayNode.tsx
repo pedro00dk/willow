@@ -2,8 +2,8 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import * as protocol from '../../../protobuf/protocol'
-import { Obj } from '../../../reducers/tracer'
+import { ObjNode } from '../../../reducers/tracer'
+import * as protocol from '../../../schema/schema'
 import { SquareBaseNode } from './BaseNode'
 import { Link, Node } from './Heap'
 import { BooleanParameter, RangeParameter } from './Parameters'
@@ -17,7 +17,7 @@ const classes = {
             border: `0.5px solid ${colors.gray.dark}`,
             cursor: 'default',
             fontSize: '1rem',
-            background: colors.primaryBlue.light
+            background: colors.blue.light
         })
     ),
     index: cn('text-truncate', css({ fontSize: '0.5rem' })),
@@ -29,32 +29,28 @@ const getParameters = (node: Node) => {
 
     return {
         showIndex:
-            !!parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
-        maxWidth: !!parameters && typeof parameters['maxWidth'] === 'number' ? (parameters['maxWidth'] as number) : 30
+            parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
+        maxWidth: parameters && typeof parameters['maxWidth'] === 'number' ? (parameters['maxWidth'] as number) : 30
     }
 }
 
-export const isDefault = (obj: Obj) =>
-    obj.type === protocol.Obj.Type.ARRAY || obj.type === protocol.Obj.Type.ALIST || obj.type === protocol.Obj.Type.TUPLE
+const supported = new Set(['array', 'alist', 'llist', 'tuple'])
+const defaults = new Set(['array', 'alist', 'tuple'])
+
+export const isDefault = (objNode: ObjNode) => defaults.has(objNode.type)
 
 // tslint:disable-next-line: variable-name
-export function Node(props: { obj: Obj; node: Node; link: Link }) {
-    if (
-        props.obj.type !== protocol.Obj.Type.TUPLE &&
-        props.obj.type !== protocol.Obj.Type.ARRAY &&
-        props.obj.type !== protocol.Obj.Type.ALIST &&
-        props.obj.type !== protocol.Obj.Type.LLIST &&
-        props.obj.type !== protocol.Obj.Type.SET
-    )
+export function Node(props: { objNode: ObjNode; node: Node; link: Link }) {
+    if (supported.has(props.objNode.type))
         return (
-            <SquareBaseNode obj={props.obj}>
+            <SquareBaseNode obj={props.objNode}>
                 <div className={classes.elements}>incompatible</div>
             </SquareBaseNode>
         )
 
-    if (props.obj.members.length === 0)
+    if (props.objNode.members.length === 0)
         return (
-            <SquareBaseNode obj={props.obj}>
+            <SquareBaseNode obj={props.objNode}>
                 <div className={classes.elements}>empty</div>
             </SquareBaseNode>
         )
@@ -62,9 +58,9 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
     const { showIndex, maxWidth } = getParameters(props.node)
 
     return (
-        <SquareBaseNode obj={props.obj}>
+        <SquareBaseNode obj={props.objNode}>
             <div className={classes.elements}>
-                {props.obj.members.map((member, i) => {
+                {props.objNode.members.map((member, i) => {
                     const isReference = typeof member.value === 'object'
                     const value = isReference ? '::' : member.value
                     return (
@@ -73,7 +69,7 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
                             <span
                                 ref={ref => {
                                     if (!isReference) return
-                                    props.link.push({ ref, target: (member.value as Obj).reference, under: false })
+                                    props.link.push({ ref, target: (member.value as ObjNode).reference, under: false })
                                 }}
                                 className={classes.value}
                             >
@@ -87,7 +83,7 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
     )
 }
 
-export function Parameters(props: { obj: Obj; node: Node; onChange: () => void }) {
+export function Parameters(props: { obj: ObjNode; node: Node; onChange: () => void }) {
     const parameters = getParameters(props.node)
 
     return (

@@ -3,7 +3,6 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
-import * as protocol from '../../protobuf/protocol'
 import { actions as codeActions } from '../../reducers/code'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, MemoTextEditor, range } from './TextEditor'
@@ -22,16 +21,10 @@ import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    [protocol.Snapshot.Type.LINE]: cn('position-absolute', css({ background: colors.primaryBlue.light })),
-    [protocol.Snapshot.Type.CALL]: cn(
-        'position-absolute',
-        css({ background: `${colors.primaryBlue.light} url(${callImg}) no-repeat right` })
-    ),
-    [protocol.Snapshot.Type.RETURN]: cn(
-        'position-absolute',
-        css({ background: `${colors.primaryBlue.light} url(${returnImg}) no-repeat right` })
-    ),
-    [protocol.Snapshot.Type.EXCEPTION]: cn('position-absolute', css({ background: colors.secondaryRed.light }))
+    line: cn('position-absolute', css({ background: colors.blue.light })),
+    call: cn('position-absolute', css({ background: `${colors.blue.light} url(${callImg}) no-repeat right` })),
+    return: cn('position-absolute', css({ background: `${colors.blue.light} url(${returnImg}) no-repeat right` })),
+    exception: cn('position-absolute', css({ background: colors.red.light }))
 }
 
 const getSyntaxSupport = (language: string) =>
@@ -50,7 +43,6 @@ export function CodeEditor() {
         const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
 
         editor.on('change', onChange)
-
         return () => editor.off('change', onChange)
     }, [editor])
 
@@ -62,13 +54,14 @@ export function CodeEditor() {
     React.useEffect(() => {
         if (!editor) return
         const markers = editor.session.getMarkers(false) as EditorMarker[]
-        Object.values(markers) //
-            .forEach(marker => (marker.id > 2 ? editor.session.removeMarker(marker.id) : undefined))
+        Object.values(markers)
+            .filter(marker => marker.id > 2)
+            .forEach(marker => editor.session.removeMarker(marker.id))
         if (!tracer.available) return
         const snapshot = tracer.steps[tracer.index].snapshot
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line
-        editor.session.addMarker(new range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
+        editor.session.addMarker(range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
         editor.scrollToLine(line, true, true, undefined)
     }, [editor, tracer])
 

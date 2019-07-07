@@ -63,7 +63,7 @@ export function SplitPane(props: {
             defaultSize={props.base}
             minSize={props.left}
             maxSize={props.right}
-            {...({ paneClassName: classes.pane } as any)}
+            {...{ paneClassName: classes.pane }}
         >
             {props.children}
         </ReactSplitPane>

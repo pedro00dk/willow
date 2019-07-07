@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { Obj } from '../../../reducers/tracer'
+import { ObjNode } from '../../../reducers/tracer'
 
 const classes = {
     square: {
@@ -23,7 +23,7 @@ const classes = {
 
 // tslint:disable-next-line: variable-name
 export const MemoSquareBaseNode = React.memo(SquareBaseNode)
-export function SquareBaseNode(props: { obj: Obj; children?: React.ReactNode; [props: string]: unknown }) {
+export function SquareBaseNode(props: { obj: ObjNode; children?: React.ReactNode; [props: string]: unknown }) {
     return (
         <div className={classes.square.container}>
             <span className={classes.square.type}>{props.obj.languageType}</span>
@@ -34,7 +34,7 @@ export function SquareBaseNode(props: { obj: Obj; children?: React.ReactNode; [p
 
 // tslint:disable-next-line: variable-name
 export const MemoEllipsisBaseNode = React.memo(EllipsisBaseNode)
-export function EllipsisBaseNode(props: { obj: Obj; children?: React.ReactNode; [props: string]: unknown }) {
+export function EllipsisBaseNode(props: { obj: ObjNode; children?: React.ReactNode; [props: string]: unknown }) {
     return (
         <div className={classes.ellipsis.container}>
             <span className={classes.ellipsis.type}>{props.obj.languageType}</span>

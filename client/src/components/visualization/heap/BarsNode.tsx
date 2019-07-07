@@ -2,8 +2,8 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import * as protocol from '../../../protobuf/protocol'
-import { Obj } from '../../../reducers/tracer'
+import { ObjNode } from '../../../reducers/tracer'
+import * as protocol from '../../../schema/schema'
 import { SquareBaseNode } from './BaseNode'
 import { Link, Node } from './Heap'
 import { BooleanParameter, RangeParameter, SelectParameter } from './Parameters'
@@ -17,7 +17,7 @@ const classes = {
             border: `0.5px solid ${colors.gray.dark}`,
             cursor: 'default',
             fontSize: '1rem',
-            background: colors.primaryBlue.light
+            background: colors.blue.light
         })
     ),
     index: cn('text-truncate', css({ fontSize: '0.5rem' })),
@@ -57,21 +57,21 @@ const getParameters = (node: Node) => {
     const parameters = node.parameters
 
     return {
-        mode: !!parameters && modes.has(parameters['mode'] as string) ? (parameters['mode'] as string) : 'delta',
+        mode: parameters && modes.has(parameters['mode'] as string) ? (parameters['mode'] as string) : 'delta',
         showIndex:
-            !!parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
+            parameters && typeof parameters['showIndex'] === 'boolean' ? (parameters['showIndex'] as boolean) : true,
         showValues:
-            !!parameters && typeof parameters['showValues'] === 'boolean'
+            parameters && typeof parameters['showValues'] === 'boolean'
                 ? (parameters['showValues'] as boolean)
                 : true,
-        width: !!parameters && typeof parameters['width'] === 'number' ? (parameters['width'] as number) : 30,
-        height: !!parameters && typeof parameters['height'] === 'number' ? (parameters['height'] as number) : 50
+        width: parameters && typeof parameters['width'] === 'number' ? (parameters['width'] as number) : 30,
+        height: parameters && typeof parameters['height'] === 'number' ? (parameters['height'] as number) : 50
     }
 }
 
-export const isDefault = (obj: Obj) => false
+export const isDefault = (obj: ObjNode) => false
 
-export function Node(props: { obj: Obj; node: Node; link: Link }) {
+export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
     if (
         (props.obj.type !== protocol.Obj.Type.TUPLE &&
             props.obj.type !== protocol.Obj.Type.ARRAY &&
@@ -112,7 +112,7 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
     )
 }
 
-export function Parameters(props: { obj: Obj; node: Node; onChange: () => void }) {
+export function Parameters(props: { obj: ObjNode; node: Node; onChange: () => void }) {
     const parameters = getParameters(props.node)
 
     return (

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { colors } from '../../../colors'
 import { useDispatch, useGetState } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
-import { Scope } from '../../../reducers/tracer'
+import { ScopeNode } from '../../../reducers/tracer'
 
 const classes = {
     container: cn('d-flex flex-column', 'w-100'),
@@ -23,7 +23,7 @@ const classes = {
         leaf: cn(
             css({
                 ':hover': {
-                    background: `radial-gradient(ellipse at top, ${colors.primaryBlue.light} 50%, transparent 60%)`
+                    background: `radial-gradient(ellipse at top, ${colors.blue.light} 50%, transparent 60%)`
                 }
             })
         )
@@ -38,38 +38,38 @@ const styles = {
             ? {
                   backgroundColor:
                       depth <= 1
-                          ? colors.primaryBlue.main
+                          ? colors.blue.main
                           : depth <= 4
-                          ? colors.primaryBlue.light
+                          ? colors.blue.light
                           : depth <= 7
-                          ? colors.secondaryYellow.light
+                          ? colors.yellow.light
                           : depth <= 10
-                          ? colors.secondaryYellow.lighter
+                          ? colors.yellow.lighter
                           : depth <= 13
-                          ? colors.secondaryRed.light
-                          : colors.secondaryRed.lighter
+                          ? colors.red.light
+                          : colors.red.lighter
               }
             : {
-                  background: `radial-gradient(ellipse at top, ${colors.primaryBlue.lighter} 20%, transparent 30%)`
+                  background: `radial-gradient(ellipse at top, ${colors.blue.lighter} 20%, transparent 30%)`
               }),
         ...(selected && isIntermediary ? { borderColor: colors.gray.light } : undefined),
         ...(selected && !isIntermediary
             ? {
-                  background: `radial-gradient(ellipse at top, ${colors.primaryBlue.main} 50%, transparent 60%)`
+                  background: `radial-gradient(ellipse at top, ${colors.blue.main} 50%, transparent 60%)`
               }
             : undefined),
         opacity: width >= 20 ? 1 : width >= 10 ? 0.75 : 0.5
     })
 }
 
-const computeChildWidth = (parent: Scope, child: Scope, width: number) => {
-    const proportion = (child.steps.to - child.steps.from + 1) / (parent.steps.to - parent.steps.from + 1)
+const computeChildWidth = (parent: ScopeNode, child: ScopeNode, width: number) => {
+    const proportion = (child.range[1] - child.range[0] + 1) / (parent.range[1] - parent.range[0] + 1)
     return { width: proportion * width, percent: `${proportion * 100}%` }
 }
 
 // tslint:disable-next-line: variable-name
 export const MemoScopeNode = React.memo(ScopeNode)
-export function ScopeNode(props: { scope: Scope; depth: number; width: number }) {
+export function ScopeNode(props: { scope: ScopeNode; depth: number; width: number }) {
     const [selected, setSelected] = React.useState(false)
     const dispatch = useDispatch()
     const getState = useGetState()
@@ -84,7 +84,7 @@ export function ScopeNode(props: { scope: Scope; depth: number; width: number })
     React.useEffect(() => {
         const interval = setInterval(() => {
             const index = getState().tracer.index
-            const updatedSelected = index >= props.scope.steps.from && index <= props.scope.steps.to
+            const updatedSelected = index >= props.scope.range[0] && index <= props.scope.range[1]
             if (updatedSelected === selected) return
             setSelected(updatedSelected)
         }, 500)
@@ -99,7 +99,7 @@ export function ScopeNode(props: { scope: Scope; depth: number; width: number })
                     className={cn(classes.scope.base, isIntermediary ? classes.scope.intermediary : classes.scope.leaf)}
                     style={styles.scope(isIntermediary, selected, props.width, props.depth)}
                     title={props.scope.name}
-                    onClick={() => dispatch(tracerActions.setIndex(props.scope.steps.from))}
+                    onClick={() => dispatch(tracerActions.setIndex(props.scope.range[0]))}
                 >
                     {isIntermediary && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>

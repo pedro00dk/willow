@@ -2,8 +2,8 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import * as protocol from '../../../protobuf/protocol'
-import { Obj } from '../../../reducers/tracer'
+import { ObjNode } from '../../../reducers/tracer'
+import * as protocol from '../../../schema/schema'
 import { EllipsisBaseNode } from './BaseNode'
 import { Link, Node } from './Heap'
 import { SelectParameter } from './Parameters'
@@ -18,7 +18,7 @@ const classes = {
             borderRadius: '50%',
             cursor: 'default',
             fontSize: '1rem',
-            background: colors.primaryBlue.light
+            background: colors.blue.light
         })
     )
 }
@@ -28,15 +28,15 @@ const getParameters = (node: Node) => {
 
     return {
         memberKey:
-            !!parameters && parameters['memberKey'] != undefined && typeof parameters['memberKey'] !== 'object'
+            parameters && parameters['memberKey'] != undefined && typeof parameters['memberKey'] !== 'object'
                 ? (parameters['memberKey'] as string).toString()
                 : '####'
     }
 }
 
-export const isDefault = (obj: Obj) => false
+export const isDefault = (obj: ObjNode) => false
 
-export function Node(props: { obj: Obj; node: Node; link: Link }) {
+export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
     if (props.obj.type === protocol.Obj.Type.SET)
         return (
             <EllipsisBaseNode obj={props.obj}>
@@ -74,10 +74,10 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
     const value = isReference ? '::' : member.value
 
     const referenceMembers = [
-        ...props.obj.members.filter(member => typeof member.key === 'object').map(member => member.key as Obj),
+        ...props.obj.members.filter(member => typeof member.key === 'object').map(member => member.key as ObjNode),
         ...props.obj.members
             .filter(member => typeof member.value === 'object' && member.key !== memberKey)
-            .map(member => member.value as Obj)
+            .map(member => member.value as ObjNode)
     ]
 
     return (
@@ -91,7 +91,7 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
                 <span
                     ref={ref => {
                         if (!isReference) return
-                        props.link.push({ ref, target: (member.value as Obj).reference, under: false })
+                        props.link.push({ ref, target: (member.value as ObjNode).reference, under: false })
                     }}
                     className={classes.elements}
                     title={`${value}`}
@@ -103,14 +103,14 @@ export function Node(props: { obj: Obj; node: Node; link: Link }) {
     )
 }
 
-export function Parameters(props: { obj: Obj; node: Node; onChange: () => void }) {
+export function Parameters(props: { obj: ObjNode; node: Node; onChange: () => void }) {
     const parameters = getParameters(props.node)
 
     return (
         <>
             <SelectParameter
                 name={'key'}
-                value={!!parameters.memberKey ? parameters.memberKey.toString() : '####'}
+                value={parameters.memberKey ? parameters.memberKey.toString() : '####'}
                 options={[
                     '####',
                     ...props.obj.members

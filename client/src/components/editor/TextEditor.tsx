@@ -33,12 +33,8 @@ export type EditorMarker = {
     range: ace.Range
 }
 
-export const range = ace.acequire('ace/range').Range as new (
-    startRow: number,
-    startColumn: number,
-    endRow: number,
-    endColumn: number
-) => ace.Range
+export const range = (startRow: number, startColumn: number, endRow: number, endColumn: number): ace.Range =>
+    new (ace.acequire('ace/range')).Range(startRow, startColumn, endRow, endColumn)
 
 // tslint:disable-next-line: variable-name
 export const MemoTextEditor = React.memo(TextEditor)
@@ -48,7 +44,7 @@ function TextEditor(props: { onEditor?: (editor: ace.Editor) => void }) {
     React.useEffect(() => {
         if (!ref.current) return
         const editor = ace.edit(ref.current)
-        if (!!props.onEditor) props.onEditor(editor)
+        if (props.onEditor) props.onEditor(editor)
         editor.setFontSize(styles.font)
         editor.$blockScrolling = Infinity
 
