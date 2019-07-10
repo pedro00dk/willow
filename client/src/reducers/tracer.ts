@@ -11,6 +11,7 @@ export type ScopeNode = {
 
 export type StackTree = {
     root: ScopeNode
+    depth: number
 }
 
 export type ObjNode = {
@@ -99,9 +100,11 @@ const buildOutput = (steps: schema.Step[]) => {
 }
 
 const buildStack = (steps: schema.Step[]) => {
-    const stack: StackTree = { root: { range: [0, 0], children: [] } }
+    const stack: StackTree = { root: { range: [0, 0], children: [] }, depth: 0 }
     const treeParentPath = [stack.root]
     steps.forEach((step, i) => {
+        stack.depth = Math.max(stack.depth, treeParentPath.length)
+        treeParentPath.forEach(scope => (scope.range[1] = i))
         if (step.threw) {
             const name = step.threw.exception ? step.threw.exception.type : step.threw.cause
             const threwSyntheticScope: ScopeNode = { name, range: [i, i], children: [{ range: [i, i] }] }
@@ -117,7 +120,7 @@ const buildStack = (steps: schema.Step[]) => {
             currentParentScopeNode.children.push(newParentScopeNode)
             const newLeafScopeNode: ScopeNode = { range: [i, i] }
             newParentScopeNode.children.push(newLeafScopeNode)
-            treeParentPath.push(newParentScopeNode, newLeafScopeNode)
+            treeParentPath.push(newParentScopeNode)
         } else {
             // creates a new leaf if the current scope does not have an ending leaf child (it happens after a RETURN)
             if (
@@ -126,10 +129,9 @@ const buildStack = (steps: schema.Step[]) => {
             )
                 currentParentScopeNode.children.push({ range: [i, i] })
             const leafNode = currentParentScopeNode.children[currentParentScopeNode.children.length - 1]
-            leafNode.range[i] = i
+            leafNode.range[1] = i
             if (step.snapshot.type === 'return') treeParentPath.pop()
         }
-        treeParentPath.forEach(scope => (scope.range[1] = i))
     })
     return stack
 }
@@ -140,8 +142,9 @@ const buildHeaps = (steps: schema.Step[]) => {
         if (!step.snapshot) return heaps.push(heaps[i - 1] || {})
         const heap: HeapGraph = {}
         heaps.push(heap)
-        Object.entries(step.snapshot.heap)
-            .forEach(([reference, obj]) => (heap[reference] = { reference, ...obj, members: [] }))
+        Object.entries(step.snapshot.heap).forEach(
+            ([reference, obj]) => (heap[reference] = { reference, ...obj, members: [] })
+        )
         Object.values(heap).forEach(objNode => {
             const members = step.snapshot.heap[objNode.reference].members
             objNode.members = members.map(member => ({
