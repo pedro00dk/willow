@@ -95,13 +95,14 @@ export const ScopeComp = React.memo((
             )}
             {(isRoot || isIntermediary) &&
                 props.width >= 10 &&
-                props.scope.children.map(child => {
+                props.scope.children.map((child, i) => {
                     const childWidth = computeChildWidth(props.scope, child, props.width)
                     const childBaseX = cumulatedShift.value
                     const childBaseY = (props.current + 1) * props.height
                     cumulatedShift.value += childWidth
                     return (
                         <ScopeComp
+                            key={i}
                             scope={child}
                             depth={props.depth}
                             current={props.current + 1}

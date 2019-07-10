@@ -40,7 +40,6 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
     const ref = React.useRef<HTMLDivElement>()
 
     React.useEffect(() => {
-        if (!ref.current) return
         const editor = ace.edit(ref.current)
         if (props.onEditor) props.onEditor(editor)
         editor.setFontSize(styles.font)
@@ -56,7 +55,7 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
         }, 500)
 
         return () => window.clearInterval(interval)
-    }, [ref])
+    }, [])
 
     return <div ref={ref} className={classes.container} />
 })

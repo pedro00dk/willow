@@ -15,7 +15,7 @@ export const Stack = React.memo(() => {
 
     React.useEffect(() => {
         const interval = setInterval(() => {
-            if (!ref.current || ref.current.clientWidth === width) return
+            if (ref.current.clientWidth === width) return
             setWidth(ref.current.clientWidth)
         }, 1000)
 
