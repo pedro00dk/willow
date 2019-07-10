@@ -23,7 +23,7 @@ const styles = {
     }),
 
     color: (width: number, depth: number, isLeaf: boolean) => ({
-        fill: isLeaf ? colors.blue.lighter : width >= 20 ? colors.blue.main : colors.blue.light
+        fill: isLeaf ? colors.blue.lighter : width >= 40 ? colors.blue.main : colors.blue.light
     })
 }
 
@@ -75,7 +75,7 @@ export const ScopeComp = React.memo((
                             >
                                 <title>{props.scope.name}</title>
                             </rect>
-                            {props.width >= 20 && (
+                            {props.width >= 40 && (
                                 <text
                                     {...styles.textSize(props.baseX, props.baseY, props.width, props.height, 2)}
                                     clipPath={`url(#${clipPathId})`}
