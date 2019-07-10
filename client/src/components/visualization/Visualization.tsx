@@ -47,8 +47,7 @@ export function Visualization() {
         >
             <SplitPane split='horizontal' base='15%' left={5} right={-5}>
                 <Stack />
-                <div></div>
-                {/* <Heap /> */}
+                <Heap />
             </SplitPane>
         </div>
     )

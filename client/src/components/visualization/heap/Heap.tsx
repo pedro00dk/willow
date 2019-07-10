@@ -1,7 +1,9 @@
 import cn from 'classnames'
 import * as React from 'react'
+import * as ReactDom from 'react-dom'
 import { State, useRedux } from '../../../reducers/Store'
 import { NodeWrapper } from './NodeWrapper'
+
 
 const classes = {
     container: cn('d-flex', 'overflow-auto', 'w-100 h-100'),
@@ -13,7 +15,8 @@ export type Node = { name: string; parameters: { [option: string]: unknown } }
 export type Link = { ref: HTMLElement; target: string; under: boolean }[]
 
 export function Heap() {
-    const ref = React.useRef<HTMLDivElement>()
+    const ref = React.useRef<SVGSVGElement>()
+    
     const updateGraph = React.useState<{}>()[1]
     const rect = React.useRef<ClientRect | DOMRect>()
     const scale = React.useRef<{ value: number }>()
@@ -35,7 +38,7 @@ export function Heap() {
             )
                 return
             rect.current = newRect
-            updateGraph({})
+            // updateGraph({})
         }, 500)
         return () => clearInterval(interval)
     }, [ref])
@@ -48,6 +51,20 @@ export function Heap() {
         typeNodes.current = {}
         links.current = {}
     }
+
+    const ref1 = React.useRef<SVGRectElement>()
+
+    React.useLayoutEffect(() => {
+        const node = ReactDom.findDOMNode(ref1.current) as SVGRectElement
+        node.setAttribute('y', '100');
+        
+    })
+
+    return <svg ref={ref}>
+        <rect x='10' y='10' width='20' height='20'></rect>
+        <rect x='100' y='10' width='20' height='20'></rect>
+        <rect ref={ref1} x='50' y='10' width='20' height='20'></rect>
+    </svg>
 
     return (
         <div
