@@ -1,9 +1,9 @@
 import * as ace from 'brace'
 import * as React from 'react'
 import { useRedux } from '../../reducers/Store'
-import { MemoTextEditor } from './TextEditor'
+import { TextEditor } from './TextEditor'
 
-export function OutputEditor() {
+export const OutputEditor = React.memo(() => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
@@ -19,5 +19,5 @@ export function OutputEditor() {
         editor.scrollToLine(editor.session.getLength(), true, true, undefined)
     }, [editor, tracer])
 
-    return <MemoTextEditor onEditor={setEditor} />
-}
+    return <TextEditor onEditor={setEditor} />
+})

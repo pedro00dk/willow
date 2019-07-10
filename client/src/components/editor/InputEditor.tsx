@@ -5,13 +5,13 @@ import * as React from 'react'
 import { colors } from '../../colors'
 import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useRedux } from '../../reducers/Store'
-import { EditorMarker, MemoTextEditor, range } from './TextEditor'
+import { EditorMarker, range, TextEditor } from './TextEditor'
 
 const classes = {
     marker: cn('position-absolute', css({ backgroundColor: colors.blue.light }))
 }
 
-export function InputEditor() {
+export const InputEditor = React.memo(() => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
@@ -38,5 +38,5 @@ export function InputEditor() {
                 .forEach(marker => editor.session.removeMarker(marker.id))
     }, [editor, fetching])
 
-    return <MemoTextEditor onEditor={setEditor} />
-}
+    return <TextEditor onEditor={setEditor} />
+})

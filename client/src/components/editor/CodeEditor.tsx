@@ -5,7 +5,7 @@ import * as React from 'react'
 import { colors } from '../../colors'
 import { actions as codeActions } from '../../reducers/code'
 import { useDispatch, useRedux } from '../../reducers/Store'
-import { EditorMarker, MemoTextEditor, range } from './TextEditor'
+import { EditorMarker, range, TextEditor } from './TextEditor'
 
 import callImg from '../../../public/editor/call.svg'
 import returnImg from '../../../public/editor/return.svg'
@@ -30,7 +30,7 @@ const classes = {
 const getSyntaxSupport = (language: string) =>
     new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
-export function CodeEditor() {
+export const CodeEditor = React.memo(() => {
     const [editor, setEditor] = React.useState<ace.Editor>(undefined)
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({ language: state.language, tracer: state.tracer }))
@@ -65,5 +65,5 @@ export function CodeEditor() {
         editor.scrollToLine(line, true, true, undefined)
     }, [editor, tracer])
 
-    return <MemoTextEditor onEditor={setEditor} />
-}
+    return <TextEditor onEditor={setEditor} />
+})

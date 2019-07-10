@@ -36,9 +36,7 @@ export type EditorMarker = {
 export const range = (startRow: number, startColumn: number, endRow: number, endColumn: number): ace.Range =>
     new (ace.acequire('ace/range')).Range(startRow, startColumn, endRow, endColumn)
 
-// tslint:disable-next-line: variable-name
-export const MemoTextEditor = React.memo(TextEditor)
-function TextEditor(props: { onEditor?: (editor: ace.Editor) => void }) {
+export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) => void }) => {
     const ref = React.useRef<HTMLDivElement>()
 
     React.useEffect(() => {
@@ -61,4 +59,4 @@ function TextEditor(props: { onEditor?: (editor: ace.Editor) => void }) {
     }, [ref])
 
     return <div ref={ref} className={classes.container} />
-}
+})
