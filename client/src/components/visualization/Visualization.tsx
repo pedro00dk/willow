@@ -5,7 +5,7 @@ import { actions as tracerActions } from '../../reducers/tracer'
 import * as schema from '../../schema/schema'
 import { SplitPane } from '../SplitPane'
 import { Heap } from './heap/Heap'
-import { MemoStack } from './stack/Stack'
+import { Stack } from './stack/Stack'
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100')
@@ -46,7 +46,7 @@ export function Visualization() {
             tabIndex={0}
         >
             <SplitPane split='horizontal' base='15%' left={5} right={-5}>
-                <MemoStack />
+                <Stack />
                 <div></div>
                 {/* <Heap /> */}
             </SplitPane>
