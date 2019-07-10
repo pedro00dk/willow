@@ -30,7 +30,7 @@ const styles = {
 const computeChildWidth = (parent: ScopeNode, child: ScopeNode, width: number) =>
     ((child.range[1] - child.range[0] + 1) / (parent.range[1] - parent.range[0] + 1)) * width
 
-export const ScopeComp = React.memo((
+export const ScopeComp = (
     props: {
         scope: ScopeNode
         depth: number
@@ -115,4 +115,4 @@ export const ScopeComp = React.memo((
                 })}
         </>
     )
-})
+}
