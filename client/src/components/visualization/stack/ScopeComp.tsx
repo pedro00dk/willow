@@ -78,7 +78,7 @@ export const ScopeComp = (
                                 <title>{props.scope.name}</title>
                             </rect>
                             {props.width >= 40 && (
-                                <text {...textSize} clipPath={clipPathId}>
+                                <text {...textSize} fontFamily='monospace' clipPath={clipPathId}>
                                     {props.scope.name}
                                 </text>
                             )}
