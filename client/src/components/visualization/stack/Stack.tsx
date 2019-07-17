@@ -8,22 +8,22 @@ const classes = {
 }
 
 export const Stack = React.memo(() => {
-    const ref = React.useRef<HTMLDivElement>()
+    const containerRef = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
     const { available, stack } = useRedux(state => ({ available: state.tracer.available, stack: state.tracer.stack }))
     const scopeHeight = 20
 
     React.useEffect(() => {
         const interval = setInterval(() => {
-            if (ref.current.clientWidth === width) return
-            setWidth(ref.current.clientWidth)
+            if (containerRef.current.clientWidth === width) return
+            setWidth(containerRef.current.clientWidth)
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [ref, width])
+    }, [containerRef, width])
 
     return (
-        <div ref={ref} className={classes.container}>
+        <div ref={containerRef} className={classes.container}>
             {available && (
                 <svg width='100%' height={`${scopeHeight * stack.depth}px`}>
                     <ScopeComp

@@ -46,8 +46,11 @@ export const ScopeComp = (
     useRedux(async state => {
         if (!selectedRectRef.current) return
         const selected = state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
-        selectedRectRef.current.setAttribute('stroke', selected ? colors.gray.dark : undefined)
+        const stroke = selectedRectRef.current.getAttribute('stroke')
+        if (selected && stroke === 'none') selectedRectRef.current.setAttribute('stroke', colors.gray.dark)
+        else if (!selected && stroke !== 'none') selectedRectRef.current.setAttribute('stroke', 'none')
     })
+
     const isRoot = props.scope.name == undefined && !!props.scope.children
     const isIntermediary = !isRoot && !!props.scope.children
     const isLeaf = !props.scope.children
