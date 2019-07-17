@@ -41,16 +41,26 @@ export const ScopeComp = (
         height: number
     } //
 ) => {
+    const selectedRectRef = React.useRef<SVGRectElement>()
     const dispatch = useDispatch()
-    const { selected } = useRedux(state => ({
-        selected: state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
-    }))
+    useRedux(async state => {
+        if (!selectedRectRef.current) return
+        const selected = state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
+        selectedRectRef.current.setAttribute('stroke', selected ? colors.gray.dark : undefined)
+    })
     const isRoot = props.scope.name == undefined && !!props.scope.children
     const isIntermediary = !isRoot && !!props.scope.children
     const isLeaf = !props.scope.children
 
     const clipPathId = `${props.baseX}-${props.baseY}`
     const cumulatedShift = { value: props.baseX }
+
+    const rectSizeP0 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 0)
+    const rectSizeP1 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 1)
+    const rectSizeP2 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 2)
+    const textSize = styles.textSize(props.baseX, props.baseY, props.width, props.height, 2)
+    const trianglePoints = styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)
+
     return (
         <>
             {!isRoot && (
@@ -58,39 +68,20 @@ export const ScopeComp = (
                     {isIntermediary && (
                         <>
                             <clipPath id={clipPathId}>
-                                <rect {...styles.rectSize(props.baseX, props.baseY, props.width, props.height, 2)} />
+                                <rect {...rectSizeP2} />
                             </clipPath>
-                            {selected && (
-                                <rect
-                                    {...styles.rectSize(props.baseX, props.baseY, props.width, props.height, 0)}
-                                    stroke={colors.gray.dark}
-                                    fill='none'
-                                >
-                                    <title>{props.scope.name}</title>
-                                </rect>
-                            )}
-                            <rect
-                                {...styles.rectSize(props.baseX, props.baseY, props.width, props.height, 1)}
-                                {...styles.color(props.width, props.current, isLeaf)}
-                            >
+                            <rect ref={selectedRectRef} {...rectSizeP0} stroke='none' fill='none' />
+                            <rect {...rectSizeP1} {...styles.color(props.width, props.current, isLeaf)}>
                                 <title>{props.scope.name}</title>
                             </rect>
                             {props.width >= 40 && (
-                                <text
-                                    {...styles.textSize(props.baseX, props.baseY, props.width, props.height, 2)}
-                                    clipPath={`url(#${clipPathId})`}
-                                >
+                                <text {...textSize} clipPath={clipPathId}>
                                     {props.scope.name}
                                 </text>
                             )}
                         </>
                     )}
-                    {isLeaf && (
-                        <polygon
-                            {...styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)}
-                            {...styles.color(props.width, props.current, isLeaf)}
-                        ></polygon>
-                    )}
+                    {isLeaf && <polygon {...trianglePoints} {...styles.color(props.width, props.current, isLeaf)} />}
                 </g>
             )}
             {(isRoot || isIntermediary) &&
