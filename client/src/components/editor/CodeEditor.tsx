@@ -31,7 +31,7 @@ const getSyntaxSupport = (language: string) =>
     new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
 export const CodeEditor = React.memo(() => {
-    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+    const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({ language: state.language, tracer: state.tracer }))
 

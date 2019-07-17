@@ -12,7 +12,7 @@ const classes = {
 }
 
 export const InputEditor = React.memo(() => {
-    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+    const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
     const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
 

@@ -4,7 +4,7 @@ import { useRedux } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 export const OutputEditor = React.memo(() => {
-    const [editor, setEditor] = React.useState<ace.Editor>(undefined)
+    const [editor, setEditor] = React.useState<ace.Editor>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
