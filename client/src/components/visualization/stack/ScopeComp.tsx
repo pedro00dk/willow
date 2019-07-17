@@ -42,6 +42,7 @@ export const ScopeComp = (
     } //
 ) => {
     const selectedRectRef = React.useRef<SVGRectElement>()
+    const trianglePoints = styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)
     const dispatch = useDispatch()
     useRedux(async state => {
         if (!selectedRectRef.current) return
@@ -54,15 +55,12 @@ export const ScopeComp = (
     const isRoot = props.scope.name == undefined && !!props.scope.children
     const isIntermediary = !isRoot && !!props.scope.children
     const isLeaf = !props.scope.children
-
     const clipPathId = `${props.baseX}-${props.baseY}`
     const cumulatedShift = { value: props.baseX }
-
     const rectSizeP0 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 0)
     const rectSizeP1 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 1)
     const rectSizeP2 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 2)
     const textSize = styles.textSize(props.baseX, props.baseY, props.width, props.height, 2)
-    const trianglePoints = styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)
 
     return (
         <>
