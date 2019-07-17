@@ -30,7 +30,7 @@ export function Store(props: { children?: React.ReactNode }) {
     return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
 }
 
-const shallowCompareObjects = <T extends { [key: string]: unknown }>(prev: T, next: { [key: string]: unknown }) => {
+const shallowCompareObjects = <T extends { [key: string]: unknown }>(prev: T, next: T) => {
     if (Object.is(prev, next)) return true
     const prevKeys = Object.keys(prev)
     const nextKeys = Object.keys(next)
@@ -51,7 +51,7 @@ export const useDispatch = () => {
     return useStore().dispatch
 }
 
-export const useRedux = <T extends {}>(selector: (state: State) => T) => {
+export const useRedux = <T extends {} | void | Promise<void>>(selector: (state: State) => T) => {
     const store = useStore()
     const memoSelector = React.useCallback(selector, [])
     const [subState, setSubState] = React.useState(() => memoSelector(store.getState()))
@@ -62,7 +62,15 @@ export const useRedux = <T extends {}>(selector: (state: State) => T) => {
 
         const checkSubStateUpdate = () => {
             const updatedSubState = memoSelector(store.getState())
-            if (didUnsubscribe || shallowCompareObjects(updatedSubState, subStateRef.current)) return
+            if (
+                didUnsubscribe ||
+                subStateRef.current == undefined ||
+                updatedSubState == undefined ||
+                typeof (subStateRef.current as Promise<void>).then === 'function' ||
+                typeof (updatedSubState as Promise<void>).then === 'function' ||
+                shallowCompareObjects(updatedSubState as {}, subStateRef.current as {})
+            )
+                return
             setSubState(updatedSubState)
             subStateRef.current = updatedSubState
         }
