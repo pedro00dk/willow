@@ -42,7 +42,6 @@ export const ScopeComp = (
     } //
 ) => {
     const selectedRectRef = React.useRef<SVGRectElement>()
-    const trianglePoints = styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)
     const dispatch = useDispatch()
     useRedux(async state => {
         if (!selectedRectRef.current) return
@@ -61,6 +60,7 @@ export const ScopeComp = (
     const rectSizeP1 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 1)
     const rectSizeP2 = styles.rectSize(props.baseX, props.baseY, props.width, props.height, 2)
     const textSize = styles.textSize(props.baseX, props.baseY, props.width, props.height, 2)
+    const trianglePoints = styles.triangleSize(props.baseX, props.baseY, props.width, props.height, 0)
 
     return (
         <>

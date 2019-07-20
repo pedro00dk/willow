@@ -11,9 +11,8 @@ export const Stack = React.memo(() => {
     const containerRef = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
     const { available, stack } = useRedux(state => ({ available: state.tracer.available, stack: state.tracer.stack }))
-
     const scopeHeight = 20
-    const height = scopeHeight * (stack ? stack.depth : 0)
+    const height = stack ? scopeHeight * stack.depth : 0
 
     React.useEffect(() => {
         const interval = setInterval(() => {
