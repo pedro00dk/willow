@@ -3,10 +3,10 @@ import * as React from 'react'
 import * as ReactDom from 'react-dom'
 import { State, useRedux } from '../../../reducers/Store'
 import { NodeWrapper } from './NodeWrapper'
-
+import { SvgView } from './SvgView'
 
 const classes = {
-    container: cn('d-flex', 'overflow-auto', 'w-100 h-100'),
+    container: cn('d-flex', 'w-100 h-100'),
     line: cn('position-absolute', 'p-0 m-0')
 }
 
@@ -14,90 +14,32 @@ export type Position = { position: { x: number; y: number }; setPosition: (p: { 
 export type Node = { name: string; parameters: { [option: string]: unknown } }
 export type Link = { ref: HTMLElement; target: string; under: boolean }[]
 
-export function Heap() {
-    const ref = React.useRef<SVGSVGElement>()
-    
-    const updateGraph = React.useState<{}>()[1]
-    const rect = React.useRef<ClientRect | DOMRect>()
-    const scale = React.useRef<{ value: number }>()
-    const positions = React.useRef<{ [reference: string]: Position }>()
-    const nodes = React.useRef<{ [reference: string]: Node }>()
-    const typeNodes = React.useRef<{ [type: string]: Node }>()
-    const links = React.useRef<{ [reference: string]: Link }>()
+export const Heap = React.memo(() => {
+    const containerRef = React.useRef<HTMLDivElement>()
+    const heapData = React.useRef<{
+        scale: number
+        positions: { [reference: string]: Position }
+        nodes: { [reference: string]: Node }
+        typeNodes: { [type: string]: Node }
+        links: { [reference: string]: Link }
+    }>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
-    React.useEffect(() => {
-        if (!ref.current) return
-        const interval = setInterval(() => {
-            const newRect = ref.current.getBoundingClientRect()
-            if (
-                rect.current.left === newRect.left &&
-                rect.current.top === newRect.top &&
-                rect.current.width === newRect.width &&
-                rect.current.height === newRect.height
-            )
-                return
-            rect.current = newRect
-            // updateGraph({})
-        }, 500)
-        return () => clearInterval(interval)
-    }, [ref])
-
-    if (!tracer.available) {
-        rect.current = new DOMRect()
-        scale.current = { value: 1 }
-        positions.current = {}
-        nodes.current = {}
-        typeNodes.current = {}
-        links.current = {}
-    }
-
-    const ref1 = React.useRef<SVGRectElement>()
-
-    React.useLayoutEffect(() => {
-        const node = ReactDom.findDOMNode(ref1.current) as SVGRectElement
-        node.setAttribute('y', '100');
-        
-    })
-
-    return <svg ref={ref}>
-        <rect x='10' y='10' width='20' height='20'></rect>
-        <rect x='100' y='10' width='20' height='20'></rect>
-        <rect ref={ref1} x='50' y='10' width='20' height='20'></rect>
-    </svg>
+    // if (!tracer.available) {
+    //     //rect.current = new DOMRect()
+    //     scale.current = { value: 1 }
+    //     positions.current = {}
+    //     nodes.current = {}
+    //     typeNodes.current = {}
+    //     links.current = {}
+    // }
 
     return (
-        <div
-            ref={ref}
-            className={classes.container}
-            onWheel={event => {
-                const factor = event.deltaY < 0 ? 0.95 : event.deltaY > 0 ? 1.05 : 1
-                scale.current.value = Math.min(Math.max(scale.current.value * factor, 0.5), 4)
-                updateGraph({})
-            }}
-        >
-            {tracer.available && (
-                <>
-                    <Nodes
-                        tracer={tracer}
-                        rect={rect.current}
-                        scale={scale.current}
-                        positions={positions.current}
-                        nodes={nodes.current}
-                        typeNodes={typeNodes.current}
-                        links={links.current}
-                    />
-                    <Edges
-                        rect={rect.current}
-                        scale={scale.current}
-                        positions={positions.current}
-                        links={links.current}
-                    />
-                </>
-            )}
+        <div ref={containerRef} className={classes.container}>
+            <SvgView size={{ width: 750, height: 500 }} markers />
         </div>
     )
-}
+})
 
 function Nodes(props: {
     tracer: State['tracer']
