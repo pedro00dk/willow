@@ -82,27 +82,27 @@ export const SvgView = (props: {
         >
             {props.markers && (
                 <g fill='none' stroke='gray' strokeWidth='1'>
-                    <rect {...props.size} width={props.size.width} height={props.size.height} opacity='0.4' />
+                    <rect {...props.size} width={props.size.width} height={props.size.height} opacity={0.4} />
                     <rect
                         x={props.size.width * 0.125}
                         y={props.size.height * 0.125}
                         width={props.size.width * 0.75}
                         height={props.size.height * 0.75}
-                        opacity='0.2'
+                        opacity={0.2}
                     />
                     <rect
                         x={props.size.width * 0.25}
                         y={props.size.height * 0.25}
                         width={props.size.width * 0.5}
                         height={props.size.height * 0.5}
-                        opacity='0.1'
+                        opacity={0.1}
                     />
                     <rect
                         x={props.size.width * 0.375}
                         y={props.size.height * 0.375}
                         width={props.size.width * 0.25}
                         height={props.size.height * 0.25}
-                        opacity='0.05'
+                        opacity={0.05}
                     />
                 </g>
             )}
