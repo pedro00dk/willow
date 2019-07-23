@@ -2,7 +2,7 @@ import cn from 'classnames'
 import * as React from 'react'
 import * as ReactDom from 'react-dom'
 import { State, useRedux } from '../../../reducers/Store'
-import { NodeWrapper } from './NodeWrapper'
+import { ObjComp } from './ObjComp'
 import { SvgView } from './SvgView'
 
 const classes = {
@@ -16,12 +16,12 @@ export type Link = { ref: HTMLElement; target: string; under: boolean }[]
 
 export const Heap = React.memo(() => {
     const containerRef = React.useRef<HTMLDivElement>()
-    const heapData = React.useRef<{
+    const data = React.useRef<{
         scale: number
         positions: { [reference: string]: Position }
+        links: { [reference: string]: Link }
         nodes: { [reference: string]: Node }
         typeNodes: { [type: string]: Node }
-        links: { [reference: string]: Link }
     }>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
@@ -36,56 +36,18 @@ export const Heap = React.memo(() => {
 
     return (
         <div ref={containerRef} className={classes.container}>
-            <SvgView size={{ width: 750, height: 500 }} markers />
+            {tracer.available && (
+                <SvgView size={{ width: 750, height: 500 }} markers>
+                    <g transform={`translate(${750 / 2},${500 / 2})`}>
+                        {Object.values(tracer.heaps[tracer.index]).map(obj => {
+                            return <ObjComp tracer={tracer} obj={obj} />
+                        })}
+                    </g>
+                </SvgView>
+            )}
         </div>
     )
 })
-
-function Nodes(props: {
-    tracer: State['tracer']
-    rect: ClientRect | DOMRect
-    scale: { value: number }
-    positions: { [reference: string]: Position }
-    nodes: { [reference: string]: Node }
-    typeNodes: { [type: string]: Node }
-    links: { [reference: string]: Link }
-}) {
-    const updateNodes = React.useState<{}>()[1]
-
-    Object.keys(props.links).forEach(reference => delete props.links[reference])
-    Object.values(props.tracer.heaps[props.tracer.index]).forEach(obj => {
-        if (!props.positions[obj.reference])
-            props.positions[obj.reference] = { position: { x: 0, y: 0 }, setPosition: undefined }
-        if (!props.nodes[obj.reference]) props.nodes[obj.reference] = { name: undefined, parameters: {} }
-        if (!props.typeNodes[obj.languageType]) props.typeNodes[obj.languageType] = { name: undefined, parameters: {} }
-        props.links[obj.reference] = [] as Link
-    })
-
-    return (
-        <>
-            {Object.values(props.tracer.heaps[props.tracer.index]).map(obj => {
-                return (
-                    <NodeWrapper
-                        key={obj.reference}
-                        tracer={props.tracer}
-                        obj={obj}
-                        rect={props.rect}
-                        scale={props.scale}
-                        positions={props.positions}
-                        nodes={props.nodes}
-                        typeNodes={props.typeNodes}
-                        links={props.links}
-                        position={props.positions[obj.reference]}
-                        node={props.nodes[obj.reference]}
-                        typeNode={props.typeNodes[obj.languageType]}
-                        link={props.links[obj.reference]}
-                        updateNodes={updateNodes}
-                    />
-                )
-            })}
-        </>
-    )
-}
 
 function Edges(props: {
     rect: ClientRect | DOMRect
