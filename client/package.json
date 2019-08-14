@@ -20,11 +20,11 @@
         "brace": "0.11.1",
         "classnames": "2.2.6",
         "emotion": "10.0.14",
-        "react": "16.8.6",
+        "react": "16.9.0",
         "react-contexify": "4.1.1",
-        "react-dom": "16.8.6",
+        "react-dom": "16.9.0",
         "react-split-pane": "0.1.87",
-        "redux": "4.0.1",
+        "redux": "4.0.4",
         "redux-thunk": "2.3.0"
     },
     "scripts": {
