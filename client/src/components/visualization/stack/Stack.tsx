@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import * as React from 'react'
 import { useRedux } from '../../../reducers/Store'
-import { ScopeComp } from './ScopeComp'
+import { Scope } from './Scope'
 
 const classes = {
     container: cn('d-flex', 'overflow-auto', 'h-100 w-100')
@@ -27,15 +27,7 @@ export const Stack = React.memo(() => {
         <div ref={containerRef} className={classes.container}>
             {available && (
                 <svg width='100%' height={`${height}px`}>
-                    <ScopeComp
-                        scope={stack.root}
-                        depth={stack.depth}
-                        current={-1}
-                        baseX={0}
-                        baseY={0}
-                        width={width}
-                        height={scopeHeight}
-                    />
+                    <Scope scope={stack.root} depth={-1} x={0} y={0} width={width} height={scopeHeight} />
                 </svg>
             )}
         </div>
