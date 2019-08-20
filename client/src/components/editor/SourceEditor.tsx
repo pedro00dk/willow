@@ -3,7 +3,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
-import { actions as codeActions } from '../../reducers/code'
+import { actions as programActions } from '../../reducers/program'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, range, TextEditor } from './TextEditor'
 
@@ -30,17 +30,18 @@ const classes = {
 const getSyntaxSupport = (language: string) =>
     new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
-export const CodeEditor = React.memo(() => {
+export const CodeEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
-    const { language, tracer } = useRedux(state => ({ language: state.language, tracer: state.tracer }))
+    const { language, tracer } = useRedux(state => ({ language: state.program.language, tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return
         editor.setTheme('ace/theme/chrome')
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
 
-        const onChange = (change: ace.EditorChangeEvent) => dispatch(codeActions.set(editor.session.doc.getAllLines()))
+        const onChange = (change: ace.EditorChangeEvent) =>
+            dispatch(programActions.setSource(editor.session.doc.getAllLines()))
 
         editor.on('change', onChange)
         return () => editor.off('change', onChange)
@@ -48,7 +49,7 @@ export const CodeEditor = React.memo(() => {
 
     React.useEffect(() => {
         if (!editor) return
-        editor.session.setMode(getSyntaxSupport(language.languages[language.selected]))
+        editor.session.setMode(getSyntaxSupport(language))
     }, [editor, language])
 
     React.useEffect(() => {
@@ -66,4 +67,4 @@ export const CodeEditor = React.memo(() => {
     }, [editor, tracer])
 
     return <TextEditor onEditor={setEditor} />
-})
+}

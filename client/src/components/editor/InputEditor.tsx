@@ -3,7 +3,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../colors'
-import { actions as inputActions } from '../../reducers/input'
+import { actions as programActions } from '../../reducers/program'
 import { useDispatch, useRedux } from '../../reducers/Store'
 import { EditorMarker, range, TextEditor } from './TextEditor'
 
@@ -11,17 +11,17 @@ const classes = {
     marker: cn('position-absolute', css({ backgroundColor: colors.blue.light }))
 }
 
-export const InputEditor = React.memo(() => {
+export const InputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
     const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
-
+    
     React.useEffect(() => {
         if (!editor) return
         editor.renderer.setShowGutter(false)
 
         const onChange = (change: ace.EditorChangeEvent) =>
-            dispatch(inputActions.set(editor.session.doc.getAllLines().slice(0, -1)))
+            dispatch(programActions.setInput(editor.session.doc.getAllLines().slice(0, -1)))
 
         editor.on('change', onChange)
         return () => editor.off('change', onChange)
@@ -39,4 +39,4 @@ export const InputEditor = React.memo(() => {
     }, [editor, fetching])
 
     return <TextEditor onEditor={setEditor} />
-})
+}

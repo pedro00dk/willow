@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useRedux } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
-export const OutputEditor = React.memo(() => {
+export const OutputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 
@@ -20,4 +20,4 @@ export const OutputEditor = React.memo(() => {
     }, [editor, tracer])
 
     return <TextEditor onEditor={setEditor} />
-})
+}
