@@ -1,15 +1,11 @@
 import * as React from 'react'
 import * as Redux from 'redux'
 import { default as thunk, ThunkAction, ThunkMiddleware } from 'redux-thunk'
-import { reducer as CodeReducer } from './code'
-import { reducer as InputReducer } from './input'
-import { reducer as LanguageReducer } from './language'
+import { reducer as ProgramReducer } from './program'
 import { reducer as TracerReducer } from './tracer'
 
 const reducers = {
-    code: CodeReducer,
-    input: InputReducer,
-    language: LanguageReducer,
+    program: ProgramReducer,
     tracer: TracerReducer
 }
 
