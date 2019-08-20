@@ -218,11 +218,11 @@ const buildGroups = (steps: schema.Step[], heaps: HeapGraph[]) => {
 const trace = (): AsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/trace' })
     try {
-        const { code, input, language } = getState()
+        const { program } = getState()
         const result = (await serverApi.post<schema.Result>('/trace', {
-            language: language.languages[language.selected],
-            source: code.join('\n'),
-            input: input.join('\n')
+            language: program.language,
+            source: program.source,
+            input: program.input
         })).data
         const steps = result.steps
         const output = buildOutput(steps)

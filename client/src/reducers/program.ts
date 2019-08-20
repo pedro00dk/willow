@@ -29,7 +29,13 @@ const initialState: State = {
 export const reducer: Reducer<State, Action> = (state = initialState, action) => {
     switch (action.type) {
         case 'program/fetchLanguages':
-            if (action.payload) return { ...state, languages: new Set(action.payload.languages), fetching: false }
+            if (action.payload)
+                return {
+                    ...state,
+                    languages: new Set(action.payload.languages),
+                    language: action.payload.languages[0],
+                    fetching: false
+                }
             if (action.error) return { ...state, fetching: false, error: action.error }
             return { ...state, fetching: true }
         case 'program/selectLanguage':
