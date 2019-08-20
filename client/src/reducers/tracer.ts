@@ -3,27 +3,27 @@ import * as schema from '../schema/schema'
 import { serverApi } from '../server'
 import { AsyncAction } from './Store'
 
-export type ScopeNode = {
+export type ScopeData = {
     name?: string
-    children?: ScopeNode[]
+    children?: ScopeData[]
     range: [number, number]
 }
 
-export type StackTree = {
-    root: ScopeNode
+export type StackData = {
+    root: ScopeData
     depth: number
 }
 
-export type ObjNode = {
+export type ObjData = {
     reference: string
     type: schema.Obj['type']
     languageType: string
     userDefined: boolean
-    members: { key: number | string | ObjNode; value: number | string | ObjNode }[]
+    members: { key: number | string | ObjData; value: number | string | ObjData }[]
 }
 
-export type HeapGraph = {
-    [reference: string]: ObjNode
+export type HeapData = {
+    [reference: string]: ObjData
 }
 
 export type GroupData = {
@@ -45,8 +45,8 @@ type State = {
     index: number
     steps: schema.Step[]
     output: string[]
-    stack: StackTree
-    heaps: HeapGraph[]
+    stack: StackData
+    heaps: HeapData[]
     groups: GroupMap[]
     error: string
 }
@@ -54,7 +54,7 @@ type State = {
 type Action =
     | {
           type: 'tracer/trace'
-          payload?: { steps: schema.Step[]; output: string[]; stack: StackTree; heaps: HeapGraph[]; groups: GroupMap[] }
+          payload?: { steps: schema.Step[]; output: string[]; stack: StackData; heaps: HeapData[]; groups: GroupMap[] }
           error?: string
       }
     | { type: 'tracer/setIndex'; payload: { index: number } }
@@ -100,63 +100,61 @@ const buildOutput = (steps: schema.Step[]) => {
 }
 
 const buildStack = (steps: schema.Step[]) => {
-    const stack: StackTree = { root: { range: [0, 0], children: [] }, depth: 0 }
-    const treeParentPath = [stack.root]
+    const stack: StackData = { root: { range: [0, 0], children: [] }, depth: 0 }
+    const scopeDataPath = [stack.root]
     steps.forEach((step, i) => {
-        stack.depth = Math.max(stack.depth, treeParentPath.length)
-        treeParentPath.forEach(scope => (scope.range[1] = i))
+        stack.depth = Math.max(stack.depth, scopeDataPath.length)
+        scopeDataPath.forEach(scope => (scope.range[1] = i))
         if (step.threw) {
             const name = step.threw.exception ? step.threw.exception.type : step.threw.cause
-            const threwSyntheticScope: ScopeNode = { name, range: [i, i], children: [{ range: [i, i] }] }
-            stack.root.children.push(threwSyntheticScope)
+            const threwScopeData: ScopeData = { name, range: [i, i], children: [{ range: [i, i] }] }
+            stack.root.children.push(threwScopeData)
             stack.root.range[1] = i
             return
         }
         if (!step.snapshot) return
-        const currentParentScopeNode = treeParentPath[treeParentPath.length - 1]
+        const parentScopeData = scopeDataPath[scopeDataPath.length - 1]
         if (step.snapshot.type === 'call') {
-            const snapshotScope = step.snapshot.stack[step.snapshot.stack.length - 1]
-            const newParentScopeNode: ScopeNode = { name: snapshotScope.name, range: [i, i], children: [] }
-            currentParentScopeNode.children.push(newParentScopeNode)
-            const newLeafScopeNode: ScopeNode = { range: [i, i] }
-            newParentScopeNode.children.push(newLeafScopeNode)
-            treeParentPath.push(newParentScopeNode)
+            const scope = step.snapshot.stack[step.snapshot.stack.length - 1]
+            const childScopeData: ScopeData = { name: scope.name, range: [i, i], children: [{ range: [i, i] }] }
+            parentScopeData.children.push(childScopeData)
+            scopeDataPath.push(childScopeData)
         } else {
             // creates a new leaf if the current scope does not have an ending leaf child (it happens after a RETURN)
             if (
-                currentParentScopeNode.children.length === 0 ||
-                currentParentScopeNode.children[currentParentScopeNode.children.length - 1].children
+                parentScopeData.children.length === 0 ||
+                parentScopeData.children[parentScopeData.children.length - 1].children
             )
-                currentParentScopeNode.children.push({ range: [i, i] })
-            const leafNode = currentParentScopeNode.children[currentParentScopeNode.children.length - 1]
+                parentScopeData.children.push({ range: [i, i] })
+            const leafNode = parentScopeData.children[parentScopeData.children.length - 1]
             leafNode.range[1] = i
-            if (step.snapshot.type === 'return') treeParentPath.pop()
+            if (step.snapshot.type === 'return') scopeDataPath.pop()
         }
     })
     return stack
 }
 
 const buildHeaps = (steps: schema.Step[]) => {
-    const heaps: HeapGraph[] = []
+    const heaps: HeapData[] = []
     steps.forEach((step, i) => {
         if (!step.snapshot) return heaps.push(heaps[i - 1] || {})
-        const heap: HeapGraph = {}
-        heaps.push(heap)
+        const heapData: HeapData = {}
+        heaps.push(heapData)
         Object.entries(step.snapshot.heap).forEach(
-            ([reference, obj]) => (heap[reference] = { reference, ...obj, members: [] })
+            ([reference, obj]) => (heapData[reference] = { reference, ...obj, members: [] })
         )
-        Object.values(heap).forEach(objNode => {
-            const members = step.snapshot.heap[objNode.reference].members
-            objNode.members = members.map(member => ({
-                key: typeof member.key !== 'object' ? member.key : heap[member.key[0]],
-                value: typeof member.value !== 'object' ? member.value : heap[member.value[0]]
+        Object.values(heapData).forEach(objData => {
+            const members = step.snapshot.heap[objData.reference].members
+            objData.members = members.map(member => ({
+                key: typeof member.key !== 'object' ? member.key : heapData[member.key[0]],
+                value: typeof member.value !== 'object' ? member.value : heapData[member.value[0]]
             }))
         })
     })
     return heaps
 }
 
-const expandGroup = (objNode: ObjNode, parentNode: ObjNode, localDepth: number, data: GroupData) => {
+const expandGroup = (objNode: ObjData, parentNode: ObjData, localDepth: number, data: GroupData) => {
     data.members.add(objNode.reference)
     data.depth = Math.max(data.depth, localDepth)
     data.type =
@@ -170,7 +168,7 @@ const expandGroup = (objNode: ObjNode, parentNode: ObjNode, localDepth: number, 
     objNode.members
         .filter(member => typeof member.value === 'object' && member.value.languageType === objNode.languageType)
         .forEach(member => {
-            const value = member.value as ObjNode
+            const value = member.value as ObjData
             if (!data.members.has(value.reference))
                 if (value === parentNode) data.hasParentEdge = true
                 else data.hasNonParentFwdBackCrossCycleEdge = true
@@ -179,7 +177,7 @@ const expandGroup = (objNode: ObjNode, parentNode: ObjNode, localDepth: number, 
     return data
 }
 
-const buildGroups = (steps: schema.Step[], heaps: HeapGraph[]) => {
+const buildGroups = (steps: schema.Step[], heaps: HeapData[]) => {
     const groups: GroupMap[] = []
     steps.forEach((step, i) => {
         if (!step.snapshot) return groups.push(groups[i - 1] || {})
@@ -221,8 +219,8 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
         const { program } = getState()
         const result = (await serverApi.post<schema.Result>('/trace', {
             language: program.language,
-            source: program.source,
-            input: program.input
+            source: program.source.join('\n'),
+            input: program.input.join('\n')
         })).data
         const steps = result.steps
         const output = buildOutput(steps)
