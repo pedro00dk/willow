@@ -8,7 +8,7 @@ import { actions as tracerActions } from '../reducers/tracer'
 import { Languages } from './Languages'
 
 const classes = {
-    container: cn('d-flex flex-row align-items-center', 'shadow-sm'),
+    container: cn('d-flex align-items-center', 'shadow-sm'),
     image: cn('m-3', css({ height: '1.5rem', width: '1.5rem' }))
 }
 
