@@ -5,7 +5,7 @@ import { Scope } from './Scope'
 
 const classes = { container: cn('d-flex align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100') }
 
-export const Stack = () => {
+export const Stack = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
     const { available, stack } = useRedux(state => ({ available: state.tracer.available, stack: state.tracer.stack }))
@@ -24,4 +24,4 @@ export const Stack = () => {
             {available && <Scope scope={stack.root} depth={-1} width={width} />}
         </div>
     )
-}
+})
