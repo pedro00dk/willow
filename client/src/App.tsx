@@ -30,10 +30,10 @@ export function App() {
             </nav>
             <div className={classes.body}>
                 <Controls />
-                <SplitPane split='vertical' base='30%' left={5} right={-5}>
-                    <SplitPane split='horizontal' base='70%' left={5} right={-5}>
+                <SplitPane>
+                    <SplitPane layout='column'>
                         <CodeEditor />
-                        <SplitPane split='horizontal' base='50%' left={5} right={-5}>
+                        <SplitPane layout='column'>
                             <InputEditor />
                             <OutputEditor />
                         </SplitPane>

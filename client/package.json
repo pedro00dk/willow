@@ -5,7 +5,6 @@
         "@types/node": "latest",
         "@types/react": "16.8.23",
         "@types/react-dom": "16.8.4",
-        "@types/react-grid-layout": "0.16.7",
         "http-server": "latest",
         "json-schema-to-typescript": "latest",
         "parcel-bundler": "latest",
@@ -23,7 +22,6 @@
         "react": "16.9.0",
         "react-contexify": "4.1.1",
         "react-dom": "16.9.0",
-        "react-split-pane": "0.1.87",
         "redux": "4.0.4",
         "redux-thunk": "2.3.0"
     },
