@@ -30,7 +30,7 @@ export function App() {
             </nav>
             <div className={classes.body}>
                 <Controls />
-                <SplitPane>
+                <SplitPane ratio={0.3}>
                     <SplitPane layout='column'>
                         <CodeEditor />
                         <SplitPane layout='column'>

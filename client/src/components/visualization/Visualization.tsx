@@ -14,8 +14,8 @@ const classes = {
 const computeNextIndex = (event: React.KeyboardEvent, tracer: State['tracer']) => {
     if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return tracer.index
     const currentStep = tracer.steps[tracer.index]
-    
-    const indexFilter = (index: number) => event.key === 'ArrowLeft' ? index < tracer.index : index > tracer.index
+
+    const indexFilter = (index: number) => (event.key === 'ArrowLeft' ? index < tracer.index : index > tracer.index)
     const anyFamilyFilter = (step: schema.Step) => true
     const siblingParentFilter = (step: schema.Step) =>
         step.snapshot && currentStep.snapshot ? step.snapshot.stack.length <= currentStep.snapshot.stack.length : true
@@ -45,7 +45,7 @@ export function Visualization() {
             }}
             tabIndex={0}
         >
-            <SplitPane split='horizontal' base='15%' left={5} right={-5}>
+            <SplitPane layout='column' ratio={0.3}>
                 <Stack />
                 <Heap />
             </SplitPane>
