@@ -35,7 +35,7 @@ export type GroupData = {
     type: 'node' | 'list' | 'tree' | 'unknown'
 }
 
-export type GroupMap = {
+export type GroupMapData = {
     [reference: string]: GroupData
 }
 
@@ -44,17 +44,23 @@ type State = {
     available: boolean
     index: number
     steps: schema.Step[]
-    output: string[]
-    stack: StackData
-    heaps: HeapData[]
-    groups: GroupMap[]
+    outputs: string[]
+    stackData: StackData
+    heapsData: HeapData[]
+    groupMapsData: GroupMapData[]
     error: string
 }
 
 type Action =
     | {
           type: 'tracer/trace'
-          payload?: { steps: schema.Step[]; output: string[]; stack: StackData; heaps: HeapData[]; groups: GroupMap[] }
+          payload?: {
+              steps: schema.Step[]
+              outputs: string[]
+              stackData: StackData
+              heapsData: HeapData[]
+              groupMapsData: GroupMapData[]
+          }
           error?: string
       }
     | { type: 'tracer/setIndex'; payload: { index: number } }
@@ -63,11 +69,11 @@ const initialState: State = {
     fetching: false,
     available: false,
     index: 0,
-    steps: [],
-    output: [],
-    stack: undefined,
-    heaps: [],
-    groups: [],
+    steps: undefined,
+    outputs: undefined,
+    stackData: undefined,
+    heapsData: undefined,
+    groupMapsData: undefined,
     error: undefined
 }
 
@@ -83,10 +89,10 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-const buildOutput = (steps: schema.Step[]) => {
-    const output: string[] = []
+const buildOutputs = (steps: schema.Step[]) => {
+    const outputs: string[] = []
     steps.forEach((step, i) => {
-        const previousOutput = i !== 0 ? output[i - 1] : ''
+        const previousOutput = i !== 0 ? outputs[i - 1] : ''
         const threw =
             step.threw && step.threw.exception
                 ? step.threw.exception.traceback.join('')
@@ -94,22 +100,22 @@ const buildOutput = (steps: schema.Step[]) => {
                 ? step.threw.cause
                 : ''
         const prints = step.prints ? step.prints.join('') : ''
-        output.push(`${previousOutput}${threw}${prints}`)
+        outputs.push(`${previousOutput}${threw}${prints}`)
     })
-    return output
+    return outputs
 }
 
-const buildStack = (steps: schema.Step[]) => {
-    const stack: StackData = { root: { range: [0, 0], children: [] }, depth: 0 }
-    const scopeDataPath = [stack.root]
+const buildStackData = (steps: schema.Step[]) => {
+    const stackData: StackData = { root: { range: [0, 0], children: [] }, depth: 0 }
+    const scopeDataPath = [stackData.root]
     steps.forEach((step, i) => {
-        stack.depth = Math.max(stack.depth, scopeDataPath.length)
+        stackData.depth = Math.max(stackData.depth, scopeDataPath.length)
         scopeDataPath.forEach(scope => (scope.range[1] = i))
         if (step.threw) {
             const name = step.threw.exception ? step.threw.exception.type : step.threw.cause
             const threwScopeData: ScopeData = { name, range: [i, i], children: [{ range: [i, i] }] }
-            stack.root.children.push(threwScopeData)
-            stack.root.range[1] = i
+            stackData.root.children.push(threwScopeData)
+            stackData.root.range[1] = i
             return
         }
         if (!step.snapshot) return
@@ -126,20 +132,20 @@ const buildStack = (steps: schema.Step[]) => {
                 parentScopeData.children[parentScopeData.children.length - 1].children
             )
                 parentScopeData.children.push({ range: [i, i] })
-            const leafNode = parentScopeData.children[parentScopeData.children.length - 1]
-            leafNode.range[1] = i
+            const lastLeafData = parentScopeData.children[parentScopeData.children.length - 1]
+            lastLeafData.range[1] = i
             if (step.snapshot.type === 'return') scopeDataPath.pop()
         }
     })
-    return stack
+    return stackData
 }
 
-const buildHeaps = (steps: schema.Step[]) => {
-    const heaps: HeapData[] = []
+const buildHeapsData = (steps: schema.Step[]) => {
+    const heapsData: HeapData[] = []
     steps.forEach((step, i) => {
-        if (!step.snapshot) return heaps.push(heaps[i - 1] || {})
+        if (!step.snapshot) return heapsData.push(heapsData[i - 1] || {})
         const heapData: HeapData = {}
-        heaps.push(heapData)
+        heapsData.push(heapData)
         Object.entries(step.snapshot.heap).forEach(
             ([reference, obj]) => (heapData[reference] = { reference, ...obj, members: [] })
         )
@@ -151,39 +157,39 @@ const buildHeaps = (steps: schema.Step[]) => {
             }))
         })
     })
-    return heaps
+    return heapsData
 }
 
-const expandGroup = (objNode: ObjData, parentNode: ObjData, localDepth: number, data: GroupData) => {
-    data.members.add(objNode.reference)
-    data.depth = Math.max(data.depth, localDepth)
-    data.type =
-        data.members.size === 1
+const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: number, groupData: GroupData) => {
+    groupData.members.add(objData.reference)
+    groupData.depth = Math.max(groupData.depth, localDepth)
+    groupData.type =
+        groupData.members.size === 1
             ? 'node'
-            : data.members.size <= data.depth && !data.hasNonParentFwdBackCrossCycleEdge
+            : groupData.members.size <= groupData.depth && !groupData.hasNonParentFwdBackCrossCycleEdge
             ? 'list'
-            : !data.hasNonParentFwdBackCrossCycleEdge
+            : !groupData.hasNonParentFwdBackCrossCycleEdge
             ? 'tree'
             : 'unknown'
-    objNode.members
-        .filter(member => typeof member.value === 'object' && member.value.languageType === objNode.languageType)
+    objData.members
+        .filter(member => typeof member.value === 'object' && member.value.languageType === objData.languageType)
         .forEach(member => {
             const value = member.value as ObjData
-            if (!data.members.has(value.reference))
-                if (value === parentNode) data.hasParentEdge = true
-                else data.hasNonParentFwdBackCrossCycleEdge = true
-            else expandGroup(value, objNode, localDepth + 1, data)
+            if (!groupData.members.has(value.reference))
+                if (value === parentObjData) groupData.hasParentEdge = true
+                else groupData.hasNonParentFwdBackCrossCycleEdge = true
+            else expandGroupData(value, objData, localDepth + 1, groupData)
         })
-    return data
+    return groupData
 }
 
-const buildGroups = (steps: schema.Step[], heaps: HeapData[]) => {
-    const groups: GroupMap[] = []
+const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
+    const groupMapsData: GroupMapData[] = []
     steps.forEach((step, i) => {
-        if (!step.snapshot) return groups.push(groups[i - 1] || {})
-        const group: GroupMap = {}
-        groups.push(group)
-        const heap = heaps[i]
+        if (!step.snapshot) return groupMapsData.push(groupMapsData[i - 1] || {})
+        const groupMapData: GroupMapData = {}
+        groupMapsData.push(groupMapData)
+        const heapData = heapsData[i]
         new Set(
             step.snapshot.stack
                 .flatMap(scope =>
@@ -198,8 +204,8 @@ const buildGroups = (steps: schema.Step[], heaps: HeapData[]) => {
                         .map(member => (member.value as string[])[0])
                 ])
         ).forEach(reference => {
-            if (group[reference]) return
-            const data = expandGroup(heap[reference], undefined, 1, {
+            if (groupMapData[reference]) return
+            const data = expandGroupData(heapData[reference], undefined, 1, {
                 base: reference,
                 depth: 0,
                 members: new Set(),
@@ -207,10 +213,10 @@ const buildGroups = (steps: schema.Step[], heaps: HeapData[]) => {
                 hasNonParentFwdBackCrossCycleEdge: false,
                 type: 'unknown'
             })
-            data.members.forEach(reference => (group[reference] = data))
+            data.members.forEach(reference => (groupMapData[reference] = data))
         })
     })
-    return groups
+    return groupMapsData
 }
 
 const trace = (): AsyncAction => async (dispatch, getState) => {
@@ -223,11 +229,11 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
             input: program.input.join('\n')
         })).data
         const steps = result.steps
-        const output = buildOutput(steps)
-        const stack = buildStack(steps)
-        const heaps = buildHeaps(steps)
-        const groups = buildGroups(steps, heaps)
-        dispatch({ type: 'tracer/trace', payload: { steps, output, stack, heaps, groups } })
+        const outputs = buildOutputs(steps)
+        const stackData = buildStackData(steps)
+        const heapsData = buildHeapsData(steps)
+        const groupMapsData = buildGroupMapsData(steps, heapsData)
+        dispatch({ type: 'tracer/trace', payload: { steps, outputs, stackData, heapsData, groupMapsData } })
     } catch (error) {
         dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
     }
