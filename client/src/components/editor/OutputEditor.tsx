@@ -15,7 +15,7 @@ export const OutputEditor = () => {
 
     React.useEffect(() => {
         if (!editor || !tracer.available) return
-        editor.session.doc.setValue(tracer.output[tracer.index])
+        editor.session.doc.setValue(tracer.outputs[tracer.index])
         editor.scrollToLine(editor.session.getLength(), true, true, undefined)
     }, [editor, tracer])
 

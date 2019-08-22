@@ -29,14 +29,12 @@ const classes = {
 export function Languages() {
     const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
-    const { language, languagesSet, programFetching, tracerFetching } = useRedux(state => ({
+    const { language, languages, fetching, tracerFetching } = useRedux(state => ({
         language: state.program.language,
-        languagesSet: state.program.languages,
-        programFetching: state.program.fetching,
+        languages: state.program.languages,
+        fetching: state.program.fetching,
         tracerFetching: state.tracer.fetching
     }))
-
-    const languages = [...languagesSet]
 
     React.useEffect(() => {
         dispatch(programActions.fetchLanguages())
@@ -52,21 +50,19 @@ export function Languages() {
             >
                 <button className={classes.button}>
                     <span className={classes.label}>
-                        {!programFetching ? (!mouseOver ? 'Language' : 'Reload') : 'Loading'}
+                        {!fetching ? (!mouseOver ? 'Language' : 'Reload') : 'Loading'}
                     </span>
-                    {programFetching && <span className={classes.spin} />}
+                    {fetching && <span className={classes.spin} />}
                 </button>
             </div>
             <select
                 className={classes.select}
                 disabled={tracerFetching}
                 defaultValue={language}
-                onChange={event => dispatch(programActions.selectLanguage(languages[event.target.selectedIndex]))}
+                onChange={event => dispatch(programActions.setLanguage(languages[event.target.selectedIndex]))}
             >
-                {languages.length === 0 && <option key={-1} value='text' label={programFetching ? '...' : '!'} />}
-                {languages.map((language, i) => (
-                    <option key={i} value={language} label={language} />
-                ))}
+                {!!languages && languages.length === 0 && <option key={-1} label={fetching ? '...' : '!'} />}
+                {!!languages && languages.map((language, i) => <option key={i} value={language} label={language} />)}
             </select>
         </div>
     )

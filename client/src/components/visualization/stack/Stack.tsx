@@ -8,7 +8,10 @@ const classes = { container: cn('d-flex align-items-start flex-nowrap', 'overflo
 export const Stack = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
-    const { available, stack } = useRedux(state => ({ available: state.tracer.available, stack: state.tracer.stack }))
+    const { available, stackData } = useRedux(state => ({
+        available: state.tracer.available,
+        stackData: state.tracer.stackData
+    }))
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -21,7 +24,7 @@ export const Stack = React.memo(() => {
 
     return (
         <div ref={ref} className={classes.container}>
-            {available && <Scope scope={stack.root} depth={-1} width={width} />}
+            {available && <Scope scope={stackData.root} depth={-1} width={width} />}
         </div>
     )
 })
