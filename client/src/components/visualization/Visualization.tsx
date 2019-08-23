@@ -31,7 +31,7 @@ const computeNextIndex = (event: React.KeyboardEvent, tracer: State['tracer']) =
     return resultSelector(selectedIndices)
 }
 
-export function Visualization() {
+export const Visualization = () => {
     const dispatch = useDispatch()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 

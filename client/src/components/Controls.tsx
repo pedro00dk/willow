@@ -19,7 +19,7 @@ const styles = {
     })
 }
 
-export function Controls() {
+export const Controls = () => {
     const dispatch = useDispatch()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
 

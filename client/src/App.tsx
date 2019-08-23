@@ -19,28 +19,26 @@ const classes = {
     body: cn('d-flex flex-column flex-fill')
 }
 
-export function App() {
-    return (
-        <div className={classes.container}>
-            <nav className={classes.header}>
-                <a className={classes.link} href='#'>
-                    <img src={logo} className={classes.logo} />
-                    <span className={classes.text}>Willow</span>
-                </a>
-            </nav>
-            <div className={classes.body}>
-                <Controls />
-                <SplitPane ratio={0.3}>
+export const App = () => (
+    <div className={classes.container}>
+        <nav className={classes.header}>
+            <a className={classes.link} href='#'>
+                <img src={logo} className={classes.logo} />
+                <span className={classes.text}>Willow</span>
+            </a>
+        </nav>
+        <div className={classes.body}>
+            <Controls />
+            <SplitPane ratio={0.3}>
+                <SplitPane layout='column'>
+                    <CodeEditor />
                     <SplitPane layout='column'>
-                        <CodeEditor />
-                        <SplitPane layout='column'>
-                            <InputEditor />
-                            <OutputEditor />
-                        </SplitPane>
+                        <InputEditor />
+                        <OutputEditor />
                     </SplitPane>
-                    <Visualization />
                 </SplitPane>
-            </div>
+                <Visualization />
+            </SplitPane>
         </div>
-    )
-}
+    </div>
+)

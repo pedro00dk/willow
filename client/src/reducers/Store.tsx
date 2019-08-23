@@ -22,9 +22,9 @@ const reduxStoreCreator = reduxStoreEnhancer(Redux.createStore)
 const reduxStore = reduxStoreCreator(Redux.combineReducers<State, Action>(reducers))
 const storeContext = React.createContext<typeof reduxStore>(undefined)
 
-export function Store(props: { children?: React.ReactNode }) {
-    return <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
-}
+export const Store = (props: { children?: React.ReactNode }) => (
+    <storeContext.Provider value={reduxStore}>{props.children}</storeContext.Provider>
+)
 
 const shallowCompareObjects = <T extends { [key: string]: unknown }>(prev: T, next: T) => {
     if (Object.is(prev, next)) return true

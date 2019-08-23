@@ -26,7 +26,7 @@ const classes = {
     select: cn('custom-select', css({ flex: '0 1 auto !important', color: colors.black, width: '6rem !important' }))
 }
 
-export function Languages() {
+export const Languages = () => {
     const [mouseOver, setMouseOver] = React.useState(false)
     const dispatch = useDispatch()
     const { language, languages, fetching, tracerFetching } = useRedux(state => ({
