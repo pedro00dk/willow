@@ -225,8 +225,8 @@ const trace = (): AsyncAction => async (dispatch, getState) => {
         const { program } = getState()
         const result = (await serverApi.post<schema.Result>('/trace', {
             language: program.language,
-            source: program.source.join('\n'),
-            input: program.input.join('\n')
+            source: program.source ? program.source.join('\n') : '',
+            input: program.input ? program.input.join('\n') : ''
         })).data
         const steps = result.steps
         const outputs = buildOutputs(steps)
