@@ -1,9 +1,12 @@
 import cn from 'classnames'
+import { css } from 'emotion'
 import * as React from 'react'
 import { useRedux } from '../../../reducers/Store'
 import { Scope } from './Scope'
 
-const classes = { container: cn('d-flex align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100') }
+const classes = {
+    container: cn('d-flex align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100', css({ userSelect: 'none' }))
+}
 
 export const Stack = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
