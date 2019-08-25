@@ -2,9 +2,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { ObjNode } from '../../../reducers/tracer'
+import { ObjData } from '../../../reducers/tracer'
 import * as protocol from '../../../schema/schema'
-import { SquareBaseNode } from './BaseNode'
+import { SquareBaseNode } from './Base'
 import { Link, Node } from './Heap'
 import { BooleanParameter, RangeParameter, SelectParameter } from './Parameters'
 
@@ -69,9 +69,9 @@ const getParameters = (node: Node) => {
     }
 }
 
-export const isDefault = (obj: ObjNode) => false
+export const isDefault = (obj: ObjData) => false
 
-export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
+export function Node(props: { obj: ObjData; node: Node; link: Link }) {
     if (
         (props.obj.type !== protocol.Obj.Type.TUPLE &&
             props.obj.type !== protocol.Obj.Type.ARRAY &&
@@ -112,7 +112,7 @@ export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
     )
 }
 
-export function Parameters(props: { obj: ObjNode; node: Node; onChange: () => void }) {
+export function Parameters(props: { obj: ObjData; node: Node; onChange: () => void }) {
     const parameters = getParameters(props.node)
 
     return (

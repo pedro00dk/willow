@@ -2,9 +2,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { ObjNode } from '../../../reducers/tracer'
+import { ObjData } from '../../../reducers/tracer'
 import * as protocol from '../../../schema/schema'
-import { SquareBaseNode } from './BaseNode'
+import { SquareBaseNode } from './Base'
 import { Link, Node } from './Heap'
 import { RangeParameter } from './Parameters'
 
@@ -50,10 +50,10 @@ const getParameters = (node: Node) => {
     }
 }
 
-export const isDefault = (obj: ObjNode) =>
+export const isDefault = (obj: ObjData) =>
     obj.type === protocol.Obj.Type.HMAP || obj.type === protocol.Obj.Type.TMAP || obj.type === protocol.Obj.Type.OTHER
 
-export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
+export function Node(props: { obj: ObjData; node: Node; link: Link }) {
     if (props.obj.members.length === 0)
         return (
             <SquareBaseNode obj={props.obj}>
@@ -76,7 +76,7 @@ export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
                             <div
                                 ref={ref => {
                                     if (!keyIsReference) return
-                                    props.link.push({ ref, target: (member.key as ObjNode).reference, under: false })
+                                    props.link.push({ ref, target: (member.key as ObjData).reference, under: false })
                                 }}
                                 className={classes.key}
                                 style={{ width: keyWidth }}
@@ -87,7 +87,7 @@ export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
                             <div
                                 ref={ref => {
                                     if (!valueIsReference) return
-                                    props.link.push({ ref, target: (member.value as ObjNode).reference, under: false })
+                                    props.link.push({ ref, target: (member.value as ObjData).reference, under: false })
                                 }}
                                 className={classes.value}
                                 style={{ width: valueWidth }}
@@ -103,7 +103,7 @@ export function Node(props: { obj: ObjNode; node: Node; link: Link }) {
     )
 }
 
-export function Parameters(props: { obj: ObjNode; node: Node; onChange: () => void }) {
+export function Parameters(props: { obj: ObjData; node: Node; onChange: () => void }) {
     const parameters = getParameters(props.node)
 
     return (
