@@ -1,6 +1,7 @@
 import cn from 'classnames'
 import * as React from 'react'
 import { colors } from '../colors'
+import { Draggable } from './Utils'
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100'),
@@ -43,10 +44,7 @@ export const SplitPane = (props: {
         children
     } = props
     const ref = React.useRef<HTMLDivElement>()
-    const firstPaneRef = React.useRef<HTMLDivElement>()
-    const secondPaneRef = React.useRef<HTMLDivElement>()
     const [currentRatio, setCurrentRatio] = React.useState(Math.min(Math.max(ratio, min), max))
-    const dragAnchor = React.useRef<{ x: number; y: number }>()
 
     const sizedProperty = layout === 'row' ? 'width' : 'height'
     const fixedProperty = layout === 'row' ? 'height' : 'width'
@@ -54,7 +52,6 @@ export const SplitPane = (props: {
     return (
         <div ref={ref} className={cn(classes.container, `flex-${props.layout}`, className)} style={style}>
             <div
-                ref={firstPaneRef}
                 className={cn(classes.pane, paneClassName)}
                 style={{
                     ...paneStyle,
@@ -64,35 +61,25 @@ export const SplitPane = (props: {
             >
                 {children[0]}
             </div>
-            <span
-                className={draggerClassName}
-                style={{
-                    ...draggerStyle,
-                    cursor: styles.cursor(layout),
-                    [fixedProperty]: '100%',
-                    [sizedProperty]: dragger
+            <Draggable
+                containerProps={{
+                    className: draggerClassName,
+                    style: {
+                        ...draggerStyle,
+                        cursor: styles.cursor(layout),
+                        [fixedProperty]: '100%',
+                        [sizedProperty]: dragger
+                    }
                 }}
-                draggable
-                onDragStart={event => {
-                    dragAnchor.current = { x: event.clientX, y: event.clientY }
-                    const ghostImage = new Image()
-                    ghostImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-                    event.dataTransfer.setDragImage(ghostImage, 0, 0)
-                }}
-                onDragEnd={event => (dragAnchor.current = undefined)}
-                onDrag={event => {
-                    if (!resizable || (event.clientX === 0 && event.clientY === 0)) return
+                showGhost={false}
+                onDrag={deltaVector => {
+                    if (!resizable) return
                     const rect = ref.current.getBoundingClientRect()
-                    const delta =
-                        layout === 'row'
-                            ? (event.clientX - dragAnchor.current.x) / rect.width
-                            : (event.clientY - dragAnchor.current.y) / rect.height
-                    dragAnchor.current = { x: event.clientX, y: event.clientY }
+                    const delta = layout === 'row' ? deltaVector.x / rect.width : deltaVector.y / rect.height
                     setCurrentRatio(Math.min(Math.max(currentRatio + delta, min), max))
                 }}
             />
             <div
-                ref={secondPaneRef}
                 className={cn(classes.pane, paneClassName)}
                 style={{
                     ...paneStyle,
