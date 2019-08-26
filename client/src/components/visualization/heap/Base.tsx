@@ -9,7 +9,7 @@ const classes = {
     children: cn('d-flex flex-row justify-content-center', 'rounded', 'p-1', css({ background: colors.gray.light }))
 }
 
-export const Base = (props: { title: string; onRef: (ref: HTMLDivElement) => void; children?: React.ReactNode }) => (
+export const Base = (props: { title: string; children?: React.ReactNode }) => (
     <div className={classes.container}>
         <span className={classes.title}>{props.title}</span>
         <div className={classes.children}>{props.children}</div>
