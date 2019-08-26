@@ -30,6 +30,11 @@ export const Draggable = (props: {
                 anchor.current = { x: event.clientX, y: event.clientY }
                 props.onDrag(deltaVector)
             }}
+            onMouseDown={event => event.stopPropagation()}
+            onMouseUp={event => event.stopPropagation()}
+            onMouseEnter={event => event.stopPropagation()}
+            onMouseLeave={event => event.stopPropagation()}
+            onMouseMove={event => event.stopPropagation()}
         >
             {props.children}
         </div>
