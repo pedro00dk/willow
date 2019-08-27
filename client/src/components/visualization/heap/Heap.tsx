@@ -1,48 +1,95 @@
 import cn from 'classnames'
 import * as React from 'react'
-import { State, useRedux } from '../../../reducers/Store'
-import { UnknownParameters } from './Parameters'
+import { useRedux } from '../../../reducers/Store'
 import { SvgView } from './SvgView'
 import { Wrapper } from './Wrapper'
+
+export type DefaultParameters = {
+    [name: string]:
+        | { value: boolean }
+        | { value: number; range: [number, number] }
+        | { value: string; options: string[] }
+}
+export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
+export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
+
+export class HeapObjProps {
+    private positions: { [reference: string]: { x: number; y: number }[] }
+    private parameterSelector: { [reference: string]: 'reference' | 'type' }
+    private referenceParameters: { [reference: string]: UnknownParameters }
+    private typeParameters: { [languageType: string]: UnknownParameters }
+
+    constructor() {
+        this.positions = {}
+        this.parameterSelector = {}
+        this.referenceParameters = {}
+        this.typeParameters = {}
+    }
+
+    getPosition(reference: string, index: number, def?: { x: number; y: number }) {
+        const referencePositions = this.positions[reference]
+            ? this.positions[reference]
+            : (this.positions[reference] = [])
+        return referencePositions[index] ? referencePositions[index] : (referencePositions[index] = def)
+    }
+
+    setRangePosition(reference: string, range: [number, number], position: { x: number; y: number }) {
+        const referencePositions = this.positions[reference]
+            ? this.positions[reference]
+            : (this.positions[reference] = [])
+        for (let i = range[0]; i <= range[1]; i += 1) referencePositions[i] = position
+    }
+
+    getParameterSelector(reference: string, def?: 'reference' | 'type') {
+        return this.parameterSelector[reference]
+            ? this.parameterSelector[reference]
+            : (this.parameterSelector[reference] = def)
+    }
+
+    setParameterSelector(reference: string, selector: 'reference' | 'type') {
+        this.parameterSelector[reference] = selector
+    }
+
+    getReferenceParameters(reference: string, def?: UnknownParameters) {
+        return this.referenceParameters[reference]
+            ? this.referenceParameters[reference]
+            : (this.referenceParameters[reference] = def)
+    }
+
+    setReferenceParameters(reference: string, parameters: UnknownParameters) {
+        this.referenceParameters[reference] = parameters
+    }
+
+    getTypeParameters(reference: string, def?: UnknownParameters) {
+        return this.typeParameters[reference] ? this.typeParameters[reference] : (this.typeParameters[reference] = def)
+    }
+
+    setTypeParameters(type: string, parameters: UnknownParameters) {
+        this.typeParameters[type] = parameters
+    }
+
+    readParameters<T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) {
+        return Object.fromEntries(
+            Object.entries(defaults).map(([name, defaults]) => {
+                if (!parameters) return [name, defaults.value] as const
+                const value = parameters[name]
+                if (typeof value !== typeof defaults.value) return [name, defaults.value] as const
+                return [name, value] as const
+            })
+        ) as ComputedParameters<U>
+    }
+}
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100'),
     line: cn('position-absolute', 'p-0 m-0')
 }
 
-export type Position = { position: { x: number; y: number }; setPosition: (p: { x: number; y: number }) => void }
-export type Node = { name: string; parameters: { [option: string]: unknown } }
-export type Link = { ref: HTMLElement; target: string; under: boolean }[]
-
-export type VisualizationProperties = {
-    positions: { [reference: string]: { x: number; y: number }[] }
-    parameterSelector: { [reference: string]: 'obj' | 'type' }
-    objParameters: { [reference: string]: UnknownParameters }
-    typeParameters: { [languageType: string]: UnknownParameters }
-}
-
 export const Heap = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const update = React.useState({})[1]
-    const visualizationProperties = React.useRef<VisualizationProperties>()
+    const heapObjProps = React.useRef<HeapObjProps>(new HeapObjProps())
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
-
-    if (!visualizationProperties.current)
-        visualizationProperties.current = {
-            positions: {},
-            parameterSelector: {},
-            objParameters: {},
-            typeParameters: {}
-        }
-
-    // if (!tracer.available) {
-    //     //rect.current = new DOMRect()
-    //     scale.current = { value: 1 }
-    //     positions.current = {}
-    //     nodes.current = {}
-    //     typeNodes.current = {}
-    //     links.current = {}
-    // }
 
     return (
         <div ref={ref} className={classes.container}>
@@ -53,7 +100,7 @@ export const Heap = React.memo(() => {
                             <Wrapper
                                 tracer={tracer}
                                 objData={objData}
-                                visualizationProperties={visualizationProperties.current}
+                                heapObjProps={heapObjProps.current}
                                 updateAll={update}
                             />
                         ))}
@@ -63,67 +110,3 @@ export const Heap = React.memo(() => {
         </div>
     )
 })
-
-function Edges(props: {
-    rect: ClientRect | DOMRect
-    scale: { value: number }
-    positions: { [reference: string]: Position }
-    links: { [reference: string]: Link }
-}) {
-    const updateEdges = React.useState<{}>()[1]
-    const thickness = props.scale.value * 2
-
-    React.useEffect(() => {
-        const interval = setInterval(() => updateEdges({}), 50)
-        return () => clearInterval(interval)
-    }, [])
-
-    return (
-        <>
-            {Object.values(props.links)
-                .flatMap(link => link)
-                .map(({ ref, target, under }) => {
-                    if (!ref) return <></>
-                    const bb = ref.getBoundingClientRect()
-                    const fromX = bb.left + bb.width / 2 - props.rect.left
-                    const fromY = bb.top + bb.height / 2 - props.rect.top
-                    const toX = props.positions[target].position.x
-                    const toY = props.positions[target].position.y
-                    const length = Math.sqrt((fromX - toX) ** 2 + (fromY - toY) ** 2)
-                    const angle = Math.atan2(fromY - toY, fromX - toX)
-                    const rotationFixedFromX = (fromX + toX - length) / 2
-                    const rotationFixedFromY = (fromY + toY - thickness) / 2
-                    return (
-                        <>
-                            <div
-                                className={classes.line}
-                                style={{
-                                    zIndex: under ? -1 : 1,
-                                    background: 'linear-gradient(to left, black 30%, transparent 70%)',
-                                    lineHeight: thickness,
-                                    width: length,
-                                    height: thickness,
-                                    left: rotationFixedFromX,
-                                    top: rotationFixedFromY,
-                                    transform: `rotate(${angle}rad)`
-                                }}
-                            />
-                            <div
-                                className={classes.line}
-                                style={{
-                                    zIndex: -1,
-                                    background: 'linear-gradient(to left, transparent 30%, black 70%)',
-                                    lineHeight: thickness,
-                                    width: length,
-                                    height: thickness,
-                                    left: rotationFixedFromX,
-                                    top: rotationFixedFromY,
-                                    transform: `rotate(${angle}rad)`
-                                }}
-                            />
-                        </>
-                    )
-                })}
-        </>
-    )
-}
