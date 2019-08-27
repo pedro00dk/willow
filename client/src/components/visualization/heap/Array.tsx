@@ -5,7 +5,7 @@ import { colors } from '../../../colors'
 import { ObjData } from '../../../reducers/tracer'
 import * as schema from '../../../schema/schema'
 import { Base } from './Base'
-import { ComputedParameters, readParameters, UnknownParameters } from './Parameters'
+import { ComputedParameters, readParameters, UnknownParameters } from './Heap'
 import { Parameters } from './Parameters'
 
 const classes = {

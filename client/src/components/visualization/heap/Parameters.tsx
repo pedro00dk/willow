@@ -1,33 +1,15 @@
 import * as React from 'react'
 import { Item } from 'react-contexify'
+import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from './Heap'
 
-export type DefaultParameters = {
-    [name: string]:
-        | { value: boolean }
-        | { value: number; range: [number, number] }
-        | { value: string; options: string[] }
-}
-export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
-export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
-
-export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) =>
-    Object.fromEntries(
-        Object.entries(defaults).map(([name, defaults]) => {
-            if (!parameters) return [name, defaults.value] as const
-            const value = parameters[name]
-            if (typeof value !== typeof defaults.value) return [name, defaults.value] as const
-            return [name, value] as const
-        })
-    ) as ComputedParameters<U>
-
-export const BooleanParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
+const BooleanParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
         <span>{props.name}</span>
         <input type='checkbox' checked={props.value} onChange={event => props.onChange(event.target.checked)} />
     </Item>
 )
 
-export const NumberParameter = (props: {
+const NumberParameter = (props: {
     name: string
     value: number
     range: [number, number]
@@ -45,7 +27,7 @@ export const NumberParameter = (props: {
     </Item>
 )
 
-export const StringParameter = (props: {
+const StringParameter = (props: {
     name: string
     value: string
     options: string[]

@@ -13,6 +13,16 @@ export type DefaultParameters = {
 export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
 export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
 
+export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) =>
+    Object.fromEntries(
+        Object.entries(defaults).map(([name, defaults]) => {
+            if (!parameters) return [name, defaults.value] as const
+            const value = parameters[name]
+            if (typeof value !== typeof defaults.value) return [name, defaults.value] as const
+            return [name, value] as const
+        })
+    ) as ComputedParameters<U>
+
 export class HeapObjProps {
     private positions: { [reference: string]: { x: number; y: number }[] }
     private parameterSelector: { [reference: string]: 'reference' | 'type' }
@@ -66,17 +76,6 @@ export class HeapObjProps {
 
     setTypeParameters(type: string, parameters: UnknownParameters) {
         this.typeParameters[type] = parameters
-    }
-
-    readParameters<T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) {
-        return Object.fromEntries(
-            Object.entries(defaults).map(([name, defaults]) => {
-                if (!parameters) return [name, defaults.value] as const
-                const value = parameters[name]
-                if (typeof value !== typeof defaults.value) return [name, defaults.value] as const
-                return [name, value] as const
-            })
-        ) as ComputedParameters<U>
     }
 }
 
