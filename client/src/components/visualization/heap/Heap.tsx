@@ -29,11 +29,15 @@ export class HeapObjProps {
     private referenceParameters: { [reference: string]: UnknownParameters }
     private typeParameters: { [languageType: string]: UnknownParameters }
 
-    constructor() {
+    constructor(private viewSize: { width: number; height: number }) {
         this.positions = {}
         this.parameterSelector = {}
         this.referenceParameters = {}
         this.typeParameters = {}
+    }
+
+    getViewSize() {
+        return this.viewSize
     }
 
     getPosition(reference: string, index: number, def?: { x: number; y: number }) {
@@ -47,7 +51,14 @@ export class HeapObjProps {
         const referencePositions = this.positions[reference]
             ? this.positions[reference]
             : (this.positions[reference] = [])
-        for (let i = range[0]; i <= range[1]; i += 1) referencePositions[i] = position
+
+        const clampedPosition = {
+            x: Math.min(Math.max(position.x, 0), this.viewSize.width * 0.95),
+            y: Math.min(Math.max(position.y, 0), this.viewSize.height * 0.95)
+        }
+        for (let i = range[0]; i <= range[1]; i += 1) referencePositions[i] = clampedPosition
+
+        return clampedPosition
     }
 
     getParameterSelector(reference: string, def?: 'reference' | 'type') {
@@ -57,7 +68,7 @@ export class HeapObjProps {
     }
 
     setParameterSelector(reference: string, selector: 'reference' | 'type') {
-        this.parameterSelector[reference] = selector
+        return (this.parameterSelector[reference] = selector)
     }
 
     getReferenceParameters(reference: string, def?: UnknownParameters) {
@@ -67,7 +78,7 @@ export class HeapObjProps {
     }
 
     setReferenceParameters(reference: string, parameters: UnknownParameters) {
-        this.referenceParameters[reference] = parameters
+        return (this.referenceParameters[reference] = parameters)
     }
 
     getTypeParameters(reference: string, def?: UnknownParameters) {
@@ -75,7 +86,7 @@ export class HeapObjProps {
     }
 
     setTypeParameters(type: string, parameters: UnknownParameters) {
-        this.typeParameters[type] = parameters
+        return (this.typeParameters[type] = parameters)
     }
 }
 
@@ -87,24 +98,22 @@ const classes = {
 export const Heap = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const update = React.useState({})[1]
-    const heapObjProps = React.useRef<HeapObjProps>(new HeapObjProps())
+    const heapObjProps = React.useRef<HeapObjProps>(new HeapObjProps({ width: 1000, height: 1000 }))
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
+    const viewSize = heapObjProps.current.getViewSize()
 
     return (
         <div ref={ref} className={classes.container}>
-            <SvgView size={{ width: 750, height: 500 }} markers>
-                {tracer.available && (
-                    <g transform={`translate(${750 / 2},${500 / 2})`}>
-                        {Object.values(tracer.heapsData[tracer.index]).map(objData => (
-                            <Wrapper
-                                tracer={tracer}
-                                objData={objData}
-                                heapObjProps={heapObjProps.current}
-                                updateAll={update}
-                            />
-                        ))}
-                    </g>
-                )}
+            <SvgView size={viewSize} markers>
+                {tracer.available &&
+                    Object.values(tracer.heapsData[tracer.index]).map(objData => (
+                        <Wrapper
+                            tracer={tracer}
+                            objData={objData}
+                            heapObjProps={heapObjProps.current}
+                            updateAll={update}
+                        />
+                    ))}
             </SvgView>
         </div>
     )

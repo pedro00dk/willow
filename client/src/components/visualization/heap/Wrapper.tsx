@@ -146,9 +146,9 @@ export const Wrapper = (props: {
                         x: currentPosition.x + svgDeltaVector.x,
                         y: currentPosition.y + svgDeltaVector.y
                     }
-                    props.heapObjProps.setRangePosition(reference, [index, index], newPosition)
-                    ref.current.setAttribute('x', newPosition.x.toString())
-                    ref.current.setAttribute('y', newPosition.y.toString())
+                    const clampedPosition = props.heapObjProps.setRangePosition(reference, [index, index], newPosition)
+                    ref.current.setAttribute('x', clampedPosition.x.toString())
+                    ref.current.setAttribute('y', clampedPosition.y.toString())
                 }}
             >
                 <MenuProvider id={reference} className={classes.menuProvider}>
