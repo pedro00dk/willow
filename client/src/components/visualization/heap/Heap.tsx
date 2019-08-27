@@ -1,9 +1,9 @@
 import cn from 'classnames'
 import * as React from 'react'
-import * as ReactDom from 'react-dom'
 import { State, useRedux } from '../../../reducers/Store'
-import { ObjComp } from './ObjComp'
+import { UnknownParameters } from './Parameters'
 import { SvgView } from './SvgView'
+import { Wrapper } from './Wrapper'
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100'),
@@ -14,16 +14,26 @@ export type Position = { position: { x: number; y: number }; setPosition: (p: { 
 export type Node = { name: string; parameters: { [option: string]: unknown } }
 export type Link = { ref: HTMLElement; target: string; under: boolean }[]
 
+export type VisualizationProperties = {
+    positions: { [reference: string]: { x: number; y: number }[] }
+    parameterSelector: { [reference: string]: 'obj' | 'type' }
+    objParameters: { [reference: string]: UnknownParameters }
+    typeParameters: { [languageType: string]: UnknownParameters }
+}
+
 export const Heap = React.memo(() => {
-    const containerRef = React.useRef<HTMLDivElement>()
-    const data = React.useRef<{
-        scale: number
-        positions: { [reference: string]: Position }
-        links: { [reference: string]: Link }
-        nodes: { [reference: string]: Node }
-        typeNodes: { [type: string]: Node }
-    }>()
+    const ref = React.useRef<HTMLDivElement>()
+    const update = React.useState({})[1]
+    const visualizationProperties = React.useRef<VisualizationProperties>()
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
+
+    if (!visualizationProperties.current)
+        visualizationProperties.current = {
+            positions: {},
+            parameterSelector: {},
+            objParameters: {},
+            typeParameters: {}
+        }
 
     // if (!tracer.available) {
     //     //rect.current = new DOMRect()
@@ -35,16 +45,21 @@ export const Heap = React.memo(() => {
     // }
 
     return (
-        <div ref={containerRef} className={classes.container}>
-            {tracer.available && (
-                <SvgView size={{ width: 750, height: 500 }} markers>
+        <div ref={ref} className={classes.container}>
+            <SvgView size={{ width: 750, height: 500 }} markers>
+                {tracer.available && (
                     <g transform={`translate(${750 / 2},${500 / 2})`}>
-                        {Object.values(tracer.heaps[tracer.index]).map(obj => {
-                            return <ObjComp tracer={tracer} obj={obj} />
-                        })}
+                        {Object.values(tracer.heapsData[tracer.index]).map(objData => (
+                            <Wrapper
+                                tracer={tracer}
+                                objData={objData}
+                                visualizationProperties={visualizationProperties.current}
+                                updateAll={update}
+                            />
+                        ))}
                     </g>
-                </SvgView>
-            )}
+                )}
+            </SvgView>
         </div>
     )
 })
