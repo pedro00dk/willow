@@ -4,16 +4,26 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 const lerp = (ratio: number, from: number, to: number) => from * (1 - ratio) + to * ratio
 const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
 
-const svgScreenToModelPoint = (svg: SVGSVGElement, ...screenPoints: { x: number; y: number }[]) => {
-    const screenTransformMatrix = svg.getScreenCTM()
-    const modelTransformMatrix = screenTransformMatrix.inverse()
-    return screenPoints.map(screenPoint => {
-        const svgScreenPoint = svg.createSVGPoint()
-        svgScreenPoint.x = screenPoint.x
-        svgScreenPoint.y = screenPoint.y
-        const svgModelPoint = svgScreenPoint.matrixTransform(modelTransformMatrix)
-        return { x: svgModelPoint.x, y: svgModelPoint.y }
+export const svgScreenPointTransform = (
+    direction: 'toSvg' | 'toScreen',
+    svgElement: SVGGraphicsElement,
+    ...points: { x: number; y: number }[]
+) => {
+    const svgToScreenTransformMatrix = svgElement.getScreenCTM()
+    const transformMatrix = direction === 'toSvg' ? svgToScreenTransformMatrix.inverse() : svgToScreenTransformMatrix
+    return points.map(point => {
+        const transformedDomPoint = new DOMPoint(point.x, point.y).matrixTransform(transformMatrix)
+        return { x: transformedDomPoint.x, y: transformedDomPoint.y }
     })
+}
+
+export const svgScreenVectorTransform = (
+    direction: 'toSvg' | 'toScreen',
+    svgElement: SVGGraphicsElement,
+    ...vectors: { x: number; y: number }[]
+) => {
+    const [root, ...shiftedVectors] = svgScreenPointTransform(direction, svgElement, { x: 0, y: 0 }, ...vectors)
+    return shiftedVectors.map(shiftedVector => ({ x: shiftedVector.x - root.x, y: shiftedVector.y - root.y }))
 }
 
 export const SvgView = (props: {
@@ -21,7 +31,7 @@ export const SvgView = (props: {
     markers: boolean
     children?: React.ReactNode
 }) => {
-    const containerRef = React.useRef<SVGSVGElement>()
+    const ref = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
     const viewBox = React.useRef([
         props.size.width * 0.25,
@@ -38,7 +48,7 @@ export const SvgView = (props: {
 
     return (
         <svg
-            ref={containerRef}
+            ref={ref}
             width='100%'
             height='100%'
             viewBox={viewBox.current.join(' ')}
@@ -48,28 +58,26 @@ export const SvgView = (props: {
             onMouseLeave={event => (click.current = false)}
             onMouseMove={event => {
                 if (!click.current) return
-                const [modelStartPoint, modelEndPoint] = svgScreenToModelPoint(
-                    containerRef.current,
-                    { x: 0, y: 0 },
-                    { x: event.movementX, y: event.movementY }
-                )
+                const screenDeltaVector = { x: event.movementX, y: event.movementY }
+                const [svgDeltaVector] = svgScreenVectorTransform('toSvg', ref.current, screenDeltaVector)
                 viewBox.current[0] = clamp(
-                    viewBox.current[0] - (modelEndPoint.x - modelStartPoint.x),
+                    viewBox.current[0] - svgDeltaVector.x,
                     ranges.x[0],
                     ranges.x[1] - viewBox.current[2]
                 )
                 viewBox.current[1] = clamp(
-                    viewBox.current[1] - (modelEndPoint.y - modelStartPoint.y),
+                    viewBox.current[1] - svgDeltaVector.y,
                     ranges.y[0],
                     ranges.y[1] - viewBox.current[3]
                 )
-                containerRef.current.setAttribute('viewBox', viewBox.current.join(' '))
+                ref.current.setAttribute('viewBox', viewBox.current.join(' '))
             }}
             onWheel={event => {
-                const [point] = svgScreenToModelPoint(containerRef.current, { x: event.clientX, y: event.clientY })
+                const screenPoint = { x: event.clientX, y: event.clientY }
+                const [svgPoint] = svgScreenPointTransform('toSvg', ref.current, screenPoint)
                 const delta = Math.min(props.size.width, props.size.height) * (event.deltaY < 0 ? 0.01 : -0.01)
-                const xRatio = ilerp(point.x, viewBox.current[0], viewBox.current[0] + viewBox.current[2])
-                const yRatio = ilerp(point.y, viewBox.current[1], viewBox.current[1] + viewBox.current[3])
+                const xRatio = ilerp(svgPoint.x, viewBox.current[0], viewBox.current[0] + viewBox.current[2])
+                const yRatio = ilerp(svgPoint.y, viewBox.current[1], viewBox.current[1] + viewBox.current[3])
                 const width = clamp(viewBox.current[2] - delta, ranges.width[0], ranges.width[1])
                 const height = clamp(viewBox.current[3] - delta, ranges.height[0], ranges.height[1])
                 if (width === viewBox.current[2] && height === viewBox.current[3]) return
@@ -77,7 +85,7 @@ export const SvgView = (props: {
                 viewBox.current[3] = height
                 viewBox.current[0] = clamp(viewBox.current[0] + delta * xRatio, ranges.x[0], ranges.x[1] - width)
                 viewBox.current[1] = clamp(viewBox.current[1] + delta * yRatio, ranges.y[0], ranges.y[1] - height)
-                containerRef.current.setAttribute('viewBox', viewBox.current.join(' '))
+                ref.current.setAttribute('viewBox', viewBox.current.join(' '))
             }}
         >
             {props.markers && (
