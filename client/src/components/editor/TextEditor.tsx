@@ -2,14 +2,6 @@ import * as ace from 'brace'
 import cn from 'classnames'
 import * as React from 'react'
 
-const classes = {
-    container: cn('d-flex', 'w-100 h-100')
-}
-
-const styles = {
-    font: '1rem'
-}
-
 export type EditorMouseEvent = {
     [props: string]: unknown
     domEvent: MouseEvent
@@ -31,6 +23,14 @@ export type EditorMarker = {
     type: string
     renderer: unknown
     range: ace.Range
+}
+
+const classes = {
+    container: cn('d-flex', 'w-100 h-100')
+}
+
+const styles = {
+    font: '1rem'
 }
 
 export const range = (startRow: number, startColumn: number, endRow: number, endColumn: number): ace.Range =>

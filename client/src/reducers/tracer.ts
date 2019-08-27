@@ -69,11 +69,11 @@ const initialState: State = {
     fetching: false,
     available: false,
     index: 0,
-    steps: undefined,
-    outputs: undefined,
+    steps: [],
+    outputs: [],
     stackData: undefined,
-    heapsData: undefined,
-    groupMapsData: undefined,
+    heapsData: [],
+    groupMapsData: [],
     error: undefined
 }
 

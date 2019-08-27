@@ -27,13 +27,15 @@ const classes = {
     exception: cn('position-absolute', css({ background: colors.red.light }))
 }
 
-const getSyntaxSupport = (language: string) =>
-    new Set(['java', 'python']).has(language) ? `ace/mode/${language}` : 'ace/mode/text'
+const supportedLanguages = new Set(['java', 'python'])
 
 export const CodeEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({ language: state.program.language, tracer: state.tracer }))
+
+    const getSyntaxSupport = (language: string) =>
+        supportedLanguages.has(language) ? `ace/mode/${language}` : 'ace/mode/text'
 
     React.useEffect(() => {
         if (!editor) return

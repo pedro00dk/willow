@@ -19,10 +19,10 @@ type Action =
 
 const initialState: State = {
     fetching: false,
-    languages: undefined,
+    languages: [],
     language: undefined,
-    source: undefined,
-    input: undefined,
+    source: [],
+    input: [],
     error: undefined
 }
 
@@ -36,7 +36,8 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
                     language: action.payload.languages[0],
                     fetching: false
                 }
-            if (action.error) return { ...state, fetching: false, error: action.error }
+            if (action.error)
+                return { ...state, languages: [], language: undefined, fetching: false, error: action.error }
             return { ...state, fetching: true }
         case 'program/setLanguage':
             return { ...state, language: action.payload }

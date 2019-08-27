@@ -45,7 +45,6 @@ export const SplitPane = (props: {
     } = props
     const ref = React.useRef<HTMLDivElement>()
     const [currentRatio, setCurrentRatio] = React.useState(Math.min(Math.max(ratio, min), max))
-
     const sizedProperty = layout === 'row' ? 'width' : 'height'
     const fixedProperty = layout === 'row' ? 'height' : 'width'
 

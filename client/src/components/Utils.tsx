@@ -1,11 +1,5 @@
 import * as React from 'react'
 
-const emptyGhostImage = (() => {
-    const emptyGhostImage = new Image()
-    emptyGhostImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-    return emptyGhostImage
-})()
-
 export const Draggable = (props: {
     containerProps: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
     showGhost: boolean
@@ -21,6 +15,8 @@ export const Draggable = (props: {
             onDragStart={event => {
                 anchor.current = { x: event.clientX, y: event.clientY }
                 if (props.showGhost) return
+                const emptyGhostImage = new Image()
+                emptyGhostImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
                 event.dataTransfer.setDragImage(emptyGhostImage, 0, 0)
             }}
             onDragEnd={event => (anchor.current = undefined)}

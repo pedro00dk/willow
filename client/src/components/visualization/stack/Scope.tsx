@@ -57,7 +57,6 @@ export const Scope = (props: { scope: ScopeData; depth: number; width: number })
     const { selected } = useRedux(state => ({
         selected: state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
     }))
-
     const root = props.scope.name == undefined && !!props.scope.children
     const leaf = props.scope.name == undefined && !props.scope.children
 

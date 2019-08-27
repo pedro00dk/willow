@@ -61,8 +61,8 @@ export const Languages = () => {
                 defaultValue={language}
                 onChange={event => dispatch(programActions.setLanguage(languages[event.target.selectedIndex]))}
             >
-                {!!languages && languages.length === 0 && <option key={-1} label={fetching ? '...' : '!'} />}
-                {!!languages && languages.map((language, i) => <option key={i} value={language} label={language} />)}
+                {languages.length === 0 && <option key={-1} label={fetching ? '...' : '!'} />}
+                {languages.map((language, i) => <option key={i} value={language} label={language} />)}
             </select>
         </div>
     )
