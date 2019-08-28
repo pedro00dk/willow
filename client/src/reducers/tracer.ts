@@ -15,7 +15,7 @@ export type StackData = {
 }
 
 export type ObjData = {
-    reference: string
+    id: string
     type: schema.Obj['type']
     languageType: string
     userDefined: boolean
@@ -23,7 +23,7 @@ export type ObjData = {
 }
 
 export type HeapData = {
-    [reference: string]: ObjData
+    [id: string]: ObjData
 }
 
 export type GroupData = {
@@ -36,7 +36,7 @@ export type GroupData = {
 }
 
 export type GroupMapData = {
-    [reference: string]: GroupData
+    [id: string]: GroupData
 }
 
 type State = {
@@ -146,11 +146,9 @@ const buildHeapsData = (steps: schema.Step[]) => {
         if (!step.snapshot) return heapsData.push(heapsData[i - 1] || {})
         const heapData: HeapData = {}
         heapsData.push(heapData)
-        Object.entries(step.snapshot.heap).forEach(
-            ([reference, obj]) => (heapData[reference] = { reference, ...obj, members: [] })
-        )
+        Object.entries(step.snapshot.heap).forEach(([id, obj]) => (heapData[id] = { id, ...obj, members: [] }))
         Object.values(heapData).forEach(objData => {
-            const members = step.snapshot.heap[objData.reference].members
+            const members = step.snapshot.heap[objData.id].members
             objData.members = members.map(member => ({
                 key: typeof member.key !== 'object' ? member.key : heapData[member.key[0]],
                 value: typeof member.value !== 'object' ? member.value : heapData[member.value[0]]
@@ -161,7 +159,7 @@ const buildHeapsData = (steps: schema.Step[]) => {
 }
 
 const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: number, groupData: GroupData) => {
-    groupData.members.add(objData.reference)
+    groupData.members.add(objData.id)
     groupData.depth = Math.max(groupData.depth, localDepth)
     groupData.type =
         groupData.members.size === 1
@@ -175,7 +173,7 @@ const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: n
         .filter(member => typeof member.value === 'object' && member.value.languageType === objData.languageType)
         .forEach(member => {
             const value = member.value as ObjData
-            if (!groupData.members.has(value.reference))
+            if (!groupData.members.has(value.id))
                 if (value === parentObjData) groupData.hasParentEdge = true
                 else groupData.hasNonParentFwdBackCrossCycleEdge = true
             else expandGroupData(value, objData, localDepth + 1, groupData)
@@ -197,23 +195,23 @@ const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
                         .filter(variable => typeof variable.value === 'object')
                         .map(variable => (variable.value as string[])[0])
                 )
-                .flatMap(reference => [
-                    reference,
-                    ...step.snapshot.heap[reference].members
+                .flatMap(id => [
+                    id,
+                    ...step.snapshot.heap[id].members
                         .filter(member => typeof member.value === 'object')
                         .map(member => (member.value as string[])[0])
                 ])
-        ).forEach(reference => {
-            if (groupMapData[reference]) return
-            const data = expandGroupData(heapData[reference], undefined, 1, {
-                base: reference,
+        ).forEach(id => {
+            if (groupMapData[id]) return
+            const data = expandGroupData(heapData[id], undefined, 1, {
+                base: id,
                 depth: 0,
                 members: new Set(),
                 hasParentEdge: false,
                 hasNonParentFwdBackCrossCycleEdge: false,
                 type: 'unknown'
             })
-            data.members.forEach(reference => (groupMapData[reference] = data))
+            data.members.forEach(id => (groupMapData[id] = data))
         })
     })
     return groupMapsData
