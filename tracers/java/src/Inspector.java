@@ -194,10 +194,10 @@ class Inspector {
         return null;
     }
 
-    private JsonElement inspectIterable(JsonObject snapshot, ArrayReference jdiArrRef, String reference, String type, String languageType, ThreadReference threadReference) {
+    private JsonElement inspectIterable(JsonObject snapshot, ArrayReference jdiArrRef, String id, String type, String languageType, ThreadReference threadReference) {
         var obj = new JsonObject();
-        // add reference to heap graph (it has to be added before other objects inspections)
-        snapshot.get("heap").getAsJsonObject().add(reference, obj);
+        // add id to heap graph (it has to be added before other objects inspections)
+        snapshot.get("heap").getAsJsonObject().add(id, obj);
         obj.addProperty("type", type);
         obj.addProperty("languageType", languageType);
         obj.addProperty("userDefined", false);
@@ -219,9 +219,9 @@ class Inspector {
                                 }
                         )
         );
-        var referenceValue = new JsonArray(1);
-        referenceValue.add(reference);
-        return referenceValue;
+        var idValue = new JsonArray(1);
+        idValue.add(id);
+        return idValue;
     }
 
     private JsonElement inspectArray(JsonObject snapshot, ObjectReference jdiObjRef, ThreadReference threadReference) {
@@ -282,10 +282,10 @@ class Inspector {
                     List.of(),
                     ObjectReference.INVOKE_SINGLE_THREADED
             );
-            var reference = Long.toString(jdiObjRef.uniqueID());
+            var id = Long.toString(jdiObjRef.uniqueID());
             var obj = new JsonObject();
-            // add reference to heap graph (it has to be added before other objects inspections)
-            snapshot.get("heap").getAsJsonObject().add(reference, obj);
+            // add id to heap graph (it has to be added before other objects inspections)
+            snapshot.get("heap").getAsJsonObject().add(id, obj);
             obj.addProperty("type", "map");
             obj.addProperty("languageType", jdiObjRef.referenceType().name());
             obj.addProperty("userDefined", false);
@@ -323,9 +323,9 @@ class Inspector {
                                     }
                             )
             );
-            var referenceValue = new JsonArray(1);
-            referenceValue.add(reference);
-            return referenceValue;
+            var idValue = new JsonArray(1);
+            idValue.add(id);
+            return idValue;
         } catch (ClassNotFoundException | InvalidTypeException | ClassNotLoadedException | IncompatibleThreadStateException | InvocationException e) {
             // ignore errors
         }
@@ -340,10 +340,10 @@ class Inspector {
 
         var orderedFields = jdiObjRef.referenceType().allFields();
         var fieldsValues = jdiObjRef.getValues(orderedFields);
-        var reference = Long.toString(jdiObjRef.uniqueID());
+        var id = Long.toString(jdiObjRef.uniqueID());
         var obj = new JsonObject();
-        // add reference to heap graph (it has to be added before other objects inspections)
-        snapshot.get("heap").getAsJsonObject().add(reference, obj);
+        // add id to heap graph (it has to be added before other objects inspections)
+        snapshot.get("heap").getAsJsonObject().add(id, obj);
         obj.addProperty("type", "map");
         obj.addProperty("languageType", jdiObjRef.referenceType().name());
         obj.addProperty("userDefined", true);
@@ -364,9 +364,9 @@ class Inspector {
                                 }
                         )
         );
-        var referenceValue = new JsonArray(1);
-        referenceValue.add(reference);
-        return referenceValue;
+        var idValue = new JsonArray(1);
+        idValue.add(id);
+        return idValue;
     }
 }
 

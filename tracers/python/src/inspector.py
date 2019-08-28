@@ -49,9 +49,9 @@ class Inspector:
                 classes.add(obj)
             return str(obj)
 
-        reference = str(id(obj))
-        if reference in snapshot['heap']:
-            return [reference]
+        id_ = str(id(obj))
+        if id_ in snapshot['heap']:
+            return [id_]
 
         generic_type = 'other'
         language_type = type(obj).__name__
@@ -73,8 +73,8 @@ class Inspector:
 
         if members is not None:
             # known object type
-            # add reference to snapshot heap (it has to be added before other objects inspections)
-            obj = snapshot['heap'][reference] = {}
+            # add id to snapshot heap (it has to be added before other objects inspections)
+            obj = snapshot['heap'][id_] = {}
             obj['type'] = generic_type
             obj['languageType'] = language_type
             obj['userDefined'] = user_defined
@@ -85,7 +85,7 @@ class Inspector:
                 }
                 for key, value in members
             ]
-            return [reference]
+            return [id_]
         else:
             # unknown object type
             # instead of inspecting unknown objects, I decided to inspect its type
