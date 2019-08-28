@@ -20,6 +20,7 @@ export type ObjData = {
     languageType: string
     userDefined: boolean
     members: { key: number | string | ObjData; value: number | string | ObjData }[]
+    objMembers: number
 }
 
 export type HeapData = {
@@ -146,13 +147,20 @@ const buildHeapsData = (steps: schema.Step[]) => {
         if (!step.snapshot) return heapsData.push(heapsData[i - 1] || {})
         const heapData: HeapData = {}
         heapsData.push(heapData)
-        Object.entries(step.snapshot.heap).forEach(([id, obj]) => (heapData[id] = { id, ...obj, members: [] }))
+        Object.entries(step.snapshot.heap).forEach(
+            ([id, obj]) => (heapData[id] = { id, ...obj, members: [], objMembers: 0 })
+        )
         Object.values(heapData).forEach(objData => {
             const members = step.snapshot.heap[objData.id].members
             objData.members = members.map(member => ({
                 key: typeof member.key !== 'object' ? member.key : heapData[member.key[0]],
                 value: typeof member.value !== 'object' ? member.value : heapData[member.value[0]]
             }))
+            objData.objMembers = objData.members.reduce(
+                (acc, member) =>
+                    acc + Number(typeof member.key === 'object') + Number(typeof member.value === 'object'),
+                0
+            )
         })
     })
     return heapsData
