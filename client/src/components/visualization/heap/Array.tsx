@@ -4,7 +4,7 @@ import * as React from 'react'
 import { colors } from '../../../colors'
 import { ObjData } from '../../../reducers/tracer'
 import * as schema from '../../../schema/schema'
-import { Base } from './Base'
+import { Base, getDisplayValue, valueChanged } from './Base'
 import { ComputedParameters, readParameters, UnknownParameters } from './Heap'
 import { Parameters } from './Parameters'
 
@@ -38,9 +38,12 @@ const defaultParameters = {
 export const isDefault = (objData: ObjData) => defaults.has(objData.type)
 export const isSupported = (objData: ObjData) => supported.has(objData.type)
 
-export const Node = (props: { objData: ObjData; parameters: UnknownParameters }) => {
+export const Node = (props: {
+    objData: ObjData
+    parameters: UnknownParameters
+    onTarget: (id: string, target: string, ref: HTMLSpanElement) => void
+}) => {
     const previousMembers = React.useRef<ObjData['members']>([])
-
     const parameters = readParameters(props.parameters, defaultParameters)
 
     React.useEffect(() => {
@@ -55,29 +58,27 @@ export const Node = (props: { objData: ObjData; parameters: UnknownParameters })
                     : props.objData.members.length === 0
                     ? 'empty'
                     : props.objData.members.map((member, i) => {
-                          const value = member.value
-                          const previousValue =
-                              previousMembers.current.length > i ? previousMembers.current[i].value : undefined
-                          const isReference = typeof value === 'object'
-                          const previousIsReference = typeof previousValue === 'object'
-                          const changed =
-                              isReference !== previousIsReference ||
-                              (isReference && (value as ObjData).reference !== (previousValue as ObjData).reference) ||
-                              value !== previousValue
-                          const shownValue = isReference ? '::' : value
+                          const isPrimitive = typeof member.value !== 'object'
+                          const changed = valueChanged(previousMembers.current[i], member)
+                          const displayValue = getDisplayValue(member.value)
 
                           return (
                               <div
                                   key={i}
                                   className={classes.element}
-                                  style={{
-                                      maxWidth: parameters['max width'],
-                                      background: styles.background(changed)
-                                  }}
-                                  title={shownValue.toString()}
+                                  style={{ maxWidth: parameters['max width'], background: styles.background(changed) }}
+                                  title={displayValue}
                               >
                                   {parameters['show index'] && <span className={classes.index}>{i}</span>}
-                                  <span className={classes.value}>{shownValue}</span>
+                                  <span
+                                      ref={ref =>
+                                          !isPrimitive &&
+                                          props.onTarget(props.objData.id, (member.value as ObjData).id, ref)
+                                      }
+                                      className={classes.value}
+                                  >
+                                      {displayValue}
+                                  </span>
                               </div>
                           )
                       })}
@@ -96,5 +97,5 @@ export const NodeParameters = (props: {
         parameters={props.parameters}
         defaults={defaultParameters}
         onChange={props.onChange}
-    ></Parameters>
+    />
 )
