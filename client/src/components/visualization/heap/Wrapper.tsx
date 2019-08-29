@@ -9,12 +9,13 @@ import { Draggable } from '../../Utils'
 import * as ArrayComponents from './Array'
 
 import 'react-contexify/dist/ReactContexify.min.css'
-import { HeapObjProps } from './Heap'
-import { svgScreenVectorTransform } from './SvgView'
+import { HeapControl } from './Heap'
+import { svgScreenPointTransform, svgScreenVectorTransform } from './SvgView'
 
 const classes = {
-    foreignObject: cn(css({ cursor: 'move', transition: 'x 0.2s ease-out, y 0.2s ease-out' })),
-    container: cn('d-flex position-absolute', css({ userSelect: 'none' })),
+    container: cn(css({ cursor: 'move' /*, transition: 'x 0.1s ease-out, y 0.1s ease-out' */ })),
+    draggable: cn('d-flex position-absolute', css({ userSelect: 'none' })),
+    path: cn(),
     menuProvider: cn('d-flex'),
     selected: cn(css({ background: colors.blue.lighter }))
 }
@@ -29,12 +30,12 @@ const classes = {
 //     return { ...defaultModule, node }
 // }
 
-// const getLinked = (current: string, links: { [reference: string]: Link }, pool: Set<string>, depth: number) => {
-//     if (depth === 0 || pool.has(current)) return
-//     pool.add(current)
-//     links[current].forEach(({ target }) => getLinked(target, links, pool, depth - 1))
-//     return pool
-// }
+const getLinked = (id: string, heapControl: HeapControl, pool: Set<string>, depth: number) => {
+    if (depth === 0 || pool.has(id)) return
+    pool.add(id)
+    heapControl.getTargets(id).forEach(({ target }) => getLinked(target, heapControl, pool, depth - 1))
+    return pool
+}
 
 // const onReposition = (
 //     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -75,121 +76,153 @@ const classes = {
 //     }
 // }
 
-// const onDrag = (
-//     event: React.DragEvent<HTMLDivElement>,
-//     anchor: { x: number; y: number },
-//     root: string,
-//     rect: ClientRect | DOMRect,
-//     positions: { [reference: string]: Position },
-//     links: { [reference: string]: Link }
-// ) => {
-//     if (event.clientX === 0 && event.clientY === 0) return
-//     const pool = getLinked(root, links, new Set(), !event.ctrlKey ? 1 : !event.shiftKey ? 2 : Infinity)
-//     pool.forEach(reference => {
-//         const position = positions[reference]
-//         position.setPosition({
-//             x: Math.max(10, Math.min(position.position.x + (event.clientX - anchor.x), rect.width - 10)),
-//             y: Math.max(10, Math.min(position.position.y + (event.clientY - anchor.y), rect.height - 10))
-//         })
-//     })
-// }
+const move = (id: string, index: number, delta: { x: number; y: number }, depth: number, heapControl: HeapControl) => {
+    const linkedPool = getLinked(id, heapControl, new Set(), depth)
+    linkedPool.forEach(id => {
+        const position = heapControl.getPosition(id, index)
+        heapControl.setPositionRange(id, [index, index], { x: position.x + delta.x, y: position.y + delta.y })
+    })
+}
 
 export const Wrapper = (props: {
     tracer: State['tracer']
     objData: ObjData
-    heapObjProps: HeapObjProps
+    heapControl: HeapControl
     updateAll: React.Dispatch<{}>
-    // rect: ClientRect | DOMRect
-    // scale: { value: number }
-    // positions: { [reference: string]: Position }
-    // nodes: { [reference: string]: Node }
-    // typeNodes: { [type: string]: Node }
-    // links: { [reference: string]: Link }
-    // position: Position
-    // node: Node
-    // typeNode: Node
-    // link: Link
-    // updateNodes: React.Dispatch<{}>
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
     const childRef = React.useRef<HTMLDivElement>()
+    const pathRefs = React.useRef<SVGLineElement[]>([])
     const updateThis = React.useState({})[1]
-    const box = React.useRef<DOMRect>()
     const { index } = props.tracer
-    const { reference, languageType } = props.objData
-    const position = props.heapObjProps.getPosition(reference, index, { x: 0, y: 0 })
-    const parameterSelector = props.heapObjProps.getParameterSelector(reference, 'type')
-    const referenceParameters = props.heapObjProps.getReferenceParameters(reference, {})
-    const typeParameters = props.heapObjProps.getTypeParameters(reference, {})
+    const { id, languageType } = props.objData
+    const parameterSelector = props.heapControl.getParameterSelector(id, 'type')
+    const idParameters = props.heapControl.getIdParameters(id, {})
+    const typeParameters = props.heapControl.getTypeParameters(id, {})
+    pathRefs.current = []
 
     React.useLayoutEffect(() => {
+        props.heapControl.setContainer(id, ref.current)
         const childRect = childRef.current.getBoundingClientRect()
         const screenSize = { x: childRect.width, y: childRect.height }
         const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
         ref.current.setAttribute('width', svgSize.x.toString())
         ref.current.setAttribute('height', svgSize.y.toString())
-        box.current = ref.current.getBBox()
+        props.heapControl.callSubscriptions(id)
+    })
+
+    React.useLayoutEffect(() => {
+        let previousSubscriptionIndex = undefined as number
+        const updatePosition = (subscriptionIndex?: number) => {
+            if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
+            previousSubscriptionIndex = subscriptionIndex
+            const position = props.heapControl.getPosition(id, index, {x: 0, y: 0})
+            ref.current.setAttribute('x', position.x.toString())
+            ref.current.setAttribute('y', position.y.toString())
+        }
+        updatePosition()
+        props.heapControl.subscribe(id, updatePosition)
+    })
+
+    React.useEffect(() => {
+        let previousSubscriptionIndex = undefined as number
+        const updatePaths = (subscriptionIndex?: number) => {
+            if (subscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex)
+                return (previousSubscriptionIndex = subscriptionIndex)
+
+            const targets = props.heapControl.getTargets(id)
+            targets.forEach(({ target, element }, i) => {
+                const sourceRect = element.getBoundingClientRect()
+                const [sourceBox] = svgScreenVectorTransform('toSvg', ref.current, {
+                    x: sourceRect.width,
+                    y: sourceRect.height
+                })
+                const [sourceLeftTop] = svgScreenPointTransform('toSvg', ref.current, {
+                    x: sourceRect.left,
+                    y: sourceRect.top
+                })
+                const sourcePositionX = sourceLeftTop.x + sourceBox.x / 2
+                const sourcePositionY = sourceLeftTop.y + sourceBox.y / 2
+
+                const targetBox = props.heapControl.getContainer(target).getBBox() // imprecise position, but has size
+                const targetLeftTop = props.heapControl.getPosition(target, index)
+                const targetPositionX =
+                    sourcePositionX <= targetLeftTop.x
+                        ? targetLeftTop.x
+                        : sourcePositionX >= targetLeftTop.x + targetBox.width
+                        ? targetLeftTop.x + targetBox.width
+                        : sourcePositionX
+                const targetPositionY =
+                    sourcePositionY <= targetLeftTop.y
+                        ? targetLeftTop.y
+                        : sourcePositionY >= targetLeftTop.x + targetBox.height
+                        ? targetLeftTop.y + targetBox.height
+                        : sourcePositionY
+
+                pathRefs.current[i].setAttribute('x1', sourcePositionX.toString())
+                pathRefs.current[i].setAttribute('y1', sourcePositionY.toString())
+                pathRefs.current[i].setAttribute('x2', targetPositionX.toString())
+                pathRefs.current[i].setAttribute('y2', targetPositionY.toString())
+            })
+        }
+        updatePaths()
+        props.heapControl.subscribe(id, updatePaths)
+        props.heapControl.getTargets(id).forEach(({ target }) => props.heapControl.subscribe(target, updatePaths))
     })
 
     return (
-        <foreignObject ref={ref} x={position.x} y={position.y} width={0} height={0} className={classes.foreignObject}>
-            <Draggable
-                containerProps={{
-                    ref: childRef,
-                    className: classes.container
-                }}
-                showGhost={false}
-                onDrag={deltaVector => {
-                    const [svgDeltaVector] = svgScreenVectorTransform('toSvg', ref.current, deltaVector)
-                    const currentPosition = props.heapObjProps.getPosition(reference, index, { x: 0, y: 0 })
-                    const newPosition = {
-                        x: currentPosition.x + svgDeltaVector.x,
-                        y: currentPosition.y + svgDeltaVector.y
-                    }
-                    const clampedPosition = props.heapObjProps.setRangePosition(reference, [index, index], newPosition)
-                    ref.current.setAttribute('x', clampedPosition.x.toString())
-                    ref.current.setAttribute('y', clampedPosition.y.toString())
-                }}
-            >
-                <MenuProvider id={reference} className={classes.menuProvider}>
-                    <ArrayComponents.Node
-                        objData={props.objData}
-                        parameters={parameterSelector === 'reference' ? referenceParameters : typeParameters}
-                    />
-                </MenuProvider>
-            </Draggable>
-            <Menu id={reference}>
-                <Item
-                    onClick={args => (
-                        props.heapObjProps.setParameterSelector(
-                            reference,
-                            parameterSelector === 'reference' ? 'type' : 'reference'
-                        ),
-                        updateThis({})
-                    )}
+        <>
+            <foreignObject ref={ref} className={classes.container}>
+                <Draggable
+                    containerProps={{ ref: childRef, className: classes.draggable }}
+                    showGhost={false}
+                    onDrag={(delta, event) => {
+                        const svgDelta = svgScreenVectorTransform('toSvg', ref.current, delta)[0]
+                        move(id, index, svgDelta, !event.altKey ? 1 : !event.shiftKey ? 2 : Infinity, props.heapControl)
+                    }}
                 >
-                    {`using ${parameterSelector} parameters`}
-                </Item>
-                <Separator />
-                <Submenu label='object parameters'>
-                    <ArrayComponents.NodeParameters
-                        withReset
-                        parameters={referenceParameters}
-                        onChange={updatedParameters => (
-                            props.heapObjProps.setReferenceParameters(reference, updatedParameters), updateThis({})
+                    <MenuProvider id={id} className={classes.menuProvider}>
+                        <ArrayComponents.Node
+                            objData={props.objData}
+                            parameters={parameterSelector === 'id' ? idParameters : typeParameters}
+                            onTarget={(id, target, ref) => props.heapControl.appendTarget(id, target, ref)}
+                        />
+                    </MenuProvider>
+                </Draggable>
+                <Menu id={id}>
+                    <Item
+                        onClick={args => (
+                            props.heapControl.setParameterSelector(id, parameterSelector === 'id' ? 'type' : 'id'),
+                            updateThis({})
                         )}
-                    />
-                </Submenu>
-                <Submenu label='type parameters'>
-                    <ArrayComponents.NodeParameters
-                        withReset
-                        parameters={typeParameters}
-                        onChange={updatedParameters => (
-                            props.heapObjProps.setTypeParameters(languageType, updatedParameters), props.updateAll({})
-                        )}
-                    />
-                </Submenu>
-            </Menu>
-        </foreignObject>
+                    >
+                        {`using ${parameterSelector} parameters`}
+                    </Item>
+                    <Separator />
+                    <Submenu label='id parameters'>
+                        <ArrayComponents.NodeParameters
+                            withReset
+                            parameters={idParameters}
+                            onChange={updatedParameters => (
+                                props.heapControl.setIdParameters(id, updatedParameters), updateThis({})
+                            )}
+                        />
+                    </Submenu>
+                    <Submenu label='type parameters'>
+                        <ArrayComponents.NodeParameters
+                            withReset
+                            parameters={typeParameters}
+                            onChange={updatedParameters => (
+                                props.heapControl.setTypeParameters(languageType, updatedParameters),
+                                props.updateAll({})
+                            )}
+                        />
+                    </Submenu>
+                </Menu>
+            </foreignObject>
+            {[...Array(props.objData.objMembers)].map(_ => (
+                <line ref={ref => pathRefs.current.push(ref)} className={classes.path} stroke='black'></line>
+            ))}
+        </>
     )
 }
