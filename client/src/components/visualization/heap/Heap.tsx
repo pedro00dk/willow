@@ -43,7 +43,7 @@ export class HeapControl {
         const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         return idPositions[index] ? idPositions[index] : this.setPositionRange(id, [index, index], def)
     }
-
+    
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
         const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         const clampedPosition = {
@@ -61,7 +61,6 @@ export class HeapControl {
 
     setParameterSelector(id: string, selector: 'id' | 'type') {
         this.parameterSelector[id] = selector
-        this.callSubscriptions(id)
     }
 
     getIdParameters(id: string, def?: UnknownParameters) {
@@ -70,7 +69,6 @@ export class HeapControl {
 
     setIdParameters(id: string, parameters: UnknownParameters) {
         this.idParameters[id] = parameters
-        this.callSubscriptions(id)
     }
 
     getTypeParameters(id: string, def?: UnknownParameters) {
@@ -79,7 +77,6 @@ export class HeapControl {
 
     setTypeParameters(type: string, parameters: UnknownParameters) {
         this.typeParameters[type] = parameters
-        this.callSubscriptions()
     }
 
     resetContainersAndTargets() {
@@ -107,7 +104,7 @@ export class HeapControl {
         this.subscriptions = {}
     }
 
-    subscribe(id: string, callback: () => void) {
+    subscribe(id: string, callback: (subscriptionIndex: number) => void) {
         if (!this.subscriptions[id]) this.subscriptions[id] = []
         this.subscriptions[id].push(callback)
     }
@@ -127,8 +124,8 @@ const classes = {
 }
 
 export const Heap = React.memo(() => {
-    const update = React.useState({})[1]
     const heapControl = React.useRef<HeapControl>(new HeapControl({ width: 1000, height: 700 }))
+    const update = React.useState({})[1]
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
     const viewSize = heapControl.current.getViewSize()
     heapControl.current.resetContainersAndTargets()
@@ -141,9 +138,9 @@ export const Heap = React.memo(() => {
                     Object.values(tracer.heapsData[tracer.index]).map(objData => (
                         <Wrapper
                             tracer={tracer}
-                            updateAll={update}
                             objData={objData}
                             heapControl={heapControl.current}
+                            updateAll={update}
                         />
                     ))}
             </SvgView>
