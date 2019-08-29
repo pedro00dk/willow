@@ -58,15 +58,15 @@ export const SvgView = (props: {
             onMouseLeave={event => (click.current = false)}
             onMouseMove={event => {
                 if (!click.current) return
-                const screenDeltaVector = { x: event.movementX, y: event.movementY }
-                const [svgDeltaVector] = svgScreenVectorTransform('toSvg', ref.current, screenDeltaVector)
+                const screenDelta = { x: event.movementX, y: event.movementY }
+                const [svgDelta] = svgScreenVectorTransform('toSvg', ref.current, screenDelta)
                 viewBox.current[0] = clamp(
-                    viewBox.current[0] - svgDeltaVector.x,
+                    viewBox.current[0] - svgDelta.x,
                     ranges.x[0],
                     ranges.x[1] - viewBox.current[2]
                 )
                 viewBox.current[1] = clamp(
-                    viewBox.current[1] - svgDeltaVector.y,
+                    viewBox.current[1] - svgDelta.y,
                     ranges.y[0],
                     ranges.y[1] - viewBox.current[3]
                 )

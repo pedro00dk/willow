@@ -71,11 +71,11 @@ export const SplitPane = (props: {
                     }
                 }}
                 showGhost={false}
-                onDrag={deltaVector => {
+                onDrag={delta => {
                     if (!resizable) return
                     const rect = ref.current.getBoundingClientRect()
-                    const delta = layout === 'row' ? deltaVector.x / rect.width : deltaVector.y / rect.height
-                    setRatio(Math.min(Math.max(ratio + delta, min), max))
+                    const increment = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
+                    setRatio(Math.min(Math.max(ratio + increment, min), max))
                 }}
             />
             <div
