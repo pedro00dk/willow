@@ -31,8 +31,9 @@ export type GroupData = {
     base: string
     depth: number
     members: Set<string>
+    hasCycleEdge: boolean
     hasParentEdge: boolean
-    hasNonParentFwdBackCrossCycleEdge: boolean
+    hasNonParentFwdBackCrossEdge: boolean
     type: 'node' | 'list' | 'tree' | 'unknown'
 }
 
@@ -172,18 +173,19 @@ const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: n
     groupData.type =
         groupData.members.size === 1
             ? 'node'
-            : groupData.members.size <= groupData.depth && !groupData.hasNonParentFwdBackCrossCycleEdge
+            : groupData.members.size <= groupData.depth && !groupData.hasNonParentFwdBackCrossEdge
             ? 'list'
-            : !groupData.hasNonParentFwdBackCrossCycleEdge
+            : !groupData.hasNonParentFwdBackCrossEdge
             ? 'tree'
             : 'unknown'
     objData.members
         .filter(member => typeof member.value === 'object' && member.value.languageType === objData.languageType)
         .forEach(member => {
             const value = member.value as ObjData
-            if (!groupData.members.has(value.id))
-                if (value === parentObjData) groupData.hasParentEdge = true
-                else groupData.hasNonParentFwdBackCrossCycleEdge = true
+            if (groupData.members.has(value.id))
+                if (value === objData) groupData.hasCycleEdge = true
+                else if (value === parentObjData) groupData.hasParentEdge = true
+                else groupData.hasNonParentFwdBackCrossEdge = true
             else expandGroupData(value, objData, localDepth + 1, groupData)
         })
     return groupData
@@ -215,8 +217,9 @@ const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
                 base: id,
                 depth: 0,
                 members: new Set(),
+                hasCycleEdge: false,
                 hasParentEdge: false,
-                hasNonParentFwdBackCrossCycleEdge: false,
+                hasNonParentFwdBackCrossEdge: false,
                 type: 'unknown'
             })
             data.members.forEach(id => (groupMapData[id] = data))
