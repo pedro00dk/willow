@@ -23,70 +23,101 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
         })
     ) as ComputedParameters<U>
 
-export class HeapObjProps {
-    private positions: { [reference: string]: { x: number; y: number }[] }
-    private parameterSelector: { [reference: string]: 'reference' | 'type' }
-    private referenceParameters: { [reference: string]: UnknownParameters }
-    private typeParameters: { [languageType: string]: UnknownParameters }
+export class HeapControl {
+    private positions: { [id: string]: { x: number; y: number }[] } = {}
+    private parameterSelector: { [id: string]: 'id' | 'type' } = {}
+    private idParameters: { [id: string]: UnknownParameters } = {}
+    private typeParameters: { [languageType: string]: UnknownParameters } = {}
+    private containers: { [id: string]: SVGForeignObjectElement } = {}
+    private targets: { [id: string]: { target: string; element: HTMLSpanElement }[] } = {}
+    private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
+    private subscriptionsCalls = 0
 
-    constructor(private viewSize: { width: number; height: number }) {
-        this.positions = {}
-        this.parameterSelector = {}
-        this.referenceParameters = {}
-        this.typeParameters = {}
-    }
+    constructor(private viewSize: { width: number; height: number }) {}
 
     getViewSize() {
         return this.viewSize
     }
 
-    getPosition(reference: string, index: number, def?: { x: number; y: number }) {
-        const referencePositions = this.positions[reference]
-            ? this.positions[reference]
-            : (this.positions[reference] = [])
-        return referencePositions[index] ? referencePositions[index] : (referencePositions[index] = def)
+    getPosition(id: string, index: number, def?: { x: number; y: number }) {
+        const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
+        return idPositions[index] ? idPositions[index] : this.setPositionRange(id, [index, index], def)
     }
 
-    setRangePosition(reference: string, range: [number, number], position: { x: number; y: number }) {
-        const referencePositions = this.positions[reference]
-            ? this.positions[reference]
-            : (this.positions[reference] = [])
-
+    setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
+        const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         const clampedPosition = {
             x: Math.min(Math.max(position.x, 0), this.viewSize.width * 0.95),
             y: Math.min(Math.max(position.y, 0), this.viewSize.height * 0.95)
         }
-        for (let i = range[0]; i <= range[1]; i += 1) referencePositions[i] = clampedPosition
-
+        for (let i = range[0]; i <= range[1]; i += 1) idPositions[i] = clampedPosition
+        this.callSubscriptions(id)
         return clampedPosition
     }
 
-    getParameterSelector(reference: string, def?: 'reference' | 'type') {
-        return this.parameterSelector[reference]
-            ? this.parameterSelector[reference]
-            : (this.parameterSelector[reference] = def)
+    getParameterSelector(id: string, def?: 'id' | 'type') {
+        return this.parameterSelector[id] ? this.parameterSelector[id] : (this.parameterSelector[id] = def)
     }
 
-    setParameterSelector(reference: string, selector: 'reference' | 'type') {
-        return (this.parameterSelector[reference] = selector)
+    setParameterSelector(id: string, selector: 'id' | 'type') {
+        this.parameterSelector[id] = selector
+        this.callSubscriptions(id)
     }
 
-    getReferenceParameters(reference: string, def?: UnknownParameters) {
-        return this.referenceParameters[reference]
-            ? this.referenceParameters[reference]
-            : (this.referenceParameters[reference] = def)
+    getIdParameters(id: string, def?: UnknownParameters) {
+        return this.idParameters[id] ? this.idParameters[id] : (this.idParameters[id] = def)
     }
 
-    setReferenceParameters(reference: string, parameters: UnknownParameters) {
-        return (this.referenceParameters[reference] = parameters)
+    setIdParameters(id: string, parameters: UnknownParameters) {
+        this.idParameters[id] = parameters
+        this.callSubscriptions(id)
     }
 
-    getTypeParameters(reference: string, def?: UnknownParameters) {
-        return this.typeParameters[reference] ? this.typeParameters[reference] : (this.typeParameters[reference] = def)
+    getTypeParameters(id: string, def?: UnknownParameters) {
+        return this.typeParameters[id] ? this.typeParameters[id] : (this.typeParameters[id] = def)
     }
 
     setTypeParameters(type: string, parameters: UnknownParameters) {
-        return (this.typeParameters[type] = parameters)
+        this.typeParameters[type] = parameters
+        this.callSubscriptions()
+    }
+
+    resetContainersAndTargets() {
+        this.containers = {}
+        this.targets = {}
+    }
+
+    getContainer(id: string) {
+        return this.containers[id]
+    }
+
+    setContainer(id: string, element: SVGForeignObjectElement) {
+        this.containers[id] = element
+    }
+
+    getTargets(id: string) {
+        return this.targets[id] ? this.targets[id] : (this.targets[id] = [])
+    }
+
+    appendTarget(id: string, target: string, element: HTMLSpanElement) {
+        this.getTargets(id).push({ target, element })
+    }
+
+    resetSubscriptions() {
+        this.subscriptions = {}
+    }
+
+    subscribe(id: string, callback: () => void) {
+        if (!this.subscriptions[id]) this.subscriptions[id] = []
+        this.subscriptions[id].push(callback)
+    }
+
+    callSubscriptions(id?: string) {
+        const subscriptionIndex = this.subscriptionsCalls++
+        if (!id)
+            Object.values(this.subscriptions) //
+                .forEach(subscriptions => subscriptions.forEach(subscription => subscription(subscriptionIndex)))
+        else if (this.subscriptions[id]) this.subscriptions[id].forEach(subscription => subscription(subscriptionIndex))
     }
 }
 
@@ -96,22 +127,23 @@ const classes = {
 }
 
 export const Heap = React.memo(() => {
-    const ref = React.useRef<HTMLDivElement>()
     const update = React.useState({})[1]
-    const heapObjProps = React.useRef<HeapObjProps>(new HeapObjProps({ width: 1000, height: 1000 }))
+    const heapControl = React.useRef<HeapControl>(new HeapControl({ width: 1000, height: 700 }))
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
-    const viewSize = heapObjProps.current.getViewSize()
+    const viewSize = heapControl.current.getViewSize()
+    heapControl.current.resetContainersAndTargets()
+    heapControl.current.resetSubscriptions()
 
     return (
-        <div ref={ref} className={classes.container}>
+        <div className={classes.container}>
             <SvgView size={viewSize} markers>
                 {tracer.available &&
                     Object.values(tracer.heapsData[tracer.index]).map(objData => (
                         <Wrapper
                             tracer={tracer}
-                            objData={objData}
-                            heapObjProps={heapObjProps.current}
                             updateAll={update}
+                            objData={objData}
+                            heapControl={heapControl.current}
                         />
                     ))}
             </SvgView>
