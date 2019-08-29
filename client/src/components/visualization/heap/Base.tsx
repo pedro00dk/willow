@@ -18,8 +18,15 @@ export const valueChanged = (previousMember: ObjData['members'][0], member: ObjD
     )
 }
 
-export const getDisplayValue = (memberKeyOrValue: ObjData['members'][0]['key'] | ObjData['members'][0]['value']) =>
-    typeof memberKeyOrValue !== 'object' ? memberKeyOrValue.toString() : '::'
+export const getDisplayValue = (
+    objData: ObjData,
+    memberKeyOrValue: ObjData['members'][0]['key'] | ObjData['members'][0]['value']
+) =>
+    typeof memberKeyOrValue !== 'object'
+        ? memberKeyOrValue.toString()
+        : memberKeyOrValue.id !== objData.id
+        ? '::'
+        : ':#:'
 
 const classes = {
     container: cn('d-flex flex-column'),

@@ -60,7 +60,7 @@ export const Node = (props: {
                     : props.objData.members.map((member, i) => {
                           const isPrimitive = typeof member.value !== 'object'
                           const changed = valueChanged(previousMembers.current[i], member)
-                          const displayValue = getDisplayValue(member.value)
+                          const displayValue = getDisplayValue(props.objData, member.value)
 
                           return (
                               <div
