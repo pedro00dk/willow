@@ -15,7 +15,7 @@ const styles = {
 
 export const SplitPane = (props: {
     layout?: 'row' | 'column'
-    ratio?: number
+    base?: number
     min?: number
     max?: number
     resizable?: boolean
@@ -30,7 +30,7 @@ export const SplitPane = (props: {
 }) => {
     const {
         layout = 'row',
-        ratio = 0.5,
+        base = 0.5,
         min = 0.2,
         max = 0.8,
         resizable = true,
@@ -44,7 +44,7 @@ export const SplitPane = (props: {
         children
     } = props
     const ref = React.useRef<HTMLDivElement>()
-    const [currentRatio, setCurrentRatio] = React.useState(Math.min(Math.max(ratio, min), max))
+    const [ratio, setRatio] = React.useState(Math.min(Math.max(base, min), max))
     const sizedProperty = layout === 'row' ? 'width' : 'height'
     const fixedProperty = layout === 'row' ? 'height' : 'width'
 
@@ -55,7 +55,7 @@ export const SplitPane = (props: {
                 style={{
                     ...paneStyle,
                     [fixedProperty]: '100%',
-                    [sizedProperty]: styles.size(currentRatio, dragger / 2)
+                    [sizedProperty]: styles.size(ratio, dragger / 2)
                 }}
             >
                 {children[0]}
@@ -75,7 +75,7 @@ export const SplitPane = (props: {
                     if (!resizable) return
                     const rect = ref.current.getBoundingClientRect()
                     const delta = layout === 'row' ? deltaVector.x / rect.width : deltaVector.y / rect.height
-                    setCurrentRatio(Math.min(Math.max(currentRatio + delta, min), max))
+                    setRatio(Math.min(Math.max(ratio + delta, min), max))
                 }}
             />
             <div
@@ -83,7 +83,7 @@ export const SplitPane = (props: {
                 style={{
                     ...paneStyle,
                     [fixedProperty]: '100%',
-                    [sizedProperty]: styles.size(1 - currentRatio, dragger / 2)
+                    [sizedProperty]: styles.size(1 - ratio, dragger / 2)
                 }}
             >
                 {children[1]}

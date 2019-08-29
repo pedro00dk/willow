@@ -29,7 +29,7 @@ export const App = () => (
         </nav>
         <div className={classes.body}>
             <Controls />
-            <SplitPane ratio={0.3}>
+            <SplitPane base={0.3}>
                 <SplitPane layout='column'>
                     <CodeEditor />
                     <SplitPane layout='column'>
