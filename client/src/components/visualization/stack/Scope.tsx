@@ -67,7 +67,7 @@ export const Scope = (props: { scope: ScopeData; depth: number; width: number })
                     className={classes.scope}
                     style={styles.scope(props.depth - Number(leaf), props.width, selected, leaf)}
                     title={props.scope.name}
-                    onClick={event => dispatch(tracerActions.setIndex(props.scope.range[event.ctrlKey ? 1 : 0]))}
+                    onClick={event => dispatch(tracerActions.setIndex(props.scope.range[!event.altKey ? 0 : 1]))}
                 >
                     {!leaf && props.width >= 20 ? props.scope.name : '\u200b'}
                 </div>
