@@ -47,14 +47,14 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
 
         const size = { width: ref.current.clientWidth, height: ref.current.clientHeight }
 
-        const interval = window.setInterval(() => {
+        const interval = setInterval(() => {
             if (size.width === ref.current.clientWidth && size.height === ref.current.clientHeight) return
             size.width = ref.current.clientWidth
             size.height = ref.current.clientHeight
             editor.resize()
         }, 1000)
 
-        return () => window.clearInterval(interval)
+        return () => clearInterval(interval)
     }, [])
 
     return <div ref={ref} className={classes.container} />
