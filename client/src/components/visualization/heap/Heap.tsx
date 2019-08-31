@@ -28,12 +28,12 @@ export class HeapControl {
     private parameterSelector: { [id: string]: 'id' | 'type' } = {}
     private idParameters: { [id: string]: UnknownParameters } = {}
     private typeParameters: { [languageType: string]: UnknownParameters } = {}
-    private containers: { [id: string]: SVGForeignObjectElement } = {}
-    private targets: { [id: string]: { target: string; element: HTMLSpanElement }[] } = {}
+    private containers: { [id: string]: { element: SVGGraphicsElement; size: { x: number; y: number } } } = {}
+    private targets: { [id: string]: { element: HTMLElement; delta: { x: number; y: number }; target: string }[] } = {}
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
     private subscriptionsCalls = 0
 
-    constructor(private viewSize: { width: number; height: number }) {}
+    constructor(private viewSize: { x: number; y: number }) {}
 
     getViewSize() {
         return this.viewSize
@@ -43,15 +43,14 @@ export class HeapControl {
         const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         return idPositions[index] ? idPositions[index] : this.setPositionRange(id, [index, index], def)
     }
-    
+
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
         const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         const clampedPosition = {
-            x: Math.min(Math.max(position.x, 0), this.viewSize.width * 0.95),
-            y: Math.min(Math.max(position.y, 0), this.viewSize.height * 0.95)
+            x: Math.min(Math.max(position.x, 0), this.viewSize.x * 0.95),
+            y: Math.min(Math.max(position.y, 0), this.viewSize.y * 0.95)
         }
         for (let i = range[0]; i <= range[1]; i += 1) idPositions[i] = clampedPosition
-        this.callSubscriptions(id)
         return clampedPosition
     }
 
@@ -88,16 +87,16 @@ export class HeapControl {
         return this.containers[id]
     }
 
-    setContainer(id: string, element: SVGForeignObjectElement) {
-        this.containers[id] = element
+    setContainer(id: string, element: SVGGraphicsElement, size: { x: number; y: number }) {
+        this.containers[id] = { element, size }
     }
 
     getTargets(id: string) {
         return this.targets[id] ? this.targets[id] : (this.targets[id] = [])
     }
 
-    appendTarget(id: string, target: string, element: HTMLSpanElement) {
-        this.getTargets(id).push({ target, element })
+    appendTarget(id: string, element: HTMLElement, delta: { x: number; y: number }, target: string) {
+        this.getTargets(id).push({ element, delta, target })
     }
 
     resetSubscriptions() {
@@ -124,8 +123,8 @@ const classes = {
 }
 
 export const Heap = React.memo(() => {
-    const heapControl = React.useRef<HeapControl>(new HeapControl({ width: 1000, height: 700 }))
-    const update = React.useState({})[1]
+    const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 1000, y: 700 }))
+    const updateHeap = React.useState({})[1]
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
     const viewSize = heapControl.current.getViewSize()
     heapControl.current.resetContainersAndTargets()
@@ -137,10 +136,10 @@ export const Heap = React.memo(() => {
                 {tracer.available &&
                     Object.values(tracer.heapsData[tracer.index]).map(objData => (
                         <Wrapper
-                            tracer={tracer}
                             objData={objData}
                             heapControl={heapControl.current}
-                            updateAll={update}
+                            updateHeap={updateHeap}
+                            tracer={tracer}
                         />
                     ))}
             </SvgView>
