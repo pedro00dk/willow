@@ -26,24 +26,15 @@ export const svgScreenVectorTransform = (
     return shiftedVectors.map(shiftedVector => ({ x: shiftedVector.x - root.x, y: shiftedVector.y - root.y }))
 }
 
-export const SvgView = (props: {
-    size: { width: number; height: number }
-    markers: boolean
-    children?: React.ReactNode
-}) => {
+export const SvgView = (props: { size: { x: number; y: number }; markers: boolean; children?: React.ReactNode }) => {
     const ref = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
-    const viewBox = React.useRef([
-        props.size.width * 0.25,
-        props.size.height * 0.25,
-        props.size.width * 0.5,
-        props.size.height * 0.5
-    ])
+    const viewBox = React.useRef([props.size.x * 0.25, props.size.y * 0.25, props.size.x * 0.5, props.size.y * 0.5])
     const ranges = {
-        x: [0, props.size.width],
-        y: [0, props.size.height],
-        width: [props.size.width * 0.25, props.size.width],
-        height: [props.size.height * 0.25, props.size.height]
+        x: [0, props.size.x],
+        y: [0, props.size.y],
+        width: [props.size.x * 0.25, props.size.x],
+        height: [props.size.y * 0.25, props.size.y]
     }
 
     return (
@@ -75,7 +66,7 @@ export const SvgView = (props: {
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
                 const [svgPoint] = svgScreenPointTransform('toSvg', ref.current, screenPoint)
-                const delta = Math.min(props.size.width, props.size.height) * (event.deltaY < 0 ? 0.01 : -0.01)
+                const delta = Math.min(props.size.x, props.size.y) * (event.deltaY < 0 ? 0.01 : -0.01)
                 const xRatio = ilerp(svgPoint.x, viewBox.current[0], viewBox.current[0] + viewBox.current[2])
                 const yRatio = ilerp(svgPoint.y, viewBox.current[1], viewBox.current[1] + viewBox.current[3])
                 const width = clamp(viewBox.current[2] - delta, ranges.width[0], ranges.width[1])
@@ -90,26 +81,26 @@ export const SvgView = (props: {
         >
             {props.markers && (
                 <g fill='none' stroke='gray' strokeWidth='1'>
-                    <rect {...props.size} width={props.size.width} height={props.size.height} opacity={0.4} />
+                    <rect {...props.size} width={props.size.x} height={props.size.y} opacity={0.4} />
                     <rect
-                        x={props.size.width * 0.125}
-                        y={props.size.height * 0.125}
-                        width={props.size.width * 0.75}
-                        height={props.size.height * 0.75}
+                        x={props.size.x * 0.125}
+                        y={props.size.y * 0.125}
+                        width={props.size.x * 0.75}
+                        height={props.size.y * 0.75}
                         opacity={0.2}
                     />
                     <rect
-                        x={props.size.width * 0.25}
-                        y={props.size.height * 0.25}
-                        width={props.size.width * 0.5}
-                        height={props.size.height * 0.5}
+                        x={props.size.x * 0.25}
+                        y={props.size.y * 0.25}
+                        width={props.size.x * 0.5}
+                        height={props.size.y * 0.5}
                         opacity={0.1}
                     />
                     <rect
-                        x={props.size.width * 0.375}
-                        y={props.size.height * 0.375}
-                        width={props.size.width * 0.25}
-                        height={props.size.height * 0.25}
+                        x={props.size.x * 0.375}
+                        y={props.size.y * 0.375}
+                        width={props.size.x * 0.25}
+                        height={props.size.y * 0.25}
                         opacity={0.05}
                     />
                 </g>
