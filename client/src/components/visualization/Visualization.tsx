@@ -3,7 +3,7 @@ import * as React from 'react'
 import { State, useDispatch, useRedux } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
 import * as schema from '../../schema/schema'
-import { SplitPane } from '../SplitPane'
+import { Splitter } from '../Splitter'
 import { Heap } from './heap/Heap'
 import { Stack } from './stack/Stack'
 
@@ -45,10 +45,10 @@ export const Visualization = () => {
             }}
             tabIndex={0}
         >
-            <SplitPane layout='column' base={0.3}>
+            <Splitter layout='column' base={0.3}>
                 <Stack />
                 <Heap />
-            </SplitPane>
+            </Splitter>
         </div>
     )
 }

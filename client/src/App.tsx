@@ -7,7 +7,7 @@ import { Controls } from './components/Controls'
 import { InputEditor } from './components/editor/InputEditor'
 import { OutputEditor } from './components/editor/OutputEditor'
 import { CodeEditor } from './components/editor/SourceEditor'
-import { SplitPane } from './components/SplitPane'
+import { Splitter } from './components/Splitter'
 import { Visualization } from './components/visualization/Visualization'
 
 const classes = {
@@ -29,16 +29,16 @@ export const App = () => (
         </nav>
         <div className={classes.body}>
             <Controls />
-            <SplitPane base={0.3}>
-                <SplitPane layout='column'>
+            <Splitter base={0.3}>
+                <Splitter layout='column'>
                     <CodeEditor />
-                    <SplitPane layout='column'>
+                    <Splitter layout='column'>
                         <InputEditor />
                         <OutputEditor />
-                    </SplitPane>
-                </SplitPane>
+                    </Splitter>
+                </Splitter>
                 <Visualization />
-            </SplitPane>
+            </Splitter>
         </div>
     </div>
 )

@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import * as React from 'react'
 import { colors } from '../colors'
-import { Draggable } from './Utils'
+import { clamp, Draggable } from '../Utils'
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100'),
@@ -13,7 +13,7 @@ const styles = {
     cursor: (layout: 'row' | 'column') => (layout === 'row' ? 'ew-resize' : 'ns-resize')
 }
 
-export const SplitPane = (props: {
+export const Splitter = (props: {
     layout?: 'row' | 'column'
     base?: number
     min?: number
@@ -44,7 +44,7 @@ export const SplitPane = (props: {
         children
     } = props
     const ref = React.useRef<HTMLDivElement>()
-    const [ratio, setRatio] = React.useState(Math.min(Math.max(base, min), max))
+    const [ratio, setRatio] = React.useState(clamp(base, min, max))
     const sizedProperty = layout === 'row' ? 'width' : 'height'
     const fixedProperty = layout === 'row' ? 'height' : 'width'
 
@@ -75,7 +75,7 @@ export const SplitPane = (props: {
                     if (!resizable) return
                     const rect = ref.current.getBoundingClientRect()
                     const increment = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
-                    setRatio(Math.min(Math.max(ratio + increment, min), max))
+                    setRatio(clamp(ratio + increment, min, max))
                 }}
             />
             <div
