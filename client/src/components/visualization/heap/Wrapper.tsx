@@ -5,12 +5,11 @@ import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
 import { ObjData } from '../../../reducers/tracer'
-import { Draggable } from '../../Utils'
+import { Draggable, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
 import * as ArrayComponents from './Array'
+import { HeapControl } from './Heap'
 
 import 'react-contexify/dist/ReactContexify.min.css'
-import { HeapControl } from './Heap'
-import { svgScreenPointTransform, svgScreenVectorTransform } from './SvgView'
 
 const classes = {
     container: cn(css({ cursor: 'move' /*, transition: 'x 0.1s ease-out, y 0.1s ease-out' */ })),
@@ -29,13 +28,6 @@ const classes = {
 
 //     return { ...defaultModule, node }
 // }
-
-const getLinked = (id: string, heapControl: HeapControl, pool: Set<string>, depth: number) => {
-    if (depth === 0 || pool.has(id)) return
-    pool.add(id)
-    heapControl.getTargets(id).forEach(({ target }) => getLinked(target, heapControl, pool, depth - 1))
-    return pool
-}
 
 // const onReposition = (
 //     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -76,47 +68,47 @@ const getLinked = (id: string, heapControl: HeapControl, pool: Set<string>, dept
 //     }
 // }
 
-const move = (id: string, index: number, delta: { x: number; y: number }, depth: number, heapControl: HeapControl) => {
-    const linkedPool = getLinked(id, heapControl, new Set(), depth)
-    linkedPool.forEach(id => {
-        const position = heapControl.getPosition(id, index)
-        heapControl.setPositionRange(id, [index, index], { x: position.x + delta.x, y: position.y + delta.y })
-    })
-}
-
 export const Wrapper = (props: {
-    tracer: State['tracer']
     objData: ObjData
+    tracer: State['tracer']
     heapControl: HeapControl
-    updateAll: React.Dispatch<{}>
+    updateHeap: React.Dispatch<{}>
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
     const childRef = React.useRef<HTMLDivElement>()
+    const targetRefs = React.useRef<{ target: string; element: HTMLElement }[]>([])
     const pathRefs = React.useRef<SVGLineElement[]>([])
     const updateThis = React.useState({})[1]
-    const { index } = props.tracer
     const { id, languageType } = props.objData
+    const { index } = props.tracer
     const parameterSelector = props.heapControl.getParameterSelector(id, 'type')
     const idParameters = props.heapControl.getIdParameters(id, {})
     const typeParameters = props.heapControl.getTypeParameters(id, {})
+    targetRefs.current = []
     pathRefs.current = []
 
-    React.useLayoutEffect(() => {
-        props.heapControl.setContainer(id, ref.current)
-        const childRect = childRef.current.getBoundingClientRect()
-        const screenSize = { x: childRect.width, y: childRect.height }
-        const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
-        ref.current.setAttribute('width', svgSize.x.toString())
-        ref.current.setAttribute('height', svgSize.y.toString())
-        props.heapControl.callSubscriptions(id)
-    })
+    const getLinkedObjDataIds = (id: string, pool: Set<string>, depth: number) => {
+        if (depth < 0 || pool.has(id)) return
+        pool.add(id)
+        props.heapControl.getTargets(id).forEach(({ target }) => getLinkedObjDataIds(target, pool, depth - 1))
+        return pool
+    }
+
+    const moveWrappers = (delta: { x: number; y: number }, depth: number) => {
+        const linkedPool = getLinkedObjDataIds(id, new Set(), depth)
+        linkedPool.forEach(id => {
+            const position = props.heapControl.getPosition(id, index)
+            props.heapControl.setPositionRange(id, [index, index], { x: position.x + delta.x, y: position.y + delta.y })
+            props.heapControl.callSubscriptions(id)
+        })
+    }
 
     React.useLayoutEffect(() => {
         let previousSubscriptionIndex = undefined as number
         const updatePosition = (subscriptionIndex?: number) => {
             if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
             previousSubscriptionIndex = subscriptionIndex
-            const position = props.heapControl.getPosition(id, index, {x: 0, y: 0})
+            const position = props.heapControl.getPosition(id, index, { x: 0, y: 0 })
             ref.current.setAttribute('x', position.x.toString())
             ref.current.setAttribute('y', position.y.toString())
         }
@@ -124,68 +116,80 @@ export const Wrapper = (props: {
         props.heapControl.subscribe(id, updatePosition)
     })
 
-    React.useEffect(() => {
-        let previousSubscriptionIndex = undefined as number
-        const updatePaths = (subscriptionIndex?: number) => {
-            if (subscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex)
-                return (previousSubscriptionIndex = subscriptionIndex)
-
-            const targets = props.heapControl.getTargets(id)
-            targets.forEach(({ target, element }, i) => {
-                const sourceRect = element.getBoundingClientRect()
-                const [sourceBox] = svgScreenVectorTransform('toSvg', ref.current, {
-                    x: sourceRect.width,
-                    y: sourceRect.height
-                })
-                const [sourceLeftTop] = svgScreenPointTransform('toSvg', ref.current, {
-                    x: sourceRect.left,
-                    y: sourceRect.top
-                })
-                const sourcePositionX = sourceLeftTop.x + sourceBox.x / 2
-                const sourcePositionY = sourceLeftTop.y + sourceBox.y / 2
-
-                const targetBox = props.heapControl.getContainer(target).getBBox() // imprecise position, but has size
-                const targetLeftTop = props.heapControl.getPosition(target, index)
-                const targetPositionX =
-                    sourcePositionX <= targetLeftTop.x
-                        ? targetLeftTop.x
-                        : sourcePositionX >= targetLeftTop.x + targetBox.width
-                        ? targetLeftTop.x + targetBox.width
-                        : sourcePositionX
-                const targetPositionY =
-                    sourcePositionY <= targetLeftTop.y
-                        ? targetLeftTop.y
-                        : sourcePositionY >= targetLeftTop.x + targetBox.height
-                        ? targetLeftTop.y + targetBox.height
-                        : sourcePositionY
-
-                pathRefs.current[i].setAttribute('x1', sourcePositionX.toString())
-                pathRefs.current[i].setAttribute('y1', sourcePositionY.toString())
-                pathRefs.current[i].setAttribute('x2', targetPositionX.toString())
-                pathRefs.current[i].setAttribute('y2', targetPositionY.toString())
-            })
-        }
-        updatePaths()
-        props.heapControl.subscribe(id, updatePaths)
-        props.heapControl.getTargets(id).forEach(({ target }) => props.heapControl.subscribe(target, updatePaths))
+    React.useLayoutEffect(() => {
+        const childRect = childRef.current.getBoundingClientRect()
+        const screenSize = { x: childRect.width, y: childRect.height }
+        const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
+        ref.current.setAttribute('width', svgSize.x.toString())
+        ref.current.setAttribute('height', svgSize.y.toString())
+        props.heapControl.setSizeRange(id, [index, index], svgSize)
+        props.heapControl.callSubscriptions(id)
     })
+
+    React.useLayoutEffect(() => {
+        const targets = targetRefs.current.map(({ target, element }) => {
+            const rect = element.getBoundingClientRect()
+            const screenPosition = { x: rect.left, y: rect.top }
+            const screenSize = { x: rect.width, y: rect.height }
+            const [svgPosition] = svgScreenPointTransform('toSvg', ref.current, screenPosition)
+            const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
+            const delta = { x: svgPosition.x + svgSize.x / 2, y: svgPosition.y + svgSize.y / 2 }
+            return { target, delta }
+        })
+        props.heapControl.setTargets(id, targets)
+        props.heapControl.callSubscriptions(id)
+    })
+
+    // React.useEffect(() => {
+    //     let previousSubscriptionIndex = undefined as number
+    //     const updatePaths = (subscriptionIndex?: number) => {
+    //         if (subscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex)
+    //             return (previousSubscriptionIndex = subscriptionIndex)
+
+    //         const targets = props.heapControl.getTargets(id)
+    //         targets.forEach(({ target, delta: element }, i) => {
+    //             const targetBox = props.heapControl.getContainer(target).getBBox() // imprecise position, but has size
+    //             const targetLeftTop = props.heapControl.getPosition(target, index)
+    //             const targetPositionX =
+    //                 sourcePositionX <= targetLeftTop.x
+    //                     ? targetLeftTop.x
+    //                     : sourcePositionX >= targetLeftTop.x + targetBox.width
+    //                     ? targetLeftTop.x + targetBox.width
+    //                     : sourcePositionX
+    //             const targetPositionY =
+    //                 sourcePositionY <= targetLeftTop.y
+    //                     ? targetLeftTop.y
+    //                     : sourcePositionY >= targetLeftTop.x + targetBox.height
+    //                     ? targetLeftTop.y + targetBox.height
+    //                     : sourcePositionY
+
+    //             pathRefs.current[i].setAttribute('x1', sourcePositionX.toString())
+    //             pathRefs.current[i].setAttribute('y1', sourcePositionY.toString())
+    //             pathRefs.current[i].setAttribute('x2', targetPositionX.toString())
+    //             pathRefs.current[i].setAttribute('y2', targetPositionY.toString())
+    //         })
+    //     }
+    //     updatePaths()
+    //     props.heapControl.subscribe(id, updatePaths)
+    //     props.heapControl.getTargets(id).forEach(({ target }) => props.heapControl.subscribe(target, updatePaths))
+    // })
 
     return (
         <>
             <foreignObject ref={ref} className={classes.container}>
                 <Draggable
                     containerProps={{ ref: childRef, className: classes.draggable }}
-                    showGhost={false}
                     onDrag={(delta, event) => {
-                        const svgDelta = svgScreenVectorTransform('toSvg', ref.current, delta)[0]
-                        move(id, index, svgDelta, !event.altKey ? 1 : !event.shiftKey ? 2 : Infinity, props.heapControl)
+                        const [svgDelta] = svgScreenVectorTransform('toSvg', ref.current, delta)
+                        const depth = !event.altKey ? 0 : !event.shiftKey ? 1 : Infinity
+                        moveWrappers(svgDelta, depth)
                     }}
                 >
                     <MenuProvider id={id} className={classes.menuProvider}>
                         <ArrayComponents.Node
                             objData={props.objData}
                             parameters={parameterSelector === 'id' ? idParameters : typeParameters}
-                            onTarget={(id, target, ref) => props.heapControl.appendTarget(id, target, ref)}
+                            onTargetRef={(id, target, ref) => targetRefs.current.push({ target, element: ref })}
                         />
                     </MenuProvider>
                 </Draggable>
@@ -214,7 +218,7 @@ export const Wrapper = (props: {
                             parameters={typeParameters}
                             onChange={updatedParameters => (
                                 props.heapControl.setTypeParameters(languageType, updatedParameters),
-                                props.updateAll({})
+                                props.updateHeap({})
                             )}
                         />
                     </Submenu>
