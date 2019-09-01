@@ -45,46 +45,34 @@ export const Splitter = (props: {
     } = props
     const ref = React.useRef<HTMLDivElement>()
     const [ratio, setRatio] = React.useState(clamp(base, min, max))
-    const sizedProperty = layout === 'row' ? 'width' : 'height'
-    const fixedProperty = layout === 'row' ? 'height' : 'width'
+    const varying = layout === 'row' ? 'width' : 'height'
+    const pinned = layout === 'row' ? 'height' : 'width'
+
+    const resize = (delta: { x: number; y: number }) => {
+        if (!resizable) return
+        const rect = ref.current.getBoundingClientRect()
+        const change = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
+        setRatio(clamp(ratio + change, min, max))
+    }
 
     return (
         <div ref={ref} className={cn(classes.container, `flex-${props.layout}`, className)} style={style}>
             <div
                 className={cn(classes.pane, paneClassName)}
-                style={{
-                    ...paneStyle,
-                    [fixedProperty]: '100%',
-                    [sizedProperty]: styles.size(ratio, dragger / 2)
-                }}
+                style={{ ...paneStyle, [pinned]: '100%', [varying]: styles.size(ratio, dragger / 2) }}
             >
                 {children[0]}
             </div>
             <Draggable
                 containerProps={{
                     className: draggerClassName,
-                    style: {
-                        ...draggerStyle,
-                        cursor: styles.cursor(layout),
-                        [fixedProperty]: '100%',
-                        [sizedProperty]: dragger
-                    }
+                    style: { ...draggerStyle, cursor: styles.cursor(layout), [pinned]: '100%', [varying]: dragger }
                 }}
-                showGhost={false}
-                onDrag={delta => {
-                    if (!resizable) return
-                    const rect = ref.current.getBoundingClientRect()
-                    const increment = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
-                    setRatio(clamp(ratio + increment, min, max))
-                }}
+                onDrag={delta => resize(delta)}
             />
             <div
                 className={cn(classes.pane, paneClassName)}
-                style={{
-                    ...paneStyle,
-                    [fixedProperty]: '100%',
-                    [sizedProperty]: styles.size(1 - ratio, dragger / 2)
-                }}
+                style={{ ...paneStyle, [pinned]: '100%', [varying]: styles.size(1 - ratio, dragger / 2) }}
             >
                 {children[1]}
             </div>
