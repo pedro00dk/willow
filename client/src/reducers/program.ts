@@ -49,17 +49,19 @@ export const reducer: Reducer<State, Action> = (state = initialState, action) =>
     return state
 }
 
-export const actions = {
-    fetchLanguages: (): AsyncAction => async dispatch => {
-        dispatch({ type: 'program/fetchLanguages' })
-        try {
-            const languages = (await serverApi.get('/languages')).data as string[]
-            dispatch({ type: 'program/fetchLanguages', payload: { languages } })
-        } catch (error) {
-            dispatch({ type: 'program/fetchLanguages', error: error.response ? error.response.data : error.toString() })
-        }
-    },
-    setLanguage: (selected: string): Action => ({ type: 'program/setLanguage', payload: selected }),
-    setSource: (source: string[]): Action => ({ type: 'program/setSource', payload: source }),
-    setInput: (input: string[]): Action => ({ type: 'program/setInput', payload: input })
+const fetchLanguages = (): AsyncAction => async dispatch => {
+    dispatch({ type: 'program/fetchLanguages' })
+    try {
+        const languages = (await serverApi.get('/languages')).data as string[]
+        dispatch({ type: 'program/fetchLanguages', payload: { languages } })
+    } catch (error) {
+        dispatch({ type: 'program/fetchLanguages', error: error.response ? error.response.data : error.toString() })
+    }
 }
+const setLanguage = (selected: string): Action => ({ type: 'program/setLanguage', payload: selected })
+
+const setSource = (source: string[]): Action => ({ type: 'program/setSource', payload: source })
+
+const setInput = (input: string[]): Action => ({ type: 'program/setInput', payload: input })
+
+export const actions = { fetchLanguages, setLanguage, setSource, setInput }
