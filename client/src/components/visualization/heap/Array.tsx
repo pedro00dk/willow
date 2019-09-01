@@ -27,21 +27,18 @@ const styles = {
     background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
 }
 
-const defaults = new Set<schema.Obj['type']>(['array', 'alist', 'tuple'])
-const supported = new Set<schema.Obj['type']>(['array', 'alist', 'llist', 'tuple'])
-
 const defaultParameters = {
     'show index': { value: true },
     'max width': { value: 30, range: [5, 100] as [number, number] }
 }
 
-export const isDefault = (objData: ObjData) => defaults.has(objData.type)
-export const isSupported = (objData: ObjData) => supported.has(objData.type)
+export const defaults: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'tuple'])
+export const supported: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'llist', 'tuple'])
 
 export const Node = (props: {
     objData: ObjData
     parameters: UnknownParameters
-    onTarget: (id: string, target: string, ref: HTMLSpanElement) => void
+    onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
 }) => {
     const previousMembers = React.useRef<ObjData['members']>([])
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -53,7 +50,7 @@ export const Node = (props: {
     return (
         <Base title={props.objData.languageType}>
             <div className={classes.container}>
-                {!isSupported(props.objData)
+                {!supported.has(props.objData.type)
                     ? 'incompatible'
                     : props.objData.members.length === 0
                     ? 'empty'
@@ -73,7 +70,7 @@ export const Node = (props: {
                                   <span
                                       ref={ref =>
                                           !isPrimitive &&
-                                          props.onTarget(props.objData.id, (member.value as ObjData).id, ref)
+                                          props.onTargetRef(props.objData.id, (member.value as ObjData).id, ref)
                                       }
                                       className={classes.value}
                                   >
