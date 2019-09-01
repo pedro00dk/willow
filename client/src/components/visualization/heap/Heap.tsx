@@ -1,7 +1,8 @@
 import cn from 'classnames'
 import * as React from 'react'
 import { useRedux } from '../../../reducers/Store'
-import { SvgView } from './SvgView'
+import { clamp } from '../../../Utils'
+import { View } from './View'
 import { Wrapper } from './Wrapper'
 
 export type DefaultParameters = {
@@ -25,11 +26,11 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
 
 export class HeapControl {
     private positions: { [id: string]: { x: number; y: number }[] } = {}
+    private sizes: { [id: string]: { x: number; y: number }[] } = {}
+    private targets: { [id: string]: { target: string; delta: { x: number; y: number } }[] } = {}
     private parameterSelector: { [id: string]: 'id' | 'type' } = {}
     private idParameters: { [id: string]: UnknownParameters } = {}
     private typeParameters: { [languageType: string]: UnknownParameters } = {}
-    private containers: { [id: string]: { element: SVGGraphicsElement; size: { x: number; y: number } } } = {}
-    private targets: { [id: string]: { element: HTMLElement; delta: { x: number; y: number }; target: string }[] } = {}
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
     private subscriptionsCalls = 0
 
@@ -47,11 +48,34 @@ export class HeapControl {
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
         const idPositions = this.positions[id] ? this.positions[id] : (this.positions[id] = [])
         const clampedPosition = {
-            x: Math.min(Math.max(position.x, 0), this.viewSize.x * 0.95),
-            y: Math.min(Math.max(position.y, 0), this.viewSize.y * 0.95)
+            x: clamp(position.x, 0, this.viewSize.x * 0.95),
+            y: clamp(position.y, 0, this.viewSize.y * 0.95)
         }
         for (let i = range[0]; i <= range[1]; i += 1) idPositions[i] = clampedPosition
         return clampedPosition
+    }
+
+    getSize(id: string, index: number, def?: { x: number; y: number }) {
+        const idSizes = this.sizes[id] ? this.sizes[id] : (this.sizes[id] = [])
+        return idSizes[index] ? idSizes[index] : this.setSizeRange(id, [index, index], def)
+    }
+
+    setSizeRange(id: string, range: [number, number], size: { x: number; y: number }) {
+        const idSizes = this.sizes[id] ? this.sizes[id] : (this.sizes[id] = [])
+        for (let i = range[0]; i <= range[1]; i += 1) idSizes[i] = size
+        return size
+    }
+
+    clearTargets() {
+        this.targets = {}
+    }
+
+    getTargets(id: string) {
+        return this.targets[id] ? this.targets[id] : (this.targets[id] = [])
+    }
+
+    setTargets(id: string, targets: { target: string; delta: { x: number; y: number } }[]) {
+        this.targets[id] = targets
     }
 
     getParameterSelector(id: string, def?: 'id' | 'type') {
@@ -78,28 +102,7 @@ export class HeapControl {
         this.typeParameters[type] = parameters
     }
 
-    resetContainersAndTargets() {
-        this.containers = {}
-        this.targets = {}
-    }
-
-    getContainer(id: string) {
-        return this.containers[id]
-    }
-
-    setContainer(id: string, element: SVGGraphicsElement, size: { x: number; y: number }) {
-        this.containers[id] = { element, size }
-    }
-
-    getTargets(id: string) {
-        return this.targets[id] ? this.targets[id] : (this.targets[id] = [])
-    }
-
-    appendTarget(id: string, element: HTMLElement, delta: { x: number; y: number }, target: string) {
-        this.getTargets(id).push({ element, delta, target })
-    }
-
-    resetSubscriptions() {
+    clearSubscriptions() {
         this.subscriptions = {}
     }
 
@@ -126,13 +129,12 @@ export const Heap = React.memo(() => {
     const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 1000, y: 700 }))
     const updateHeap = React.useState({})[1]
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
-    const viewSize = heapControl.current.getViewSize()
-    heapControl.current.resetContainersAndTargets()
-    heapControl.current.resetSubscriptions()
+    heapControl.current.clearTargets()
+    heapControl.current.clearSubscriptions()
 
     return (
         <div className={classes.container}>
-            <SvgView size={viewSize} markers>
+            <View size={heapControl.current.getViewSize()}>
                 {tracer.available &&
                     Object.values(tracer.heapsData[tracer.index]).map(objData => (
                         <Wrapper
@@ -142,7 +144,7 @@ export const Heap = React.memo(() => {
                             tracer={tracer}
                         />
                     ))}
-            </SvgView>
+            </View>
         </div>
     )
 })
