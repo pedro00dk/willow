@@ -39,10 +39,6 @@ const useStore = () => {
     return store
 }
 
-export const useGetState = () => {
-    return useStore().getState
-}
-
 export const useDispatch = () => {
     return useStore().dispatch
 }
