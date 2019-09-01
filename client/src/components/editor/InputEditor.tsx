@@ -15,7 +15,7 @@ export const InputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
     const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
-    
+
     React.useEffect(() => {
         if (!editor) return
         editor.renderer.setShowGutter(false)
@@ -30,12 +30,11 @@ export const InputEditor = () => {
     React.useEffect(() => {
         if (!editor) return
         editor.setReadOnly(fetching)
-        if (fetching)
-            editor.session.addMarker(range(0, 0, editor.session.getLength() - 1, 1), classes.marker, 'fullLine', false)
-        else
-            Object.values(editor.session.getMarkers(false) as EditorMarker[])
-                .filter(marker => marker.id > 2)
-                .forEach(marker => editor.session.removeMarker(marker.id))
+        Object.values(editor.session.getMarkers(false) as EditorMarker[])
+            .filter(marker => marker.id > 2)
+            .forEach(marker => editor.session.removeMarker(marker.id))
+        if (!fetching) return
+        editor.session.addMarker(range(0, 0, editor.session.getLength() - 1, 1), classes.marker, 'fullLine', false)
     }, [editor, fetching])
 
     return <TextEditor onEditor={setEditor} />

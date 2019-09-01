@@ -45,12 +45,12 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
         editor.setFontSize(styles.font)
         editor.$blockScrolling = Infinity
 
-        const size = { width: ref.current.clientWidth, height: ref.current.clientHeight }
+        const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
 
         const interval = setInterval(() => {
-            if (size.width === ref.current.clientWidth && size.height === ref.current.clientHeight) return
-            size.width = ref.current.clientWidth
-            size.height = ref.current.clientHeight
+            if (size.x === ref.current.clientWidth && size.y === ref.current.clientHeight) return
+            size.x = ref.current.clientWidth
+            size.y = ref.current.clientHeight
             editor.resize()
         }, 1000)
 

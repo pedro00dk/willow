@@ -34,9 +34,6 @@ export const CodeEditor = () => {
     const dispatch = useDispatch()
     const { language, tracer } = useRedux(state => ({ language: state.program.language, tracer: state.tracer }))
 
-    const getSyntaxSupport = (language: string) =>
-        supportedLanguages.has(language) ? `ace/mode/${language}` : 'ace/mode/text'
-
     React.useEffect(() => {
         if (!editor) return
         editor.setTheme('ace/theme/chrome')
@@ -51,6 +48,10 @@ export const CodeEditor = () => {
 
     React.useEffect(() => {
         if (!editor) return
+
+        const getSyntaxSupport = (language: string) =>
+            supportedLanguages.has(language) ? `ace/mode/${language}` : 'ace/mode/text'
+
         editor.session.setMode(getSyntaxSupport(language))
     }, [editor, language])
 
