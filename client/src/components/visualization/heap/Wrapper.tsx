@@ -89,7 +89,7 @@ export const Wrapper = (props: {
         .map(([name]) => name)
     const nodeName = (parameterSelector === 'id'
         ? props.heapControl.getIdNodeName(id, defaultNodeNames[0])
-        : props.heapControl.getTypeNodeName(id, defaultNodeNames[0])) as keyof typeof modules
+        : props.heapControl.getTypeNodeName(languageType, defaultNodeNames[0])) as keyof typeof modules
     const { Node, NodeParameters } = modules[nodeName]
     targetRefs.current = []
     pathRefs.current = []
@@ -235,14 +235,16 @@ export const Wrapper = (props: {
                     </Submenu>
                     <Submenu label='type node'>
                         <Item
-                            onClick={args => (props.heapControl.setTypeNodeName(id, undefined), props.updateHeap({}))}
+                            onClick={args => (
+                                props.heapControl.setTypeNodeName(languageType, undefined), props.updateHeap({})
+                            )}
                         >
                             reset
                         </Item>
                         {supportedNodeNames.map(nodeName => (
                             <Item
                                 onClick={args => (
-                                    props.heapControl.setTypeNodeName(id, nodeName), props.updateHeap({})
+                                    props.heapControl.setTypeNodeName(languageType, nodeName), props.updateHeap({})
                                 )}
                             >
                                 {nodeName}
