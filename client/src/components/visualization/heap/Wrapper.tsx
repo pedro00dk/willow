@@ -76,25 +76,23 @@ export const Wrapper = (props: {
     const targetRefs = React.useRef<{ target: string; element: HTMLElement }[]>([])
     const pathRefs = React.useRef<SVGPathElement[]>([])
     const updateThis = React.useState({})[1]
-    const { id, languageType } = props.objData
+    const { id, type, languageType } = props.objData
     const { index } = props.tracer
     const parameterSelector = props.heapControl.getParameterSelector(id, 'type')
     const idParameters = props.heapControl.getIdParameters(id, {})
     const typeParameters = props.heapControl.getTypeParameters(languageType, {})
+    const defaultNodeNames = Object.entries(modules)
+        .filter(([, mod]) => mod.defaults.has(type))
+        .map(([name]) => name)
+    const supportedNodeNames = Object.entries(modules)
+        .filter(([, mod]) => mod.supported.has(type))
+        .map(([name]) => name)
+    const nodeName = (parameterSelector === 'id'
+        ? props.heapControl.getIdNodeName(id, defaultNodeNames[0])
+        : props.heapControl.getTypeNodeName(id, defaultNodeNames[0])) as keyof typeof modules
+    const { Node, NodeParameters } = modules[nodeName]
     targetRefs.current = []
     pathRefs.current = []
-
-    const getNodeName = (objData: ObjData) => {
-        const defaultNodeName = Object.entries(modules)
-            .filter(([, mod]) => mod.defaults.has(objData.type))
-            .map(([name]) => name)[0]
-        return parameterSelector === 'id'
-            ? props.heapControl.getIdNodeName(id, defaultNodeName)
-            : props.heapControl.getTypeNodeName(id, defaultNodeName)
-    }
-
-    const nodeName = getNodeName(props.objData) as keyof typeof modules
-    const { Node, NodeParameters } = modules[nodeName]
 
     const getLinkedObjDataIds = (id: string, pool: Set<string>, depth: number) => {
         if (depth < 0 || pool.has(id)) return
@@ -224,6 +222,33 @@ export const Wrapper = (props: {
                     >
                         {`using ${parameterSelector} parameters`}
                     </Item>
+                    <Separator />
+                    <Submenu label='id node'>
+                        <Item onClick={args => (props.heapControl.setIdNodeName(id, undefined), updateThis({}))}>
+                            reset
+                        </Item>
+                        {supportedNodeNames.map(nodeName => (
+                            <Item onClick={args => (props.heapControl.setIdNodeName(id, nodeName), updateThis({}))}>
+                                {nodeName}
+                            </Item>
+                        ))}
+                    </Submenu>
+                    <Submenu label='type node'>
+                        <Item
+                            onClick={args => (props.heapControl.setTypeNodeName(id, undefined), props.updateHeap({}))}
+                        >
+                            reset
+                        </Item>
+                        {supportedNodeNames.map(nodeName => (
+                            <Item
+                                onClick={args => (
+                                    props.heapControl.setTypeNodeName(id, nodeName), props.updateHeap({})
+                                )}
+                            >
+                                {nodeName}
+                            </Item>
+                        ))}
+                    </Submenu>
                     <Separator />
                     <Submenu label='id parameters'>
                         <NodeParameters
