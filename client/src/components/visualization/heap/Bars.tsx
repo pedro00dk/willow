@@ -98,7 +98,7 @@ export const Node = (props: {
                                   <div
                                       key={i}
                                       className={classes.element}
-                                      style={{ width: parameters['width'] }}
+                                      style={{ width: parameters['width'], background: styles.background(changed) }}
                                       title={displayValue}
                                   >
                                       <div
