@@ -6,10 +6,16 @@ import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
 import { ObjData } from '../../../reducers/tracer'
 import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
-import * as ArrayComponents from './Array'
-import { HeapControl } from './Heap'
+import * as ArrayModule from './Array'
+import * as BarsModule from './Bars'
+import { HeapControl, UnknownParameters } from './Heap'
 
 import 'react-contexify/dist/ReactContexify.min.css'
+
+const modules = {
+    array: { ...ArrayModule },
+    bars: { ...BarsModule }
+}
 
 const classes = {
     container: cn(css({ cursor: 'move' /*, transition: 'x 0.1s ease-out, y 0.1s ease-out' */ })),
@@ -19,16 +25,6 @@ const classes = {
     path: cn(css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' })),
     marker: cn(css({}))
 }
-
-// const getNodeComponent = (obj: ObjData, node: Node, typeNode: Node) => {
-//     if (node.name != undefined) return { ...components[node.name as keyof typeof components], node }
-//     if (typeNode.name != undefined) return { ...components[typeNode.name as keyof typeof components], node: typeNode }
-//     const defaultModule = Object.entries(components)
-//         .filter(([, node]) => node.isDefault(obj))
-//         .map(([, node]) => node)[0]
-
-//     return { ...defaultModule, node }
-// }
 
 // const onReposition = (
 //     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -84,9 +80,21 @@ export const Wrapper = (props: {
     const { index } = props.tracer
     const parameterSelector = props.heapControl.getParameterSelector(id, 'type')
     const idParameters = props.heapControl.getIdParameters(id, {})
-    const typeParameters = props.heapControl.getTypeParameters(id, {})
+    const typeParameters = props.heapControl.getTypeParameters(languageType, {})
     targetRefs.current = []
     pathRefs.current = []
+
+    const getNodeName = (objData: ObjData) => {
+        const defaultNodeName = Object.entries(modules)
+            .filter(([, mod]) => mod.defaults.has(objData.type))
+            .map(([name]) => name)[0]
+        return parameterSelector === 'id'
+            ? props.heapControl.getIdNodeName(id, defaultNodeName)
+            : props.heapControl.getTypeNodeName(id, defaultNodeName)
+    }
+
+    const nodeName = getNodeName(props.objData) as keyof typeof modules
+    const { Node, NodeParameters } = modules[nodeName]
 
     const getLinkedObjDataIds = (id: string, pool: Set<string>, depth: number) => {
         if (depth < 0 || pool.has(id)) return
@@ -198,11 +206,13 @@ export const Wrapper = (props: {
                     }}
                 >
                     <MenuProvider id={id} className={classes.menuProvider}>
-                        <ArrayComponents.Node
-                            objData={props.objData}
-                            parameters={parameterSelector === 'id' ? idParameters : typeParameters}
-                            onTargetRef={(id, target, ref) => targetRefs.current.push({ target, element: ref })}
-                        />
+                        <div className={classes.menuProvider}>
+                            <Node
+                                objData={props.objData}
+                                parameters={parameterSelector === 'id' ? idParameters : typeParameters}
+                                onTargetRef={(id, target, ref) => targetRefs.current.push({ target, element: ref })}
+                            />
+                        </div>
                     </MenuProvider>
                 </Draggable>
                 <Menu id={id}>
@@ -216,19 +226,19 @@ export const Wrapper = (props: {
                     </Item>
                     <Separator />
                     <Submenu label='id parameters'>
-                        <ArrayComponents.NodeParameters
+                        <NodeParameters
                             withReset
                             parameters={idParameters}
-                            onChange={updatedParameters => (
+                            onChange={(updatedParameters: UnknownParameters) => (
                                 props.heapControl.setIdParameters(id, updatedParameters), updateThis({})
                             )}
                         />
                     </Submenu>
                     <Submenu label='type parameters'>
-                        <ArrayComponents.NodeParameters
+                        <NodeParameters
                             withReset
                             parameters={typeParameters}
-                            onChange={updatedParameters => (
+                            onChange={(updatedParameters: UnknownParameters) => (
                                 props.heapControl.setTypeParameters(languageType, updatedParameters),
                                 props.updateHeap({})
                             )}
