@@ -5,7 +5,7 @@ import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
 import { ObjData } from '../../../reducers/tracer'
-import { Draggable, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
+import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
 import * as ArrayComponents from './Array'
 import { HeapControl } from './Heap'
 
@@ -14,9 +14,10 @@ import 'react-contexify/dist/ReactContexify.min.css'
 const classes = {
     container: cn(css({ cursor: 'move' /*, transition: 'x 0.1s ease-out, y 0.1s ease-out' */ })),
     draggable: cn('d-flex position-absolute', css({ userSelect: 'none' })),
-    path: cn(),
     menuProvider: cn('d-flex'),
-    selected: cn(css({ background: colors.blue.lighter }))
+    selected: cn(css({ background: colors.blue.lighter })),
+    path: cn(css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' })),
+    marker: cn(css({}))
 }
 
 // const getNodeComponent = (obj: ObjData, node: Node, typeNode: Node) => {
@@ -77,7 +78,7 @@ export const Wrapper = (props: {
     const ref = React.useRef<SVGForeignObjectElement>()
     const childRef = React.useRef<HTMLDivElement>()
     const targetRefs = React.useRef<{ target: string; element: HTMLElement }[]>([])
-    const pathRefs = React.useRef<SVGLineElement[]>([])
+    const pathRefs = React.useRef<SVGPathElement[]>([])
     const updateThis = React.useState({})[1]
     const { id, languageType } = props.objData
     const { index } = props.tracer
@@ -98,10 +99,59 @@ export const Wrapper = (props: {
         const linkedPool = getLinkedObjDataIds(id, new Set(), depth)
         linkedPool.forEach(id => {
             const position = props.heapControl.getPosition(id, index)
-            props.heapControl.setPositionRange(id, [index, index], { x: position.x + delta.x, y: position.y + delta.y })
+            props.heapControl.setPositionRange(id, [0, props.tracer.heapsData.length], {
+                x: position.x + delta.x,
+                y: position.y + delta.y
+            })
             props.heapControl.callSubscriptions(id)
         })
     }
+
+    const computePathCoordinates = (
+        sourcePosition: { x: number; y: number },
+        delta: { x: number; y: number },
+        targetPosition: { x: number; y: number },
+        targetSize: { x: number; y: number }
+    ) => {
+        const source = { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
+        const target = {
+            x: clamp(source.x, targetPosition.x, targetPosition.x + targetSize.x),
+            y: clamp(source.y, targetPosition.y, targetPosition.y + targetSize.y)
+        }
+        const center = { x: lerp(0.5, source.x, target.x), y: lerp(0.5, source.y, target.y) }
+        const parallelVector = { x: target.x - source.x, y: target.y - source.y }
+        const orthogonalVector = { x: parallelVector.y / 4, y: -parallelVector.x / 4 }
+        const control = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
+        return `M ${source.x},${source.y} Q ${control.x},${control.y} ${target.x},${target.y}`
+    }
+
+    React.useLayoutEffect(() => {
+        const childRect = childRef.current.getBoundingClientRect()
+        const screenSize = { x: childRect.width, y: childRect.height }
+        const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
+        ref.current.setAttribute('width', svgSize.x.toString())
+        ref.current.setAttribute('height', svgSize.y.toString())
+        props.heapControl.setSizeRange(id, [index, index], svgSize)
+        props.heapControl.callSubscriptions(id)
+    })
+
+    React.useLayoutEffect(() => {
+        const position = props.heapControl.getPosition(id, index, { x: 0, y: 0 })
+        const targets = targetRefs.current.map(({ target, element }) => {
+            const rect = element.getBoundingClientRect()
+            const screenPosition = { x: rect.left, y: rect.top }
+            const screenSize = { x: rect.width, y: rect.height }
+            const [elementPosition] = svgScreenPointTransform('toSvg', ref.current, screenPosition)
+            const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
+            const delta = {
+                x: elementPosition.x + svgSize.x / 2 - position.x,
+                y: elementPosition.y + svgSize.y / 2 - position.y
+            }
+            return { target, delta }
+        })
+        props.heapControl.setTargets(id, targets)
+        props.heapControl.callSubscriptions(id)
+    })
 
     React.useLayoutEffect(() => {
         let previousSubscriptionIndex = undefined as number
@@ -116,63 +166,25 @@ export const Wrapper = (props: {
         props.heapControl.subscribe(id, updatePosition)
     })
 
-    React.useLayoutEffect(() => {
-        const childRect = childRef.current.getBoundingClientRect()
-        const screenSize = { x: childRect.width, y: childRect.height }
-        const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
-        ref.current.setAttribute('width', svgSize.x.toString())
-        ref.current.setAttribute('height', svgSize.y.toString())
-        props.heapControl.setSizeRange(id, [index, index], svgSize)
-        props.heapControl.callSubscriptions(id)
+    React.useEffect(() => {
+        let previousSubscriptionIndex = undefined as number
+        const updatePaths = (subscriptionIndex?: number) => {
+            if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
+            previousSubscriptionIndex = subscriptionIndex
+            const targets = props.heapControl.getTargets(id)
+            targets.forEach(({ target, delta }, i) => {
+                const pathRef = pathRefs.current[i]
+                const sourcePosition = props.heapControl.getPosition(id, index)
+                const targetPosition = props.heapControl.getPosition(target, index)
+                const targetSize = props.heapControl.getSize(target, index)
+                const pathCoordinates = computePathCoordinates(sourcePosition, delta, targetPosition, targetSize)
+                pathRef.setAttribute('d', pathCoordinates)
+            })
+        }
+        updatePaths()
+        props.heapControl.subscribe(id, updatePaths)
+        props.heapControl.getTargets(id).forEach(({ target }) => props.heapControl.subscribe(target, updatePaths))
     })
-
-    React.useLayoutEffect(() => {
-        const targets = targetRefs.current.map(({ target, element }) => {
-            const rect = element.getBoundingClientRect()
-            const screenPosition = { x: rect.left, y: rect.top }
-            const screenSize = { x: rect.width, y: rect.height }
-            const [svgPosition] = svgScreenPointTransform('toSvg', ref.current, screenPosition)
-            const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
-            const delta = { x: svgPosition.x + svgSize.x / 2, y: svgPosition.y + svgSize.y / 2 }
-            return { target, delta }
-        })
-        props.heapControl.setTargets(id, targets)
-        props.heapControl.callSubscriptions(id)
-    })
-
-    // React.useEffect(() => {
-    //     let previousSubscriptionIndex = undefined as number
-    //     const updatePaths = (subscriptionIndex?: number) => {
-    //         if (subscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex)
-    //             return (previousSubscriptionIndex = subscriptionIndex)
-
-    //         const targets = props.heapControl.getTargets(id)
-    //         targets.forEach(({ target, delta: element }, i) => {
-    //             const targetBox = props.heapControl.getContainer(target).getBBox() // imprecise position, but has size
-    //             const targetLeftTop = props.heapControl.getPosition(target, index)
-    //             const targetPositionX =
-    //                 sourcePositionX <= targetLeftTop.x
-    //                     ? targetLeftTop.x
-    //                     : sourcePositionX >= targetLeftTop.x + targetBox.width
-    //                     ? targetLeftTop.x + targetBox.width
-    //                     : sourcePositionX
-    //             const targetPositionY =
-    //                 sourcePositionY <= targetLeftTop.y
-    //                     ? targetLeftTop.y
-    //                     : sourcePositionY >= targetLeftTop.x + targetBox.height
-    //                     ? targetLeftTop.y + targetBox.height
-    //                     : sourcePositionY
-
-    //             pathRefs.current[i].setAttribute('x1', sourcePositionX.toString())
-    //             pathRefs.current[i].setAttribute('y1', sourcePositionY.toString())
-    //             pathRefs.current[i].setAttribute('x2', targetPositionX.toString())
-    //             pathRefs.current[i].setAttribute('y2', targetPositionY.toString())
-    //         })
-    //     }
-    //     updatePaths()
-    //     props.heapControl.subscribe(id, updatePaths)
-    //     props.heapControl.getTargets(id).forEach(({ target }) => props.heapControl.subscribe(target, updatePaths))
-    // })
 
     return (
         <>
@@ -224,8 +236,26 @@ export const Wrapper = (props: {
                     </Submenu>
                 </Menu>
             </foreignObject>
+            <defs>
+                <marker
+                    id='pointer'
+                    className={classes.marker}
+                    markerWidth={10}
+                    markerHeight={8}
+                    refX={8}
+                    refY={4}
+                    orient='auto'
+                    markerUnits='userSpaceOnUse'
+                >
+                    <polyline points='0 0, 10 4, 0 8' />
+                </marker>
+            </defs>
             {[...Array(props.objData.objMembers)].map(_ => (
-                <line ref={ref => pathRefs.current.push(ref)} className={classes.path} stroke='black'></line>
+                <path
+                    ref={ref => ref && pathRefs.current.push(ref)}
+                    className={classes.path}
+                    markerEnd='url(#pointer)'
+                />
             ))}
         </>
     )
