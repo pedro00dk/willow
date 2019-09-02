@@ -32,8 +32,8 @@ const defaultParameters = {
     'max width': { value: 30, range: [5, 100] as [number, number] }
 }
 
-export const defaults: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'tuple'])
-export const supported: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'llist', 'tuple'])
+export const defaults: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'tuple', 'set'])
+export const supported: ReadonlySet<schema.Obj['type']> = new Set(['array', 'alist', 'llist', 'tuple', 'set'])
 
 export const Node = (props: {
     objData: ObjData
