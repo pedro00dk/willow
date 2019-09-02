@@ -47,10 +47,6 @@ export const Node = (props: {
     const previousMembers = React.useRef<ObjData['members']>([])
     const parameters = readParameters(props.parameters, defaultParameters)
 
-    React.useEffect(() => {
-        previousMembers.current = props.objData.members
-    })
-
     const computeDeltaRatios = (values: number[]) => {
         const min = Math.min(...values)
         const max = Math.max(...values)
@@ -77,6 +73,10 @@ export const Node = (props: {
         return ratioIndices.map(([value, i]) => value)
     }
 
+    React.useEffect(() => {
+        previousMembers.current = props.objData.members
+    })
+
     return (
         <Base title={props.objData.languageType}>
             <div className={classes.container}>
@@ -94,7 +94,7 @@ export const Node = (props: {
                               const changed = valueChanged(previousMembers.current[i], member)
                               const displayValue = getDisplayValue(props.objData, member.value)
 
-                              return ratios.map((ratio, i) => (
+                              return (
                                   <div
                                       key={i}
                                       className={classes.element}
@@ -103,12 +103,12 @@ export const Node = (props: {
                                   >
                                       <div
                                           className={classes.bar}
-                                          style={{ height: `${ratio * parameters['height']}px` }}
+                                          style={{ height: `${ratios[i] * parameters['height']}px` }}
                                       />
                                       {parameters['show index'] && <span className={classes.index}>{i}</span>}
                                       {parameters['show values'] && <span className={classes.value}>{values[i]}</span>}
                                   </div>
-                              ))
+                              )
                           })
                       })()}
             </div>
