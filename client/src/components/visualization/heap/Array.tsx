@@ -69,6 +69,7 @@ export const Node = (props: {
                                   {parameters['show index'] && <span className={classes.index}>{i}</span>}
                                   <span
                                       ref={ref =>
+                                          ref &&
                                           !isPrimitive &&
                                           props.onTargetRef(props.objData.id, (member.value as ObjData).id, ref)
                                       }
