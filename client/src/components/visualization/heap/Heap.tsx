@@ -29,8 +29,10 @@ export class HeapControl {
     private sizes: { [id: string]: { x: number; y: number }[] } = {}
     private targets: { [id: string]: { target: string; delta: { x: number; y: number } }[] } = {}
     private parameterSelector: { [id: string]: 'id' | 'type' } = {}
+    private idNodeName: { [id: string]: string } = {}
+    private typeNodeName: { [type: string]: string } = {}
     private idParameters: { [id: string]: UnknownParameters } = {}
-    private typeParameters: { [languageType: string]: UnknownParameters } = {}
+    private typeParameters: { [type: string]: UnknownParameters } = {}
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
     private subscriptionsCalls = 0
 
@@ -84,6 +86,22 @@ export class HeapControl {
 
     setParameterSelector(id: string, selector: 'id' | 'type') {
         this.parameterSelector[id] = selector
+    }
+
+    getIdNodeName(id: string, def?: string) {
+        return this.idNodeName[id] ? this.idNodeName[id] : (this.idNodeName[id] = def)
+    }
+
+    setIdNodeName(id: string, nodeType: string) {
+        this.idNodeName[id] = nodeType
+    }
+
+    getTypeNodeName(id: string, def?: string) {
+        return this.typeNodeName[id] ? this.typeNodeName[id] : (this.typeNodeName[id] = def)
+    }
+
+    setTypeNodeName(id: string, nodeType: string) {
+        this.typeNodeName[id] = nodeType
     }
 
     getIdParameters(id: string, def?: UnknownParameters) {
