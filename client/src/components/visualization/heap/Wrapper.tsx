@@ -23,7 +23,7 @@ const classes = {
     menuProvider: cn('d-flex'),
     selected: cn(css({ background: colors.blue.lighter })),
     path: cn(css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' })),
-    marker: cn(css({}))
+    polyline: cn(css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' }))
 }
 
 // const onReposition = (
@@ -276,7 +276,6 @@ export const Wrapper = (props: {
             <defs>
                 <marker
                     id='pointer'
-                    className={classes.marker}
                     markerWidth={10}
                     markerHeight={8}
                     refX={8}
@@ -284,7 +283,7 @@ export const Wrapper = (props: {
                     orient='auto'
                     markerUnits='userSpaceOnUse'
                 >
-                    <polyline points='0 0, 10 4, 0 8' />
+                    <polyline className={classes.polyline} points='0 0, 10 4, 0 8' />
                 </marker>
             </defs>
             {[...Array(props.objData.objMembers)].map(_ => (
