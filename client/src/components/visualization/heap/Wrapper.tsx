@@ -26,45 +26,6 @@ const classes = {
     polyline: cn(css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' }))
 }
 
-// const onReposition = (
-//     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-//     tracer: State['tracer'],
-//     root: string,
-//     rect: ClientRect | DOMRect,
-//     positions: { [reference: string]: Position },
-//     links: { [reference: string]: Link }
-// ) => {
-//     const data = tracer.groupMapsData[tracer.index][root]
-//     if (!data) return
-
-//     const anchor = positions[root].position
-//     const space = rect.width - positions[root].position.x
-//     const increment = space / data.depth
-//     let distance = 0
-//     positions[data.base].setPosition({ ...anchor, x: anchor.x + increment * distance })
-//     const moved = new Set([data.base])
-//     const previousLevel = new Set([data.base])
-//     distance++
-//     while (previousLevel.size > 0) {
-//         const pool = [...previousLevel]
-//             .map(reference => {
-//                 const x = getLinked(reference, links, new Set(), 2)
-//                 return x
-//             })
-//             .reduce((acc, n) => {
-//                 n.forEach(reference => acc.add(reference))
-//                 return acc
-//             }, new Set<string>())
-//         pool.forEach(reference => (!data.members.has(reference) ? pool.delete(reference) : undefined))
-//         moved.forEach(reference => pool.delete(reference))
-//         pool.forEach(reference => moved.add(reference))
-//         pool.forEach(reference => positions[reference].setPosition({ ...anchor, x: anchor.x + increment * distance }))
-//         previousLevel.clear()
-//         pool.forEach(reference => previousLevel.add(reference))
-//         distance++
-//     }
-// }
-
 export const Wrapper = (props: {
     objData: ObjData
     tracer: State['tracer']
@@ -129,6 +90,38 @@ export const Wrapper = (props: {
         const orthogonalVector = { x: parallelVector.y / 4, y: -parallelVector.x / 4 }
         const control = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
         return `M ${source.x},${source.y} Q ${control.x},${control.y} ${target.x},${target.y}`
+    }
+
+    const repositionWrappers = () => {
+        const groupMap = props.tracer.groupMapsData[index]
+        const group = groupMap[id]
+        if (!group || group.type === 'unknown') return
+        const base = group.base
+        const positionAnchor = props.heapControl.getPosition(id, index)
+        const increment = { x: 100, y: 50 }
+
+        // TODO buggy yet
+        const postOrderSetPosition = (objData: ObjData, depth: { x: number; y: number }, repositioned: Set<string>) => {
+            if (repositioned.has(objData.id)) return
+            repositioned.add(objData.id)
+            const initialYDepth = depth.y
+            depth.x++
+            const childObjects = objData.members.filter(
+                member => typeof member.value === 'object' && member.value.languageType === objData.languageType
+            )
+            childObjects.forEach(member => postOrderSetPosition(member.value as ObjData, depth, repositioned))
+            depth.x--
+
+            props.heapControl.setPositionRange(objData.id, [0, props.tracer.heapsData.length], {
+                x: positionAnchor.x + increment.x * depth.x,
+                y: positionAnchor.y + increment.y * (initialYDepth + (depth.y - initialYDepth) / 2)
+            })
+
+            if (childObjects.length === 0) depth.y++
+        }
+        const repositioned = new Set<string>()
+        postOrderSetPosition(props.tracer.heapsData[index][base], { x: 0, y: 0 }, repositioned)
+        repositioned.forEach(id => props.heapControl.callSubscriptions(id))
     }
 
     React.useLayoutEffect(() => {
@@ -206,7 +199,7 @@ export const Wrapper = (props: {
                     }}
                 >
                     <MenuProvider id={id} className={classes.menuProvider}>
-                        <div className={classes.menuProvider}>
+                        <div className={classes.menuProvider} onDoubleClick={event => repositionWrappers()}>
                             <Node
                                 objData={props.objData}
                                 parameters={parameterSelector === 'id' ? idParameters : typeParameters}
