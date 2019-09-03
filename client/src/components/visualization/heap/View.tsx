@@ -61,11 +61,11 @@ export const View = (props: {
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
                 const [svgPoint] = svgScreenPointTransform('toSvg', ref.current, screenPoint)
-                scaleView(svgPoint, event.deltaY < 0 ? 0.01 : -0.01)
+                scaleView(svgPoint, event.deltaY < 0 ? 0.02 : -0.02)
             }}
         >
-            <g fill='none' stroke='gray' strokeWidth={1} opacity={0.1}>
-                <rect x={props.size.x} y={props.size.y} width={props.size.x} height={props.size.y} />
+            <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
+                <rect width={props.size.x} height={props.size.y} />
                 <rect x={props.size.x / 4} y={props.size.y / 4} width={props.size.x / 2} height={props.size.y / 2} />
             </g>
             {props.children}
