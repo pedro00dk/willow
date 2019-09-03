@@ -22,7 +22,7 @@ const modules = {
 }
 
 const classes = {
-    container: cn(css({ cursor: 'move' /*, transition: 'x 0.1s ease-out, y 0.1s ease-out' */ })),
+    container: cn(css({ cursor: 'move', transition: 'x 0.2s ease-out, y 0.2s ease-out' })),
     draggable: cn('d-flex position-absolute', css({ userSelect: 'none' })),
     menuProvider: cn('d-flex'),
     selected: cn(css({ background: colors.blue.lighter })),
@@ -102,26 +102,29 @@ export const Wrapper = (props: {
         if (!group || group.type === 'unknown') return
         const base = group.base
         const positionAnchor = props.heapControl.getPosition(id, index)
-        const increment = { x: 100, y: 50 }
+        const sizeAnchor = props.heapControl.getSize(id, index)
+        const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
 
-        // TODO buggy yet
         const postOrderSetPosition = (objData: ObjData, depth: { x: number; y: number }, repositioned: Set<string>) => {
             if (repositioned.has(objData.id)) return
             repositioned.add(objData.id)
             const initialYDepth = depth.y
-            depth.x++
             const childObjects = objData.members.filter(
                 member => typeof member.value === 'object' && member.value.languageType === objData.languageType
             )
-            childObjects.forEach(member => postOrderSetPosition(member.value as ObjData, depth, repositioned))
-            depth.x--
+            const isLeaf = childObjects.length === 0
+            if (!isLeaf) {
+                depth.x++
+                childObjects.forEach(member => postOrderSetPosition(member.value as ObjData, depth, repositioned))
+                depth.x--
+            }
 
             props.heapControl.setPositionRange(objData.id, [0, props.tracer.heapsData.length], {
                 x: positionAnchor.x + increment.x * depth.x,
-                y: positionAnchor.y + increment.y * (initialYDepth + (depth.y - initialYDepth) / 2)
+                y:
+                    positionAnchor.y +
+                    increment.y * (isLeaf ? depth.y++ : initialYDepth + (depth.y - 1 - initialYDepth) / 2)
             })
-
-            if (childObjects.length === 0) depth.y++
         }
         const repositioned = new Set<string>()
         postOrderSetPosition(props.tracer.heapsData[index][base], { x: 0, y: 0 }, repositioned)
