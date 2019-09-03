@@ -8,13 +8,15 @@ import { ObjData } from '../../../reducers/tracer'
 import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
 import * as ArrayModule from './Array'
 import * as BarsModule from './Bars'
+import * as FieldModule from './Field'
 import { HeapControl, UnknownParameters } from './Heap'
 
 import 'react-contexify/dist/ReactContexify.min.css'
 
 const modules = {
     array: { ...ArrayModule },
-    bars: { ...BarsModule }
+    bars: { ...BarsModule },
+    field: { ...FieldModule }
 }
 
 const classes = {
@@ -249,6 +251,7 @@ export const Wrapper = (props: {
                     <Separator />
                     <Submenu label='id parameters'>
                         <NodeParameters
+                            objData={props.objData}
                             withReset
                             parameters={idParameters}
                             onChange={(updatedParameters: UnknownParameters) => (
@@ -258,6 +261,7 @@ export const Wrapper = (props: {
                     </Submenu>
                     <Submenu label='type parameters'>
                         <NodeParameters
+                            objData={props.objData}
                             withReset
                             parameters={typeParameters}
                             onChange={(updatedParameters: UnknownParameters) => (
