@@ -133,29 +133,11 @@ export const Wrapper = (props: {
 
     React.useLayoutEffect(() => {
         const childRect = childRef.current.getBoundingClientRect()
-        const screenSize = { x: childRect.width, y: childRect.height }
-        const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
-        ref.current.setAttribute('width', svgSize.x.toString())
-        ref.current.setAttribute('height', svgSize.y.toString())
-        props.heapControl.setSizeRange(id, [index, index], svgSize)
-        props.heapControl.callSubscriptions(id)
-    })
-
-    React.useLayoutEffect(() => {
-        const position = props.heapControl.getPosition(id, index, { x: 0, y: 0 })
-        const targets = targetRefs.current.map(({ target, element }) => {
-            const rect = element.getBoundingClientRect()
-            const screenPosition = { x: rect.left, y: rect.top }
-            const screenSize = { x: rect.width, y: rect.height }
-            const [elementPosition] = svgScreenPointTransform('toSvg', ref.current, screenPosition)
-            const [svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenSize)
-            const delta = {
-                x: elementPosition.x + svgSize.x / 2 - position.x,
-                y: elementPosition.y + svgSize.y / 2 - position.y
-            }
-            return { target, delta }
-        })
-        props.heapControl.setTargets(id, targets)
+        const childScreenSize = { x: childRect.width, y: childRect.height }
+        const [childSvgSize] = svgScreenVectorTransform('toSvg', ref.current, childScreenSize)
+        ref.current.setAttribute('width', childSvgSize.x.toString())
+        ref.current.setAttribute('height', childSvgSize.y.toString())
+        props.heapControl.setSizeRange(id, [index, index], childSvgSize)
         props.heapControl.callSubscriptions(id)
     })
 
@@ -172,18 +154,38 @@ export const Wrapper = (props: {
         props.heapControl.subscribe(id, updatePosition)
     })
 
+    React.useLayoutEffect(() => {
+        const position = props.heapControl.getPosition(id, index, { x: 0, y: 0 })
+        const targets = targetRefs.current.map(({ target, element }) => {
+            const elementRect = element.getBoundingClientRect()
+            const elementScreenPosition = { x: elementRect.left, y: elementRect.top }
+            const elementScreenSize = { x: elementRect.width, y: elementRect.height }
+            const [elementSvgPosition] = svgScreenPointTransform('toSvg', ref.current, elementScreenPosition)
+            const [elementSvgSize] = svgScreenVectorTransform('toSvg', ref.current, elementScreenSize)
+            const delta = {
+                x: elementSvgPosition.x + elementSvgSize.x / 2 - position.x,
+                y: elementSvgPosition.y + elementSvgSize.y / 2 - position.y
+            }
+            return { target, delta }
+        })
+        props.heapControl.setTargets(id, targets)
+        props.heapControl.callSubscriptions(id)
+    })
+
     React.useEffect(() => {
         let previousSubscriptionIndex = undefined as number
         const updatePaths = (subscriptionIndex?: number) => {
             if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
             previousSubscriptionIndex = subscriptionIndex
             const targets = props.heapControl.getTargets(id)
+            pathRefs.current.forEach(pathRef => pathRef.setAttribute('visibility', 'hidden'))
             targets.forEach(({ target, delta }, i) => {
-                const pathRef = pathRefs.current[i]
                 const sourcePosition = props.heapControl.getPosition(id, index)
                 const targetPosition = props.heapControl.getPosition(target, index)
                 const targetSize = props.heapControl.getSize(target, index)
                 const pathCoordinates = computePathCoordinates(sourcePosition, delta, targetPosition, targetSize)
+                const pathRef = pathRefs.current[i]
+                pathRef.setAttribute('visibility', 'visible')
                 pathRef.setAttribute('d', pathCoordinates)
             })
         }
