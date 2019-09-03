@@ -155,6 +155,7 @@ export const Heap = React.memo(() => {
                 {tracer.available &&
                     Object.values(tracer.heapsData[tracer.index]).map(objData => (
                         <Wrapper
+                            key={objData.id}
                             objData={objData}
                             heapControl={heapControl.current}
                             updateHeap={updateHeap}

@@ -229,8 +229,9 @@ export const Wrapper = (props: {
                         <Item onClick={args => (props.heapControl.setIdNodeName(id, undefined), updateThis({}))}>
                             reset
                         </Item>
-                        {supportedNodeNames.map(nodeName => (
+                        {supportedNodeNames.map((nodeName, i) => (
                             <Item
+                                key={i}
                                 onClick={args =>
                                     parameterSelector === 'id'
                                         ? (props.heapControl.setIdNodeName(id, nodeName), updateThis({}))
@@ -271,8 +272,9 @@ export const Wrapper = (props: {
                     <polyline className={classes.polyline} points='0 0, 10 4, 0 8' />
                 </marker>
             </defs>
-            {[...Array(props.objData.objMembers)].map(_ => (
+            {[...Array(props.objData.objMembers)].map((_, i) => (
                 <path
+                    key={i}
                     ref={ref => ref && pathRefs.current.push(ref)}
                     className={classes.path}
                     markerEnd='url(#pointer)'
