@@ -10,13 +10,15 @@ import * as ArrayModule from './Array'
 import * as BarsModule from './Bars'
 import * as FieldModule from './Field'
 import { HeapControl, UnknownParameters } from './Heap'
+import * as MapModule from './Map'
 
 import 'react-contexify/dist/ReactContexify.min.css'
 
 const modules = {
     array: { ...ArrayModule },
     bars: { ...BarsModule },
-    field: { ...FieldModule }
+    field: { ...FieldModule },
+    map: { ...MapModule }
 }
 
 const classes = {
