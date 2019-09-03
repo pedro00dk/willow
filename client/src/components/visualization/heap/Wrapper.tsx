@@ -66,11 +66,15 @@ export const Wrapper = (props: {
         return pool
     }
 
-    const moveWrappers = (delta: { x: number; y: number }, depth: number) => {
+    const moveWrappers = (delta: { x: number; y: number }, depth: number, update: 'all' | 'from' | 'single') => {
         const linkedPool = getLinkedObjDataIds(id, new Set(), depth)
         linkedPool.forEach(id => {
             const position = props.heapControl.getPosition(id, index)
-            props.heapControl.setPositionRange(id, [0, props.tracer.heapsData.length], {
+            const updateRange = [
+                update === 'all' ? 0 : index,
+                update === 'single' ? index : props.tracer.heapsData.length
+            ] as [number, number]
+            props.heapControl.setPositionRange(id, updateRange, {
                 x: position.x + delta.x,
                 y: position.y + delta.y
             })
@@ -96,7 +100,7 @@ export const Wrapper = (props: {
         return `M ${source.x},${source.y} Q ${control.x},${control.y} ${target.x},${target.y}`
     }
 
-    const repositionWrappers = () => {
+    const repositionWrappers = (update: 'all' | 'from' | 'single') => {
         const groupMap = props.tracer.groupMapsData[index]
         const group = groupMap[id]
         if (!group || group.type === 'unknown') return
@@ -104,6 +108,10 @@ export const Wrapper = (props: {
         const positionAnchor = props.heapControl.getPosition(id, index)
         const sizeAnchor = props.heapControl.getSize(id, index)
         const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
+        const updateRange = [
+            update === 'all' ? 0 : index,
+            update === 'single' ? index : props.tracer.heapsData.length
+        ] as [number, number]
 
         const postOrderSetPosition = (objData: ObjData, depth: { x: number; y: number }, repositioned: Set<string>) => {
             if (repositioned.has(objData.id)) return
@@ -119,7 +127,7 @@ export const Wrapper = (props: {
                 depth.x--
             }
 
-            props.heapControl.setPositionRange(objData.id, [0, props.tracer.heapsData.length], {
+            props.heapControl.setPositionRange(objData.id, updateRange, {
                 x: positionAnchor.x + increment.x * depth.x,
                 y:
                     positionAnchor.y +
@@ -128,6 +136,17 @@ export const Wrapper = (props: {
         }
         const repositioned = new Set<string>()
         postOrderSetPosition(props.tracer.heapsData[index][base], { x: 0, y: 0 }, repositioned)
+
+        const basePosition = props.heapControl.getPosition(base, index)
+        const baseAnchorDelta = { x: positionAnchor.x - basePosition.x, y: positionAnchor.y - basePosition.y }
+        repositioned.forEach(id => {
+            const position = props.heapControl.getPosition(id, index)
+            props.heapControl.setPositionRange(id, updateRange, {
+                x: position.x + baseAnchorDelta.x,
+                y: position.y + baseAnchorDelta.y
+            })
+        })
+
         repositioned.forEach(id => props.heapControl.callSubscriptions(id))
     }
 
@@ -202,11 +221,18 @@ export const Wrapper = (props: {
                     onDrag={(delta, event) => {
                         const [svgDelta] = svgScreenVectorTransform('toSvg', ref.current, delta)
                         const depth = !event.altKey ? 0 : !event.shiftKey ? 1 : Infinity
-                        moveWrappers(svgDelta, depth)
+                        const update = !event.ctrlKey ? 'all' : !event.altKey ? 'from' : 'single'
+                        moveWrappers(svgDelta, depth, update)
                     }}
                 >
                     <MenuProvider id={id} className={classes.menuProvider}>
-                        <div className={classes.menuProvider} onDoubleClick={event => repositionWrappers()}>
+                        <div
+                            className={classes.menuProvider}
+                            onDoubleClick={event => {
+                                const update = !event.ctrlKey ? 'all' : !event.altKey ? 'from' : 'single'
+                                repositionWrappers(update)
+                            }}
+                        >
                             <Node
                                 objData={props.objData}
                                 parameters={parameterSelector === 'id' ? idParameters : typeParameters}
