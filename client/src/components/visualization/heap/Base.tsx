@@ -31,7 +31,7 @@ export const getDisplayValue = (
 const classes = {
     container: cn('d-flex flex-column'),
     title: cn('px-1', css({ fontSize: '0.5rem' })),
-    children: cn('d-flex flex-row justify-content-center', 'rounded', 'p-1', css({ background: colors.gray.light }))
+    children: cn('d-flex justify-content-center', 'rounded', 'p-1', css({ background: colors.gray.light }))
 }
 
 export const Base = (props: { title: string; children?: React.ReactNode }) => (
