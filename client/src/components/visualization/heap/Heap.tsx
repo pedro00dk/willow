@@ -139,12 +139,11 @@ export class HeapControl {
 }
 
 const classes = {
-    container: cn('d-flex', 'w-100 h-100'),
-    line: cn('position-absolute', 'p-0 m-0')
+    container: cn('d-flex', 'w-100 h-100')
 }
 
 export const Heap = React.memo(() => {
-    const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 1000, y: 700 }))
+    const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 2000, y: 600 }))
     const updateHeap = React.useState({})[1]
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
     heapControl.current.clearTargets()
