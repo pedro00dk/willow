@@ -86,6 +86,7 @@ export const Node = (props: {
 }
 
 export const NodeParameters = (props: {
+    objData: ObjData
     withReset: boolean
     parameters: UnknownParameters
     onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
