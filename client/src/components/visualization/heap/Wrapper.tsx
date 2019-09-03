@@ -220,54 +220,35 @@ export const Wrapper = (props: {
                         {`using ${parameterSelector} parameters`}
                     </Item>
                     <Separator />
-                    <Submenu label='id node'>
+                    <Submenu label='node'>
                         <Item onClick={args => (props.heapControl.setIdNodeName(id, undefined), updateThis({}))}>
                             reset
                         </Item>
                         {supportedNodeNames.map(nodeName => (
-                            <Item onClick={args => (props.heapControl.setIdNodeName(id, nodeName), updateThis({}))}>
-                                {nodeName}
-                            </Item>
-                        ))}
-                    </Submenu>
-                    <Submenu label='type node'>
-                        <Item
-                            onClick={args => (
-                                props.heapControl.setTypeNodeName(languageType, undefined), props.updateHeap({})
-                            )}
-                        >
-                            reset
-                        </Item>
-                        {supportedNodeNames.map(nodeName => (
                             <Item
-                                onClick={args => (
-                                    props.heapControl.setTypeNodeName(languageType, nodeName), props.updateHeap({})
-                                )}
+                                onClick={args =>
+                                    parameterSelector === 'id'
+                                        ? (props.heapControl.setIdNodeName(id, nodeName), updateThis({}))
+                                        : (props.heapControl.setTypeNodeName(languageType, nodeName),
+                                          props.updateHeap({}))
+                                }
                             >
                                 {nodeName}
                             </Item>
                         ))}
                     </Submenu>
                     <Separator />
-                    <Submenu label='id parameters'>
+                    <Submenu label='parameters'>
                         <NodeParameters
                             objData={props.objData}
                             withReset
-                            parameters={idParameters}
-                            onChange={(updatedParameters: UnknownParameters) => (
-                                props.heapControl.setIdParameters(id, updatedParameters), updateThis({})
-                            )}
-                        />
-                    </Submenu>
-                    <Submenu label='type parameters'>
-                        <NodeParameters
-                            objData={props.objData}
-                            withReset
-                            parameters={typeParameters}
-                            onChange={(updatedParameters: UnknownParameters) => (
-                                props.heapControl.setTypeParameters(languageType, updatedParameters),
-                                props.updateHeap({})
-                            )}
+                            parameters={parameterSelector === 'id' ? idParameters : typeParameters}
+                            onChange={(updatedParameters: UnknownParameters) =>
+                                parameterSelector === 'id'
+                                    ? (props.heapControl.setIdParameters(id, updatedParameters), updateThis({}))
+                                    : (props.heapControl.setTypeParameters(languageType, updatedParameters),
+                                      props.updateHeap({}))
+                            }
                         />
                     </Submenu>
                 </Menu>
