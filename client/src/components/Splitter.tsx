@@ -56,7 +56,7 @@ export const Splitter = (props: {
     }
 
     return (
-        <div ref={ref} className={cn(classes.container, `flex-${props.layout}`, className)} style={style}>
+        <div ref={ref} className={cn(classes.container, `flex-${layout}`, className)} style={style}>
             <div
                 className={cn(classes.pane, paneClassName)}
                 style={{ ...paneStyle, [pinned]: '100%', [varying]: styles.size(ratio, dragger / 2) }}
