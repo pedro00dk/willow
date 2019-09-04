@@ -107,7 +107,7 @@ export const Wrapper = (props: {
         const base = group.base
         const positionAnchor = props.heapControl.getPosition(id, index)
         const sizeAnchor = props.heapControl.getSize(id, index)
-        const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
+        const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.1 }
         const updateRange = [
             update === 'all' ? 0 : index,
             update === 'single' ? index : props.tracer.heapsData.length
@@ -174,17 +174,19 @@ export const Wrapper = (props: {
     })
 
     React.useLayoutEffect(() => {
-        const position = props.heapControl.getPosition(id, index, { x: 0, y: 0 })
+        const childRect = childRef.current.getBoundingClientRect()
+        props.heapControl.getPosition(id, index, { x: 0, y: 0 })
         const targets = targetRefs.current.map(({ target, element }) => {
             const elementRect = element.getBoundingClientRect()
-            const elementScreenPosition = { x: elementRect.left, y: elementRect.top }
+            const elementScreenDelta = { x: elementRect.left - childRect.left, y: elementRect.left - childRect.left }
             const elementScreenSize = { x: elementRect.width, y: elementRect.height }
-            const [elementSvgPosition] = svgScreenPointTransform('toSvg', ref.current, elementScreenPosition)
-            const [elementSvgSize] = svgScreenVectorTransform('toSvg', ref.current, elementScreenSize)
-            const delta = {
-                x: elementSvgPosition.x + elementSvgSize.x / 2 - position.x,
-                y: elementSvgPosition.y + elementSvgSize.y / 2 - position.y
-            }
+            const [elementSvgDelta, elementSvgSize] = svgScreenVectorTransform(
+                'toSvg',
+                ref.current,
+                elementScreenDelta,
+                elementScreenSize
+            )
+            const delta = { x: elementSvgDelta.x + elementSvgSize.x / 2, y: elementSvgDelta.y + elementSvgSize.y / 2 }
             return { target, delta }
         })
         props.heapControl.setTargets(id, targets)
