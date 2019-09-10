@@ -5,7 +5,7 @@ import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
 import { ObjData } from '../../../reducers/tracer'
-import { clamp, Draggable, lerp, svgScreenVectorTransform } from '../../../Utils'
+import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
 import * as ArrayModule from './Array'
 import * as BarsModule from './Bars'
 import * as FieldModule from './Field'
@@ -107,7 +107,7 @@ export const Wrapper = (props: {
         const base = group.base
         const positionAnchor = props.heapControl.getPosition(id, index)
         const sizeAnchor = props.heapControl.getSize(id, index)
-        const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.1 }
+        const increment = { x: sizeAnchor.x * 1.8, y: sizeAnchor.y * 1.1 }
         const updateRange = [
             update === 'all' ? 0 : index,
             update === 'single' ? index : props.tracer.heapsData.length
@@ -175,18 +175,17 @@ export const Wrapper = (props: {
 
     React.useLayoutEffect(() => {
         const childRect = childRef.current.getBoundingClientRect()
-        props.heapControl.getPosition(id, index, { x: 0, y: 0 })
+        const [position] = svgScreenPointTransform('toSvg', ref.current, { x: childRect.left, y: childRect.top })
         const targets = targetRefs.current.map(({ target, element }) => {
             const elementRect = element.getBoundingClientRect()
-            const elementScreenDelta = { x: elementRect.left - childRect.left, y: elementRect.left - childRect.left }
+            const elementScreenPosition = { x: elementRect.left, y: elementRect.top }
             const elementScreenSize = { x: elementRect.width, y: elementRect.height }
-            const [elementSvgDelta, elementSvgSize] = svgScreenVectorTransform(
-                'toSvg',
-                ref.current,
-                elementScreenDelta,
-                elementScreenSize
-            )
-            const delta = { x: elementSvgDelta.x + elementSvgSize.x / 2, y: elementSvgDelta.y + elementSvgSize.y / 2 }
+            const [elementSvgPosition] = svgScreenPointTransform('toSvg', ref.current, elementScreenPosition)
+            const [elementSvgSize] = svgScreenVectorTransform('toSvg', ref.current, elementScreenSize)
+            const delta = {
+                x: elementSvgPosition.x + elementSvgSize.x / 2 - position.x,
+                y: elementSvgPosition.y + elementSvgSize.y / 2 - position.y
+            }
             return { target, delta }
         })
         props.heapControl.setTargets(id, targets)
@@ -222,8 +221,8 @@ export const Wrapper = (props: {
                     containerProps={{ ref: childRef, className: classes.draggable }}
                     onDrag={(delta, event) => {
                         const [svgDelta] = svgScreenVectorTransform('toSvg', ref.current, delta)
-                        const depth = !event.altKey ? 0 : !event.shiftKey ? 1 : Infinity
-                        const update = !event.ctrlKey ? 'all' : !event.altKey ? 'from' : 'single'
+                        const depth = !event.altKey ? 0 : Infinity
+                        const update = !event.ctrlKey ? 'from' : !event.altKey ? 'all' : 'single'
                         moveWrappers(svgDelta, depth, update)
                     }}
                 >
@@ -231,7 +230,7 @@ export const Wrapper = (props: {
                         <div
                             className={classes.menuProvider}
                             onDoubleClick={event => {
-                                const update = !event.ctrlKey ? 'all' : !event.altKey ? 'from' : 'single'
+                                const update = !event.ctrlKey ? 'from' : !event.altKey ? 'all' : 'single'
                                 repositionWrappers(update)
                             }}
                         >
