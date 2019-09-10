@@ -34,7 +34,7 @@ jobs:
               --env TRACER_JAVA="docker run -i willow:java#public class Main{public static void main(String[] a){}}#error+-" \
               --env TRACER_PYTHON="docker run -i willow:python##error+-" \
               willow:server \
-              sh -c "npx tsc && npx jest --testRegex 'dist/test/.*\.test\.js'"
+              npm run test-base
         #
         #
         ### deploy ###
