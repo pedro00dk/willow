@@ -1,8 +1,8 @@
-FROM python:alpine
+FROM python:3.7-alpine
 
 WORKDIR /app
 ADD ./package.sh ./
 ADD ./res ./res/
 ADD ./src ./src/
 
-ENTRYPOINT ["sh", "package.sh", "start"]
+CMD ["sh", "package.sh", "start"]

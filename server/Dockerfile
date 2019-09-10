@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:12-alpine
 
 WORKDIR /app
 
@@ -16,4 +16,4 @@ RUN npm install &&\
 ADD ./src ./src
 ADD ./test ./test
 
-ENTRYPOINT [ "npm", "run", "start" ]
+CMD [ "npm", "run", "start" ]

@@ -1,4 +1,4 @@
-FROM openjdk:13-alpine
+FROM openjdk:12-alpine
 
 WORKDIR /app
 ADD ./package.sh ./
@@ -8,4 +8,4 @@ ADD ./src ./src
 
 RUN . package.sh build
 
-ENTRYPOINT ["sh", "package.sh", "start"]
+CMD ["sh", "package.sh", "start"]
