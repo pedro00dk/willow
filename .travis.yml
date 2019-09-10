@@ -8,6 +8,8 @@ jobs:
         - stage: test
           name: bare metal
           before_install:
+            - nvm ls-remote
+            - pyenv install --list
             - nvm install v11.12.0
             - nvm use v11.12.0
             - pyenv install -s 3.6.3
