@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:12-alpine
 
 WORKDIR /app
 ADD ./package.json ./
@@ -19,5 +19,4 @@ RUN echo \
 ADD ./public ./public
 ADD ./src ./src
 
-ENTRYPOINT [ "npm", "run", "serve-proxy" ]
-CMD [ "--", "--help" ]
+CMD [ "npm", "run", "serve-proxy" ]
