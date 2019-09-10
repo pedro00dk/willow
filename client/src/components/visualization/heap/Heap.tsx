@@ -143,7 +143,7 @@ const classes = {
 }
 
 export const Heap = React.memo(() => {
-    const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 2000, y: 600 }))
+    const heapControl = React.useRef<HeapControl>(new HeapControl({ x: 2000, y: 1200 }))
     const updateHeap = React.useState({})[1]
     const { tracer } = useRedux(state => ({ tracer: state.tracer }))
     heapControl.current.clearTargets()
