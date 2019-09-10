@@ -15,13 +15,13 @@ cd ./willow/
 
 # create or update images
 cd ./tracers/java/
-docker image build --tag willow:java .
+docker image build --no-cache --tag willow:java .
 cd ../python/
-docker image build --tag willow:python .
+docker image build --no-cache --tag willow:python .
 cd ../../server/
-docker image build --tag willow:server .
+docker image build --no-cache --tag willow:server .
 cd ../client/
-docker image build --tag willow:client .
+docker image build --no-cache --tag willow:client .
 
 # clean dangling images
 docker image prune --force
@@ -32,8 +32,8 @@ docker container run --name willow_server --rm --detach \
     -- \
     willow:server \
     -- \
-    --tracer java 'docker run --rm -i willow:java --in-mode proto' \
-    --tracer python 'docker run --rm -i willow:python --in-mode proto'
+    --tracer java 'docker run --rm -i willow:java' \
+    --tracer python 'docker run --rm -i willow:python'
 
 # give some time to the container to start
 SERVER_IP=$(docker container inspect willow_server --format {{.NetworkSettings.IPAddress}})

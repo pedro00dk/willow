@@ -42,22 +42,22 @@ jobs:
           name: deploy
           # using install because no deploy provider will help to deploy on google compute engines
           before_install:
-            - echo $GCLOUD_SERVICE_ACCOUNT_KEY | base64 -di | gcloud auth activate-service-account --key-file=-
-            - gcloud config set project $GCLOUD_PROJECT_NAME
-            - gcloud config set compute/zone $GCLOUD_PROJECT_ZONE
+            - echo ${GCLOUD_SERVICE_ACCOUNT_KEY} | base64 -di | gcloud auth activate-service-account --key-file=-
+            - gcloud config set project ${GCLOUD_PROJECT_NAME}
+            - gcloud config set compute/zone ${GCLOUD_PROJECT_ZONE}
             - gcloud config list
             - |
               gcloud compute instances create willow-instance \
-                  --service-account=$GCLOUD_SERVICE_ACCOUNT_NAME \
-                  --image=cos-stable-72-11316-171-0 --image-project=cos-cloud --machine-type=n1-standard-1 \
-                    --subnet=default --tags=http-server --boot-disk-size=10GB || true
+                  --service-account=${GCLOUD_SERVICE_ACCOUNT_NAME} \
+                  --machine-type=${VM_MACHINE_TYPE} \
+                  --image=${VM_IMAGE}
+                  --image-project=cos-cloud --subnet=default --tags=http-server --boot-disk-size=10GB || true
             - |
               gcloud compute firewall-rules create default-allow-http \
                   --direction=INGRESS --priority=1000 --network=default --action=ALLOW \
                   --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server || true
           install:
-            - DEPLOY_SCRIPT=$(cat ./deploy.sh)
-            - gcloud compute ssh willow-instance -- sh -c "$DEPLOY_SCRIPT"
+            - gcloud compute ssh willow-instance -- sh -c "$(cat ./deploy.sh)"
 
 stages:
     - name: test
