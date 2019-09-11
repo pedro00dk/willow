@@ -27,22 +27,18 @@ docker image build --no-cache --tag willow:client .
 docker image prune --force
 
 # start api server
-docker container run --name willow_server --rm --detach \
-    --volume /var/run/docker.sock:/var/run/docker.sock \
-    -- \
+docker container run --name willow_server --detach --volume /var/run/docker.sock:/var/run/docker.sock \
     willow:server \
-    -- \
-    --tracer java 'docker run --rm -i willow:java' \
-    --tracer python 'docker run --rm -i willow:python'
+    npm run start-base -- \
+    --tracer python 'docker run --rm -i willow:python' # --tracer java 'docker run --rm -i willow:java'
 
-# give some time to the container to start
+
 SERVER_IP=$(docker container inspect willow_server --format {{.NetworkSettings.IPAddress}})
 echo $SERVER_IP
 
 # start client server
-sudo docker container run --name willow_client --rm --detach --publish 80:8000 \
+sudo docker container run --name willow_client --detach --publish 80:8000 \
     --env 'PORT=8000' \
     --env "SERVER=http://${SERVER_IP}:8000" \
     --env 'PROXY=yes' \
-    -- \
     willow:client
