@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-bare-metal:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'testing jobs and steps'
+
+  test-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'testing jobs and steps'
+  
+  publish-docker-images:
+    needs: [test-bare-metal, test-docker]
+    runs-on: ubuntu-lateststeps:
+      - run: |
+          echo 'testing jobs and steps'
