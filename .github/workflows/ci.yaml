@@ -9,6 +9,16 @@ jobs:
   test-bare-metal:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        run: |
+          docker --version
+          node --version
+          npm --version
+          python --version
+          javac --version
+          java --version
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+          nvm --help
       - run: |
           echo 'testing jobs and steps'
 
