@@ -20,6 +20,7 @@ jobs:
   
   publish-docker-images:
     needs: [test-bare-metal, test-docker]
-    runs-on: ubuntu-lateststeps:
+    runs-on: ubuntu-latest
+    steps:
       - run: |
           echo 'testing jobs and steps'
