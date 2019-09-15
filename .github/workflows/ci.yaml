@@ -21,11 +21,14 @@ jobs:
         with:
           java-version: '12'
           architecture: x64
-      - name: Check versions
+      - name: build
         run: |
-          node --version
-          python --version
-          java -version
+          cd ./tracers/java
+          . package.sh build
+      - name: test
+        run: |
+          cd ./server
+          npm run test
 
   test-docker:
     runs-on: ubuntu-latest
