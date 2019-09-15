@@ -15,8 +15,8 @@ jobs:
           node --version
           npm --version
           python --version
-          javac --version
-          java --version
+          javac -version
+          java -version
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
           nvm --help
       - run: |
