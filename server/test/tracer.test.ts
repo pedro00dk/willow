@@ -13,19 +13,19 @@ const tracers = Object.entries(process.env)
 Object.values(tracers).forEach(({ language, command, working, broken }) => {
     describe(`tracer -- ${language}`, () => {
         test('working code', async () => {
-            await expect(new Tracer(command, 'sh').run(working, 5000)).resolves.toBeDefined()
+            await expect(new Tracer(command).run(working, 5000)).resolves.toBeDefined()
         })
 
         test('broken code', async () => {
-            await expect(new Tracer(command, 'sh').run(broken, 5000)).resolves.toBeDefined()
+            await expect(new Tracer(command).run(broken, 5000)).resolves.toBeDefined()
         })
 
         test('max steps', async () => {
-            await expect(new Tracer(command, 'sh').run({ ...working, steps: 0 }, 5000)).resolves.toBeDefined()
+            await expect(new Tracer(command).run({ ...working, steps: 0 }, 5000)).resolves.toBeDefined()
         })
 
         test('elapsed timeout', async () => {
-            await expect(new Tracer(command, 'sh').run(working, 0)).resolves.toBeDefined()
+            await expect(new Tracer(command).run(working, 0)).resolves.toBeDefined()
         })
     })
 })
