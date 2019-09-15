@@ -25,6 +25,8 @@ jobs:
         run: |
           cd ./tracers/java
           . package.sh build
+          cd ../../server
+          npm install
       - name: test
         run: |
           cd ./server
