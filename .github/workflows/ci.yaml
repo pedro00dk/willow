@@ -29,9 +29,9 @@ jobs:
           npm install
       - name: test tracer
         run: |
-          cd ./tracers/python
+          cd ./tracers/java
           echo '{}' | . ./package.sh start
-          cd ../java
+          cd ../python
           echo '{}' | . ./package.sh start
       - name: test
         run: |
@@ -41,8 +41,22 @@ jobs:
   test-docker:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          docker --version
+      - uses: actions/checkout@master
+      - name: build
+        run: |
+          cd ./tracers/java/
+          docker image build --no-cache --tag willow:java .
+          cd ../python/
+          docker image build --no-cache --tag willow:python .
+          cd ../../server/
+          docker image build --no-cache --tag willow:server .
+      - name: test
+        run: |
+          docker container run --rm --interactive --tty --volume /var/run/docker.sock:/var/run/docker.sock \
+            --env TRACER_JAVA="docker run -i willow:java#public class Main{public static void main(String[] a){}}#error+-" \
+            --env TRACER_PYTHON="docker run -i willow:python##error+-" \
+            willow:server \
+            npm run test-base
 
   publish-docker-images:
     needs: [test-bare-metal, test-docker]
