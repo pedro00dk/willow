@@ -6,37 +6,37 @@ on:
       - master
 
 jobs:
-  test-bare-metal:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12'
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.7'
-          architecture: x64
-      - uses: actions/setup-java@v1
-        with:
-          java-version: '12'
-          architecture: x64
-      - name: build
-        run: |
-          cd ./tracers/java
-          . package.sh build
-          cd ../../server
-          npm install
-      - name: test tracer
-        run: |
-          cd ./tracers/java
-          echo '{}' | . ./package.sh start || true
-          cd ../python
-          echo '{}' | . ./package.sh start || true
-      - name: test
-        run: |
-          cd ./server
-          npm run test
+#   test-bare-metal:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@master
+#       - uses: actions/setup-node@v1
+#         with:
+#           node-version: '12'
+#       - uses: actions/setup-python@v1
+#         with:
+#           python-version: '3.7'
+#           architecture: x64
+#       - uses: actions/setup-java@v1
+#         with:
+#           java-version: '12'
+#           architecture: x64
+#       - name: build
+#         run: |
+#           cd ./tracers/java
+#           . package.sh build
+#           cd ../../server
+#           npm install
+#       - name: test tracer
+#         run: |
+#           cd ./tracers/java
+#           echo '{}' | . ./package.sh start || true
+#           cd ../python
+#           echo '{}' | . ./package.sh start || true
+#       - name: test
+#         run: |
+#           cd ./server
+#           npm run test
 
   test-docker:
     runs-on: ubuntu-latest
@@ -57,10 +57,3 @@ jobs:
             --env TRACER_PYTHON="docker run -i willow:python##error+-" \
             willow:server \
             npm run test-base
-
-  publish-docker-images:
-    needs: [test-bare-metal, test-docker]
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo 'testing jobs and steps'
