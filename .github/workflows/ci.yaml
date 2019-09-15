@@ -27,6 +27,12 @@ jobs:
           . package.sh build
           cd ../../server
           npm install
+      - name: test tracer
+        run: |
+          cd ./tracers/python
+          echo '{}' | . ./package.sh start
+          cd ../java
+          echo '{}' | . ./package.sh start
       - name: test
         run: |
           cd ./server
