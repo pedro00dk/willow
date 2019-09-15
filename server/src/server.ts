@@ -12,7 +12,6 @@ export class Server {
     constructor(
         private readonly port: number,
         private readonly tracers: { [language: string]: string },
-        private readonly shell: string,
         private readonly steps: number,
         private readonly timeout: number,
         clients: string
@@ -47,10 +46,7 @@ export class Server {
 
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
-                const result = await new Tracer(this.tracers[language], this.shell).run(
-                    { source, input, steps },
-                    this.timeout
-                )
+                const result = await new Tracer(this.tracers[language]).run({ source, input, steps }, this.timeout)
                 res.send(result)
                 log.info(Server.name, req.path, 'ok')
             } catch (error) {

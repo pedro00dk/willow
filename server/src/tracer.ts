@@ -5,7 +5,7 @@ import * as schema from './schema/schema'
  * Spawns and connects to a tracer process.
  */
 export class Tracer {
-    constructor(private readonly command: string, private readonly shell: string) {}
+    constructor(private readonly command: string) {}
 
     async run(trace: schema.Trace, timeout: number) {
         const tracer = cp.spawn(this.command, { shell: true })
