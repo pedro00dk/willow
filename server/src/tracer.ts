@@ -8,7 +8,7 @@ export class Tracer {
     constructor(private readonly command: string, private readonly shell: string) {}
 
     async run(trace: schema.Trace, timeout: number) {
-        const tracer = cp.spawn(this.command, { shell: this.shell })
+        const tracer = cp.spawn(this.command, { shell: true })
 
         const stopPromise = new Promise((res, rej) => {
             tracer.on('close', (code, signal) => res())
