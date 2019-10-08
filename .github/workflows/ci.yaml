@@ -38,7 +38,7 @@ jobs:
 #           cd ./server
 #           npm run test
 
-  test-docker:
+  test-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -57,3 +57,8 @@ jobs:
             --env TRACER_PYTHON="docker run -i willow:python##error+-" \
             willow:server \
             npm run test-base
+      - name: publish
+        run: |
+          docker login docker.pkg.github.com --username pedro00dk --password ${{ secrets.PASSWORD }}
+          docker tag willow:java docker.pkg.github.com/pedro00dk/willow/java
+          docker push docker.pkg.github.com/pedro00dk/willow/java
