@@ -1,7 +1,6 @@
 import argparse
 import json
 import pathlib
-import sys
 import tracer
 
 
@@ -14,14 +13,14 @@ def main():
 
     trace = json.loads(input())
 
-    trace['source'] = \
+    source = \
         trace['source'] if not arguments.test and trace.get('source') is not None else \
         pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else \
         ''
-    trace['input'] = trace['input'] if trace.get('input') is not None else ''
-    trace['steps'] = trace['steps'] if trace.get('steps') is not None else 2 ** 31 - 1
+    input_ = trace['input'] if trace.get('input') is not None else ''
+    steps = trace['steps'] if trace.get('steps') is not None else 2 ** 31 - 1
 
-    t = tracer.Tracer(trace)
+    t = tracer.Tracer(source, input_, steps)
     result = t.run()
 
     print(

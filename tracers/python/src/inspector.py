@@ -1,6 +1,5 @@
 import sys
 import types
-import traceback
 
 
 class Inspector:
@@ -9,9 +8,7 @@ class Inspector:
     """
 
     def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
-        snapshot = {}
-
-        snapshot['type'] = event
+        snapshot = {'type': event}
 
         current_frame = frame
         frames = []
@@ -19,8 +16,8 @@ class Inspector:
             frames.append(current_frame)
             current_frame = current_frame.f_back
 
-        file = frame.f_code.co_filename
-        frames = [frame for frame in frames if frame.f_code.co_filename == file]
+        filename = frame.f_code.co_filename
+        frames = [frame for frame in frames if frame.f_code.co_filename == filename]
         frames.reverse()
         snapshot['stack'] = [{'line': frame.f_lineno - 1, 'name': frame.f_code.co_name} for frame in frames]
 
@@ -36,14 +33,14 @@ class Inspector:
 
         return snapshot
 
+    STRING_TYPES = (bool, complex, str, type(None))
+    NUMBER_TYPES = (int, float)
+
     def _inspect_object(self, snapshot: dict, obj, classes: set, module: str):
-        if isinstance(obj, (bool, complex, type(None), str)):
+        if isinstance(obj, Inspector.STRING_TYPES):
             return str(obj)
-        if isinstance(obj, (int, float)):
-            if abs(obj) < 2 ** 53:
-                return obj
-            else:
-                return str(obj)
+        if isinstance(obj, Inspector.NUMBER_TYPES):
+            return obj if abs(obj) < 2 ** 53 else str(obj)
         if isinstance(obj, type):
             if obj.__module__ == module:
                 classes.add(obj)
@@ -67,24 +64,22 @@ class Inspector:
         elif isinstance(obj, (*classes,)):
             user_defined = True
             members = [(key, value) for key, value in vars(obj).items() if not key.startswith('_')]
-        else:
-            # unknown object type
-            pass
 
         if members is not None:
             # known object type
-            # add id to snapshot heap (it has to be added before other objects inspections)
-            obj = snapshot['heap'][id_] = {}
-            obj['type'] = generic_type
-            obj['languageType'] = language_type
-            obj['userDefined'] = user_defined
-            obj['members'] = [
-                {
-                    'key': self._inspect_object(snapshot, key, classes, module),
-                    'value': self._inspect_object(snapshot, value, classes, module)
-                }
-                for key, value in members
-            ]
+            # add id to snapshot heap (it has to be added before other object inspections)
+            obj = snapshot['heap'][id_] = {
+                'type':  generic_type,
+                'languageType': language_type,
+                'userDefined': user_defined,
+                'members': [
+                    {
+                        'key': self._inspect_object(snapshot, key, classes, module),
+                        'value': self._inspect_object(snapshot, value, classes, module)
+                    }
+                    for key, value in members
+                ]
+            }
             return [id_]
         else:
             # unknown object type
