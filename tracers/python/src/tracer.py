@@ -43,7 +43,7 @@ class Tracer:
 
             # raising an exception is the only way to stop an exec call.
 
-        except ResourceWarning as e:
+        except TracerStopException as e:
             # tracer controlled exceptions (not tracer or traced program exceptions, no traceback at all)
             self._result['steps'].append({'threw': {'cause': str(e)}})
 
@@ -70,9 +70,9 @@ class Tracer:
         self._current_step += 1
 
         if self._current_step > self._steps:
-            raise ResourceWarning(f'reached maximum step: {self._steps}')
+            raise TracerStopException(f'reached maximum step: {self._steps}')
         if self._input_miss:
-            raise ResourceWarning('program requires input')
+            raise TracerStopException('program requires input')
 
         snapshot = self._inspector.inspect(frame, event, args, self._exec_call_frame)
         prints = self._print_cache
@@ -91,3 +91,10 @@ class Tracer:
 
     def _print_hook(self, text: str):
         self._print_cache.append(text)
+
+class TracerStopException(Exception):
+    """
+    TracerStopExceptions are used to get information of why the exec function call stops.
+    These exceptions are created by the Tracer itself, and not caused by a traced program bug or raised exception.
+    """
+    pass
