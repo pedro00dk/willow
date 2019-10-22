@@ -2,17 +2,25 @@
 
 A tool to inspect java code, analyzing it line by line and returning its state (stack and heap data).
 
-
 ```
-usage: tracer [-h] [--in-mode {proto,text}] [--out-mode {proto,text}] [--test]
+usage: tracer [options]
+input pipe: {"source?": "string", "input"?: "string", "steps?": "number"}
 
 Java tracer CLI
 
 named arguments:
   -h, --help             show this help message and exit
-  --in-mode {proto,text}
-                         The input mode
-  --out-mode {proto,text}
-                         The output mode
-  --test                 Run the test code ignoring the provide
+  --pretty               Pretty print output
+  --test                 Run the test code ignoring the provided
 ```
+The tracer receives the input through standard input stream and its result will be generated in the standard output stream.
+The input must be in the json format with the following fields:
+```json
+{
+    "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
+    "input": "The string input to be provided to the program through stdin. It is optional, but the program may get stuck (finishing the tracing process) if not enough input is provided.",
+    "steps": "a number that limits the maximum amount of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not count."
+}
+```
+
+The output follows the JSON-Schema found in the schemas folder in this project.
