@@ -28,7 +28,7 @@
             "additionalProperties": false
         },
         "snapshot": {
-            "description": "Snapshots contains the memory of a program. They store theyselves type, if the program ended, any exception raised, the current stack/heap of the program.",
+            "description": "Snapshots contains the memory of a program. They store themselves type, if the program ended, any exception raised, the current stack/heap of the program.",
             "properties": {
                 "type": {
                     "type": "string",
