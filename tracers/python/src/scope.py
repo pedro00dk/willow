@@ -2,7 +2,7 @@ import sys
 import types
 
 
-def create_globals(allowed_builtins: set, over_builtins: dict, allowed_modules: set, full_halt_modules: bool = False):
+def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modules: set, full_halt_modules: bool = False):
     """
     Create a global scope to be used in exec calls, this scope may have restricted access to python builtins and
     modules.
@@ -21,8 +21,8 @@ def create_globals(allowed_builtins: set, over_builtins: dict, allowed_modules: 
     if allowed_builtins is not None:
         builtins = {name: obj for name, obj in builtins.items() if name in allowed_builtins}
 
-    if over_builtins is not None:
-        builtins = {**builtins, **over_builtins}
+    if override_builtins is not None:
+        builtins = {**builtins, **override_builtins}
 
     if full_halt_modules and allowed_modules is not None:
         sys.modules = {name: mod for name, mod in sys.modules.items() if name in allowed_modules}
@@ -37,10 +37,7 @@ def create_globals(allowed_builtins: set, over_builtins: dict, allowed_modules: 
     if import_ is not None:
         builtins['__import__'] = halt_import
 
-    return {
-        '__name__': '__main__',
-        '__builtins__': builtins
-    }
+    return {'__name__': '__main__', '__builtins__': builtins}
 
 
 class HookedInput:

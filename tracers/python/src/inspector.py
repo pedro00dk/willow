@@ -7,6 +7,9 @@ class Inspector:
     Inspects the received frame, building a snapshot from it.
     """
 
+    STRING_LIKE_TYPES = (bool, complex, str, type(None))
+    NUMBER_LIKE_TYPES = (int, float)
+
     def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
         snapshot = {'type': event}
 
@@ -33,13 +36,10 @@ class Inspector:
 
         return snapshot
 
-    STRING_TYPES = (bool, complex, str, type(None))
-    NUMBER_TYPES = (int, float)
-
     def _inspect_object(self, snapshot: dict, obj, classes: set, module: str):
-        if isinstance(obj, Inspector.STRING_TYPES):
+        if isinstance(obj, Inspector.STRING_LIKE_TYPES):
             return str(obj)
-        if isinstance(obj, Inspector.NUMBER_TYPES):
+        if isinstance(obj, Inspector.NUMBER_LIKE_TYPES):
             return obj if abs(obj) < 2 ** 53 else str(obj)
         if isinstance(obj, type):
             if obj.__module__ == module:
@@ -65,23 +65,20 @@ class Inspector:
             user_defined = True
             members = [(key, value) for key, value in vars(obj).items() if not key.startswith('_')]
 
-        if members is not None:
-            # known object type
-            # add id to snapshot heap (it has to be added before other object inspections)
-            obj = snapshot['heap'][id_] = {
-                'type':  generic_type,
-                'languageType': language_type,
-                'userDefined': user_defined,
-                'members': [
-                    {
-                        'key': self._inspect_object(snapshot, key, classes, module),
-                        'value': self._inspect_object(snapshot, value, classes, module)
-                    }
-                    for key, value in members
-                ]
-            }
+        if members is not None:  # known object type
+            # add object id to the snapshot heap (it has to be added before other object inspections)
+            obj = snapshot['heap'][id_] = {}
+            obj['type'] = generic_type,
+            obj['languageType'] = language_type,
+            obj['userDefined'] = user_defined,
+            obj['members'] = [
+                {
+                    'key': self._inspect_object(snapshot, key, classes, module),
+                    'value': self._inspect_object(snapshot, value, classes, module)
+                }
+                for key, value in members
+            ]
             return [id_]
-        else:
-            # unknown object type
+        else:  # unknown object type
             # instead of inspecting unknown objects, I decided to inspect its type
             return self._inspect_object(snapshot, type(obj), classes, module)
