@@ -5,7 +5,7 @@ import { actions as tracerActions } from '../../reducers/tracer'
 import * as schema from '../../schema/schema'
 import { Splitter } from '../Splitter'
 import { Heap } from './heap/Heap'
-import { Stack } from './stack/Stack'
+import { StackTrace } from './stacktrace/StackTrace'
 
 const classes = {
     container: cn('d-flex', 'w-100 h-100')
@@ -46,7 +46,7 @@ export const Visualization = () => {
             tabIndex={0}
         >
             <Splitter layout='column' base={0.3}>
-                <Stack />
+                <StackTrace />
                 <Heap />
             </Splitter>
         </div>

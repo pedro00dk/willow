@@ -52,7 +52,7 @@ const computeChildWidth = (parent: ScopeData, child: ScopeData, width: number) =
     return { width: proportion * width, percent: `${proportion * 100}%` }
 }
 
-export const Scope = (props: { scope: ScopeData; depth: number; width: number }) => {
+export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: number }) => {
     const dispatch = useDispatch()
     const { selected } = useRedux(state => ({
         selected: state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
@@ -78,7 +78,7 @@ export const Scope = (props: { scope: ScopeData; depth: number; width: number })
                         const { width, percent } = computeChildWidth(props.scope, child, props.width)
                         return (
                             <div key={i} className={classes.child} style={{ width: percent }}>
-                                <Scope scope={child} depth={props.depth + 1} width={width} />
+                                <ScopeTrace scope={child} depth={props.depth + 1} width={width} />
                             </div>
                         )
                     })}
