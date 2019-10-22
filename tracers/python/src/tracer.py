@@ -27,7 +27,6 @@ class Tracer:
 
     def run(self):
         self._result = {'steps': []}
-        script_globals = []
 
         allowed_builtins = globals()['__builtins__'].copy() if isinstance(globals()['__builtins__'], dict) else \
             vars(globals()['__builtins__']).copy()
