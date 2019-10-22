@@ -42,7 +42,7 @@ class Tracer:
         allowed_builtins = {*allowed_builtins.keys()}
         allowed_builtins.remove('open')
         over_builtins = {'input': scope.HookedInput(self._input_hook), 'print': scope.HookedPrint(self._print_hook)}
-        allowed_modules = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'},
+        allowed_modules = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
         sandbox_globals = scope.create_globals(allowed_builtins, over_builtins, allowed_modules, True)
 
         try:
