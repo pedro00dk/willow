@@ -175,17 +175,12 @@ export const Wrapper = (props: {
 
     React.useLayoutEffect(() => {
         const childRect = childRef.current.getBoundingClientRect()
-        const [position] = svgScreenPointTransform('toSvg', ref.current, { x: childRect.left, y: childRect.top })
         const targets = targetRefs.current.map(({ target, element }) => {
             const elementRect = element.getBoundingClientRect()
-            const elementScreenPosition = { x: elementRect.left, y: elementRect.top }
-            const elementScreenSize = { x: elementRect.width, y: elementRect.height }
-            const [elementSvgPosition] = svgScreenPointTransform('toSvg', ref.current, elementScreenPosition)
-            const [elementSvgSize] = svgScreenVectorTransform('toSvg', ref.current, elementScreenSize)
-            const delta = {
-                x: elementSvgPosition.x + elementSvgSize.x / 2 - position.x,
-                y: elementSvgPosition.y + elementSvgSize.y / 2 - position.y
-            }
+            const screenDelta = { x: elementRect.left - childRect.left, y: elementRect.top - childRect.top }
+            const screenSize = { x: elementRect.width, y: elementRect.height }
+            const [svgDelta, svgSize] = svgScreenVectorTransform('toSvg', ref.current, screenDelta, screenSize)
+            const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
             return { target, delta }
         })
         props.heapControl.setTargets(id, targets)
