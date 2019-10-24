@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -56,19 +55,17 @@ public class Tracer {
 
         var classRegex = Pattern.compile("(public\\s+class\\s+([A-Za-z][A-Za-z0-9_]*))");
         var classMatcher = classRegex.matcher(code);
-        var classesIndicesNames = IntStream
-                .generate(() -> 0)
-                .takeWhile(classMatcher::find)
-                .mapToObj(i -> Map.entry(classMatcher.start(), classMatcher.group(2)))
+
+        var classesIndicesNames = Stream.generate(classMatcher::find)
+                .takeWhile(found -> found)
+                .map(found -> Map.entry(classMatcher.start(), classMatcher.group(2)))
                 .collect(Collectors.toList());
 
         var mainMethodRegex = Pattern.compile("(public\\s+static\\s+void\\s+main\\s*\\(.*\\))");
         var mainMethodMatcher = mainMethodRegex.matcher(code);
-        var mainMethodIndices = IntStream
-                .generate(() -> 0)
-                .takeWhile(mainMethodMatcher::find)
-                .map(mainMethodMatcher::start)
-                .boxed()
+        var mainMethodIndices = Stream.generate(mainMethodMatcher::find)
+                .takeWhile(found -> found)
+                .map(f -> mainMethodMatcher.start())
                 .collect(Collectors.toList());
 
         if (classesIndicesNames.isEmpty()) return "Main.java";
@@ -184,18 +181,28 @@ public class Tracer {
         if (this.currentStep > this.steps)
             throw new TracerStopException("reached maximum step: " + this.steps);
 
-        var snapshotOrThrew = inspector.inspect(event, previousEvent, previousSnapshot);
+        var steps = result.get("steps").getAsJsonArray();
+        var snapshotThrew = inspector.inspect(event, previousEvent, previousSnapshot);
         var prints = printCache.stream().sequential().collect(
-                () -> new JsonArray(printCache.size()), JsonArray::add, null
+                () -> new JsonArray(printCache.size()), JsonArray::add, (print0, print1) -> {
+                    throw new RuntimeException("parallel stream not allowed");
+                }
         );
         this.printCache = new ArrayList<>();
         var step = new JsonObject();
-        step.add(snapshotOrThrew.isSnapshot ? "snapshot" : "threw", snapshotOrThrew.content);
-        step.add("prints", prints);
-        result.get("steps").getAsJsonArray().add(step);
+        step.add("snapshot", snapshotThrew.snapshot);
+        step.add("prints", snapshotThrew.threw == null ? prints : new JsonArray());
+        steps.add(step);
+
+        if (snapshotThrew.threw != null) {
+            var threwStep = new JsonObject();
+            threwStep.add("threw", snapshotThrew.threw);
+            threwStep.add("prints", prints);
+            steps.add(threwStep);
+        }
 
         this.previousEvent = event;
-        this.previousSnapshot = snapshotOrThrew.isSnapshot ? snapshotOrThrew.content : this.previousSnapshot;
+        this.previousSnapshot = snapshotThrew.snapshot;
     }
 
     private String inputHook() {

@@ -11,19 +11,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
 /**
  * Inspects the received event, building a snapshot from it.
  */
 class Inspector {
 
-    SnapshotOrThrew inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
+    SnapshotThrew inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
         var snapshot = new JsonObject();
         snapshot.addProperty(
                 "type",
                 event instanceof MethodEntryEvent
                         ? "call"
-                        : event instanceof MethodExitEvent || (event instanceof ThreadDeathEvent && previousEvent instanceof ExceptionEvent)
+                        : event instanceof MethodExitEvent || event instanceof ThreadDeathEvent
                         ? "return"
                         : event instanceof ExceptionEvent
                         ? "exception"
@@ -33,23 +32,18 @@ class Inspector {
         if (event instanceof ThreadDeathEvent && previousEvent instanceof ExceptionEvent) {
             // ThreadDeathEvents cannot be used to extract information, in this case, the previous snapshot is used
             snapshot.add("stack", previousSnapshot.get("stack"));
-            snapshot.add("heap", previousSnapshot.get("stack"));
+            snapshot.add("heap", previousSnapshot.get("heap"));
 
             var exceptionEvent = (ExceptionEvent) previousEvent;
-            var exceptionMessage = ((StringReference) exceptionEvent
-                    .exception()
-                    .getValue(exceptionEvent.exception().referenceType().fieldByName("detailMessage"))
-            ).value();
-
             var threw = new JsonObject();
             // the traceback is not easily recoverable from the tracer but it is printed in the stderr (collected in prints)
             threw.add("exception", JsonException.fromParts(exceptionEvent.exception().referenceType().name(), ""));
-            return new SnapshotOrThrew(threw, false);
+            return new SnapshotThrew(snapshot, threw);
         }
 
         // Get frames may fail when debugging this debugger
         // frames() function returns an immutable list with the scopes in reversed order (cannot be reversed)
-        var frames = ((LocatableEvent) event).thread().frames();
+        var frames = new ArrayList<>(((LocatableEvent) event).thread().frames());
         Collections.reverse(frames);
         snapshot.add(
                 "stack",
@@ -107,7 +101,7 @@ class Inspector {
                     );
                 });
 
-        return new SnapshotOrThrew(snapshot, true);
+        return new SnapshotThrew(snapshot, null);
     }
 
     private JsonElement inspectValue(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
@@ -151,7 +145,7 @@ class Inspector {
 
         var jdiObjRef = (ObjectReference) jdiValue;
         var id = Long.toString(jdiObjRef.uniqueID());
-        if (snapshot.has(id)) {
+        if (snapshot.get("heap").getAsJsonObject().has(id)) {
             var idValue = new JsonArray(1);
             idValue.add(id);
             return idValue;
@@ -366,13 +360,13 @@ class Inspector {
         return idValue;
     }
 
-    static class SnapshotOrThrew {
-        JsonObject content;
-        boolean isSnapshot;
+    static class SnapshotThrew {
+        JsonObject snapshot;
+        JsonObject threw;
 
-        SnapshotOrThrew(JsonObject content, boolean isSnapshot) {
-            this.content = content;
-            this.isSnapshot = isSnapshot;
+        SnapshotThrew(JsonObject snapshot, JsonObject threw) {
+            this.snapshot = snapshot;
+            this.threw = threw;
         }
     }
 
@@ -383,8 +377,10 @@ class Inspector {
 
         static JsonObject fromParts(String type, String traceback) {
             var exception = new JsonObject();
+            var tracebackLines = new JsonArray(1);
+            tracebackLines.add(traceback);
             exception.addProperty("type", type);
-            exception.addProperty("traceback", traceback);
+            exception.add("traceback", tracebackLines);
             return exception;
         }
 
