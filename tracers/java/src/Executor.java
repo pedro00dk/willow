@@ -4,6 +4,7 @@ import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.event.Event;
+import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.ThreadStartEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 import com.sun.jdi.request.EventRequest;
@@ -18,69 +19,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Executes a compiled project.
  */
 class Executor {
 
-    void execute(Path path, String filename, Consumer<Event> trace, Supplier<String> inputHook, Consumer<String> printHook, Consumer<String> lockHook) throws Exception {
-        VirtualMachine vm = null;
-        var vmDisconnected = false;
+    void execute(Path path, String filename, LambdaUtils.ConsumerT<Event> trace, Supplier<String> inputHook, LambdaUtils.ConsumerT<String> printHook, LambdaUtils.ConsumerT<String> lockHook) throws Exception {
+        VirtualMachine fvm = null;
         try {
-            vm = startVirtualMachine(path, filename);
+            var vm = fvm = launchVirtualMachine(path, filename);
             var allowedThreads = configureEventRequests(vm, path);
-
             var vmStdin = vm.process().getOutputStream();
             var vmStdout = vm.process().getInputStream();
             var vmStderr = vm.process().getErrorStream();
-
             vmStdin.write(inputHook.get().getBytes());
             vmStdin.flush();
-
-            while (!vmDisconnected) {
-                vm.resume();
-                var eventSet = vm.eventQueue().remove(1000);
-                if (eventSet == null) {
-                    lockHook.accept("");
-                    break;
-                }
-                for (var event : eventSet) {
-                    // interrupt not allowed threads
-                    if (event instanceof ThreadStartEvent && !allowedThreads.contains(((ThreadStartEvent) event).thread().name())
-                    ) ((ThreadStartEvent) event).thread().interrupt();
-
-                    // check if is last event (if call eventQueue again, it throws an VMDisconnectedException)
-                    if (event instanceof VMDisconnectEvent) vmDisconnected = true;
-
-                    // print hooks
-                    var printAvailable = vmStdout.available();
-                    if (printAvailable > 0) printHook.accept(new String(vmStdout.readNBytes(printAvailable)));
-                    var errorAvailable = vmStderr.available();
-                    if (errorAvailable > 0) printHook.accept(new String(vmStderr.readNBytes(errorAvailable)));
-
-                    trace.accept(event);
-                }
-            }
-        } catch (RuntimeException e) {
-            // controlled error that came from the trace function and hooks of unchecked errors from anywhere
-            var cause = (Exception) e.getCause();
-            throw cause != null ? cause : e;
+            var disconnected = new boolean[]{false};
+            var locked = new boolean[]{false};
+            IntStream.generate(() -> 0)
+                    .peek(i -> vm.resume())
+                    .boxed()
+                    .map(LambdaUtils.asFunction(i -> vm.eventQueue().remove(1000)))
+                    .takeWhile(eventSet -> !locked[0])
+                    .peek(eventSet -> locked[0] = eventSet == null)
+                    .flatMap(EventSet::stream)
+                    .peek(event -> {
+                        if (event instanceof ThreadStartEvent && !allowedThreads.contains(((ThreadStartEvent) event).thread().name())
+                        ) ((ThreadStartEvent) event).thread().interrupt();
+                    })
+                    .peek(event -> disconnected[0] = event instanceof VMDisconnectEvent)
+                    .takeWhile(event -> !disconnected[0])
+                    .forEach(LambdaUtils.asConsumer(event -> {
+                        var printAvailable = vmStdout.available();
+                        var errorAvailable = vmStderr.available();
+                        if (printAvailable > 0) printHook.accept(new String(vmStdout.readNBytes(printAvailable)));
+                        if (errorAvailable > 0) printHook.accept(new String(vmStderr.readNBytes(errorAvailable)));
+                        trace.accept(event);
+                    }));
+            if (locked[0]) lockHook.accept(null);
         } catch (Exception e) {
-            // internal errors from executor
-            throw e;
+            // exceptions may be from vm initialization or IO operations or runtime exceptions that came from the stream
+            // containing any tracer or traced program exceptions
+            throw !(e instanceof RuntimeException) | e.getCause() == null ? e : ((Exception) e.getCause());
         } finally {
             try {
-                if (vm != null) vm.exit(0);
+                if (fvm != null) fvm.exit(0);
             } catch (VMDisconnectedException e) {
                 // throws this exceptions if the vm is already disconnected
             }
         }
     }
 
-    private VirtualMachine startVirtualMachine(Path path, String filename) throws IOException, IllegalConnectorArgumentsException, VMStartException {
+    private VirtualMachine launchVirtualMachine(Path path, String filename) throws IllegalConnectorArgumentsException, IOException, VMStartException {
         var binPath = Paths.get(path.toString(), "bin/");
         var vmm = VirtualMachineManagerImpl.virtualMachineManager();
         var connector = vmm.defaultConnector();
@@ -105,7 +100,6 @@ class Executor {
         allowedThreadsNames.addAll(Set.of("Common-Cleaner", "DestroyJavaVM"));
 
         var vmDeathRequest = vm.eventRequestManager().createVMDeathRequest();
-
         var threadStartRequest = vm.eventRequestManager().createThreadStartRequest();
         threadStartRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
         var threadDeathRequest = vm.eventRequestManager().createThreadDeathRequest();
@@ -113,51 +107,49 @@ class Executor {
 
         var classNames = getProjectClasses(path);
 
-        var methodEntryRequests = classNames //
+        var methodEntryRequests = classNames
                 .stream()
-                .map(c -> {
+                .map(className -> {
                     var methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
                     methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                     methodEntryRequest.addThreadFilter(mainThread);
-                    methodEntryRequest.addClassFilter(c);
+                    methodEntryRequest.addClassFilter(className);
                     return methodEntryRequest;
                 })
                 .collect(Collectors.toList());
 
-        var methodExitRequests = classNames //
+        var methodExitRequests = classNames
                 .stream()
-                .map(c -> {
+                .map(className -> {
                     var methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
                     methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
                     methodExitRequest.addThreadFilter(mainThread);
-                    methodExitRequest.addClassFilter(c);
+                    methodExitRequest.addClassFilter(className);
                     return methodExitRequest;
                 })
                 .collect(Collectors.toList());
 
-        var stepRequests = classNames //
+        var stepRequests = classNames
                 .stream()
-                .map(c -> {
+                .map(className -> {
                     var stepRequest = vm
                             .eventRequestManager()
                             .createStepRequest(mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
                     stepRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-                    stepRequest.addClassFilter(c);
+                    stepRequest.addClassFilter(className);
                     return stepRequest;
                 })
                 .collect(Collectors.toList());
 
-        var exceptionRequests = classNames //
+        var exceptionRequests = classNames
                 .stream()
-                .map(c -> {
+                .map(className -> {
                     var exceptionRequest = vm.eventRequestManager().createExceptionRequest(null, true, true);
                     exceptionRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-                    exceptionRequest.addClassFilter(c);
+                    exceptionRequest.addClassFilter(className);
                     return exceptionRequest;
                 })
                 .collect(Collectors.toList());
-
-        // TODO implement step into try blocks
 
         vmDeathRequest.enable();
         threadStartRequest.enable();
@@ -180,6 +172,39 @@ class Executor {
                     .collect(Collectors.toList());
         } catch (IOException e) {
             return List.of();
+        }
+    }
+
+    static class LambdaUtils {
+
+        static <T, U> Function<T, U> asFunction(FunctionT<T, U> functionT) {
+            return (T argument) -> {
+                try {
+                    return functionT.apply(argument);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+
+        static <T> Consumer<T> asConsumer(ConsumerT<T> consumerT) {
+            return (T argument) -> {
+                try {
+                    consumerT.accept(argument);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+
+        @FunctionalInterface
+        interface FunctionT<T, U> {
+            U apply(T argument) throws Exception;
+        }
+
+        @FunctionalInterface
+        interface ConsumerT<T> {
+            void accept(T argument) throws Exception;
         }
     }
 }

@@ -12,21 +12,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
 
-
 public class Main {
 
     public static void main(String[] args) throws ArgumentParserException, IOException {
-        var parser = ArgumentParsers.newFor("tracer").build().description("Java tracer CLI");
-        parser
-                .usage(
-                        "tracer [options]\ninput pipe: {\"source?\": \"string\", \"input\"?: \"string\", \"steps?\": \"number\"}"
-                );
-        parser
+        var argumentParser = ArgumentParsers.newFor("tracer").build().description("Java tracer CLI");
+        argumentParser.usage("tracer [options]\n  stdin: {\"source?\": \"string\", \"input\"?: \"string\", \"steps?\": \"number\"}");
+        argumentParser
                 .addArgument("--pretty")
                 .setDefault(false)
                 .action(new StoreTrueArgumentAction())
                 .help("Pretty print output");
-        parser
+        argumentParser
                 .addArgument("--test")
                 .setDefault(false)
                 .action(new StoreTrueArgumentAction())
@@ -34,34 +30,31 @@ public class Main {
 
         Namespace arguments;
         try {
-            arguments = parser.parseArgs(args);
+            arguments = argumentParser.parseArgs(args);
         } catch (HelpScreenException e) {
-            // throws all ArgumentParserException except HelpScreens
+            // throws all ArgumentParserException children except HelpScreens
             return;
         }
 
         var scan = new Scanner(System.in);
-        var trace = new Gson().fromJson(scan.nextLine(), JsonObject.class);
+        var traceData = new Gson().fromJson(scan.nextLine(), JsonObject.class);
         scan.close();
 
-        var source = trace.get("source");
-        var sourceValue = !arguments.getBoolean("test") && source != null ? source.getAsString()
+        var sourceJson = traceData.get("source");
+        var inputJson = traceData.get("input");
+        var stepsJson = traceData.get("steps");
+        var source = !arguments.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
                 : arguments.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
                 : "";
-        trace.addProperty("source", sourceValue);
+        var input = inputJson != null ? inputJson.getAsString() : "";
+        var steps = stepsJson != null ? stepsJson.getAsNumber().intValue() : Integer.MAX_VALUE;
 
-        var input = trace.get("input");
-        var inputValue = input != null ? input.getAsString() : "";
-        trace.addProperty("input", inputValue);
+        var result = new Tracer(source, input, steps).run();
 
-        var steps = trace.get("steps");
-        var stepsValue = steps != null ? steps.getAsNumber().intValue() : Integer.MAX_VALUE;
-        trace.addProperty("steps", stepsValue);
-
-        var t = new Tracer(trace);
-        var result = t.run();
-
-        if (!arguments.getBoolean("pretty")) System.out.println(result.toString());
-        else System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(result));
+        System.out.println(
+                arguments.getBoolean("pretty")
+                        ? new GsonBuilder().setPrettyPrinting().create().toJson(result)
+                        : result.toString()
+        );
     }
 }

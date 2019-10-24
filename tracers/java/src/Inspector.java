@@ -5,43 +5,33 @@ import com.google.gson.JsonPrimitive;
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-class InspectionResult {
-    JsonObject snapshot;
-    JsonObject threw;
-
-    InspectionResult(JsonObject snapshot) {
-        this(snapshot, null);
-    }
-
-    InspectionResult(JsonObject snapshot, JsonObject threw) {
-        this.snapshot = snapshot;
-        this.threw = threw;
-    }
-}
 
 /**
  * Inspects the received event, building a snapshot from it.
  */
 class Inspector {
 
-    InspectionResult inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
+    SnapshotOrThrew inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
         var snapshot = new JsonObject();
         snapshot.addProperty(
                 "type",
                 event instanceof MethodEntryEvent
                         ? "call"
-                        : event instanceof MethodExitEvent || event instanceof ThreadDeathEvent
+                        : event instanceof MethodExitEvent || (event instanceof ThreadDeathEvent && previousEvent instanceof ExceptionEvent)
                         ? "return"
                         : event instanceof ExceptionEvent
                         ? "exception"
                         : "line"
-
         );
 
-        if (event instanceof ThreadDeathEvent && previousSnapshot.get("type").getAsString().equals("exception")) {
+        if (event instanceof ThreadDeathEvent && previousEvent instanceof ExceptionEvent) {
+            // ThreadDeathEvents cannot be used to extract information, in this case, the previous snapshot is used
             snapshot.add("stack", previousSnapshot.get("stack"));
             snapshot.add("heap", previousSnapshot.get("stack"));
 
@@ -52,14 +42,14 @@ class Inspector {
             ).value();
 
             var threw = new JsonObject();
-            threw.add("exception", DumpException.dump(exceptionEvent.exception().referenceType().name()));
-
-            return new InspectionResult(snapshot, threw);
+            // the traceback is not easily recoverable from the tracer but it is printed in the stderr (collected in prints)
+            threw.add("exception", JsonException.fromParts(exceptionEvent.exception().referenceType().name(), ""));
+            return new SnapshotOrThrew(threw, false);
         }
 
         // Get frames may fail when debugging this debugger
-        // frames() function returns an immutable list with the scopes in a reversed order
-        var frames = new ArrayList<>(((LocatableEvent) event).thread().frames());
+        // frames() function returns an immutable list with the scopes in reversed order (cannot be reversed)
+        var frames = ((LocatableEvent) event).thread().frames();
         Collections.reverse(frames);
         snapshot.add(
                 "stack",
@@ -117,7 +107,7 @@ class Inspector {
                     );
                 });
 
-        return new InspectionResult(snapshot);
+        return new SnapshotOrThrew(snapshot, true);
     }
 
     private JsonElement inspectValue(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
@@ -160,6 +150,13 @@ class Inspector {
         if (!(jdiValue instanceof ObjectReference)) return null;
 
         var jdiObjRef = (ObjectReference) jdiValue;
+        var id = Long.toString(jdiObjRef.uniqueID());
+        if (snapshot.has(id)) {
+            var idValue = new JsonArray(1);
+            idValue.add(id);
+            return idValue;
+        }
+
         return (value = inspectString(jdiObjRef)) != null
                 ? value
                 : (value = inspectBoxed(jdiObjRef)) != null
@@ -367,6 +364,52 @@ class Inspector {
         var idValue = new JsonArray(1);
         idValue.add(id);
         return idValue;
+    }
+
+    static class SnapshotOrThrew {
+        JsonObject content;
+        boolean isSnapshot;
+
+        SnapshotOrThrew(JsonObject content, boolean isSnapshot) {
+            this.content = content;
+            this.isSnapshot = isSnapshot;
+        }
+    }
+
+    /**
+     * Builds exception json objects from exceptions.
+     */
+    static class JsonException {
+
+        static JsonObject fromParts(String type, String traceback) {
+            var exception = new JsonObject();
+            exception.addProperty("type", type);
+            exception.addProperty("traceback", traceback);
+            return exception;
+        }
+
+        static JsonObject fromThrowable(Throwable throwable, Set<Integer> removeLines) {
+            var tracebackWriter = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(tracebackWriter, true));
+
+            var formattedTraceback = Arrays
+                    .stream(tracebackWriter.toString().split("\n"))
+                    .map(l -> l + "\n")
+                    .collect(Collectors.toList());
+
+            var traceback = IntStream
+                    .range(0, formattedTraceback.size())
+                    .filter(i -> !removeLines.contains(i) && !removeLines.contains(i - formattedTraceback.size()))
+                    .mapToObj(formattedTraceback::get)
+                    .collect(JsonArray::new, JsonArray::add, (line0, line1) -> {
+                        throw new RuntimeException("parallel stream not allowed");
+                    });
+
+            var exception = new JsonObject();
+            exception.addProperty("type", throwable.getClass().getName());
+            exception.add("traceback", traceback);
+            return exception;
+        }
     }
 }
 
