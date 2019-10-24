@@ -4,7 +4,7 @@ A tool to inspect java code, analyzing it line by line and returning its state (
 
 ```
 usage: tracer [options]
-input pipe: {"source?": "string", "input"?: "string", "steps?": "number"}
+  stdin: {"source?": "string", "input"?: "string", "steps?": "number"}
 
 Java tracer CLI
 
