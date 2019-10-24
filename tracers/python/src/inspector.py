@@ -68,9 +68,9 @@ class Inspector:
         if members is not None:  # known object type
             # add object id to the snapshot heap (it has to be added before other object inspections)
             obj = snapshot['heap'][id_] = {}
-            obj['type'] = generic_type,
-            obj['languageType'] = language_type,
-            obj['userDefined'] = user_defined,
+            obj['type'] = generic_type
+            obj['languageType'] = language_type
+            obj['userDefined'] = user_defined
             obj['members'] = [
                 {
                     'key': self._inspect_object(snapshot, key, classes, module),
