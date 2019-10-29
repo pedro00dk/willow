@@ -37,13 +37,15 @@ export class Server {
 
         this.server.post('/trace', async (req, res) => {
             log.http(Server.name, req.path)
-            const language = req.body['language'] as string
-            const source = req.body['source'] as string
-            const input = req.body['input'] as string
+            const trace = {
+                language: req.body['language'] as string,
+                source: req.body['source'] as string,
+                input: req.body['input'] as string
+            }
             const steps = this.steps
             try {
-                if (!this.tracers[language]) throw new Error('unexpected language')
-                const result = await new Tracer(this.tracers[language]).run({ source, input, steps }, this.timeout)
+                if (!this.tracers[trace.language]) throw new Error('unexpected language')
+                const result = await new Tracer(this.tracers[trace.language]).run(trace, this.timeout)
                 res.send(result)
                 log.info(Server.name, req.path, 'ok')
             } catch (error) {

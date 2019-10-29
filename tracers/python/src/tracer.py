@@ -10,11 +10,11 @@ class Tracer:
     Traces python source and analyses its state after each instruction.
     """
 
-    def __init__(self, source: str, input_: str, steps: str):
+    def __init__(self, trace: dict):
         self._filename = '<script>'
-        self._source = source
-        self._input = input_.splitlines()
-        self._steps = steps
+        self._source = trace['source']
+        self._input = trace['input'].splitlines()
+        self._steps = trace['steps']
 
         self._inspector = inspector.Inspector()
         self._result = None

@@ -39,17 +39,20 @@ public class Main {
         var scan = new Scanner(System.in);
         var traceData = new Gson().fromJson(scan.nextLine(), JsonObject.class);
         scan.close();
-
         var sourceJson = traceData.get("source");
         var inputJson = traceData.get("input");
         var stepsJson = traceData.get("steps");
-        var source = !arguments.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
-                : arguments.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
-                : "";
-        var input = inputJson != null ? inputJson.getAsString() : "";
-        var steps = stepsJson != null ? stepsJson.getAsNumber().intValue() : Integer.MAX_VALUE;
+        var trace = new JsonObject();
+        trace.addProperty(
+                "source",
+                !arguments.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
+                        : arguments.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
+                        : ""
+        );
+        trace.addProperty("input", inputJson != null ? inputJson.getAsString() : "");
+        trace.addProperty("steps", stepsJson != null ? stepsJson.getAsNumber().intValue() : Integer.MAX_VALUE);
 
-        var result = new Tracer(source, input, steps).run();
+        var result = new Tracer(trace).run();
 
         System.out.println(
                 arguments.getBoolean("pretty")

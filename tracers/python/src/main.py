@@ -17,14 +17,16 @@ def main():
     arguments = argument_parser.parse_args()
 
     trace_data = json.loads(input())
-    source = \
+    trace = {
+        'source': \
         trace_data['source'] if not arguments.test and trace_data.get('source') is not None else \
         pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else \
-        ''
-    input_ = trace_data['input'] if trace_data.get('input') is not None else ''
-    steps = trace_data['steps'] if trace_data.get('steps') is not None else 2 ** 31 - 1
+        '',
+        'input': trace_data['input'] if trace_data.get('input') is not None else '',
+        'steps': trace_data['steps'] if trace_data.get('steps') is not None else 2 ** 31 - 1
+    }
 
-    result = tracer.Tracer(source, input_, steps).run()
+    result = tracer.Tracer(trace).run()
 
     print(
         json.dumps(

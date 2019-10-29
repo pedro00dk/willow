@@ -35,10 +35,10 @@ public class Tracer {
     private int currentStep;
     private List<String> printCache;
 
-    public Tracer(String source, String input, int steps) {
-        this.source = source;
-        this.input = input;
-        this.steps = steps;
+    public Tracer(JsonObject trace) {
+        this.source = trace.get("source").getAsString();
+        this.input = trace.get("input").getAsString();
+        this.steps = trace.get("steps").getAsInt();
         this.filename = getMainFilename(this.source);
         inspector = new Inspector();
         result = null;
