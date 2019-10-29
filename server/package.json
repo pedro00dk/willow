@@ -6,20 +6,20 @@
         "@types/jest": "latest",
         "@types/node": "latest",
         "@types/npmlog": "4.1.2",
-        "@types/yargs": "13.0.2",
+        "@types/yargs": "13.0.3",
         "jest": "latest",
         "json-schema-to-typescript": "latest",
         "prettier": "latest",
         "source-map-support": "latest",
         "tslint": "latest",
         "tslint-config-prettier": "latest",
-        "typescript": "latest"
+        "typescript": "beta"
     },
     "dependencies": {
         "cors": "2.8.5",
         "express": "4.17.1",
         "npmlog": "4.1.2",
-        "yargs": "13.3.0"
+        "yargs": "14.2.0"
     },
     "config": {
         "java_tracer": "cd ../tracers/java/ && . ./package.sh start",
