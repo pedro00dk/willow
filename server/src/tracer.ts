@@ -29,13 +29,7 @@ export class Tracer {
             if (!tracer.killed) tracer.kill()
         }
 
-        try {
-            if (stderrBuffers.length > 0) throw new Error(Buffer.concat(stderrBuffers).toString('utf-8'))
-            return JSON.parse(Buffer.concat(stdoutBuffers).toString('utf-8')) as schema.Result
-        } catch (error) {
-            throw error
-        } finally {
-            if (!tracer.killed) tracer.kill()
-        }
+        if (stderrBuffers.length > 0) throw new Error(Buffer.concat(stderrBuffers).toString('utf-8'))
+        return JSON.parse(Buffer.concat(stdoutBuffers).toString('utf-8')) as schema.Result
     }
 }

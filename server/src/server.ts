@@ -22,9 +22,7 @@ export class Server {
         this.server.use(
             cors({
                 origin: (origin, callback) =>
-                    clients === '*' || clients === origin
-                        ? callback(undefined, true)
-                        : callback(new Error('not allowed by CORS')),
+                    callback(clients === '*' || clients === origin ? undefined : new Error('illegal origin (CORS)')),
                 credentials: true
             })
         )
@@ -43,7 +41,6 @@ export class Server {
             const source = req.body['source'] as string
             const input = req.body['input'] as string
             const steps = this.steps
-
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language]).run({ source, input, steps }, this.timeout)
