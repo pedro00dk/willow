@@ -13,7 +13,7 @@
         "source-map-support": "latest",
         "tslint": "latest",
         "tslint-config-prettier": "latest",
-        "typescript": "beta"
+        "typescript": "latest"
     },
     "dependencies": {
         "cors": "2.8.5",
