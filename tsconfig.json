@@ -1,13 +1,12 @@
 {
     "compilerOptions": {
-        "downlevelIteration": true,
+        "allowSyntheticDefaultImports": true,
         "lib": ["esnext"],
-        "newLine": "LF",
         "moduleResolution": "node",
+        "newLine": "LF",
         "noImplicitAny": true,
         "noImplicitThis": true,
-        "outDir": "./dist/",
         "sourceMap": true,
-        "target": "es5"
+        "target": "esnext"
     }
 }
