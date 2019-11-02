@@ -1,5 +1,5 @@
-import * as log from 'npmlog'
-import * as yargs from 'yargs'
+import log from 'npmlog'
+import yargs from 'yargs'
 import { Server } from './server'
 
 const main = () => {
@@ -25,4 +25,4 @@ const main = () => {
     new Server(port, tracers, steps, timeout, clients).listen()
 }
 
-if (!module.parent) main()
+main()

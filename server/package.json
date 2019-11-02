@@ -1,5 +1,6 @@
 {
     "main": "./src/index.ts",
+    "type": "module",
     "devDependencies": {
         "@types/cors": "2.8.5",
         "@types/express": "4.17.0",
@@ -28,9 +29,9 @@
     "scripts": {
         "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json && prettier --config ./.prettierrc.js -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
-        "debug-base": "tsc && node -r source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
+        "debug-base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
         "debug": "npm run debug-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
-        "start-base": "tsc && node -r source-map-support/register -- ./dist/src/index.js",
+        "start-base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register -- ./dist/src/index.js",
         "start": "npm run start-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
         "test-base": "tsc && jest --testRegex 'dist/test/.*\\.test\\.js' --",
         "test": "export TRACER_JAVA=\"$npm_package_config_java_tracer#public class Main{public static void main(String[] a){}}#error+-\" && export TRACER_PYTHON=\"$npm_package_config_python_tracer##error+-\" && npm run test-base"

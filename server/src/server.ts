@@ -1,6 +1,6 @@
-import * as cors from 'cors'
-import * as express from 'express'
-import * as log from 'npmlog'
+import cors from 'cors'
+import express from 'express'
+import log from 'npmlog'
 import { Tracer } from './tracer'
 
 /**
