@@ -23,17 +23,17 @@
         "yargs": "14.2.0"
     },
     "config": {
-        "java_tracer": "cd ../tracers/java/ && . ./package.sh start",
-        "python_tracer": "cd ../tracers/python/ && . ./package.sh start"
+        "java-tracer": "cd ../tracers/java/ && . ./package.sh start",
+        "python-tracer": "cd ../tracers/python/ && . ./package.sh start"
     },
     "scripts": {
         "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json && prettier --config ./.prettierrc.js -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
-        "debug-base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
-        "debug": "npm run debug-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
-        "start-base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register -- ./dist/src/index.js",
-        "start": "npm run start-base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
-        "test-base": "tsc && jest --testRegex 'dist/test/.*\\.test\\.js' --",
-        "test": "export TRACER_JAVA=\"$npm_package_config_java_tracer#public class Main{public static void main(String[] a){}}#error+-\" && export TRACER_PYTHON=\"$npm_package_config_python_tracer##error+-\" && npm run test-base"
+        "debug:base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
+        "start:base": "tsc && node --experimental-modules --es-module-specifier-resolution node --require source-map-support/register -- ./dist/src/index.js",
+        "test:base": "tsc && jest --testRegex 'dist/test/.*\\.test\\.js' --",
+        "debug": "npm run debug:base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
+        "start": "npm run start:base -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
+        "test": "export TRACER_JAVA=\"$npm_package_config_java_tracer#public class Main{public static void main(String[] a){}}#error+-\" && export TRACER_PYTHON=\"$npm_package_config_python_tracer##error+-\" && npm run test:base"
     }
 }
