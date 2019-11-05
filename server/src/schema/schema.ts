@@ -12,7 +12,7 @@ export type Schema = Trace | Result
 /**
  * Represents programs values. They shall be one of the following ones. Types like boolean, null, or integers larger than what a double can fit (+- 2 ** 53 - 1) must use string representation.
  */
-export type Value = number | string | string[]
+export type Value = number | string | [string]
 
 /**
  * Traces are the requests to be sent to tracers processes. Traces must have a source to be executed and may have some input. The steps field defines the maximum number of steps to inspect.
@@ -37,7 +37,7 @@ export interface Step {
     prints?: string[]
 }
 /**
- * Snapshots contains the memory of a program. They store theyselves type, if the program ended, any exception raised, the current stack/heap of the program.
+ * Snapshots contains the memory of a program. They store themselves type, if the program ended, any exception raised, the current stack/heap of the program.
  */
 export interface Snapshot {
     type: 'line' | 'call' | 'return' | 'exception'
