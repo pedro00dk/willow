@@ -36,7 +36,7 @@ export const Language = () => {
     }))
 
     React.useEffect(() => void dispatch(languageActions.fetch()), [])
-console.log(languages)
+
     return (
         <div className={classes.container}>
             <div className={classes.input}>
