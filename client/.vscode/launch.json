@@ -8,12 +8,20 @@
             "name": "Launch",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:1234",
+            "url": "http://localhost:${input:port}",
             "runtimeExecutable": "/usr/bin/google-chrome-stable",
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
                 "../*": "${webRoot}/*"
             }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "port",
+            "type": "promptString",
+            "default": "1234",
+            "description": "port"   
         }
     ]
 }
