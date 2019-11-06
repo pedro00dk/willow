@@ -1,6 +1,5 @@
-import * as ace from 'brace'
-import cn from 'classnames'
-import * as React from 'react'
+import ace from 'brace'
+import React from 'react'
 
 export type EditorMouseEvent = {
     [props: string]: unknown
@@ -26,10 +25,7 @@ export type EditorMarker = {
 }
 
 const classes = {
-    container: cn('d-flex', 'w-100 h-100')
-}
-
-const styles = {
+    container: 'd-flex w-100 h-100',
     font: '1rem'
 }
 
@@ -42,7 +38,7 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
     React.useEffect(() => {
         const editor = ace.edit(ref.current)
         if (props.onEditor) props.onEditor(editor)
-        editor.setFontSize(styles.font)
+        editor.setFontSize(classes.font)
         editor.$blockScrolling = Infinity
 
         const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }

@@ -1,10 +1,10 @@
-import * as ace from 'brace'
+import ace from 'brace'
 import cn from 'classnames'
 import { css } from 'emotion'
-import * as React from 'react'
+import React from 'react'
 import { colors } from '../../colors'
-import { actions as programActions } from '../../reducers/program'
-import { useDispatch, useRedux } from '../../reducers/Store'
+import { actions as inputActions } from '../../reducers/input'
+import { useDispatch, useSelection } from '../../reducers/Store'
 import { EditorMarker, range, TextEditor } from './TextEditor'
 
 const classes = {
@@ -14,17 +14,12 @@ const classes = {
 export const InputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
-    const { fetching } = useRedux(state => ({ fetching: state.tracer.fetching }))
+    const fetching = useSelection(state => state.tracer.fetching)
 
     React.useEffect(() => {
         if (!editor) return
         editor.renderer.setShowGutter(false)
-
-        const onChange = (change: ace.EditorChangeEvent) =>
-            dispatch(programActions.setInput(editor.session.doc.getAllLines().slice(0, -1)))
-
-        editor.on('change', onChange)
-        return () => editor.off('change', onChange)
+        editor.on('change', () => dispatch(inputActions.set(editor.session.doc.getAllLines().slice(0, -1))))
     }, [editor])
 
     React.useEffect(() => {

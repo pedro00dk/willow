@@ -1,11 +1,11 @@
-import * as ace from 'brace'
-import * as React from 'react'
-import { useRedux } from '../../reducers/Store'
+import ace from 'brace'
+import React from 'react'
+import { useSelection } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 export const OutputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
-    const { tracer } = useRedux(state => ({ tracer: state.tracer }))
+    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return

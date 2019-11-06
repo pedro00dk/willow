@@ -1,10 +1,10 @@
-import * as ace from 'brace'
+import ace from 'brace'
 import cn from 'classnames'
 import { css } from 'emotion'
-import * as React from 'react'
+import React from 'react'
 import { colors } from '../../colors'
-import { actions as programActions } from '../../reducers/program'
-import { useDispatch, useRedux } from '../../reducers/Store'
+import { actions as sourceActions } from '../../reducers/source'
+import { useDispatch, useSelection } from '../../reducers/Store'
 import { EditorMarker, range, TextEditor } from './TextEditor'
 
 import callImg from '../../../public/editor/call.svg'
@@ -27,38 +27,31 @@ const classes = {
     exception: cn('position-absolute', css({ background: colors.red.light }))
 }
 
-const supportedLanguages = new Set(['java', 'python'])
+const languages = new Set(['java', 'python'])
 
-export const CodeEditor = () => {
+export const SourceEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
     const dispatch = useDispatch()
-    const { language, tracer } = useRedux(state => ({ language: state.program.language, tracer: state.tracer }))
+    const { language, tracer } = useSelection(state => ({
+        language: state.language.languages[state.language.selected],
+        tracer: state.tracer
+    }))
 
     React.useEffect(() => {
         if (!editor) return
         editor.setTheme('ace/theme/chrome')
         editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
-
-        const onChange = (change: ace.EditorChangeEvent) =>
-            dispatch(programActions.setSource(editor.session.doc.getAllLines()))
-
-        editor.on('change', onChange)
-        return () => editor.off('change', onChange)
+        editor.on('change', () => dispatch(sourceActions.set(editor.session.doc.getAllLines())))
     }, [editor])
 
     React.useEffect(() => {
         if (!editor) return
-
-        const getSyntaxSupport = (language: string) =>
-            supportedLanguages.has(language) ? `ace/mode/${language}` : 'ace/mode/text'
-
-        editor.session.setMode(getSyntaxSupport(language))
+        editor.session.setMode(`ace/mode/${languages.has(language) ? language : 'text'}`)
     }, [editor, language])
 
     React.useEffect(() => {
         if (!editor) return
-        const markers = editor.session.getMarkers(false) as EditorMarker[]
-        Object.values(markers)
+        Object.values(editor.session.getMarkers(false) as EditorMarker[])
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.session.removeMarker(marker.id))
         if (!tracer.available) return
