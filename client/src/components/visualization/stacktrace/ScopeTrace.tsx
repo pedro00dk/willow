@@ -47,11 +47,6 @@ const styles = {
     })
 }
 
-const computeChildWidth = (parent: ScopeData, child: ScopeData, width: number) => {
-    const proportion = (child.range[1] - child.range[0] + 1) / (parent.range[1] - parent.range[0] + 1)
-    return { width: proportion * width, percent: `${proportion * 100}%` }
-}
-
 export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: number }) => {
     const dispatch = useDispatch()
     const { selected } = useSelection(state => ({
@@ -59,6 +54,11 @@ export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: numb
     }))
     const root = props.scope.name == undefined && !!props.scope.children
     const leaf = props.scope.name == undefined && !props.scope.children
+
+    const computeChildWidth = (parent: ScopeData, child: ScopeData, width: number) => {
+        const proportion = (child.range[1] - child.range[0] + 1) / (parent.range[1] - parent.range[0] + 1)
+        return { width: proportion * width, percent: `${proportion * 100}%` }
+    }
 
     return (
         <div className={classes.container}>
