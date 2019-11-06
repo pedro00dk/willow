@@ -1,7 +1,13 @@
-import { Reducer } from 'redux'
 import * as schema from '../schema/schema'
 import { serverApi } from '../server'
-import { AsyncAction } from './Store'
+import { DefaultAsyncAction } from './Store'
+import { reducer as programReducer } from './program'
+import { reducer as tracerReducer } from './tracer'
+
+export type StackData = {
+    root: ScopeData
+    depth: number
+}
 
 export type ScopeData = {
     name?: string
@@ -9,9 +15,8 @@ export type ScopeData = {
     range: [number, number]
 }
 
-export type StackData = {
-    root: ScopeData
-    depth: number
+export type HeapData = {
+    [id: string]: ObjData
 }
 
 export type ObjData = {
@@ -23,11 +28,11 @@ export type ObjData = {
     objMembers: number
 }
 
-export type HeapData = {
-    [id: string]: ObjData
+export type GroupData = {
+    [id: string]: StructureData
 }
 
-export type GroupData = {
+export type StructureData = {
     base: string
     depth: number
     members: Set<string>
@@ -35,10 +40,6 @@ export type GroupData = {
     hasParentEdge: boolean
     hasNonParentFwdBackCrossEdge: boolean
     type: 'node' | 'list' | 'tree' | 'unknown'
-}
-
-export type GroupMapData = {
-    [id: string]: GroupData
 }
 
 type State = {
@@ -49,7 +50,7 @@ type State = {
     outputs: string[]
     stackData: StackData
     heapsData: HeapData[]
-    groupMapsData: GroupMapData[]
+    groupMapsData: GroupData[]
     error: string
 }
 
@@ -61,7 +62,7 @@ type Action =
               outputs: string[]
               stackData: StackData
               heapsData: HeapData[]
-              groupMapsData: GroupMapData[]
+              groupMapsData: GroupData[]
           }
           error?: string
       }
@@ -79,16 +80,22 @@ const initialState: State = {
     error: undefined
 }
 
-export const reducer: Reducer<State, Action> = (state = initialState, action) => {
+export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
         case 'tracer/trace':
+            return action.payload
+                ? { ...state, fetching: false, available: true, ...action.payload }
+                : action.error
+                ? { ...state, fetching: false, error: action.error }
+                : { ...initialState, fetching: true }
             if (action.payload) return { ...state, fetching: false, available: true, ...action.payload }
             if (action.error) return { ...state, fetching: false, error: action.error }
             return { ...initialState, fetching: true }
         case 'tracer/setIndex':
             return { ...state, ...action.payload }
+        default:
+            return state
     }
-    return state
 }
 
 const buildOutputs = (steps: schema.Step[]) => {
@@ -167,7 +174,7 @@ const buildHeapsData = (steps: schema.Step[]) => {
     return heapsData
 }
 
-const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: number, groupData: GroupData) => {
+const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: number, groupData: StructureData) => {
     groupData.members.add(objData.id)
     groupData.depth = Math.max(groupData.depth, localDepth)
     groupData.type =
@@ -192,10 +199,10 @@ const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: n
 }
 
 const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
-    const groupMapsData: GroupMapData[] = []
+    const groupMapsData: GroupData[] = []
     steps.forEach((step, i) => {
         if (!step.snapshot) return groupMapsData.push(groupMapsData[i - 1] || {})
-        const groupMapData: GroupMapData = {}
+        const groupMapData: GroupData = {}
         groupMapsData.push(groupMapData)
         const heapData = heapsData[i]
         new Set(
@@ -228,7 +235,7 @@ const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
     return groupMapsData
 }
 
-const trace = (): AsyncAction => async (dispatch, getState) => {
+const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/trace' })
     try {
         const { program } = getState()
