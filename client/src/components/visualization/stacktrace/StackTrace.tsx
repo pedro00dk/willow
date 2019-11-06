@@ -1,6 +1,6 @@
 import cn from 'classnames'
 import { css } from 'emotion'
-import * as React from 'react'
+import React from 'react'
 import { useSelection } from '../../../reducers/Store'
 import { ScopeTrace } from './ScopeTrace'
 

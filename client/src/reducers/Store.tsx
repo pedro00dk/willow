@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { reducer as inputReducer } from './input'
 import { reducer as languageReducer } from './language'
 import { reducer as sourceReducer } from './source'
