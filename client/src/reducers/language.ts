@@ -35,7 +35,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
 const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'language/fetch' })
     try {
-        const languages = (await serverApi.get('/languages')).data as string[]
+        const languages = (await serverApi.get<string[]>('/languages')).data
         dispatch({ type: 'language/fetch', payload: languages })
     } catch (error) {
         dispatch({ type: 'language/fetch', error: error.response ? error.response.data : error.toString() })
