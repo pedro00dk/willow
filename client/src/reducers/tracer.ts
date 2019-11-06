@@ -1,8 +1,6 @@
 import * as schema from '../schema/schema'
 import { serverApi } from '../server'
 import { DefaultAsyncAction } from './Store'
-import { reducer as programReducer } from './program'
-import { reducer as tracerReducer } from './tracer'
 
 export type StackData = {
     root: ScopeData
@@ -45,57 +43,46 @@ export type StructureData = {
 type State = {
     fetching: boolean
     available: boolean
-    index: number
-    steps: schema.Step[]
-    outputs: string[]
-    stackData: StackData
-    heapsData: HeapData[]
-    groupMapsData: GroupData[]
-    error: string
+    index?: number
+    steps?: schema.Step[]
+    outputs?: string[]
+    stackData?: StackData
+    heapsData?: HeapData[]
+    groupsData?: GroupData[]
+    error?: string
 }
 
 type Action =
     | {
-          type: 'tracer/trace'
+          type: 'tracer/execute'
           payload?: {
               steps: schema.Step[]
               outputs: string[]
               stackData: StackData
               heapsData: HeapData[]
-              groupMapsData: GroupData[]
+              groupsData: GroupData[]
           }
           error?: string
       }
-    | { type: 'tracer/setIndex'; payload: { index: number } }
+    | { type: 'tracer/setIndex'; payload: number }
 
 const initialState: State = {
     fetching: false,
-    available: false,
-    index: 0,
-    steps: [],
-    outputs: [],
-    stackData: undefined,
-    heapsData: [],
-    groupMapsData: [],
-    error: undefined
+    available: false
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
-        case 'tracer/trace':
+        case 'tracer/execute':
             return action.payload
-                ? { ...state, fetching: false, available: true, ...action.payload }
+                ? { ...state, fetching: false, available: true, index: 0, ...action.payload }
                 : action.error
-                ? { ...state, fetching: false, error: action.error }
+                ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
-            if (action.payload) return { ...state, fetching: false, available: true, ...action.payload }
-            if (action.error) return { ...state, fetching: false, error: action.error }
-            return { ...initialState, fetching: true }
         case 'tracer/setIndex':
-            return { ...state, ...action.payload }
-        default:
-            return state
+            return { ...state, index: action.payload }
     }
+    return state
 }
 
 const buildOutputs = (steps: schema.Step[]) => {
@@ -198,7 +185,7 @@ const expandGroupData = (objData: ObjData, parentObjData: ObjData, localDepth: n
     return groupData
 }
 
-const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
+const buildGroupsData = (steps: schema.Step[], heapsData: HeapData[]) => {
     const groupMapsData: GroupData[] = []
     steps.forEach((step, i) => {
         if (!step.snapshot) return groupMapsData.push(groupMapsData[i - 1] || {})
@@ -236,28 +223,28 @@ const buildGroupMapsData = (steps: schema.Step[], heapsData: HeapData[]) => {
 }
 
 const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
-    dispatch({ type: 'tracer/trace' })
+    dispatch({ type: 'tracer/execute' })
     try {
-        const { program } = getState()
+        const { language, source, input } = getState()
         const result = (await serverApi.post<schema.Result>('/trace', {
-            language: program.language,
-            source: program.source ? program.source.join('\n') : '',
-            input: program.input ? program.input.join('\n') : ''
+            language: language.languages[language.selected],
+            source: source.join('\n'),
+            input: input.join('\n')
         })).data
         const steps = result.steps
         const outputs = buildOutputs(steps)
         const stackData = buildStackData(steps)
         const heapsData = buildHeapsData(steps)
-        const groupMapsData = buildGroupMapsData(steps, heapsData)
-        dispatch({ type: 'tracer/trace', payload: { steps, outputs, stackData, heapsData, groupMapsData } })
+        const groupsData = buildGroupsData(steps, heapsData)
+        dispatch({ type: 'tracer/execute', payload: { steps, outputs, stackData, heapsData, groupsData } })
     } catch (error) {
-        dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
+        dispatch({ type: 'tracer/execute', error: error.response ? error.response.data : error.toString() })
     }
 }
 
-const setIndex = (index: number): AsyncAction => async (dispatch, getState) => {
+const setIndex = (index: number): DefaultAsyncAction => (dispatch, getState) => {
     const { tracer } = getState()
-    dispatch({ type: 'tracer/setIndex', payload: { index: Math.max(0, Math.min(index, tracer.steps.length - 1)) } })
+    return dispatch({ type: 'tracer/setIndex', payload: Math.min(Math.max(index, 0), tracer.steps.length - 1) })
 }
 
 export const actions = { trace, setIndex }
