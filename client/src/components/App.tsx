@@ -9,11 +9,11 @@ import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'
 import { SourceEditor } from './editor/SourceEditor'
+import { Splitter } from './Splitter'
+import { StackTrace } from './visualization/stacktrace/StackTrace'
+// import { Heap } from './heap/Heap'
 
 import logo from '../../public/logo.svg'
-import { Splitter } from './Splitter'
-// import { Heap } from './heap/Heap'
-// import { Visualization } from './visualization/Visualization'
 
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
@@ -104,11 +104,10 @@ export const Visualization = () => {
             tabIndex={0}
         >
             <Splitter layout='column' base={0.3}>
-                <div></div>
+                <StackTrace />
                 <div></div>
             </Splitter>
-            {/* <StackTrace />
-                <Heap /> */}
+            {/* <Heap /> */}
         </div>
     )
 }
