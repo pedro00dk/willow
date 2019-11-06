@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { useRedux } from '../../../reducers/Store'
+import { useSelection } from '../../../reducers/Store'
 import { ScopeTrace } from './ScopeTrace'
 
 const classes = {
@@ -11,7 +11,7 @@ const classes = {
 export const StackTrace = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
-    const { available, stackData } = useRedux(state => ({
+    const { available, stackData } = useSelection(state => ({
         available: state.tracer.available,
         stackData: state.tracer.stackData
     }))

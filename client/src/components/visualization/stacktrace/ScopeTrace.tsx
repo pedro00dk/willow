@@ -1,13 +1,13 @@
 import cn from 'classnames'
 import { css } from 'emotion'
-import * as React from 'react'
+import React from 'react'
 import { colors } from '../../../colors'
-import { useDispatch, useRedux } from '../../../reducers/Store'
+import { useDispatch, useSelection } from '../../../reducers/Store'
 import { actions as tracerActions } from '../../../reducers/tracer'
 import { ScopeData } from '../../../reducers/tracer'
 
 const classes = {
-    container: cn('d-flex flex-column', 'w-100'),
+    container: 'd-flex flex-column w-100',
     scope: cn(
         'text-truncate',
         'w-100',
@@ -18,8 +18,8 @@ const classes = {
             ':hover': { borderColor: `${colors.gray.dark} !important` }
         })
     ),
-    children: cn('d-flex'),
-    child: cn('d-flex')
+    children: 'd-flex',
+    child: 'd-flex'
 }
 
 const scopeColors = (depth: number) => {
@@ -54,7 +54,7 @@ const computeChildWidth = (parent: ScopeData, child: ScopeData, width: number) =
 
 export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: number }) => {
     const dispatch = useDispatch()
-    const { selected } = useRedux(state => ({
+    const { selected } = useSelection(state => ({
         selected: state.tracer.index >= props.scope.range[0] && state.tracer.index <= props.scope.range[1]
     }))
     const root = props.scope.name == undefined && !!props.scope.children
