@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React from 'react'
 import { colors } from '../colors'
-import { Draggable } from '../Utils'
+import { Draggable } from './visualization/graphview/Utils'
 
 const classes = {
     container: 'd-flex w-100 h-100',

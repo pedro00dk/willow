@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import * as React from 'react'
 import { useRedux } from '../../../reducers/Store'
-import { clamp } from '../../../Utils'
+import { clamp } from './Utils'
 import { View } from './View'
 import { Wrapper } from './Wrapper'
 

@@ -5,7 +5,7 @@ import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { colors } from '../../../colors'
 import { State } from '../../../reducers/Store'
 import { ObjData } from '../../../reducers/tracer'
-import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
+import { clamp, Draggable, lerp, svgScreenPointTransform, svgScreenVectorTransform } from './Utils'
 import * as ArrayModule from './Array'
 import * as BarsModule from './Bars'
 import * as FieldModule from './Field'
@@ -55,6 +55,7 @@ export const Wrapper = (props: {
     const nodeName = (parameterSelector === 'id'
         ? props.heapControl.getIdNodeName(id, defaultNodeNames[0])
         : props.heapControl.getTypeNodeName(languageType, defaultNodeNames[0])) as keyof typeof modules
+    console.log(modules, nodeName)
     const { Node, NodeParameters } = modules[nodeName]
     targetRefs.current = []
     pathRefs.current = []

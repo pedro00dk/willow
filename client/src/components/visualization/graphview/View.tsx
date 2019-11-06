@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { clamp, ilerp, svgScreenPointTransform, svgScreenVectorTransform } from '../../../Utils'
+import { clamp, ilerp, svgScreenPointTransform, svgScreenVectorTransform } from './Utils'
 
 export const View = (props: {
     size: { x: number; y: number }
