@@ -14,15 +14,16 @@ export class Server {
         private readonly tracers: { [language: string]: string },
         private readonly steps: number,
         private readonly timeout: number,
-        clients: string
+        readonly clients: string
     ) {
-        this.server = express()
         this.server = express()
         this.server.use(express.json())
         this.server.use(
             cors({
-                origin: (origin, callback) =>
-                    callback(clients === '*' || clients === origin ? undefined : new Error('illegal origin (CORS)')),
+                origin: (origin, callback) => {
+                    const allow = clients === '*' || clients === origin
+                    callback(!allow ? new Error('illegal origin (CORS)') : undefined, allow)
+                },
                 credentials: true
             })
         )
