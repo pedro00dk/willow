@@ -1,12 +1,16 @@
 import * as React from 'react'
+import { reducer as inputReducer } from './input'
+import { reducer as languageReducer } from './language'
+import { reducer as sourceReducer } from './source'
+import { reducer as tracerReducer } from './tracer'
 
 export type SubState = any
 export type SubAction = { type?: string; payload?: any; error?: any }
 export type SubReducer = (state: SubState, action: SubAction) => SubState
-export type SubReducers = { [field: string]: SubReducer }
+export type SubReducers = { [name: string]: SubReducer }
 
-export type State<T extends SubReducers> = { [field in keyof T]: Parameters<T[field]>[0] }
-export type Action<T extends SubReducers> = { [field in keyof T]: Parameters<T[field]>[1] }[keyof T] | {}
+export type State<T extends SubReducers> = { [name in keyof T]: Parameters<T[name]>[0] }
+export type Action<T extends SubReducers> = { [name in keyof T]: Parameters<T[name]>[1] }[keyof T] | {}
 export type Reducer<T extends SubReducers> = (state: State<T>, action: Action<T>) => State<T>
 
 export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getState: GetState<T>) => Promise<void>
@@ -22,9 +26,8 @@ export type Hooks<T extends SubReducers> = {
 // prettier-ignore
 const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> =>
     (state: State<typeof reducers>, action: Action<typeof reducers>): State<typeof reducers> =>
-        Object.fromEntries(
-            Object.entries(reducers).map(([field, reducer]) => [field, reducer(field as keyof typeof state, action)])
-        ) as State<typeof reducers>
+        Object.fromEntries(Object.entries(reducers).map(([name, reducer]) => [name, reducer(state[name], action)])) as
+        State<typeof reducers>
 
 const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
     const state = { value: reducer({} as State<T>, {}) }
@@ -81,6 +84,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
 
             checkSelectionUpdate()
             const unsubscribe = store.subscribe(checkSelectionUpdate)
+
             return () => unsubscribe()
         }, [])
 
@@ -98,4 +102,26 @@ export const Store = <T extends SubReducers>(props: {
     <props.context.Provider value={createHooks(createStore(combineReducers(props.reducers)))}>
         {props.children}
     </props.context.Provider>
+)
+
+// default store including all reducers
+const reducers = {
+    input: inputReducer,
+    language: languageReducer,
+    source: sourceReducer,
+    tracer: tracerReducer
+}
+const context = React.createContext<Hooks<typeof reducers>>(undefined)
+
+export type DefaultAsyncAction = AsyncAction<typeof reducers>
+
+export const useDispatch = () => React.useContext(context).useDispatch()
+
+export const useSelection = <V extends any>(query: (state: State<typeof reducers>) => V) =>
+    React.useContext(context).useSelection(query)
+
+export const DefaultStore = (props: { children?: React.ReactNode }) => (
+    <Store reducers={reducers} context={context}>
+        {props.children}
+    </Store>
 )
