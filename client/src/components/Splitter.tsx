@@ -1,15 +1,15 @@
 import cn from 'classnames'
-import * as React from 'react'
+import React from 'react'
 import { colors } from '../colors'
-import { clamp, Draggable } from '../Utils'
+import { Draggable } from '../Utils'
 
 const classes = {
-    container: cn('d-flex', 'w-100 h-100'),
-    pane: cn('d-flex')
+    container: 'd-flex w-100 h-100',
+    pane: 'd-flex'
 }
 
 const styles = {
-    size: (ratio: number, crop: number) => `calc(${ratio * 100}% - ${crop}px)`,
+    size: (ratio: number, crop: number) => `calc(${(ratio * 100).toFixed(2)}% - ${crop}px)`,
     cursor: (layout: 'row' | 'column') => (layout === 'row' ? 'ew-resize' : 'ns-resize')
 }
 
@@ -44,7 +44,7 @@ export const Splitter = (props: {
         children
     } = props
     const ref = React.useRef<HTMLDivElement>()
-    const [ratio, setRatio] = React.useState(clamp(base, min, max))
+    const [ratio, setRatio] = React.useState(Math.min(Math.max(base, min), max))
     const varying = layout === 'row' ? 'width' : 'height'
     const pinned = layout === 'row' ? 'height' : 'width'
 
@@ -52,7 +52,7 @@ export const Splitter = (props: {
         if (!resizable) return
         const rect = ref.current.getBoundingClientRect()
         const change = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
-        setRatio(clamp(ratio + change, min, max))
+        setRatio(Math.min(Math.max(ratio + change, min), max))
     }
 
     return (
