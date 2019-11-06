@@ -21,7 +21,7 @@ const styles = {
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const tracer = useSelection(state => state.tracer)
+    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
 
     return (
         <div className={classes.container}>

@@ -5,7 +5,7 @@ import { TextEditor } from './TextEditor'
 
 export const OutputEditor = () => {
     const [editor, setEditor] = React.useState<ace.Editor>()
-    const tracer = useSelection(state => state.tracer)
+    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
 
     React.useEffect(() => {
         if (!editor) return
