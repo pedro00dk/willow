@@ -1,6 +1,6 @@
-import * as React from 'react'
+import React from 'react'
 import { Item } from 'react-contexify'
-import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from './Heap'
+import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from '../GraphController'
 
 const BooleanParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
@@ -49,7 +49,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
     withReset: boolean
     parameters: T
     defaults: U
-    onChange: (updatedParameters: ComputedParameters<U>) => void
+    onChange: (parameters: ComputedParameters<U>) => void
 }) => {
     const parameters = readParameters(props.parameters, props.defaults)
     return (
@@ -64,27 +64,21 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                     <BooleanParameter
                         name={name}
                         value={value}
-                        onChange={value => {
-                            props.onChange({ ...parameters, [name]: value })
-                        }}
+                        onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : typeof value === 'number' ? (
                     <NumberParameter
                         name={name}
                         value={value}
                         range={(props.defaults[name] as any)['range']}
-                        onChange={value => {
-                            props.onChange({ ...parameters, [name]: value })
-                        }}
+                        onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : typeof value === 'string' ? (
                     <StringParameter
                         name={name}
                         value={value}
                         options={(props.defaults[name] as any)['options']}
-                        onChange={value => {
-                            props.onChange({ ...parameters, [name]: value })
-                        }}
+                        onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : (
                     <span>unknown property</span>
