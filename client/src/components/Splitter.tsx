@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React from 'react'
 import { colors } from '../colors'
-import { Draggable } from './visualization/graphview/Utils'
+import { Draggable } from './Draggable'
 
 const classes = {
     container: 'd-flex w-100 h-100',
@@ -64,7 +64,7 @@ export const Splitter = (props: {
                 {children[0]}
             </div>
             <Draggable
-                containerProps={{
+                props={{
                     className: draggerClassName,
                     style: { ...draggerStyle, cursor: styles.cursor(layout), [pinned]: '100%', [varying]: dragger }
                 }}
