@@ -1,12 +1,12 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
-import { colors } from '../../../colors'
-import { ObjData } from '../../../reducers/tracer'
-import * as schema from '../../../schema/schema'
-import { Base, getDisplayValue, valueChanged } from './Base'
-import { ComputedParameters, readParameters, UnknownParameters } from './Heap'
-import { Parameters } from './Parameters'
+import { colors } from '../../../../../colors'
+import { ObjData } from '../../../../../reducers/tracer'
+import * as schema from '../../../../../schema/schema'
+import { Base, getDisplayValue, valueChanged } from '../../Base'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphView'
+import { Parameters } from '../Parameters'
 
 const classes = {
     container: cn('d-flex align-items-center', 'text-nowrap'),
