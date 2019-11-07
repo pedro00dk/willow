@@ -7,13 +7,16 @@ export const Heap = (props: {
     controller: GraphController
     updateGraph: React.Dispatch<{}>
     tracer: DefaultState['tracer']
-}) =>
-    Object.values(props.tracer.heapsData[props.tracer.index]).map(objData => (
-        <Wrapper
-            key={objData.id}
-            objData={objData}
-            controller={props.controller}
-            updateGraph={props.updateGraph}
-            tracer={props.tracer}
-        />
-    ))
+}) => (
+    <>
+        {Object.values(props.tracer.heapsData[props.tracer.index]).map(objData => (
+            <Wrapper
+                key={objData.id}
+                objData={objData}
+                controller={props.controller}
+                updateGraph={props.updateGraph}
+                tracer={props.tracer}
+            />
+        ))}
+    </>
+)
