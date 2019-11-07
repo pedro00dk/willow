@@ -7,12 +7,10 @@ const classes = {
     split: 'px-2'
 }
 
-export const Controls = () => {
-    return (
-        <div className={classes.container}>
-            <Language />
-            <span className={classes.split}/>
-            <Toolbar />
-        </div>
-    )
-}
+export const Controls = () => (
+    <div className={classes.container}>
+        <Language />
+        <span className={classes.split} />
+        <Toolbar />
+    </div>
+)
