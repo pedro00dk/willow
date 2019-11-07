@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 const classes = {
     container: 'd-flex w-100 h-100'
@@ -24,13 +24,17 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-export const View = (props: { children?: React.ReactNode }) => {
+export const View = (props: { size: { x: number; y: number }; children?: React.ReactNode }) => {
     const ref = React.useRef<HTMLDivElement>()
     const svgRef = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
-    const [size, setSize] = React.useState({ x: 1, y: 1 })
-    const viewBox = React.useRef([0, 0, size.x * 0.5, size.y * 0.5])
-    const ranges = [[0, size.x], [0, size.y], [size.x * 0.3, size.x], [size.y * 0.3, size.y]]
+    const viewBox = React.useRef([0, 0, props.size.x * 0.5, props.size.y * 0.5])
+    const ranges = [
+        [0, props.size.x],
+        [0, props.size.y],
+        [props.size.x * 0.3, props.size.x],
+        [props.size.y * 0.3, props.size.y]
+    ]
 
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
     const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
@@ -41,9 +45,8 @@ export const View = (props: { children?: React.ReactNode }) => {
         svgRef.current.setAttribute('viewBox', viewBox.current.join(' '))
     }
 
-    // TODO zoom is still a bit buggy
     const scaleView = (root: { x: number; y: number }, multiplier: number) => {
-        const factor = Math.min(size.x, size.y) * multiplier
+        const factor = Math.min(props.size.x, props.size.y) * multiplier
         const ratio = {
             x: ilerp(root.x, viewBox.current[0], viewBox.current[0] + viewBox.current[2]),
             y: ilerp(root.y, viewBox.current[1], viewBox.current[1] + viewBox.current[3])
@@ -60,28 +63,33 @@ export const View = (props: { children?: React.ReactNode }) => {
         svgRef.current.setAttribute('viewBox', viewBox.current.join(' '))
     }
 
-    // recomputes viewBox TODO think a better way
-    if (svgRef.current) scaleView({ x: 0, y: 0 }, 0)
-
     React.useLayoutEffect(() => {
-        if (size.x !== ref.current.clientWidth || size.y !== ref.current.clientHeight)
-            setSize({ x: ref.current.clientWidth, y: ref.current.clientHeight })
+        const containerSize = { x: ref.current.clientWidth, y: ref.current.clientHeight }
+        const svgSize = { x: svgRef.current.clientWidth, y: svgRef.current.clientHeight }
+        if (containerSize.x !== svgSize.x || containerSize.y === svgSize.y) {
+            svgRef.current.setAttribute('width', containerSize.x.toString())
+            svgRef.current.setAttribute('height', containerSize.y.toString())
+        }
 
         const interval = setInterval(() => {
-            if (size.x === ref.current.clientWidth && size.y === ref.current.clientHeight) return
-            setSize({ x: ref.current.clientWidth, y: ref.current.clientHeight })
+            containerSize.x = ref.current.clientWidth
+            containerSize.y = ref.current.clientHeight
+            svgSize.x = svgRef.current.clientWidth
+            svgSize.y = svgRef.current.clientHeight
+            if (containerSize.x === svgSize.x && containerSize.y === svgSize.y) return
+            svgRef.current.setAttribute('width', containerSize.x.toString())
+            svgRef.current.setAttribute('height', containerSize.y.toString())
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [ref, svgRef, size])
+    }, [ref, svgRef])
 
     return (
         <div ref={ref} className={classes.container}>
             <svg
                 ref={svgRef}
-                width={size.x}
-                height={size.y}
                 viewBox={viewBox.current.join(' ')}
+                preserveAspectRatio='xMidYMid meet'
                 onMouseDown={event => (click.current = true)}
                 onMouseUp={event => (click.current = false)}
                 onMouseLeave={event => (click.current = false)}
@@ -98,8 +106,13 @@ export const View = (props: { children?: React.ReactNode }) => {
                 }}
             >
                 <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
-                    <rect width={size.x} height={size.y} />
-                    <rect x={size.x / 4} y={size.y / 4} width={size.x / 2} height={size.y / 2} />
+                    <rect width={props.size.x} height={props.size.y} />
+                    <rect
+                        x={props.size.x / 4}
+                        y={props.size.y / 4}
+                        width={props.size.x / 2}
+                        height={props.size.y / 2}
+                    />
                 </g>
                 {props.children}
             </svg>
