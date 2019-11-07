@@ -113,6 +113,7 @@ const reducers = {
 }
 const context = React.createContext<Hooks<typeof reducers>>(undefined)
 
+export type DefaultState = State<typeof reducers>
 export type DefaultAsyncAction = AsyncAction<typeof reducers>
 
 export const useDispatch = () => React.useContext(context).useDispatch()
