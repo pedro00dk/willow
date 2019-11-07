@@ -39,13 +39,13 @@ export const View = (props: { size: { x: number; y: number }; children?: React.R
     const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
     const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
 
-    const moveView = (delta: { x: number; y: number }) => {
+    const move = (delta: { x: number; y: number }) => {
         viewBox.current[0] = clamp(viewBox.current[0] - delta.x, ranges[0][0], ranges[0][1] - viewBox.current[2])
         viewBox.current[1] = clamp(viewBox.current[1] - delta.y, ranges[1][0], ranges[1][1] - viewBox.current[3])
         svgRef.current.setAttribute('viewBox', viewBox.current.join(' '))
     }
 
-    const scaleView = (root: { x: number; y: number }, multiplier: number) => {
+    const scale = (root: { x: number; y: number }, multiplier: number) => {
         const factor = Math.min(props.size.x, props.size.y) * multiplier
         const ratio = {
             x: ilerp(root.x, viewBox.current[0], viewBox.current[0] + viewBox.current[2]),
@@ -97,12 +97,12 @@ export const View = (props: { size: { x: number; y: number }; children?: React.R
                     if (!click.current) return
                     const screenDelta = { x: event.movementX, y: event.movementY }
                     const [svgDelta] = svgScreenTransformVector('toSvg', svgRef.current, screenDelta)
-                    moveView(svgDelta)
+                    move(svgDelta)
                 }}
                 onWheel={event => {
                     const screenPoint = { x: event.clientX, y: event.clientY }
                     const [svgPoint] = svgScreenTransformPoint('toSvg', svgRef.current, screenPoint)
-                    scaleView(svgPoint, event.deltaY < 0 ? 0.02 : -0.02)
+                    scale(svgPoint, event.deltaY < 0 ? 0.02 : -0.02)
                 }}
             >
                 <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
