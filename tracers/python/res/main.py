@@ -20,7 +20,7 @@ dd = {
 
 class CCC:
     def __init__(self):
-        self.field = False
+        self.attribute = False
 
 
 ccc = CCC

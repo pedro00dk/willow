@@ -15,7 +15,7 @@ optional arguments:
 ```
 
 The tracer receives the input through standard input stream and its result will be generated in the standard output stream.
-The input must be in the json format with the following fields:
+The input must be in the json format with the following properties:
 ```json
 {
     "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",

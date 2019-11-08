@@ -54,10 +54,10 @@ public class Main {
     }
 
     static class CCC {
-        private boolean field;
+        private boolean attribute;
 
         public CCC() {
-            this.field = false;
+            this.attribute = false;
         }
     }
 
