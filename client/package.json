@@ -9,8 +9,6 @@
         "json-schema-to-typescript": "latest",
         "parcel-bundler": "latest",
         "prettier": "latest",
-        "tslint": "latest",
-        "tslint-config-prettier": "latest",
         "typescript": "latest"
     },
     "dependencies": {

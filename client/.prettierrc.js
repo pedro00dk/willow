@@ -1,2 +1,1 @@
-const parentConfig = require('../.prettierrc')
-module.exports = parentConfig
+module.exports = require('../.prettierrc')

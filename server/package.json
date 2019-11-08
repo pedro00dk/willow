@@ -12,8 +12,6 @@
         "json-schema-to-typescript": "latest",
         "prettier": "latest",
         "source-map-support": "latest",
-        "tslint": "latest",
-        "tslint-config-prettier": "latest",
         "typescript": "latest"
     },
     "dependencies": {
