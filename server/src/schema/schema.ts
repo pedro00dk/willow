@@ -15,7 +15,7 @@ export type Schema = Trace | Result
 export type Value = number | string | [string]
 
 /**
- * Traces are the requests to be sent to tracers processes. Traces must have a source to be executed and may have some input. The steps field defines the maximum number of steps to inspect.
+ * Traces are the requests to be sent to tracers processes. Traces must have a source to be executed and may have some input. The steps property defines the maximum number of steps to inspect.
  */
 export interface Trace {
     source?: string
@@ -29,7 +29,7 @@ export interface Result {
     steps: Step[]
 }
 /**
- * Steps store the results of inspections of the traced program. They shall contain at least one of the snapshot or threw fields and may have 0 or more prints.
+ * Steps store the results of inspections of the traced program. They shall contain at least one of the snapshot or threw properties and may have 0 or more prints.
  */
 export interface Step {
     snapshot?: Snapshot
