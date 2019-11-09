@@ -77,7 +77,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
             const checkSelectionUpdate = () => {
                 const updatedSelection = memoQuery(store.getState())
                 const isPromise = typeof updatedSelection.then === 'function'
-                const areEqual = areSelectionsEqual(selectionRef, updatedSelection)
+                const areEqual = areSelectionsEqual(selectionRef.current, updatedSelection)
                 if (isPromise || areEqual) return
                 setSelection((selectionRef.current = updatedSelection))
             }
