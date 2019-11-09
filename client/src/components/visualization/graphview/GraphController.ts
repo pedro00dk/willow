@@ -26,8 +26,8 @@ export class GraphController {
     }
 
     callSubscriptions(id?: string) {
-        const call = this.subscriptionCalls++
-        ;(id ? Object.values(this.subscriptions).flat() : this.subscriptions[id]).forEach(s => s(call))
+        const subscriptionCall = this.subscriptionCalls++
+        ;(id ? Object.values(this.subscriptions).flat() : this.subscriptions[id]).forEach(s => s(subscriptionCall))
     }
 
     clearSubscriptions() {
