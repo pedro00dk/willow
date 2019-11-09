@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelection } from '../../../reducers/Store'
 import { GraphController } from './GraphController'
 import { Heap } from './heap/Heap'
-import { View } from './View'
+import { SvgView } from './SvgView'
 
 const classes = {
     container: 'd-flex w-100 h-100'
@@ -18,9 +18,9 @@ export const GraphView = React.memo(() => {
 
     return (
         <div className={classes.container}>
-            <View size={viewSize}>
+            <SvgView size={viewSize}>
                 {tracer.available && <Heap controller={controller.current} updateGraph={updateGraph} tracer={tracer} />}
-            </View>
+            </SvgView>
         </div>
     )
 })

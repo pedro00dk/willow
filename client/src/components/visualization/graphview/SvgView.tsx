@@ -24,7 +24,9 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-export const View = (props: { size: { x: number; y: number }; children?: React.ReactNode }) => {
+export const svgElementContext = React.createContext<() => SVGSVGElement>(() => undefined)
+
+export const SvgView = (props: { size: { x: number; y: number }; children?: React.ReactNode }) => {
     const ref = React.useRef<HTMLDivElement>()
     const svgRef = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
@@ -114,7 +116,7 @@ export const View = (props: { size: { x: number; y: number }; children?: React.R
                         height={props.size.y / 2}
                     />
                 </g>
-                {props.children}
+                <svgElementContext.Provider value={() => svgRef.current}>{props.children}</svgElementContext.Provider>
             </svg>
         </div>
     )
