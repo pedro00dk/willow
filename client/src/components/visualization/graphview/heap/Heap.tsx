@@ -1,7 +1,8 @@
 import React from 'react'
 import { DefaultState } from '../../../../reducers/Store'
 import { GraphController } from '../GraphController'
-import { Wrapper } from '../Wrapper'
+import { SvgWrapper } from '../SvgWrapper'
+import { ObjDataWrapper } from './ObjDataWrapper'
 
 export const Heap = (props: {
     controller: GraphController
@@ -10,13 +11,9 @@ export const Heap = (props: {
 }) => (
     <>
         {Object.values(props.tracer.heapsData[props.tracer.index]).map(objData => (
-            <Wrapper
-                key={objData.id}
-                objData={objData}
-                controller={props.controller}
-                updateGraph={props.updateGraph}
-                tracer={props.tracer}
-            />
+            <SvgWrapper key={objData.id} id={objData.id} {...props}>
+                <ObjDataWrapper objData={objData} {...props} />
+            </SvgWrapper>
         ))}
     </>
 )
