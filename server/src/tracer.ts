@@ -10,9 +10,9 @@ export class Tracer {
     async run(trace: schema.Trace, timeout: number) {
         const tracer = cp.spawn(this.command, { shell: true })
 
-        const stopPromise = new Promise((res, rej) => {
-            tracer.on('close', (code, signal) => res())
-            setTimeout(() => rej(new Error(`reached timeout ${timeout}ms`)), timeout)
+        const stopPromise = new Promise((resolve, reject) => {
+            tracer.on('close', (code, signal) => resolve())
+            setTimeout(() => reject(new Error(`reached timeout ${timeout}ms`)), timeout)
         })
 
         const stdoutBuffers: Buffer[] = []

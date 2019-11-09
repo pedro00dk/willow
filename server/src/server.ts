@@ -22,7 +22,7 @@ export class Server {
             cors({
                 origin: (origin, callback) => {
                     const allow = clients === '*' || clients === origin
-                    callback(!allow ? new Error('illegal origin (CORS)') : undefined, allow)
+                    callback(!allow && new Error('illegal origin (CORS)'), allow)
                 },
                 credentials: true
             })
