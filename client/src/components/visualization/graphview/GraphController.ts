@@ -12,6 +12,7 @@ export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T
 export class GraphController {
     private subscriptionCalls = 0
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
+    private index = 0
     private positions: { [id: string]: { x: number; y: number }[] } = {}
     private sizes: { [id: string]: { x: number; y: number }[] } = {}
     private targets: { [id: string]: { id: string; delta: { x: number; y: number } }[] } = {}
@@ -32,6 +33,14 @@ export class GraphController {
 
     clearSubscriptions() {
         this.subscriptions = {}
+    }
+
+    getIndex() {
+        return this.index
+    }
+
+    setIndex(index: number) {
+        this.index = index
     }
 
     getPosition(id: string, index: number, def?: { x: number; y: number }) {
