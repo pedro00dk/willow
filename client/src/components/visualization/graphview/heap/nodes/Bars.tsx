@@ -5,23 +5,19 @@ import { colors } from '../../../../../colors'
 import { ObjData } from '../../../../../reducers/tracer'
 import * as schema from '../../../../../schema/schema'
 import { Base, getDisplayValue, valueChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphView'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphController'
 import { Parameters } from '../Parameters'
 
 const classes = {
-    container: cn('d-flex align-items-end', 'text-nowrap'),
+    container: 'd-flex align-items-end text-nowrap',
     element: cn(
         'd-inline-flex flex-column',
         'px-1',
-        css({
-            border: `0.5px solid ${colors.gray.dark}`,
-            cursor: 'default',
-            fontSize: '1rem'
-        })
+        css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
     ),
     index: cn('text-truncate', css({ fontSize: '0.5rem' })),
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' })),
-    bar: cn(css({ borderBottom: `1px solid ${colors.gray.dark}` }))
+    bar: css({ borderBottom: `1px solid ${colors.gray.dark}` })
 }
 
 const styles = {

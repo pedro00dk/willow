@@ -5,11 +5,11 @@ import { colors } from '../../../../../colors'
 import { ObjData } from '../../../../../reducers/tracer'
 import * as schema from '../../../../../schema/schema'
 import { Base, getDisplayValue, valueChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphView'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphController'
 import { Parameters } from '../Parameters'
 
 const classes = {
-    container: cn('d-flex flex-column justify-content-center', 'text-nowrap'),
+    container: 'd-flex flex-column justify-content-center text-nowrap',
     element: cn('d-inline-flex', css({ cursor: 'default' })),
     key: cn(
         'text-center text-truncate',
