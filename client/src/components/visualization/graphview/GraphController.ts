@@ -12,7 +12,7 @@ export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T
 export class GraphController {
     private subscriptionCalls = 0
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
-    private index = 0
+    private index: number
     private positions: { [id: string]: { x: number; y: number }[] } = {}
     private sizes: { [id: string]: { x: number; y: number }[] } = {}
     private targets: { [id: string]: { id: string; delta: { x: number; y: number } }[] } = {}

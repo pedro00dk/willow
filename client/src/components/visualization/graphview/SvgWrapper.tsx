@@ -9,7 +9,6 @@ const classes = {
 
 export const SvgWrapper = (props: {
     id: string
-    tracer: DefaultState['tracer']
     controller: GraphController
     updateGraph: React.Dispatch<{}>
     children?: React.ReactNode
@@ -19,8 +18,8 @@ export const SvgWrapper = (props: {
 
     React.useLayoutEffect(() => {
         const updateRect = (subscriptionCall?: number) => {
-            const position = props.controller.getPosition(props.id, props.tracer.index, { x: 0, y: 0 })
-            const size = props.controller.getSize(props.id, props.tracer.index, { x: 0, y: 0 })
+            const position = props.controller.getPosition(props.id, props.controller.getIndex(), { x: 0, y: 0 })
+            const size = props.controller.getSize(props.id, props.controller.getIndex(), { x: 0, y: 0 })
             ref.current.setAttribute('x', position.x.toString())
             ref.current.setAttribute('y', position.y.toString())
             ref.current.setAttribute('width', size.x.toString())

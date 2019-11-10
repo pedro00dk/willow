@@ -13,8 +13,9 @@ export const GraphView = React.memo(() => {
     const updateGraph = React.useState({})[1]
     const { tracer } = useSelection(state => ({ tracer: state.tracer }))
     const viewSize = { x: 1000, y: 1000 }
-    controller.current.clearTargets()
     controller.current.clearSubscriptions()
+    controller.current.clearTargets()
+    controller.current.setIndex(tracer.index)
 
     return (
         <div className={classes.container}>
