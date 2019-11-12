@@ -28,7 +28,13 @@ export class GraphController {
 
     callSubscriptions(id?: string) {
         const subscriptionCall = this.subscriptionCalls++
-        ;(id ? Object.values(this.subscriptions).flat() : this.subscriptions[id]).forEach(s => s(subscriptionCall))
+        if (!id)
+            return Object.values(this.subscriptions)
+                .flat()
+                .forEach(subscription => subscription(subscriptionCall))
+
+        const subscriptions = this.subscriptions[id]
+        if (subscriptions) subscriptions.forEach(subscription => subscription(subscriptionCall))
     }
 
     clearSubscriptions() {
@@ -106,7 +112,7 @@ export class GraphController {
     }
 
     setTypeNodeName(type: string, nodeType: string) {
-        this.typeNodeName[type] = nodeType
+        return (this.typeNodeName[type] = nodeType)
     }
 
     getTypeParameters(type: string, def?: UnknownParameters) {
