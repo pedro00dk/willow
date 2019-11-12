@@ -1,10 +1,9 @@
 import { css } from 'emotion'
 import React from 'react'
-import { DefaultState } from '../../../reducers/Store'
 import { GraphController } from './GraphController'
 
 const classes = {
-    container: css({ cursor: 'move', transition: 'x 0.2s ease-out, y 0.2s ease-out' })
+    container: css({ cursor: 'move' })
 }
 
 export const SvgWrapper = (props: {
@@ -16,7 +15,7 @@ export const SvgWrapper = (props: {
     const ref = React.useRef<SVGForeignObjectElement>()
     const pathRef = React.useRef<SVGForeignObjectElement>()
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         const updateRect = (subscriptionCall?: number) => {
             const position = props.controller.getPosition(props.id, props.controller.getIndex(), { x: 0, y: 0 })
             const size = props.controller.getSize(props.id, props.controller.getIndex(), { x: 0, y: 0 })
@@ -30,28 +29,30 @@ export const SvgWrapper = (props: {
         props.controller.subscribe(props.id, updateRect)
     })
 
-    // React.useEffect(() => {
-    //     let previousSubscriptionIndex = undefined as number
+    React.useEffect(() => {
+        // pathRef.current.childNodes.forEach(child => pathRef.current.removeChild(child))
+        console.log('targets', props.controller.getTargets(props.id))
+        // let previousSubscriptionIndex = undefined as number
 
-    //     const updatePaths = (subscriptionIndex?: number) => {
-    //         if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
-    //         previousSubscriptionIndex = subscriptionIndex
-    //         const targets = props.controller.getTargets(id)
-    //         pathRefs.current.forEach(pathRef => pathRef.setAttribute('visibility', 'hidden'))
-    //         targets.forEach(({ target, delta }, i) => {
-    //             const sourcePosition = props.controller.getPosition(id, index)
-    //             const targetPosition = props.controller.getPosition(target, index)
-    //             const targetSize = props.controller.getSize(target, index)
-    //             const pathCoordinates = computePathCoordinates(sourcePosition, delta, targetPosition, targetSize)
-    //             const pathRef = pathRefs.current[i]
-    //             pathRef.setAttribute('visibility', 'visible')
-    //             pathRef.setAttribute('d', pathCoordinates)
-    //         })
-    //     }
-    //     updatePaths()
-    //     props.controller.subscribe(id, updatePaths)
-    //     props.controller.getTargets(id).forEach(({ target }) => props.controller.subscribe(target, updatePaths))
-    // })
+        // const updatePaths = (subscriptionIndex?: number) => {
+        //     if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
+        //     previousSubscriptionIndex = subscriptionIndex
+        //     const targets = props.controller.getTargets(id)
+        //     pathRefs.current.forEach(pathRef => pathRef.setAttribute('visibility', 'hidden'))
+        //     targets.forEach(({ target, delta }, i) => {
+        //         const sourcePosition = props.controller.getPosition(id, index)
+        //         const targetPosition = props.controller.getPosition(target, index)
+        //         const targetSize = props.controller.getSize(target, index)
+        //         const pathCoordinates = computePathCoordinates(sourcePosition, delta, targetPosition, targetSize)
+        //         const pathRef = pathRefs.current[i]
+        //         pathRef.setAttribute('visibility', 'visible')
+        //         pathRef.setAttribute('d', pathCoordinates)
+        //     })
+        // }
+        // updatePaths()
+        // props.controller.subscribe(id, updatePaths)
+        // props.controller.getTargets(id).forEach(({ target }) => props.controller.subscribe(target, updatePaths))
+    })
 
     return (
         <>
