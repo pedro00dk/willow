@@ -15,7 +15,7 @@ export class GraphController {
     private index: number
     private positions: { [id: string]: { x: number; y: number }[] } = {}
     private sizes: { [id: string]: { x: number; y: number }[] } = {}
-    private targets: { [id: string]: { id: string; delta: { x: number; y: number } }[] } = {}
+    private targets: { [id: string]: { target: string; delta: { x: number; y: number } }[] } = {}
     private selector: { [id: string]: 'id' | 'type' } = {}
     private nodeName: { [id: string]: string } = {}
     private parameters: { [id: string]: UnknownParameters } = {}
@@ -75,7 +75,7 @@ export class GraphController {
         return this.targets[id] || (this.targets[id] = [])
     }
 
-    setTargets(id: string, targets: { id: string; delta: { x: number; y: number } }[]) {
+    setTargets(id: string, targets: { target: string; delta: { x: number; y: number } }[]) {
         this.targets[id] = targets
     }
 
