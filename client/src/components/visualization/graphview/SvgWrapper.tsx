@@ -1,19 +1,22 @@
 import { css } from 'emotion'
 import React from 'react'
 import { GraphController } from './GraphController'
+import { colors } from '../../../colors'
 
 const classes = {
-    container: css({ cursor: 'move' })
+    container: css({ cursor: 'move' }),
+    path: css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' })
 }
 
 export const SvgWrapper = (props: {
     id: string
+    paths: number
     controller: GraphController
     updateGraph: React.Dispatch<{}>
     children?: React.ReactNode
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
-    const pathRef = React.useRef<SVGForeignObjectElement>()
+    const pathsRef = React.useRef<SVGForeignObjectElement>()
 
     React.useEffect(() => {
         const updateRect = (subscriptionCall?: number) => {
@@ -29,29 +32,46 @@ export const SvgWrapper = (props: {
         props.controller.subscribe(props.id, updateRect)
     })
 
-    React.useEffect(() => {
-        // pathRef.current.childNodes.forEach(child => pathRef.current.removeChild(child))
-        console.log('targets', props.controller.getTargets(props.id))
-        // let previousSubscriptionIndex = undefined as number
+    React.useLayoutEffect(() => {
+        const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
-        // const updatePaths = (subscriptionIndex?: number) => {
-        //     if (previousSubscriptionIndex !== undefined && previousSubscriptionIndex === subscriptionIndex) return
-        //     previousSubscriptionIndex = subscriptionIndex
-        //     const targets = props.controller.getTargets(id)
-        //     pathRefs.current.forEach(pathRef => pathRef.setAttribute('visibility', 'hidden'))
-        //     targets.forEach(({ target, delta }, i) => {
-        //         const sourcePosition = props.controller.getPosition(id, index)
-        //         const targetPosition = props.controller.getPosition(target, index)
-        //         const targetSize = props.controller.getSize(target, index)
-        //         const pathCoordinates = computePathCoordinates(sourcePosition, delta, targetPosition, targetSize)
-        //         const pathRef = pathRefs.current[i]
-        //         pathRef.setAttribute('visibility', 'visible')
-        //         pathRef.setAttribute('d', pathCoordinates)
-        //     })
-        // }
-        // updatePaths()
-        // props.controller.subscribe(id, updatePaths)
-        // props.controller.getTargets(id).forEach(({ target }) => props.controller.subscribe(target, updatePaths))
+        const computePathD = (
+            sourcePosition: { x: number; y: number },
+            delta: { x: number; y: number },
+            targetPosition: { x: number; y: number },
+            targetSize: { x: number; y: number }
+        ) => {
+            const source = { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
+            const target = {
+                x: Math.min(Math.max(source.x, targetPosition.x), targetPosition.x + targetSize.x),
+                y: Math.min(Math.max(source.y, targetPosition.y), targetPosition.y + targetSize.y)
+            }
+            const center = { x: lerp(source.x, target.x, 0.5), y: lerp(source.y, target.y, 0.5) }
+            const parallelVector = { x: target.x - source.x, y: target.y - source.y }
+            const orthogonalVector = { x: parallelVector.y / 4, y: -parallelVector.x / 4 }
+            const control = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
+            return `M ${source.x},${source.y} Q ${control.x},${control.y} ${target.x},${target.y}`
+        }
+
+        const updatePaths = (subscriptionCall?: number) => {
+            const targets = props.controller.getTargets(props.id)
+            const paths = pathsRef.current.children
+            targets.forEach(({ target, delta }, i) => {
+                if (i >= paths.length) return
+                const sourcePosition = props.controller.getPosition(props.id, props.controller.getIndex())
+                const targetPosition = props.controller.getPosition(target, props.controller.getIndex())
+                const targetSize = props.controller.getSize(target, props.controller.getIndex())
+                if (!targetPosition) return
+                const pathD = computePathD(sourcePosition, delta, targetPosition, targetSize)
+                paths[i].setAttribute('d', pathD)
+                paths[i].setAttribute('class', classes.path)
+                paths[i].setAttribute('marker-end', 'url(#pointer)')
+            })
+        }
+
+        updatePaths()
+        props.controller.subscribe(props.id, updatePaths)
+        props.controller.getTargets(props.id).forEach(({ target }) => props.controller.subscribe(target, updatePaths))
     })
 
     return (
@@ -66,13 +86,18 @@ export const SvgWrapper = (props: {
                     orient='auto'
                     markerUnits='userSpaceOnUse'
                 >
-                    {/* <polyline className={classes.polyline} points='0 0, 10 4, 0 8' /> */}
+                    <polyline className={classes.path} points='0 0, 10 4, 0 8' />
                 </marker>
             </defs>
-            <g ref={pathRef} />
             <foreignObject ref={ref} className={classes.container}>
                 {props.children}
             </foreignObject>
+            <g ref={pathsRef}>
+                {[...Array(props.paths).keys()].map(i => (
+                    <path key={i} className={classes.path} markerEnd='url(#pointer)' />
+                ))}
+                <path />
+            </g>
         </>
     )
 }
