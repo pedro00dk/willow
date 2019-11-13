@@ -65,7 +65,7 @@ export const SvgView = (props: { size: { x: number; y: number }; children?: Reac
         svgRef.current.setAttribute('viewBox', viewBox.current.join(' '))
     }
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const containerSize = { x: ref.current.clientWidth, y: ref.current.clientHeight }
         const svgSize = { x: svgRef.current.clientWidth, y: svgRef.current.clientHeight }
         if (containerSize.x !== svgSize.x || containerSize.y === svgSize.y) {
