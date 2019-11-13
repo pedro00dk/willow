@@ -5,15 +5,14 @@ import { colors } from '../colors'
 import { DefaultStore, useDispatch, useSelection } from '../reducers/Store'
 import { actions as tracerActions } from '../reducers/tracer'
 import * as schema from '../schema/schema'
+import logo from '../../public/logo.svg'
 import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'
 import { SourceEditor } from './editor/SourceEditor'
 import { Splitter } from './Splitter'
 import { StackTrace } from './visualization/stacktrace/StackTrace'
-// import { Heap } from './heap/Heap'
-
-import logo from '../../public/logo.svg'
+import { GraphView } from './visualization/graphview/GraphView'
 
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
@@ -105,9 +104,8 @@ export const Visualization = () => {
         >
             <Splitter layout='column' base={0.3}>
                 <StackTrace />
-                <div></div>
+                <GraphView />
             </Splitter>
-            {/* <Heap /> */}
         </div>
     )
 }
