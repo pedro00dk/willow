@@ -28,9 +28,9 @@ public class Main {
                 .action(new StoreTrueArgumentAction())
                 .help("Run the test code ignoring the provided");
 
-        Namespace arguments;
+        Namespace options;
         try {
-            arguments = argumentParser.parseArgs(args);
+            options = argumentParser.parseArgs(args);
         } catch (HelpScreenException e) {
             // throws all ArgumentParserException children except HelpScreens
             return;
@@ -45,8 +45,8 @@ public class Main {
         var trace = new JsonObject();
         trace.addProperty(
                 "source",
-                !arguments.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
-                        : arguments.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
+                !options.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
+                        : options.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
                         : ""
         );
         trace.addProperty("input", inputJson != null ? inputJson.getAsString() : "");
@@ -55,7 +55,7 @@ public class Main {
         var result = new Tracer(trace).run();
 
         System.out.println(
-                arguments.getBoolean("pretty")
+                options.getBoolean("pretty")
                         ? new GsonBuilder().setPrettyPrinting().create().toJson(result)
                         : result.toString()
         );

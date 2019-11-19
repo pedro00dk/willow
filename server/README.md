@@ -16,4 +16,4 @@ Options:
 
 The tracer server expects a set of optional arguments to work properly.
 The `--tracer` option must be set for each available tracer that will be exposed by the server.
-This argument expects a tuple with the language of the tracer and the shell command to start it.
+This option expects a tuple with the language of the tracer and the shell command to start it.

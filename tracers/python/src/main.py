@@ -14,13 +14,13 @@ def main():
         action='store_true',
         help='Run the test source, ignoring the provided'
     )
-    arguments = argument_parser.parse_args()
+    options = argument_parser.parse_args()
 
     trace_data = json.loads(input())
     trace = {
         'source': \
-        trace_data['source'] if not arguments.test and trace_data.get('source') is not None else \
-        pathlib.Path('./res/main.py').read_text(encoding='utf8') if arguments.test else \
+        trace_data['source'] if not options.test and trace_data.get('source') is not None else \
+        pathlib.Path('./res/main.py').read_text(encoding='utf8') if options.test else \
         '',
         'input': trace_data['input'] if trace_data.get('input') is not None else '',
         'steps': trace_data['steps'] if trace_data.get('steps') is not None else 2 ** 31 - 1
@@ -32,8 +32,8 @@ def main():
         json.dumps(
             result,
             check_circular=False,
-            indent=4 if arguments.pretty else None,
-            separators=None if arguments.pretty else (',', ':')
+            indent=4 if arguments.options else None,
+            separators=None if arguments.options else (',', ':')
         ),
         end=''
     )
