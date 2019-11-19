@@ -61,19 +61,13 @@ export const Obj = (props: {
     }
 
     const updatePosition = (delta: { x: number; y: number }, depth: number, update: 'all' | 'from' | 'single') => {
-        console.log(depth, update)
-        const linked = getLinked(props.objData, depth)
-        console.log(linked)
-        linked.forEach(id => {
+        getLinked(props.objData, depth).forEach(id => {
             const position = props.controller.getPosition(id, index)
             const updateRange = [
                 update === 'all' ? 0 : index,
                 update === 'single' ? index : props.tracer.heapsData.length
             ] as [number, number]
-            props.controller.setPositionRange(id, updateRange, {
-                x: position.x + delta.x,
-                y: position.y + delta.y
-            })
+            props.controller.setPositionRange(id, updateRange, { x: position.x + delta.x, y: position.y + delta.y })
             props.controller.callSubscriptions(id)
         })
     }

@@ -22,6 +22,16 @@ export class GraphController {
     private typeNodeName: { [type: string]: string } = {}
     private typeParameters: { [type: string]: UnknownParameters } = {}
 
+    constructor(private graphSize: { x: number; y: number }, private endPadding: { x: number; y: number }) {}
+
+    getGraphSize() {
+        return this.graphSize
+    }
+
+    getPadding() {
+        return this.endPadding
+    }
+
     subscribe(id: string, callback: (subscriptionCall: number) => void) {
         ;(this.subscriptions[id] || (this.subscriptions[id] = [])).push(callback)
     }
@@ -49,18 +59,22 @@ export class GraphController {
         this.index = index
     }
 
-    getPosition(id: string, index: number, def?: { x: number; y: number }) {
+    getPosition(id: string, index: number, def = { x: 0, y: 0 }) {
         const positions = this.positions[id] || (this.positions[id] = [])
         return positions[index] || this.setPositionRange(id, [index, index], def)
     }
 
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
         const positions = this.positions[id] || (this.positions[id] = [])
-        for (let i = range[0]; i <= range[1]; i += 1) positions[i] = position
-        return position
+        const paddedPosition = {
+            x: Math.min(Math.max(position.x, 0), this.graphSize.x - this.endPadding.x),
+            y: Math.min(Math.max(position.y, 0), this.graphSize.y - this.endPadding.y)
+        }
+        for (let i = range[0]; i <= range[1]; i += 1) positions[i] = paddedPosition
+        return paddedPosition
     }
 
-    getSize(id: string, index: number, def?: { x: number; y: number }) {
+    getSize(id: string, index: number, def = { x: 0, y: 0 }) {
         const sizes = this.sizes[id] || (this.sizes[id] = [])
         return sizes[index] ? sizes[index] : this.setSizeRange(id, [index, index], def)
     }
