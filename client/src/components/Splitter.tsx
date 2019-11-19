@@ -48,13 +48,6 @@ export const Splitter = (props: {
     const varying = layout === 'row' ? 'width' : 'height'
     const pinned = layout === 'row' ? 'height' : 'width'
 
-    const resize = (delta: { x: number; y: number }) => {
-        if (!resizable) return
-        const rect = ref.current.getBoundingClientRect()
-        const change = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
-        setRatio(Math.min(Math.max(ratio + change, min), max))
-    }
-
     return (
         <div ref={ref} className={cn(classes.container, `flex-${layout}`, className)} style={style}>
             <div
@@ -68,7 +61,12 @@ export const Splitter = (props: {
                     className: draggerClassName,
                     style: { ...draggerStyle, cursor: styles.cursor(layout), [pinned]: '100%', [varying]: dragger }
                 }}
-                onDrag={delta => resize(delta)}
+                onDrag={delta => {
+                    if (!resizable) return
+                    const rect = ref.current.getBoundingClientRect()
+                    const change = layout === 'row' ? delta.x / rect.width : delta.y / rect.height
+                    setRatio(Math.min(Math.max(ratio + change, min), max))
+                }}
             />
             <div
                 className={cn(classes.pane, paneClassName)}

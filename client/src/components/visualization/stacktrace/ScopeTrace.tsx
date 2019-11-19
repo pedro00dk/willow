@@ -55,11 +55,6 @@ export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: numb
     const root = props.scope.name == undefined && !!props.scope.children
     const leaf = props.scope.name == undefined && !props.scope.children
 
-    const computeChildWidth = (parent: ScopeData, child: ScopeData, width: number) => {
-        const proportion = (child.range[1] - child.range[0] + 1) / (parent.range[1] - parent.range[0] + 1)
-        return { width: proportion * width, percent: `${proportion * 100}%` }
-    }
-
     return (
         <div className={classes.container}>
             {!root && (
@@ -75,7 +70,11 @@ export const ScopeTrace = (props: { scope: ScopeData; depth: number; width: numb
             {!leaf && props.width >= 10 && (
                 <div className={classes.children}>
                     {props.scope.children.map((child, i) => {
-                        const { width, percent } = computeChildWidth(props.scope, child, props.width)
+                        const proportion =
+                            (child.range[1] - child.range[0] + 1) / (props.scope.range[1] - props.scope.range[0] + 1)
+                        const width = proportion * props.width
+                        const percent = `${proportion * 100}%`
+
                         return (
                             <div key={i} className={classes.child} style={{ width: percent }}>
                                 <ScopeTrace scope={child} depth={props.depth + 1} width={width} />
