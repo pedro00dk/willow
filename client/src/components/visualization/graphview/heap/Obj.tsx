@@ -33,7 +33,7 @@ export const Obj = (props: {
     targets.current = []
     const getSvgElement = React.useContext(svgElementContext)
     const { id, type, languageType } = props.objData
-    const { index } = props.tracer
+    const { index, groupsData } = props.tracer
     const selector = props.controller.getSelector(id, 'type')
     const parameters =
         selector === 'id' ? props.controller.getParameters(id, {}) : props.controller.getTypeParameters(id, {})
@@ -60,16 +60,64 @@ export const Obj = (props: {
         return pool
     }
 
-    const updatePosition = (delta: { x: number; y: number }, depth: number, update: 'all' | 'from' | 'single') => {
+    const updatePosition = (delta: { x: number; y: number }, depth: number, update: 'from' | 'all') => {
         getLinked(props.objData, depth).forEach(id => {
             const position = props.controller.getPosition(id, index)
-            const updateRange = [
-                update === 'all' ? 0 : index,
-                update === 'single' ? index : props.tracer.heapsData.length
-            ] as [number, number]
-            props.controller.setPositionRange(id, updateRange, { x: position.x + delta.x, y: position.y + delta.y })
+            const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
+            props.controller.setPositionRange(id, range, { x: position.x + delta.x, y: position.y + delta.y })
             props.controller.callSubscriptions(id)
         })
+    }
+
+    const autoLayout = (horizontal: boolean, update: 'from' | 'all') => {
+        const groupData = groupsData[index]
+        const structure = groupData[id]
+        if (!structure || structure.type === 'unknown') return
+        const positionAnchor = props.controller.getPosition(id, index)
+        const sizeAnchor = props.controller.getSize(id, index)
+        const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
+        const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
+
+        const postLayout = (
+            objData: ObjData,
+            horizontal: boolean,
+            depth = { x: 0, y: 0 },
+            positions: { [id: string]: { x: number; y: number } } = {}
+        ) => {
+            if (positions[objData.id]) return
+            positions[objData.id] = { x: 0, y: 0 }
+
+            const newDepth = { ...depth }
+            const members = objData.members.filter(
+                member => typeof member.value === 'object' && structure.members.has(member.value.id)
+            )
+            members.forEach(member => {
+                const [, updatedDepth] = postLayout(
+                    member.value as ObjData,
+                    horizontal,
+                    { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
+                    positions
+                )
+                newDepth.x = updatedDepth.x
+                newDepth.y = updatedDepth.y
+            })
+            const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
+            positions[objData.id].x =
+                positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
+            positions[objData.id].y =
+                positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
+            return [
+                positions,
+                { x: newDepth.x + (horizontal || !isLeaf ? -1 : 1), y: newDepth.y + (!horizontal || !isLeaf ? -1 : 1) }
+            ] as const
+        }
+
+        Object.entries(postLayout(props.tracer.heapsData[index][structure.base], false)[0]).forEach(
+            ([id, position]) => {
+                props.controller.setPositionRange(id, range, position)
+                props.controller.callSubscriptions(id)
+            }
+        )
     }
 
     const updateSize = () => {
@@ -96,11 +144,19 @@ export const Obj = (props: {
 
     return (
         <Draggable
-            props={{ ref: r => ((ref.current = r), updateSize(), updateTargets()), className: classes.container }}
+            props={{
+                ref: r => ((ref.current = r), updateSize(), updateTargets()),
+                className: classes.container,
+                onDoubleClick: event => {
+                    const horizontal = !event.altKey
+                    const update = !event.ctrlKey ? 'from' : 'all'
+                    autoLayout(horizontal, update)
+                }
+            }}
             onDrag={(delta, event) => {
                 const [svgDelta] = svgScreenTransformVector('toSvg', getSvgElement(), delta)
                 const depth = !event.altKey ? 0 : Infinity
-                const update = !event.ctrlKey ? 'from' : !event.altKey ? 'all' : 'single'
+                const update = !event.ctrlKey ? 'from' : 'all'
                 updatePosition(svgDelta, depth, update)
             }}
         >

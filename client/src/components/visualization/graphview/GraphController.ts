@@ -70,7 +70,7 @@ export class GraphController {
             x: Math.min(Math.max(position.x, 0), this.graphSize.x - this.endPadding.x),
             y: Math.min(Math.max(position.y, 0), this.graphSize.y - this.endPadding.y)
         }
-        for (let i = range[0]; i <= range[1]; i += 1) positions[i] = paddedPosition
+        for (let i = range[0]; i <= range[1]; i++) positions[i] = paddedPosition
         return paddedPosition
     }
 
@@ -81,7 +81,7 @@ export class GraphController {
 
     setSizeRange(id: string, range: [number, number], size: { x: number; y: number }) {
         const sizes = this.sizes[id] || (this.sizes[id] = [])
-        for (let i = range[0]; i <= range[1]; i += 1) sizes[i] = size
+        for (let i = range[0]; i <= range[1]; i++) sizes[i] = size
         return size
     }
 
