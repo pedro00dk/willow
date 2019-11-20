@@ -1,6 +1,7 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
+import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
 import { ObjData } from '../../../../reducers/tracer'
@@ -113,12 +114,10 @@ export const Obj = (props: {
             ] as const
         }
 
-        Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(
-            ([id, position]) => {
-                props.controller.setPositionRange(id, range, position)
-                props.controller.callSubscriptions(id)
-            }
-        )
+        Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(([id, position]) => {
+            props.controller.setPositionRange(id, range, position)
+            props.controller.callSubscriptions(id)
+        })
     }
 
     const updateSize = () => {
@@ -162,22 +161,24 @@ export const Obj = (props: {
             }}
         >
             <MenuProvider id={id} className={classes.menuProvider}>
-                <Node
-                    objData={props.objData}
-                    parameters={parameters}
-                    onTargetRef={(id, target, spanRef) => targets.current.push([target, spanRef])}
-                />
+                <div className={classes.menuProvider}>
+                    <Node
+                        objData={props.objData}
+                        parameters={parameters}
+                        onTargetRef={(id, target, spanRef) => targets.current.push([target, spanRef])}
+                    />
+                </div>
             </MenuProvider>
             <Menu id={id}>
-                {/* <Item
+                <Item
                     onClick={args => (
                         props.controller.setSelector(id, selector === 'id' ? 'type' : 'id'), updateObj({})
                     )}
                 >
                     {`using ${selector} parameters`}
-                </Item> */}
+                </Item>
                 <Separator />
-                {/* <Submenu label='node'>
+                <Submenu label='node'>
                     <Item onClick={args => (props.controller.setNodeName(id, undefined), updateObj({}))}>reset</Item>
                     {supportedNodeNames.map((nodeName, i) => (
                         <Item
@@ -191,9 +192,9 @@ export const Obj = (props: {
                             {nodeName}
                         </Item>
                     ))}
-                </Submenu> */}
+                </Submenu>
                 <Separator />
-                {/* <Submenu label='parameters'>
+                <Submenu label='parameters'>
                     <NodeParameters
                         objData={props.objData}
                         withReset
@@ -205,7 +206,7 @@ export const Obj = (props: {
                                   props.updateGraph({}))
                         }
                     />
-                </Submenu> */}
+                </Submenu>
             </Menu>
         </Draggable>
     )
