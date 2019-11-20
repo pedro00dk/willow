@@ -172,22 +172,25 @@ export const Obj = (props: {
             <Menu id={id}>
                 <Item
                     onClick={args => (
-                        props.controller.setSelector(id, selector === 'id' ? 'type' : 'id'), updateObj({})
+                        props.controller.setSelector(id, selector === 'id' ? 'type' : 'id'), props.updateGraph({})
                     )}
                 >
                     {`using ${selector} parameters`}
                 </Item>
                 <Separator />
                 <Submenu label='node'>
-                    <Item onClick={args => (props.controller.setNodeName(id, undefined), updateObj({}))}>reset</Item>
+                    <Item onClick={args => (props.controller.setNodeName(id, undefined), props.updateGraph({}))}>
+                        reset
+                    </Item>
                     {supportedNodeNames.map((nodeName, i) => (
                         <Item
                             key={i}
-                            onClick={args =>
+                            onClick={args => {
                                 selector === 'id'
-                                    ? (props.controller.setNodeName(id, nodeName), updateObj({}))
-                                    : (props.controller.setTypeNodeName(languageType, nodeName), props.updateGraph({}))
-                            }
+                                    ? props.controller.setNodeName(id, nodeName)
+                                    : props.controller.setTypeNodeName(languageType, nodeName)
+                                props.updateGraph({})
+                            }}
                         >
                             {nodeName}
                         </Item>
@@ -201,9 +204,9 @@ export const Obj = (props: {
                         parameters={parameters}
                         onChange={(updatedParameters: UnknownParameters) => {
                             selector === 'id'
-                                ? (props.controller.setParameters(id, updatedParameters), updateObj({}))
-                                : (props.controller.setTypeParameters(languageType, updatedParameters),
-                                  props.updateGraph({}))
+                                ? props.controller.setParameters(id, updatedParameters)
+                                : props.controller.setTypeParameters(languageType, updatedParameters)
+                            props.updateGraph({})
                         }}
                     />
                 </Submenu>
