@@ -93,7 +93,6 @@ export const SvgWrapper = (props: {
                 {[...Array(props.paths).keys()].map(i => (
                     <path key={i} className={classes.path} markerEnd='url(#pointer)' />
                 ))}
-                <path />
             </g>
         </>
     )

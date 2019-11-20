@@ -1,9 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
+import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
 import { ObjData } from '../../../../reducers/tracer'
-import { GraphController } from '../GraphController'
+import { GraphController, UnknownParameters } from '../GraphController'
 import { Draggable } from '../../../Draggable'
 import { svgScreenTransformVector, svgElementContext } from '../SvgView'
 import * as ArrayModule from './nodes/Array'
@@ -19,7 +20,8 @@ const modules = {
 }
 
 const classes = {
-    container: cn('d-flex position-absolute', css({ userSelect: 'none' }))
+    container: cn('d-flex position-absolute', css({ userSelect: 'none' })),
+    menuProvider: 'd-flex'
 }
 
 export const Obj = (props: {
@@ -32,6 +34,7 @@ export const Obj = (props: {
     const targets = React.useRef<[string, HTMLSpanElement][]>()
     targets.current = []
     const getSvgElement = React.useContext(svgElementContext)
+    const updateObj = React.useState({})[1]
     const { id, type, languageType } = props.objData
     const { index, groupsData } = props.tracer
     const selector = props.controller.getSelector(id, 'type')
@@ -80,7 +83,6 @@ export const Obj = (props: {
 
         const postLayout = (
             objData: ObjData,
-            horizontal: boolean,
             depth = { x: 0, y: 0 },
             positions: { [id: string]: { x: number; y: number } } = {}
         ) => {
@@ -94,7 +96,6 @@ export const Obj = (props: {
             members.forEach(member => {
                 const [, updatedDepth] = postLayout(
                     member.value as ObjData,
-                    horizontal,
                     { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
                     positions
                 )
@@ -112,7 +113,7 @@ export const Obj = (props: {
             ] as const
         }
 
-        Object.entries(postLayout(props.tracer.heapsData[index][structure.base], false)[0]).forEach(
+        Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(
             ([id, position]) => {
                 props.controller.setPositionRange(id, range, position)
                 props.controller.callSubscriptions(id)
@@ -160,21 +161,52 @@ export const Obj = (props: {
                 updatePosition(svgDelta, depth, update)
             }}
         >
-            <Node
-                objData={props.objData}
-                parameters={parameters}
-                onTargetRef={(id, target, spanRef) => targets.current.push([target, spanRef])}
-            />
-            {/* <MenuProvider id={id} className={classes.menuProvider}>
-                <div
-                    className={classes.menuProvider}
-                    onDoubleClick={event => {
-                        const update = !event.ctrlKey ? 'from' : !event.altKey ? 'all' : 'single'
-                        repositionWrappers(update)
-                    }}
+            <MenuProvider id={id} className={classes.menuProvider}>
+                <Node
+                    objData={props.objData}
+                    parameters={parameters}
+                    onTargetRef={(id, target, spanRef) => targets.current.push([target, spanRef])}
+                />
+            </MenuProvider>
+            <Menu id={id}>
+                {/* <Item
+                    onClick={args => (
+                        props.controller.setSelector(id, selector === 'id' ? 'type' : 'id'), updateObj({})
+                    )}
                 >
-                </div>
-            </MenuProvider> */}
+                    {`using ${selector} parameters`}
+                </Item> */}
+                <Separator />
+                {/* <Submenu label='node'>
+                    <Item onClick={args => (props.controller.setNodeName(id, undefined), updateObj({}))}>reset</Item>
+                    {supportedNodeNames.map((nodeName, i) => (
+                        <Item
+                            key={i}
+                            onClick={args =>
+                                selector === 'id'
+                                    ? (props.controller.setNodeName(id, nodeName), updateObj({}))
+                                    : (props.controller.setTypeNodeName(languageType, nodeName), props.updateGraph({}))
+                            }
+                        >
+                            {nodeName}
+                        </Item>
+                    ))}
+                </Submenu> */}
+                <Separator />
+                {/* <Submenu label='parameters'>
+                    <NodeParameters
+                        objData={props.objData}
+                        withReset
+                        parameters={parameters}
+                        onChange={(updatedParameters: UnknownParameters) =>
+                            selector === 'id'
+                                ? (props.controller.setParameters(id, updatedParameters), updateObj({}))
+                                : (props.controller.setTypeParameters(languageType, updatedParameters),
+                                  props.updateGraph({}))
+                        }
+                    />
+                </Submenu> */}
+            </Menu>
         </Draggable>
     )
 }
