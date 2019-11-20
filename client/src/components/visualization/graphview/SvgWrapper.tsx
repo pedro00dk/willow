@@ -17,6 +17,8 @@ export const SvgWrapper = (props: {
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
     const pathsRef = React.useRef<SVGForeignObjectElement>()
+    const afterUpdate = React.useRef(true)
+    afterUpdate.current = true
 
     const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
@@ -41,6 +43,11 @@ export const SvgWrapper = (props: {
     const updateRect = (subscriptionCall?: number) => {
         const position = props.controller.getPosition(props.id, props.controller.getIndex(), { x: 0, y: 0 })
         const size = props.controller.getSize(props.id, props.controller.getIndex(), { x: 0, y: 0 })
+        console.log(props.controller.getAnimate())
+        ref.current.setAttribute(
+            'style',
+            `transition: ${props.controller.getAnimate() ? 'x 0.4s ease-out, y 0.4s ease-out' : 'none'}`
+        )
         ref.current.setAttribute('x', position.x.toString())
         ref.current.setAttribute('y', position.y.toString())
         ref.current.setAttribute('width', size.x.toString())

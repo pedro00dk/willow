@@ -15,6 +15,7 @@ export const GraphView = React.memo(() => {
     controller.current.clearSubscriptions()
     controller.current.clearTargets()
     controller.current.setIndex(tracer.index)
+    controller.current.setAnimate(true)
 
     return (
         <div className={classes.container}>
