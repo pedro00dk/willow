@@ -1,6 +1,13 @@
 {
-    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./dist/"
+        "allowSyntheticDefaultImports": true,
+        "lib": ["esnext"],
+        "moduleResolution": "node",
+        "newLine": "LF",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "target": "esnext"
     }
 }
