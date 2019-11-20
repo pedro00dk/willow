@@ -38,9 +38,9 @@ export const Obj = (props: {
     const updateObj = React.useState({})[1]
     const { id, type, languageType } = props.objData
     const { index, groupsData } = props.tracer
-    const selector = props.controller.getSelector(id, 'type')
+    const selector = props.controller.getSelector(id)
     const parameters =
-        selector === 'id' ? props.controller.getParameters(id, {}) : props.controller.getTypeParameters(id, {})
+        selector === 'id' ? props.controller.getParameters(id) : props.controller.getTypeParameters(languageType)
     const defaultNode = Object.entries(modules)
         .filter(([, mod]) => mod.defaults.has(type))
         .map(([name]) => name)[0]
@@ -141,7 +141,7 @@ export const Obj = (props: {
             props.controller.getTargets(id).push({ target, delta })
         })
     }
-
+    console.log('here', parameters)
     return (
         <Draggable
             props={{
@@ -199,12 +199,12 @@ export const Obj = (props: {
                         objData={props.objData}
                         withReset
                         parameters={parameters}
-                        onChange={(updatedParameters: UnknownParameters) =>
+                        onChange={(updatedParameters: UnknownParameters) => {
                             selector === 'id'
                                 ? (props.controller.setParameters(id, updatedParameters), updateObj({}))
                                 : (props.controller.setTypeParameters(languageType, updatedParameters),
                                   props.updateGraph({}))
-                        }
+                        }}
                     />
                 </Submenu>
             </Menu>

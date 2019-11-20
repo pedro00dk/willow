@@ -97,7 +97,7 @@ export class GraphController {
         this.targets = {}
     }
 
-    getSelector(id: string, def?: 'id' | 'type') {
+    getSelector(id: string, def: 'id' | 'type' = 'type') {
         return this.selector[id] || this.setSelector(id, def)
     }
 
@@ -113,7 +113,8 @@ export class GraphController {
         return (this.nodeName[id] = nodeType)
     }
 
-    getParameters(id: string, def?: UnknownParameters) {
+    getParameters(id: string, def: UnknownParameters = {}) {
+        console.log(this.parameters[id])
         return this.parameters[id] || this.setParameters(id, def)
     }
 
@@ -129,7 +130,7 @@ export class GraphController {
         return (this.typeNodeName[type] = nodeType)
     }
 
-    getTypeParameters(type: string, def?: UnknownParameters) {
+    getTypeParameters(type: string, def: UnknownParameters = {}) {
         return this.typeParameters[type] || this.setTypeParameters(type, def)
     }
 
