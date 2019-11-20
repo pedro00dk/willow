@@ -17,8 +17,6 @@ export const SvgWrapper = (props: {
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
     const pathsRef = React.useRef<SVGForeignObjectElement>()
-    const afterUpdate = React.useRef(true)
-    afterUpdate.current = true
 
     const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
@@ -43,7 +41,6 @@ export const SvgWrapper = (props: {
     const updateRect = (subscriptionCall?: number) => {
         const position = props.controller.getPosition(props.id, props.controller.getIndex(), { x: 0, y: 0 })
         const size = props.controller.getSize(props.id, props.controller.getIndex(), { x: 0, y: 0 })
-        console.log(props.controller.getAnimate())
         ref.current.setAttribute(
             'style',
             `transition: ${props.controller.getAnimate() ? 'x 0.4s ease-out, y 0.4s ease-out' : 'none'}`
@@ -63,10 +60,14 @@ export const SvgWrapper = (props: {
             const targetPosition = props.controller.getPosition(target, props.controller.getIndex())
             const targetSize = props.controller.getSize(target, props.controller.getIndex())
             if (!targetPosition) return
-            const pathD = computePath(sourcePosition, delta, targetPosition, targetSize)
-            paths[i].setAttribute('d', pathD)
-            paths[i].setAttribute('class', classes.path)
-            paths[i].setAttribute('marker-end', 'url(#pointer)')
+            // TODO  auto layout animation not working
+            const path = computePath(sourcePosition, delta, targetPosition, targetSize)
+            const animateElement = paths[i].children[0]
+            const previousPath = animateElement.getAttribute('to')
+            animateElement.setAttribute('from', previousPath)
+            animateElement.setAttribute('to', path)
+            animateElement.setAttribute('dur', props.controller.getAnimate() ? '0.4s' : '0s')
+            ;(paths[i].children[0] as any).beginElement()
         })
     }
 
@@ -98,7 +99,9 @@ export const SvgWrapper = (props: {
             </foreignObject>
             <g ref={pathsRef}>
                 {[...Array(props.paths).keys()].map(i => (
-                    <path key={i} className={classes.path} markerEnd='url(#pointer)' />
+                    <path key={i} className={classes.path} markerEnd='url(#pointer)'>
+                        <animate attributeName='d' attributeType='XML' begin='indefinite' fill='freeze' />
+                    </path>
                 ))}
             </g>
         </>
