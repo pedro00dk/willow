@@ -59,7 +59,7 @@ export const Obj = (props: {
         if (depth < 0 || pool.has(objData.id)) return pool
         pool.add(objData.id)
         objData.members
-            .filter(member => typeof member === 'object')
+            .filter(member => typeof member.value === 'object')
             .forEach(member => getLinked(member.value as ObjData, depth - 1, pool))
         return pool
     }
@@ -73,7 +73,7 @@ export const Obj = (props: {
             props.controller.callSubscriptions(id)
         })
     }
-    
+
     const autoLayout = (horizontal: boolean, update: 'from' | 'all') => {
         const groupData = groupsData[index]
         const structure = groupData[id]
@@ -82,59 +82,60 @@ export const Obj = (props: {
         const sizeAnchor = props.controller.getSize(id, index)
         const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
         const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
-        
+
         const postLayout = (
             objData: ObjData,
             depth = { x: 0, y: 0 },
             positions: { [id: string]: { x: number; y: number } } = {}
-            ) => {
-                if (positions[objData.id]) return
-                positions[objData.id] = { x: 0, y: 0 }
-                
-                const newDepth = { ...depth }
-                const members = objData.members.filter(
-                    member => typeof member.value === 'object' && structure.members.has(member.value.id)
-                    )
-                    members.forEach(member => {
-                        const [, updatedDepth] = postLayout(
-                            member.value as ObjData,
-                            { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
-                            positions
-                            )
-                            newDepth.x = updatedDepth.x
-                            newDepth.y = updatedDepth.y
-                        })
-                        const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
-                        positions[objData.id].x =
-                        positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
-                        positions[objData.id].y =
-                        positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
-                        return [
-                            positions,
-                            { x: newDepth.x + (horizontal || !isLeaf ? -1 : 1), y: newDepth.y + (!horizontal || !isLeaf ? -1 : 1) }
-                        ] as const
-                    }
-                    
-                    props.controller.setAnimate(true)
-                    Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(([id, position]) => {
-                        props.controller.setPositionRange(id, range, position)
-                        props.controller.callSubscriptions(id)
-                    })
-                }
-                
-                const updateSize = () => {
-                    if (!ref.current) return
-                    const rect = ref.current.getBoundingClientRect()
-                    const screenSize = { x: rect.width, y: rect.height }
-                    const [svgSize] = svgScreenTransformVector('toSvg', getSvgElement(), screenSize)
-                    props.controller.setSizeRange(id, [index, index], svgSize)
-                    props.controller.callSubscriptions(id)
-                }
-                
-                const updateTargets = () => {
-                    if (!ref.current) return
-                    targets.current.forEach(([target, spanRef]) => {
-                        const rect = ref.current.getBoundingClientRect()
+        ) => {
+            if (positions[objData.id]) return [positions, depth] as const
+            positions[objData.id] = { x: 0, y: 0 }
+
+            const newDepth = { ...depth }
+            const members = objData.members.filter(
+                member => typeof member.value === 'object' && structure.members.has(member.value.id)
+            )
+            console.log(members)
+            members.forEach(member => {
+                const [, updatedDepth] = postLayout(
+                    member.value as ObjData,
+                    { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
+                    positions
+                )
+                newDepth.x = updatedDepth.x
+                newDepth.y = updatedDepth.y
+            })
+            const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
+            positions[objData.id].x =
+                positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
+            positions[objData.id].y =
+                positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
+            return [
+                positions,
+                { x: newDepth.x + (horizontal || !isLeaf ? -1 : 1), y: newDepth.y + (!horizontal || !isLeaf ? -1 : 1) }
+            ] as const
+        }
+
+        props.controller.setAnimate(true)
+        Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(([id, position]) => {
+            props.controller.setPositionRange(id, range, position)
+            props.controller.callSubscriptions(id)
+        })
+    }
+
+    const updateSize = () => {
+        if (!ref.current) return
+        const rect = ref.current.getBoundingClientRect()
+        const screenSize = { x: rect.width, y: rect.height }
+        const [svgSize] = svgScreenTransformVector('toSvg', getSvgElement(), screenSize)
+        props.controller.setSizeRange(id, [index, index], svgSize)
+        props.controller.callSubscriptions(id)
+    }
+
+    const updateTargets = () => {
+        if (!ref.current) return
+        targets.current.forEach(([target, spanRef]) => {
+            const rect = ref.current.getBoundingClientRect()
             const spanRect = spanRef.getBoundingClientRect()
             const screenDelta = { x: spanRect.left - rect.left, y: spanRect.top - rect.top }
             const screenSize = { x: spanRect.width, y: spanRect.height }
@@ -143,7 +144,6 @@ export const Obj = (props: {
             props.controller.getTargets(id).push({ target, delta })
         })
     }
-    console.log('here', parameters)
     return (
         <Draggable
             props={{
