@@ -19,11 +19,11 @@
             "required": ["steps"]
         },
         "step": {
-            "description": "Steps store the results of inspections of the traced program. They shall contain at least one of the snapshot or threw properties and may have 0 or more prints.",
+            "description": "Steps store the results of inspections of the traced program. They shall contain a snapshot, but the last step may contain a threw property instead. The can optionally contain a prints property",
             "properties": {
                 "snapshot": { "$ref": "#/definitions/snapshot" },
-                "threw": { "$ref": "#/definitions/threw" },
-                "prints": { "type": "array", "items": { "type": "string" } }
+                "prints": { "type": "array", "items": { "type": "string" } },
+                "threw": { "$ref": "#/definitions/threw" }
             },
             "additionalProperties": false
         },

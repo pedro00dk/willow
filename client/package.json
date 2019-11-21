@@ -22,7 +22,7 @@
         "react-dom": "16.11.0"
     },
     "scripts": {
-        "format": "shopt -s extglob globstar && tslint -c ./tslint.json -p ./package.json && prettier --config ./.prettierrc.js -c --write ./src/**/*.ts* && shopt -u extglob globstar",
+        "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
         "//00": "",
         "//01": "environment variables",

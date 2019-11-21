@@ -42,9 +42,9 @@ public class Tracer {
         this.filename = getMainFilename(this.source);
         inspector = new Inspector();
         result = null;
+        currentStep = 0;
         previousEvent = null;
         previousSnapshot = null;
-        currentStep = 0;
         printCache = new ArrayList<>();
     }
 

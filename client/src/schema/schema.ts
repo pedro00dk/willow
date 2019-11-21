@@ -29,12 +29,12 @@ export interface Result {
     steps: Step[]
 }
 /**
- * Steps store the results of inspections of the traced program. They shall contain at least one of the snapshot or threw properties and may have 0 or more prints.
+ * Steps store the results of inspections of the traced program. They shall contain a snapshot, but the last step may contain a threw property instead. The can optionally contain a prints property
  */
 export interface Step {
     snapshot?: Snapshot
-    threw?: Threw
     prints?: string[]
+    threw?: Threw
 }
 /**
  * Snapshots contains the memory of a program. They store themselves type, if the program ended, any exception raised, the current stack/heap of the program.

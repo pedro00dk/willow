@@ -226,11 +226,13 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/execute' })
     try {
         const { language, source, input } = getState()
-        const result = (await serverApi.post<schema.Result>('/trace', {
-            language: language.languages[language.selected],
-            source: source.join('\n'),
-            input: input.join('\n')
-        })).data
+        const result = (
+            await serverApi.post<schema.Result>('/trace', {
+                language: language.languages[language.selected],
+                source: source.join('\n'),
+                input: input.join('\n')
+            })
+        ).data
         const steps = result.steps
         const outputs = buildOutputs(steps)
         const stackData = buildStackData(steps)

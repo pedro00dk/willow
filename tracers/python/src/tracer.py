@@ -18,11 +18,11 @@ class Tracer:
 
         self._inspector = inspector.Inspector()
         self._result = None
-
         self._current_step = 0
+
+        self._exec_call_frame = None
         self._input_index = 0
         self._input_miss = False
-        self._exec_call_frame = None
         self._print_cache = []
 
     def run(self):
@@ -83,14 +83,17 @@ class Tracer:
 
     def _input_hook(self, prompt: str):
         self._print_cache.append(prompt)
-        if self._input_index < len(self._input):
-            self._input_index += 1
-            return self._input[self._input_index - 1]
-        self._input_miss = True
-        return None
+        if self._input_index >= len(self._input):
+            # cannot raise TracerStopException here because it may be captured by the program
+            # enable flag to raise exception in _trace function
+            self._input_miss = True
+            return None
+        self._input_index += 1
+        return self._input[self._input_index - 1]
 
     def _print_hook(self, text: str):
         self._print_cache.append(text)
+
 
 class TracerStopException(Exception):
     """
