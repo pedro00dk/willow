@@ -112,9 +112,13 @@ export const Obj = (props: {
             }
             return [positions, finalDepth] as const
         }
-
+        const [positions] = postLayout(props.tracer.heapsData[index][structure.base])
+        const basePosition = positions[structure.base]
+        const baseDelta = { x: positionAnchor.x - basePosition.x, y: positionAnchor.y - basePosition.y }
         props.controller.setAnimate(true)
-        Object.entries(postLayout(props.tracer.heapsData[index][structure.base])[0]).forEach(([id, position]) => {
+        Object.entries(positions).forEach(([id, position]) => {
+            position.x += baseDelta.x
+            position.y += baseDelta.y
             props.controller.setPositionRange(id, range, position)
             props.controller.callSubscriptions(id)
         })
