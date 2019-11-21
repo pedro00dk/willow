@@ -35,7 +35,6 @@ export const Obj = (props: {
     const targets = React.useRef<[string, HTMLSpanElement][]>()
     targets.current = []
     const getSvgElement = React.useContext(svgElementContext)
-    const updateObj = React.useState({})[1]
     const { id, type, languageType } = props.objData
     const { index, groupsData } = props.tracer
     const selector = props.controller.getSelector(id)
@@ -55,16 +54,15 @@ export const Obj = (props: {
 
     const { Node, NodeParameters } = modules[nodeName as keyof typeof modules]
 
-    const getLinked = (objData: ObjData, depth = 0, pool = new Set<string>()) => {
-        if (depth < 0 || pool.has(objData.id)) return pool
-        pool.add(objData.id)
-        objData.members
-            .filter(member => typeof member.value === 'object')
-            .forEach(member => getLinked(member.value as ObjData, depth - 1, pool))
-        return pool
-    }
-
     const updatePosition = (delta: { x: number; y: number }, depth: number, update: 'from' | 'all') => {
+        const getLinked = (objData: ObjData, depth = 0, pool = new Set<string>()) => {
+            if (depth < 0 || pool.has(objData.id)) return pool
+            pool.add(objData.id)
+            objData.members
+                .filter(member => typeof member.value === 'object')
+                .forEach(member => getLinked(member.value as ObjData, depth - 1, pool))
+            return pool
+        }
         getLinked(props.objData, depth).forEach(id => {
             const position = props.controller.getPosition(id, index)
             const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
@@ -92,28 +90,27 @@ export const Obj = (props: {
             positions[objData.id] = { x: 0, y: 0 }
 
             const newDepth = { ...depth }
-            const members = objData.members.filter(
-                member => typeof member.value === 'object' && structure.members.has(member.value.id)
-            )
-            console.log(members)
-            members.forEach(member => {
-                const [, updatedDepth] = postLayout(
-                    member.value as ObjData,
-                    { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
-                    positions
-                )
-                newDepth.x = updatedDepth.x
-                newDepth.y = updatedDepth.y
-            })
+            objData.members
+                .filter(member => typeof member.value === 'object' && structure.members.has(member.value.id))
+                .forEach(member => {
+                    const [, updatedDepth] = postLayout(
+                        member.value as ObjData,
+                        { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
+                        positions
+                    )
+                    newDepth.x = updatedDepth.x
+                    newDepth.y = updatedDepth.y
+                })
             const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
             positions[objData.id].x =
                 positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
             positions[objData.id].y =
                 positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
-            return [
-                positions,
-                { x: newDepth.x + (horizontal || !isLeaf ? -1 : 1), y: newDepth.y + (!horizontal || !isLeaf ? -1 : 1) }
-            ] as const
+            const finalDepth = {
+                x: newDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
+                y: newDepth.y + (!horizontal ? -1 : isLeaf ? 1 : 0)
+            }
+            return [positions, finalDepth] as const
         }
 
         props.controller.setAnimate(true)
