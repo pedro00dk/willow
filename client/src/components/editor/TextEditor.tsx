@@ -37,9 +37,9 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
 
     React.useEffect(() => {
         const editor = ace.edit(ref.current)
-        if (props.onEditor) props.onEditor(editor)
         editor.setFontSize(classes.font)
         editor.$blockScrolling = Infinity
+        if (props.onEditor) props.onEditor(editor)
 
         const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
 
@@ -51,7 +51,7 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [])
+    }, [ref])
 
     return <div ref={ref} className={classes.container} />
 })
