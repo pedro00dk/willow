@@ -19,8 +19,8 @@ The input must be in the json format with the following properties:
 ```json
 {
     "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
-    "input": "The string input to be provided to the program through stdin. It is optional, but the program may get stuck (finishing the tracing process) if not enough input is provided.",
-    "steps": "a number that limits the maximum amount of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not count."
+    "input": "The string input to be provided to the program through stdin. It is optional, but the program may get stop if enough input is provided.",
+    "steps": "the maximum amount of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
 }
 ```
 

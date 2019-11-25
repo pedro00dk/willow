@@ -5,15 +5,15 @@ import tracer
 
 
 def main():
+    """
+    Entrypoint of the python tracer. Build the command line interface of the application, parse arguments, call the
+    tracer API and print the results.
+    """
+
     argument_parser = argparse.ArgumentParser(description='Python tracer CLI', usage=argparse.SUPPRESS)
     argument_parser.usage = 'tracer [options]\n  stdin: {"source?": "string", "input"?: "string", "steps?": "number"}'
     argument_parser.add_argument('--pretty', default=False, action='store_true', help='Pretty print output')
-    argument_parser.add_argument(
-        '--test',
-        default=False,
-        action='store_true',
-        help='Run the test source, ignoring the provided'
-    )
+    argument_parser.add_argument('--test', default=False, action='store_true', help='Run the test source')
     options = argument_parser.parse_args()
 
     trace_data = json.loads(input())

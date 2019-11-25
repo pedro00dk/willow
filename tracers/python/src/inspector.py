@@ -4,13 +4,26 @@ import types
 
 class Inspector:
     """
-    Inspects the received frame, building a snapshot from it.
+    Inspector processes a frame object and produces a dictionary with stack and heap of the current frame.
     """
 
+    # types that can be converted to a JSON string
     STRING_LIKE_TYPES = (bool, complex, str, type(None))
+
+    # types that can be converted to a JSON number (with javascript's restriction of `2**53 - 1`)
     NUMBER_LIKE_TYPES = (int, float)
 
-    def inspect(self, frame: types.FrameType, event: str, args, exec_call_frame: types.FrameType):
+    def inspect(self, frame: types.FrameType, event: str, exec_call_frame: types.FrameType):
+        """
+        Inspect the received frame and its event to build a dictionary with inspection data.
+
+        > frame: `frame`: frame where the stack and heap data will be extracted from.  
+        > event: `str`: type of event the frame is refering to, one of `['call', 'line', 'exception', 'return']`.  
+        > exec_call_frame: `frame`: the frame of the exec call, it is used to know which frame is the base frame.
+        
+        > return `dict`: a dictionary with the processed frame data.
+        """
+
         snapshot = {'type': event}
 
         current_frame = frame
@@ -37,6 +50,19 @@ class Inspector:
         return snapshot
 
     def _inspect_object(self, snapshot: dict, obj, classes: set, module: str):
+        """
+        Recursively inspect objects of the heap. String like and Number like objects are transformed in their JSON
+        equivalents, while complex objects are transformed in JSON objects that contain information of its type and
+        members and then added to the snapshot, only their references are returned.
+
+        > snapshot: `dict`: snapshot to be filled with heap information.  
+        > obj: `*any`: current object to be processed.  
+        > classes: `set<str>`: set of user defined classes, it is used to known which objects shall be analyzed.  
+        > module: the name of the main module to only save classes that where declared in it.  
+
+        > return `int | float | str | [str]`: the final JSON value.
+        """
+
         if isinstance(obj, Inspector.STRING_LIKE_TYPES):
             return str(obj)
         if isinstance(obj, Inspector.NUMBER_LIKE_TYPES):
