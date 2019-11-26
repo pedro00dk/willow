@@ -1,5 +1,5 @@
 import cors from 'cors'
-import express from 'express'
+import express, { json } from 'express'
 import log from 'npmlog'
 import { Tracer } from './tracer'
 
@@ -10,10 +10,11 @@ export class Server {
     private server: express.Express
 
     constructor(
-        private readonly port: number,
         private readonly tracers: { [language: string]: string },
+        private readonly port: number,
         private readonly steps: number,
         private readonly timeout: number,
+        private readonly debug: boolean,
         readonly clients: string
     ) {
         this.server = express()
@@ -48,11 +49,11 @@ export class Server {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language]).run(trace, this.timeout)
                 res.send(result)
-                log.info(Server.name, req.path, 'ok')
+                log.info(Server.name, req.path, 'ok', this.debug && JSON.stringify({ trace, result }, undefined, 4))
             } catch (error) {
                 res.status(400)
                 res.send(error.message)
-                log.info(Server.name, req.path, 'error', error.message)
+                log.info(Server.name, req.path, 'error', error.message, JSON.stringify({ trace }, undefined, 4))
             }
         })
     }

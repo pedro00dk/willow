@@ -7,6 +7,7 @@ Willow API for CLI Tracers
 
 Options:
   --clients   Client origin (enable CORS)                         [default: "*"]
+  --debug     Log traces calls and results                             [boolean]
   --port      Set the server port                                [default: 8000]
   --steps     Maximum number of a program being traced           [default: 1000]
   --timeout   Maximum tracer run time (milliseconds)             [default: 8000]

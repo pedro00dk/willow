@@ -8,6 +8,7 @@ const main = () => {
         .alias('h', 'help')
         .hide('version')
         .option('clients', { default: '*', description: 'Client origin (enable CORS)' })
+        .option('debug', { type: 'boolean', description: 'Log traces calls and results' })
         .option('port', { default: 8000, description: 'Set the server port' })
         .option('steps', { default: 1000, description: 'Maximum number of allowed steps of a program' })
         .option('timeout', { default: 8000, description: 'Maximum tracer run time (milliseconds)' })
@@ -15,6 +16,7 @@ const main = () => {
 
     const options = parser.argv
     const clients = options.clients
+    const debug = options.debug
     const port = options.port
     const steps = options.steps
     const timeout = options.timeout
@@ -22,7 +24,7 @@ const main = () => {
         .map((_, i) => [options.tracer[i * 2], options.tracer[i * 2 + 1]] as const)
         .reduce((acc, [language, command]) => ({ ...acc, [language]: command }), {} as { [language: string]: string })
     log.info(main.name, 'cli', { port, tracers })
-    new Server(port, tracers, steps, timeout, clients).listen()
+    new Server(tracers, port, steps, timeout, debug, clients).listen()
 }
 
 main()
