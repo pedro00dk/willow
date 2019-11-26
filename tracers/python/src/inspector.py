@@ -4,31 +4,31 @@ import types
 
 class Inspector:
     """
-    Inspector processes a frame object and produces a dictionary with stack and heap of the current frame.
+    Inspect frames and produces dictionaries with their state data.
     """
 
     # types that can be converted to a JSON string
     STRING_LIKE_TYPES = (bool, complex, str, type(None))
 
-    # types that can be converted to a JSON number (with javascript's restriction of `2**53 - 1`)
+    # types that can be converted to a JSON number (with javascript's restriction of 2^53 - 1)
     NUMBER_LIKE_TYPES = (int, float)
 
-    def inspect(self, frame: types.FrameType, event: str, exec_call_frame: types.FrameType):
+    def inspect(self, frame: types.FrameType, event: str, exec_frame: types.FrameType):
         """
-        Inspect the received frame and its event to build a dictionary with inspection data.
+        Inspect the frame and its event to build a dictionary with state data.
 
-        > frame: `frame`: frame where the stack and heap data will be extracted from.  
-        > event: `str`: type of event the frame is refering to, one of `['call', 'line', 'exception', 'return']`.  
-        > exec_call_frame: `frame`: the frame of the exec call, it is used to know which frame is the base frame.
-        
-        > return `dict`: a dictionary with the processed frame data.
+        > frame: `frame`: frame where the state data will be extracted from
+        > event: `str`: frame event type, one of: call, line, exception or return
+        > exec_frame: `frame`: frame of the exec() call, it is used to know which frame is the base frame
+
+        > return `dict`: the processed frame data
         """
 
         snapshot = {'type': event}
 
         current_frame = frame
         frames = []
-        while current_frame != exec_call_frame:
+        while current_frame != exec_frame and current_frame is not None:
             frames.append(current_frame)
             current_frame = current_frame.f_back
 
@@ -51,16 +51,17 @@ class Inspector:
 
     def _inspect_object(self, snapshot: dict, obj, classes: set, module: str):
         """
-        Recursively inspect objects of the heap. String like and Number like objects are transformed in their JSON
-        equivalents, while complex objects are transformed in JSON objects that contain information of its type and
-        members and then added to the snapshot, only their references are returned.
+        Recursively inspect objects of the heap.
+        String and Number like objects are transformed in str or int.
+        Complex objects are transformed in dictionaries that contain information of their type and members and added to
+        the snapshot, then their references are returned as a list.
 
-        > snapshot: `dict`: snapshot to be filled with heap information.  
-        > obj: `*any`: current object to be processed.  
-        > classes: `set<str>`: set of user defined classes, it is used to known which objects shall be analyzed.  
-        > module: the name of the main module to only save classes that where declared in it.  
+        > snapshot: `dict`: snapshot to be filled with heap information
+        > obj: `*any`: object to be processed
+        > classes: `set<str>`: set of user defined classes, which is used to known which objects shall be analyzed
+        > module: main module name, used to only save classes that where declared in it
 
-        > return `int | float | str | [str]`: the final JSON value.
+        > return `int | float | str | [str]`: the transformed value
         """
 
         if isinstance(obj, Inspector.STRING_LIKE_TYPES):
@@ -92,7 +93,7 @@ class Inspector:
             members = [(key, value) for key, value in vars(obj).items() if not key.startswith('_')]
 
         if members is not None:  # known object type
-            # add object id to the snapshot heap (it has to be added before other object inspections)
+            # add object id to the heap before further inspections to avoid stack overflows
             obj = snapshot['heap'][id_] = {}
             obj['type'] = generic_type
             obj['languageType'] = language_type
@@ -106,5 +107,5 @@ class Inspector:
             ]
             return [id_]
         else:  # unknown object type
-            # instead of inspecting unknown objects, I decided to inspect its type
+            # instead of inspecting unknown objects, inspect their type only
             return self._inspect_object(snapshot, type(obj), classes, module)

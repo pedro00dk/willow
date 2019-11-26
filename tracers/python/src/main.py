@@ -6,8 +6,8 @@ import tracer
 
 def main():
     """
-    Entrypoint of the python tracer. Build the command line interface of the application, parse arguments, call the
-    tracer API and print the results.
+    Entrypoint of the tracer.
+    Build the command line interface, run the tracer and print results.
     """
 
     argument_parser = argparse.ArgumentParser(description='Python tracer CLI', usage=argparse.SUPPRESS)

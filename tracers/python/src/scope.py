@@ -4,14 +4,14 @@ import types
 
 def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modules: set, full_halt_modules: bool = False):
     """
-    Produce globals scope objects with controlled restrictions to be used by `exec` calls.
+    Produce globals scope objects with controlled restrictions that can be used by exec().
 
-    > allowed_builtins: `set<str>`: builtins to be part of the scope, empty set remove all builtins, `None` nothing.  
-    > override_builtins: `dict<str, any>`: extra builtins to override the default ones or be added to the scope.  
-    > allowed_modules: `set<str>`: modules to be part of the scope, empty set halts all modules, `None` halts nothing.  
-    > full_halt_modules: `bool`: remove modules references from the sys module.
+    > allowed_builtins: `set<str>`: builtins to allow in the scope, empty set removes all, `None` removes nothing
+    > override_builtins: `dict<str, any>`: extra builtins to override or add to the allowed ones
+    > allowed_modules: `set<str>`: modules to allow in the scope, empty set halts all, `None` halts nothing
+    > full_halt_modules: `bool`: remove modules references from the sys module
 
-    > return `dict`: `globals()` like object with the received restrictions.
+    > return `dict`: globals() like object with the received restrictions
     """
 
     builtins = globals()['__builtins__']
@@ -30,7 +30,7 @@ def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modul
 
     def halt_import(module, globals_, locals_, fromlist, level):
         if module not in allowed_modules:
-            raise ModuleNotFoundError(f'access to {repr(module)} is halted')
+            raise ModuleNotFoundError(f'access to {repr(module)} is halted. Allowed: {str(allowed_modules)}')
         return import_(module, globals_, locals_, fromlist, level)
 
     if import_ is not None:
