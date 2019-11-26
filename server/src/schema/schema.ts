@@ -13,19 +13,6 @@ export type Schema = Trace | Result
  * Value is the representation of any program element
  */
 export type Value = number | string | [string]
-/**
- * Indicates that the program stop before finishing or maybe even starting
- */
-export type Threw =
-    | {
-          /**
-           * Controlled threw not caused by the program
-           */
-          cause: string
-      }
-    | {
-          exception: Exception
-      }
 
 /**
  * Trace is a request that can be read by tracer processes
@@ -111,6 +98,16 @@ export interface Obj {
 export interface Member {
     key: Value
     value: Value
+}
+/**
+ * Indicates that the program stop before finishing or maybe even starting
+ */
+export interface Threw {
+    /**
+     * Controlled threw not caused by the program
+     */
+    cause?: string
+    exception?: Exception
 }
 /**
  * Exception is an uncaught error of the program or the tracer itself.

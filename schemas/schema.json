@@ -92,22 +92,11 @@
         },
         "threw": {
             "description": "Indicates that the program stop before finishing or maybe even starting",
-            "oneOf": [
-                {
-                    "properties": {
-                        "cause": { "type": "string", "description": "Controlled threw not caused by the program" }
-                    },
-                    "additionalProperties": false,
-                    "required": ["cause"]
-                },
-                {
-                    "properties": {
-                        "exception": { "$ref": "#/definitions/exception" }
-                    },
-                    "additionalProperties": false,
-                    "required": ["exception"]
-                }
-            ]
+            "properties": {
+                "cause": { "type": "string", "description": "Controlled threw not caused by the program" },
+                "exception": { "$ref": "#/definitions/exception" }
+            },
+            "additionalProperties": false
         },
         "exception": {
             "description": "Exception is an uncaught error of the program or the tracer itself.",
