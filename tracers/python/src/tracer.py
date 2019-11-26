@@ -61,7 +61,7 @@ class Tracer:
             type_ = type(e).__name__
             traceback_ = traceback.format_exception(type(e), e, e.__traceback__)
             traceback_.pop(1)  # remove exec() traceback line (assuming it is an exception from the traced code)
-            threw = {'exception': {'type': type_, 'traceback': traceback_}}
+            threw = {'exception': {'type': type_, 'traceback': ''.join(traceback_)}}
             self._result['steps'].append({'threw': threw, 'prints': self._print_cache})
         finally:
             sys.settrace(None)
@@ -73,8 +73,8 @@ class Tracer:
         Trace the frame and its event.
         Actually, even frames of the run() and exec() are passed to _trace(), as it starts processing in sys.settrace().
         However these frames are ignored when _filename is checked, tracing only frames of the debugee program.
-        _trace() may want to stop the tracing process then the program reaches the maximum number of steps, it is done
-        by raising a TraceStopException to stop the exec call.
+        _trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising
+        a TraceStopException to stop exec().
 
         > frame: `frame`: frame where the state data will be extracted from
         > event: `str`: frame event type, one of: call, line, exception or return
@@ -91,7 +91,7 @@ class Tracer:
         if self._current_step > self._steps:
             raise TracerStopException(f'reached maximum step: {self._steps}')
 
-        snapshot = self._inspector.inspect(frame, event, self._exec_frame)
+        snapshot = self._inspector.inspect(frame, self._exec_frame)
         self._result['steps'].append({'snapshot': snapshot, 'prints': self._print_cache})
         self._print_cache = []
 

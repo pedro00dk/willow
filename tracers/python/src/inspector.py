@@ -13,18 +13,17 @@ class Inspector:
     # types that can be converted to a JSON number (with javascript's restriction of 2^53 - 1)
     NUMBER_LIKE_TYPES = (int, float)
 
-    def inspect(self, frame: types.FrameType, event: str, exec_frame: types.FrameType):
+    def inspect(self, frame: types.FrameType, exec_frame: types.FrameType):
         """
-        Inspect the frame and its event to build a dictionary with state data.
+        Inspect the frame to build a dictionary with state data.
 
         > frame: `frame`: frame where the state data will be extracted from
-        > event: `str`: frame event type, one of: call, line, exception or return
         > exec_frame: `frame`: frame of the exec() call, it is used to know which frame is the base frame
 
         > return `dict`: the processed frame data
         """
 
-        snapshot = {'type': event}
+        snapshot = {}
 
         current_frame = frame
         frames = []
@@ -77,27 +76,25 @@ class Inspector:
         if id_ in snapshot['heap']:
             return [id_]
 
-        generic_type = 'other'
-        language_type = type(obj).__name__
-        user_defined = False
+        g_type = 'other'
+        l_type = type(obj).__name__
         members = None
 
         if isinstance(obj, (tuple, list, set)):
-            generic_type = 'tuple' if isinstance(obj, tuple) else 'alist' if isinstance(obj, list) else 'set'
+            g_type = 'array' if not isinstance(obj, set) else 'set'
             members = [*enumerate(obj)]
         elif isinstance(obj, dict):
-            generic_type = 'map'
+            g_type = 'map'
             members = [*obj.items()]
         elif isinstance(obj, (*classes,)):
-            user_defined = True
+            g_type = 'map'
             members = [(key, value) for key, value in vars(obj).items() if not key.startswith('_')]
 
         if members is not None:  # known object type
             # add object id to the heap before further inspections to avoid stack overflows
             obj = snapshot['heap'][id_] = {}
-            obj['type'] = generic_type
-            obj['languageType'] = language_type
-            obj['userDefined'] = user_defined
+            obj['gType'] = g_type
+            obj['lType'] = l_type
             obj['members'] = [
                 {
                     'key': self._inspect_object(snapshot, key, classes, module),
