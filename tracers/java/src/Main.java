@@ -14,6 +14,14 @@ import java.util.Scanner;
 
 public class Main {
 
+    /**
+     * Entry point of the java tracer.
+     * Build the command line interface, run the tracer and print results.
+     *
+     * @param args
+     * @throws ArgumentParserException
+     * @throws IOException
+     */
     public static void main(String[] args) throws ArgumentParserException, IOException {
         var argumentParser = ArgumentParsers.newFor("tracer").build().description("Java tracer CLI");
         argumentParser.usage("tracer [options]\n  stdin: {\"source?\": \"string\", \"input\"?: \"string\", \"steps?\": \"number\"}");

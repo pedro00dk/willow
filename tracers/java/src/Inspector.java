@@ -3,7 +3,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.sun.jdi.*;
-import com.sun.jdi.event.*;
+import com.sun.jdi.event.ExceptionEvent;
+import com.sun.jdi.event.LocatableEvent;
+import com.sun.jdi.event.MethodEntryEvent;
+import com.sun.jdi.event.MethodExitEvent;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -12,38 +15,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Inspects the received event, building a snapshot from it.
+ * Inspect events and produces maps with their state data.
  */
 class Inspector {
 
-    SnapshotThrew inspect(Event event, Event previousEvent, JsonObject previousSnapshot) throws IncompatibleThreadStateException {
+    /**
+     * Inspect the event to build a map with state data.
+     *
+     * @param event event where the state data will be extracted from
+     * @return the processed event data
+     * @throws IncompatibleThreadStateException
+     */
+    JsonObject inspect(LocatableEvent event) throws IncompatibleThreadStateException {
         var snapshot = new JsonObject();
-        snapshot.addProperty(
-                "type",
-                event instanceof MethodEntryEvent
-                        ? "call"
-                        : event instanceof MethodExitEvent || event instanceof ThreadDeathEvent
-                        ? "return"
-                        : event instanceof ExceptionEvent
-                        ? "exception"
-                        : "line"
-        );
-
-        if (event instanceof ThreadDeathEvent && previousEvent instanceof ExceptionEvent) {
-            // ThreadDeathEvents cannot be used to extract information, in this case, the previous snapshot is used
-            snapshot.add("stack", previousSnapshot.get("stack"));
-            snapshot.add("heap", previousSnapshot.get("heap"));
-
-            var exceptionEvent = (ExceptionEvent) previousEvent;
-            var threw = new JsonObject();
-            // the traceback is not easily recoverable from the tracer but it is printed in the stderr (collected in prints)
-            threw.add("exception", JsonException.fromParts(exceptionEvent.exception().referenceType().name(), ""));
-            return new SnapshotThrew(snapshot, threw);
-        }
-
-        // Get frames may fail when debugging this debugger
-        // frames() function returns an immutable list with the scopes in reversed order (cannot be reversed)
-        var frames = new ArrayList<>(((LocatableEvent) event).thread().frames());
+        var frames = new ArrayList<>(event.thread().frames());
         Collections.reverse(frames);
         snapshot.add(
                 "stack",
@@ -100,10 +85,18 @@ class Inspector {
                                     )
                     );
                 });
-
-        return new SnapshotThrew(snapshot, null);
+        return snapshot;
     }
 
+    /**
+     * Recursively inspect values of the heap.
+     * Mutates the snapshot if it is an object.
+     *
+     * @param snapshot        snapshot to be filled with heap information
+     * @param jdiValue        value to be processed
+     * @param threadReference debugee jvm thread to call functions on it
+     * @return the transformed value
+     */
     private JsonElement inspectValue(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
         JsonElement value;
         return jdiValue == null
@@ -163,7 +156,7 @@ class Inspector {
                 ? value
                 : (value = inspectUserObject(snapshot, jdiObjRef, threadReference)) != null
                 ? value
-                : new JsonPrimitive("type " + jdiObjRef.referenceType().name());
+                : new JsonPrimitive("class " + jdiObjRef.referenceType().name());
     }
 
     private JsonElement inspectString(ObjectReference jdiObjRef) {
@@ -189,9 +182,8 @@ class Inspector {
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
-        obj.addProperty("type", type);
-        obj.addProperty("languageType", languageType);
-        obj.addProperty("userDefined", false);
+        obj.addProperty("gType", type);
+        obj.addProperty("lType", languageType);
         int[] memberIndex = {0};
         obj.add(
                 "members",
@@ -242,9 +234,9 @@ class Inspector {
                     ),
                     Long.toString(jdiObjRef.uniqueID()),
                     LinkedList.class.isAssignableFrom(jdiObjRefClass)
-                            ? "llist"
+                            ? "linked"
                             : List.class.isAssignableFrom(jdiObjRefClass)
-                            ? "alist"
+                            ? "array"
                             : "set",
                     jdiObjRef.referenceType().name(),
                     threadReference
@@ -277,9 +269,8 @@ class Inspector {
             var obj = new JsonObject();
             // add id to heap graph (it has to be added before other objects inspections)
             snapshot.get("heap").getAsJsonObject().add(id, obj);
-            obj.addProperty("type", "map");
-            obj.addProperty("languageType", jdiObjRef.referenceType().name());
-            obj.addProperty("userDefined", false);
+            obj.addProperty("gType", "map");
+            obj.addProperty("lType", jdiObjRef.referenceType().name());
             obj.add(
                     "members",
                     jdiArrRef.getValues().stream()
@@ -335,9 +326,8 @@ class Inspector {
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
-        obj.addProperty("type", "map");
-        obj.addProperty("languageType", jdiObjRef.referenceType().name());
-        obj.addProperty("userDefined", true);
+        obj.addProperty("gType", "map");
+        obj.addProperty("lType", jdiObjRef.referenceType().name());
         obj.add(
                 "members",
                 orderedFields.stream()
@@ -358,54 +348,6 @@ class Inspector {
         var idValue = new JsonArray(1);
         idValue.add(id);
         return idValue;
-    }
-
-    static class SnapshotThrew {
-        JsonObject snapshot;
-        JsonObject threw;
-
-        SnapshotThrew(JsonObject snapshot, JsonObject threw) {
-            this.snapshot = snapshot;
-            this.threw = threw;
-        }
-    }
-
-    /**
-     * Builds exception json objects from exceptions.
-     */
-    static class JsonException {
-
-        static JsonObject fromParts(String type, String traceback) {
-            var exception = new JsonObject();
-            var tracebackLines = new JsonArray(1);
-            tracebackLines.add(traceback);
-            exception.addProperty("type", type);
-            exception.add("traceback", tracebackLines);
-            return exception;
-        }
-
-        static JsonObject fromThrowable(Throwable throwable, Set<Integer> removeLines) {
-            var tracebackWriter = new StringWriter();
-            throwable.printStackTrace(new PrintWriter(tracebackWriter, true));
-
-            var formattedTraceback = Arrays
-                    .stream(tracebackWriter.toString().split("\n"))
-                    .map(l -> l + "\n")
-                    .collect(Collectors.toList());
-
-            var traceback = IntStream
-                    .range(0, formattedTraceback.size())
-                    .filter(i -> !removeLines.contains(i) && !removeLines.contains(i - formattedTraceback.size()))
-                    .mapToObj(formattedTraceback::get)
-                    .collect(JsonArray::new, JsonArray::add, (line0, line1) -> {
-                        throw new RuntimeException("parallel stream not allowed");
-                    });
-
-            var exception = new JsonObject();
-            exception.addProperty("type", throwable.getClass().getName());
-            exception.add("traceback", traceback);
-            return exception;
-        }
     }
 }
 

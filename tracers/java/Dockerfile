@@ -1,4 +1,4 @@
-FROM openjdk:12-alpine
+FROM openjdk:13-alpine
 
 WORKDIR /app
 ADD ./package.sh ./

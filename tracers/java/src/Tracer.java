@@ -3,20 +3,13 @@ import com.google.gson.JsonObject;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.event.*;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaFileObject;
-import javax.tools.ToolProvider;
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Traces a java file and analyses its state after each instruction.
@@ -25,201 +18,161 @@ public class Tracer {
     private String source;
     private String input;
     private int steps;
-    private String filename;
-
     private Inspector inspector;
     private JsonObject result;
-
-    private Event previousEvent;
-    private JsonObject previousSnapshot;
     private int currentStep;
     private List<String> printCache;
 
+    /**
+     * Create the tracer with the trace object, which contains the source to be inspected, its input and the maximum of
+     * steps to be evaluated.
+     *
+     * @param trace source, input and steps, the two firsts are String and the later int.
+     */
     public Tracer(JsonObject trace) {
         this.source = trace.get("source").getAsString();
         this.input = trace.get("input").getAsString();
         this.steps = trace.get("steps").getAsInt();
-        this.filename = getMainFilename(this.source);
         inspector = new Inspector();
         result = null;
         currentStep = 0;
-        previousEvent = null;
-        previousSnapshot = null;
         printCache = new ArrayList<>();
     }
 
-    private String getMainFilename(String code) {
-        var commentStringRegex = Pattern
-                .compile("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/|[\\t]*//.*)|\"(\\\\.|[^\\\\\"])*\"|'(\\\\[\\s\\S]|[^'])*'");
-        code = commentStringRegex.matcher(code).replaceAll("");
-
-        var classRegex = Pattern.compile("(public\\s+class\\s+([A-Za-z][A-Za-z0-9_]*))");
-        var classMatcher = classRegex.matcher(code);
-
-        var classesIndicesNames = Stream.generate(classMatcher::find)
-                .takeWhile(found -> found)
-                .map(found -> Map.entry(classMatcher.start(), classMatcher.group(2)))
-                .collect(Collectors.toList());
-
-        var mainMethodRegex = Pattern.compile("(public\\s+static\\s+void\\s+main\\s*\\(.*\\))");
-        var mainMethodMatcher = mainMethodRegex.matcher(code);
-        var mainMethodIndices = Stream.generate(mainMethodMatcher::find)
-                .takeWhile(found -> found)
-                .map(f -> mainMethodMatcher.start())
-                .collect(Collectors.toList());
-
-        if (classesIndicesNames.isEmpty()) return "Main.java";
-        else if (mainMethodIndices.isEmpty()) return classesIndicesNames.get(0).getValue() + ".java";
-        else {
-            var mainIndex = mainMethodIndices.get(0);
-            var classesBeforeMain = classesIndicesNames
-                    .stream()
-                    .filter(classIndexName -> classIndexName.getKey() < mainIndex)
-                    .collect(Collectors.toList());
-            if (!classesBeforeMain.isEmpty()) return classesBeforeMain.get(0).getValue() + ".java";
-            else return classesIndicesNames.get(0).getValue() + ".java";
-        }
-    }
-
-    private Path generateProject(String filename, String source) throws IOException, ApplicationExternalException {
-        var path = Files.createTempDirectory("");
-        if (source.isBlank()) // javac does not fail with empty files, but produces no output
-            throw new ApplicationExternalException("Compilation fail:\nUnable to create class from empty file.\n");
-        var srcPath = Paths.get(path.toString(), "src/");
-        Files.createDirectory(srcPath);
-        var mainPath = Paths.get(srcPath.toString(), filename);
-        Files.writeString(mainPath, source);
-        return path;
-    }
-
-    private void compileProject(Path path, String filename) throws IOException, ApplicationExternalException {
-        var srcPath = Paths.get(path.toString(), "src/");
-        var mainPath = Paths.get(srcPath.toString(), filename);
-        var binPath = Paths.get(path.toString(), "bin/");
-        Files.createDirectory(binPath);
-        var compiler = ToolProvider.getSystemJavaCompiler();
-        var dgCollector = new DiagnosticCollector<JavaFileObject>();
-        var fileManager = compiler.getStandardFileManager(dgCollector, Locale.ENGLISH, StandardCharsets.UTF_8);
-        var projectFiles = Stream.of(mainPath).map(p -> p.toAbsolutePath().toString()).toArray(String[]::new);
-        var javaFiles = fileManager.getJavaFileObjects(projectFiles);
-        var javacOptions = List.of("-d", binPath.toString(), "-cp", srcPath.toString(), "-g", "-proc:none");
-        var output = new StringWriter();
-        var task = compiler.getTask(output, fileManager, dgCollector, javacOptions, null, javaFiles);
-        if (!task.call()) {
-            var diagnostic = dgCollector.getDiagnostics().stream()
-                    .map(Diagnostic::toString)
-                    .collect(Collectors.joining("\n", "\n", "\n"));
-            throw new ApplicationExternalException("Compilation fail:\n" + output.toString() + diagnostic);
-        }
-    }
-
+    /**
+     * Run the source and inspect the debugee program state.
+     * The debugee program runs in a new JVM.
+     * The execution is analysed by the trace(), which is called by the Executor.
+     * The trace() may raise TraceStopExceptions or PrintedExceptions to stop the tracing process, the only way to stop
+     * the Executor.
+     * run(), trace() and the Executor might also raise unexpected exceptions, that will the be captured and returned
+     * the same way as exceptions from the debugee program, being easily distinguishable by their tracebacks.
+     *
+     * @return the result
+     */
     JsonObject run() {
         result = new JsonObject();
         result.add("steps", new JsonArray());
-
-        Path path;
         try {
-            path = generateProject(filename, source);
-            compileProject(path, filename);
-        } catch (ApplicationExternalException e) {
+            new Executor().execute(source, this::trace, this::inputHook, this::printHook, this::lockHook);
+        } catch (Executor.ApplicationExternalException | TracerStopException e) {
             var threw = new JsonObject();
             threw.addProperty("cause", e.getMessage());
             var step = new JsonObject();
             step.add("threw", threw);
+            step.add("prints", getPrintsArray());
             result.get("steps").getAsJsonArray().add(step);
             return result;
-        } catch (IOException e) {
+        } catch (PrintedException e) {
+            var exception = new JsonObject();
+            exception.addProperty("type", e.type);
+            exception.addProperty("traceback", e.traceback);
             var threw = new JsonObject();
-            threw.add("exception", Inspector.JsonException.fromThrowable(e, Set.of()));
+            threw.add("exception", exception);
             var step = new JsonObject();
             step.add("threw", threw);
+            step.add("prints", getPrintsArray());
             result.get("steps").getAsJsonArray().add(step);
-            return result;
-        }
-
-        try {
-            new Executor().execute(path, filename, this::trace, this::inputHook, this::printHook, this::lockHook);
-        } catch (TracerStopException e) {
-            var threw = new JsonObject();
-            threw.addProperty("cause", e.getMessage());
-            var step = new JsonObject();
-            step.add("threw", threw);
-            result.get("steps").getAsJsonArray().add(step);
-        } catch (ApplicationExternalException e) {
-            var threw = new JsonObject();
-            threw.addProperty("cause", e.getMessage());
-            var step = new JsonObject();
-            step.add("threw", threw);
-            result.get("steps").getAsJsonArray().add(step);
-            return result;
         } catch (Exception e) {
             var threw = new JsonObject();
-            threw.add("exception", Inspector.JsonException.fromThrowable(e, Set.of()));
+            var tracebackWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(tracebackWriter, true));
+            var traceback = Arrays
+                    .stream(tracebackWriter.toString().split("\n"))
+                    .map(l -> l + "\n")
+                    .collect(Collectors.joining());
+            var exception = new JsonObject();
+            exception.addProperty("type", e.getClass().getName());
+            exception.addProperty("traceback", traceback);
+            threw.add("exception", exception);
             var step = new JsonObject();
             step.add("threw", threw);
+            step.add("prints", getPrintsArray());
             result.get("steps").getAsJsonArray().add(step);
         }
         return result;
     }
 
-    private void trace(Event event) throws ApplicationExternalException, TracerStopException, IncompatibleThreadStateException {
-        if (
-                event instanceof VMStartEvent ||
-                        event instanceof VMDeathEvent ||
-                        event instanceof VMDisconnectEvent ||
-                        event instanceof ThreadStartEvent ||
-                        // uncaught exceptions are followed by a ThreadDeathEvent (not matching this case)
-                        event instanceof ThreadDeathEvent && !(previousEvent instanceof ExceptionEvent)
+    /**
+     * Trace the event.
+     * trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising a
+     * TraceStopException to stop the Executor.
+     *
+     * @param event event where the stack and heap data will be extracted from.
+     * @throws PrintedException
+     * @throws TracerStopException
+     * @throws IncompatibleThreadStateException
+     */
+    private void trace(Event event) throws PrintedException, TracerStopException, IncompatibleThreadStateException {
+        // check errors print in stdout or stderr in non Locatable frames
+        if ((event instanceof VMStartEvent ||
+                event instanceof VMDeathEvent ||
+                event instanceof VMDisconnectEvent ||
+                event instanceof ThreadStartEvent ||
+                event instanceof ThreadDeathEvent)
+                && !this.printCache.isEmpty()
         ) {
-            if (this.printCache.isEmpty()) return;
-            var printCache = this.printCache;
-            this.printCache = new ArrayList<>();
-            throw new ApplicationExternalException(String.join("\n", printCache));
+            // exception printed in the error stream is collected to be shown inside a threw object
+            var exceptionTraceback = String.join("", this.printCache);
+            this.printCache.clear();
+            throw new PrintedException(exceptionTraceback);
         }
 
-        this.currentStep++;
-        if (this.currentStep > this.steps)
-            throw new TracerStopException("reached maximum step: " + this.steps);
+        if (!(event instanceof LocatableEvent) || !((LocatableEvent) event).thread().name().equals("main")) return;
 
-        var steps = result.get("steps").getAsJsonArray();
-        var snapshotThrew = inspector.inspect(event, previousEvent, previousSnapshot);
-        var prints = printCache.stream().sequential().collect(
+        if (++this.currentStep > this.steps) throw new TracerStopException("reached maximum step: " + this.steps);
+
+        var snapshot = inspector.inspect((LocatableEvent) event);
+        var step = new JsonObject();
+        step.add("snapshot", snapshot);
+        step.add("prints", getPrintsArray());
+        result.get("steps").getAsJsonArray().add(step);
+        this.printCache.clear();
+    }
+
+    /**
+     * Return the print cache as a JSON array.
+     *
+     * @return json array containing prints.
+     */
+    private JsonArray getPrintsArray() {
+        return printCache.stream().sequential().collect(
                 () -> new JsonArray(printCache.size()), JsonArray::add, (print0, print1) -> {
                     throw new RuntimeException("parallel stream not allowed");
                 }
         );
-        this.printCache = new ArrayList<>();
-        var step = new JsonObject();
-        step.add("snapshot", snapshotThrew.snapshot);
-        step.add("prints", snapshotThrew.threw == null ? prints : new JsonArray());
-        steps.add(step);
-
-        if (snapshotThrew.threw != null) {
-            var threwStep = new JsonObject();
-            threwStep.add("threw", snapshotThrew.threw);
-            threwStep.add("prints", prints);
-            steps.add(threwStep);
-        }
-
-        this.previousEvent = event;
-        this.previousSnapshot = snapshotThrew.snapshot;
     }
 
+    /**
+     * Return the entire input to be sent to the traced program through standard input.
+     *
+     * @return the traced program input.
+     */
     private String inputHook() {
         return this.input;
     }
 
+    /**
+     * Gets the text produced in the standard output and standard error at each step and save it in the print cache.
+     *
+     * @param text the text collected from the standard output and error streams.
+     */
     private void printHook(String text) {
         this.printCache.add(text);
     }
 
+    /**
+     * Hook called when very slow operations are made by the traced program and no events are produced within 1 second.
+     *
+     * @param cause the expected cause, may be null
+     * @throws TracerStopException
+     */
     private void lockHook(String cause) throws TracerStopException {
         throw new TracerStopException("program requires input or slow function call");
     }
 
     /**
-     * TracerStopExceptions are used to stop executing the debugee application, indicating some internal stop condition.
-     * (not application fail)
+     * Exception used to stop the Executor.
      */
     static class TracerStopException extends Exception {
         TracerStopException(String message) {
@@ -228,12 +181,22 @@ public class Tracer {
     }
 
     /**
-     * ApplicationExternalExceptions represent application exceptions not catchable in the default tracing process.
-     * (ex.: empty file -> detected in compilation, no main method found -> sent as error in standard error stream)
+     * Exception used to indicate that the debugee program printed an exception in the error stream.
+     * The exception data is captured by the PrintedException.
+     * Always happens when the program finishes throwing an exception.
      */
-    static class ApplicationExternalException extends Exception {
-        ApplicationExternalException(String message) {
-            super(message);
+    static class PrintedException extends Exception {
+        String type;
+        String traceback;
+
+        PrintedException(String printedException) {
+            super();
+            var classStartIndex = printedException.indexOf(' ', 20) + 1; // skip "Exception in thread "
+            var endClassIndex = printedException.indexOf(' ', classStartIndex);
+            type = printedException.substring(classStartIndex, endClassIndex);
+            traceback = printedException;
         }
     }
+
+
 }
