@@ -56,13 +56,13 @@ class Tracer:
             exec(compiled, sandbox_globals)
         except TracerStopException as e:
             threw = {'cause': str(e)}
-            self._result['steps'].append({'threw': threw, 'prints': self._print_cache})
+            self._result['steps'].append({'threw': threw, 'prints': ''.join(self._print_cache)})
         except Exception as e:
             type_ = type(e).__name__
             traceback_ = traceback.format_exception(type(e), e, e.__traceback__)
             traceback_.pop(1)  # remove exec() traceback line (assuming it is an exception from the traced code)
             threw = {'exception': {'type': type_, 'traceback': ''.join(traceback_)}}
-            self._result['steps'].append({'threw': threw, 'prints': self._print_cache})
+            self._result['steps'].append({'threw': threw, 'prints': ''.join(self._print_cache)})
         finally:
             sys.settrace(None)
 
@@ -92,7 +92,7 @@ class Tracer:
             raise TracerStopException(f'reached maximum step: {self._steps}')
 
         snapshot = self._inspector.inspect(frame, self._exec_frame)
-        self._result['steps'].append({'snapshot': snapshot, 'prints': self._print_cache})
+        self._result['steps'].append({'snapshot': snapshot, 'prints': ''.join(self._print_cache)})
         self._print_cache = []
 
         return self._trace

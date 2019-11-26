@@ -24,7 +24,7 @@
             "description": "Step stores the information of a program in a certain point",
             "properties": {
                 "snapshot": { "$ref": "#/definitions/snapshot" },
-                "prints": { "type": "array", "items": { "type": "string" } },
+                "prints": { "type": "string", "description": "The content printed during the step" },
                 "threw": { "$ref": "#/definitions/threw" }
             },
             "additionalProperties": false
@@ -56,7 +56,7 @@
                 "members": { "type": "array", "items": { "$ref": "#/definitions/member" } }
             },
             "additionalProperties": false,
-            "required": ["type", "languageType", "members"]
+            "required": ["gType", "lType", "members"]
         },
         "variable": {
             "description": "Variable is a named value from the stack to the heap",
@@ -96,7 +96,9 @@
                 "cause": { "type": "string", "description": "Controlled threw not caused by the program" },
                 "exception": { "$ref": "#/definitions/exception" }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "minProperties": 1,
+            "maxProperties": 1
         },
         "exception": {
             "description": "Exception is an uncaught error of the program or the tracer itself.",

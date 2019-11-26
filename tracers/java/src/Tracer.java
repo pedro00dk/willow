@@ -8,7 +8,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +59,7 @@ public class Tracer {
             threw.addProperty("cause", e.getMessage());
             var step = new JsonObject();
             step.add("threw", threw);
-            step.add("prints", getPrintsArray());
+            step.addProperty("prints", String.join("", printCache));
             result.get("steps").getAsJsonArray().add(step);
             return result;
         } catch (PrintedException e) {
@@ -71,7 +70,7 @@ public class Tracer {
             threw.add("exception", exception);
             var step = new JsonObject();
             step.add("threw", threw);
-            step.add("prints", getPrintsArray());
+            step.addProperty("prints", String.join("", printCache));
             result.get("steps").getAsJsonArray().add(step);
         } catch (Exception e) {
             var threw = new JsonObject();
@@ -87,7 +86,7 @@ public class Tracer {
             threw.add("exception", exception);
             var step = new JsonObject();
             step.add("threw", threw);
-            step.add("prints", getPrintsArray());
+            step.addProperty("prints", String.join("", printCache));
             result.get("steps").getAsJsonArray().add(step);
         }
         return result;
@@ -125,22 +124,9 @@ public class Tracer {
         var snapshot = inspector.inspect((LocatableEvent) event);
         var step = new JsonObject();
         step.add("snapshot", snapshot);
-        step.add("prints", getPrintsArray());
+        step.addProperty("prints", String.join("", printCache));
         result.get("steps").getAsJsonArray().add(step);
         this.printCache.clear();
-    }
-
-    /**
-     * Return the print cache as a JSON array.
-     *
-     * @return json array containing prints.
-     */
-    private JsonArray getPrintsArray() {
-        return printCache.stream().sequential().collect(
-                () -> new JsonArray(printCache.size()), JsonArray::add, (print0, print1) -> {
-                    throw new RuntimeException("parallel stream not allowed");
-                }
-        );
     }
 
     /**

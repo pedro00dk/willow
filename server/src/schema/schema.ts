@@ -42,7 +42,10 @@ export interface Result {
  */
 export interface Step {
     snapshot?: Snapshot
-    prints?: string[]
+    /**
+     * The content printed during the step
+     */
+    prints?: string
     threw?: Threw
 }
 /**
@@ -85,11 +88,11 @@ export interface Obj {
     /**
      * General type
      */
-    gType?: 'array' | 'linked' | 'set' | 'map'
+    gType: 'array' | 'linked' | 'set' | 'map'
     /**
      * Type string in the language
      */
-    lType?: string
+    lType: string
     members: Member[]
 }
 /**
