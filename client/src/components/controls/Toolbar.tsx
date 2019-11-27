@@ -1,11 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
-import { useDispatch, useSelection } from '../../reducers/Store'
-import { actions as tracerActions } from '../../reducers/tracer'
-
 import playImg from '../../../public/buttons/play.png'
 import stepImg from '../../../public/buttons/stepInto.png'
+import { useDispatch, useSelection } from '../../reducers/Store'
+import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
     container: 'd-flex align-items-center',
