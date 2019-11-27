@@ -5,14 +5,9 @@ import com.google.gson.JsonPrimitive;
 import com.sun.jdi.*;
 import com.sun.jdi.event.ExceptionEvent;
 import com.sun.jdi.event.LocatableEvent;
-import com.sun.jdi.event.MethodEntryEvent;
-import com.sun.jdi.event.MethodExitEvent;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Inspect events and produces maps with their state data.
@@ -28,6 +23,7 @@ class Inspector {
      */
     JsonObject inspect(LocatableEvent event) throws IncompatibleThreadStateException {
         var snapshot = new JsonObject();
+        snapshot.addProperty("info", !(event instanceof ExceptionEvent) ? "ok" : "warn");
         var frames = new ArrayList<>(event.thread().frames());
         Collections.reverse(frames);
         snapshot.add(

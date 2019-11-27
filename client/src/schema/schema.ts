@@ -52,6 +52,10 @@ export interface Step {
  * Snapshots contains the state of a program in a certain point
  */
 export interface Snapshot {
+    /**
+     * Snapshot info
+     */
+    info: 'ok' | 'warn' | 'error'
     stack: Scope[]
     heap: {
         [k: string]: Obj

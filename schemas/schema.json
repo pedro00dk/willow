@@ -32,11 +32,12 @@
         "snapshot": {
             "description": "Snapshots contains the state of a program in a certain point",
             "properties": {
+                "info": {"type":"string", "enum": ["ok", "warn", "error"], "description": "Snapshot info" },
                 "stack": { "type": "array", "items": { "$ref": "#/definitions/scope" } },
                 "heap": { "type": "object", "additionalProperties": { "$ref": "#/definitions/obj" } }
             },
             "additionalProperties": false,
-            "required": ["stack", "heap"]
+            "required": ["info", "stack", "heap"]
         },
         "scope": {
             "description": "Scope stores basic data and variables that may point to the heap",

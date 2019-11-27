@@ -13,9 +13,9 @@ class Inspector:
     # types that can be converted to a JSON number (with javascript's restriction of 2^53 - 1)
     NUMBER_LIKE_TYPES = (int, float)
 
-    def inspect(self, frame: types.FrameType, exec_frame: types.FrameType):
+    def inspect(self, frame: types.FrameType, event: str, exec_frame: types.FrameType):
         """
-        Inspect the frame to build a dictionary with state data.
+        Inspect the frame and its event to build a dictionary with state data.
 
         > frame: `frame`: frame where the state data will be extracted from
         > exec_frame: `frame`: frame of the exec() call, it is used to know which frame is the base frame
@@ -23,7 +23,7 @@ class Inspector:
         > return `dict`: the processed frame data
         """
 
-        snapshot = {}
+        snapshot = {'info': 'ok' if event != 'exception' else 'warn'}
 
         current_frame = frame
         frames = []

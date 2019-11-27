@@ -91,7 +91,7 @@ class Tracer:
         if self._current_step > self._steps:
             raise TracerStopException(f'reached maximum step: {self._steps}')
 
-        snapshot = self._inspector.inspect(frame, self._exec_frame)
+        snapshot = self._inspector.inspect(frame, event, self._exec_frame)
         self._result['steps'].append({'snapshot': snapshot, 'prints': ''.join(self._print_cache)})
         self._print_cache = []
 
