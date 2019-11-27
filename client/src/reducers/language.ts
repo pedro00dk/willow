@@ -28,8 +28,9 @@ export const reducer = (state: State = initialState, action: Action): State => {
                 : { ...initialState, fetching: true }
         case 'language/select':
             return { ...state, selected: action.payload }
+        default:
+            return state
     }
-    return state
 }
 
 const fetch = (): DefaultAsyncAction => async dispatch => {
@@ -38,7 +39,7 @@ const fetch = (): DefaultAsyncAction => async dispatch => {
         const languages = (await serverApi.get<string[]>('/languages')).data
         dispatch({ type: 'language/fetch', payload: languages })
     } catch (error) {
-        dispatch({ type: 'language/fetch', error: error.response ? error.response.data : error.toString() })
+        dispatch({ type: 'language/fetch', error: error?.response?.data ?? error.toString() })
     }
 }
 

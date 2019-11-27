@@ -42,12 +42,10 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
     }
 
     const subscribe = (listener: () => void) => {
-        let isSubscribed = true
+        let subscribed = true
         subscriptions.push(listener)
-        return () => {
-            if (isSubscribed) subscriptions.splice(subscriptions.indexOf(listener), 1)
-            isSubscribed = false
-        }
+
+        return () => subscribed && (subscriptions.splice(subscriptions.indexOf(listener), 1), (subscribed = false))
     }
 
     return { getState, dispatch, subscribe }
@@ -62,7 +60,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
         const keysB = Object.keys(selectionB)
         return (
             keysA.length === keysB.length &&
-            keysB.reduce((acc, key) => acc && selectionA[key] === selectionB[key], true)
+            keysB.reduce((acc, next) => acc && selectionA[next] === selectionB[next], true)
         )
     }
 

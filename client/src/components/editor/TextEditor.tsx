@@ -39,7 +39,7 @@ export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) =
         const editor = ace.edit(ref.current)
         editor.setFontSize(classes.font)
         editor.$blockScrolling = Infinity
-        if (props.onEditor) props.onEditor(editor)
+        props.onEditor?.(editor)
 
         const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
 
