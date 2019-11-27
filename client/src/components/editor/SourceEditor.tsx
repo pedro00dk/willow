@@ -7,9 +7,6 @@ import { actions as sourceActions } from '../../reducers/source'
 import { useDispatch, useSelection } from '../../reducers/Store'
 import { EditorMarker, range, TextEditor } from './TextEditor'
 
-import callImg from '../../../public/editor/call.svg'
-import returnImg from '../../../public/editor/return.svg'
-
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
 import 'brace/mode/java'
@@ -21,10 +18,9 @@ import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    line: cn('position-absolute', css({ background: colors.blue.light })),
-    call: cn('position-absolute', css({ background: `${colors.blue.light} url(${callImg}) no-repeat right` })),
-    return: cn('position-absolute', css({ background: `${colors.blue.light} url(${returnImg}) no-repeat right` })),
-    exception: cn('position-absolute', css({ background: colors.red.light }))
+    ok: cn('position-absolute', css({ background: colors.blue.light })),
+    warn: cn('position-absolute', css({ background: colors.yellow.light })),
+    error: cn('position-absolute', css({ background: colors.red.light }))
 }
 
 const languages = new Set(['java', 'python'])
@@ -58,7 +54,7 @@ export const SourceEditor = () => {
         const snapshot = tracer.steps[tracer.index].snapshot
         if (!snapshot) return
         const line = snapshot.stack[snapshot.stack.length - 1].line
-        editor.session.addMarker(range(line, 0, line, 1), classes[snapshot.type], 'fullLine', false)
+        editor.session.addMarker(range(line, 0, line, 1), classes[snapshot.info], 'fullLine', false)
         editor.scrollToLine(line, true, true, undefined)
     }, [editor, tracer])
 
