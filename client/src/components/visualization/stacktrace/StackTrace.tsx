@@ -4,6 +4,8 @@ import React from 'react'
 import { useSelection } from '../../../reducers/Store'
 import { ScopeTrace } from './ScopeTrace'
 
+export type ScopeData = { name: string; children: ScopeData[]; range: [number, number] }
+
 const classes = {
     container: cn('d-flex align-items-start flex-nowrap', 'overflow-auto', 'w-100 h-100', css({ userSelect: 'none' }))
 }
@@ -11,10 +13,44 @@ const classes = {
 export const StackTrace = React.memo(() => {
     const ref = React.useRef<HTMLDivElement>()
     const [width, setWidth] = React.useState(0)
-    const { available, stackData } = useSelection(state => ({
-        available: state.tracer.available,
-        stackData: state.tracer.stackData
-    }))
+    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+
+    const stackRootData = React.useMemo(() => {
+        if (!tracer.available) return
+        const stackRootData: ScopeData = { name: undefined, children: [], range: [0, 0] }
+        const scopeDataPath: ScopeData[] = []
+        tracer.steps.forEach(({ snapshot, threw }, i) => {
+            if (threw) {
+                const name = threw.exception?.type ?? threw.cause
+                const threwScopeData: ScopeData = { name, range: [i, i], children: [] }
+                stackRootData.children.push(threwScopeData)
+                scopeDataPath.splice(0, Infinity, threwScopeData)
+                return
+            }
+            ;[...Array(Math.max(snapshot.stack.length, scopeDataPath.length)).keys()].forEach(j => {
+                const scope = snapshot.stack[j]
+                const scopeData = scopeDataPath[j]
+                if (!scope && !scopeData) return
+                else if (!scopeData) {
+                    const newScopeData: ScopeData = { name: scope.name, range: [i, i], children: [] }
+                    const parentScopeData = scopeDataPath[j - 1]
+                    ;(parentScopeData?.children ?? stackRootData.children).push(newScopeData)
+                    scopeDataPath.push(newScopeData)
+                    scopeDataPath.forEach(scopeData => (scopeData.range[1] = i))
+                } else if (!scope) {
+                    scopeDataPath.splice(j)
+                } else if (scope.name !== scopeData.name) {
+                    const newScopeData: ScopeData = { name, range: [i, i], children: [] }
+                    const parentScopeData = scopeDataPath[j - 1]
+                    ;(parentScopeData?.children ?? stackRootData.children).push(newScopeData)
+                    scopeDataPath.pop()
+                    scopeDataPath.push(newScopeData)
+                    scopeDataPath.forEach(scopeData => (scopeData.range[1] = i))
+                }
+            })
+        })
+        return stackRootData
+    }, [tracer.available])
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -27,7 +63,7 @@ export const StackTrace = React.memo(() => {
 
     return (
         <div ref={ref} className={classes.container}>
-            {available && <ScopeTrace scope={stackData.root} depth={-1} width={width} />}
+            {tracer.available && <ScopeTrace scope={stackRootData} depth={-1} width={width} />}
         </div>
     )
 })
