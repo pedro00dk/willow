@@ -9,9 +9,7 @@ const classes = {
     container: 'd-flex input-group w-auto',
     input: 'input-group-prepend',
     button: cn(
-        'd-inline-flex align-items-center',
-        'btn',
-        'p-1',
+        'd-inline-flex align-items-center btn p-1',
         css({
             background: colors.gray.light,
             border: `1px solid ${colors.gray.dark}`,

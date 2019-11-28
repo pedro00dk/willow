@@ -17,7 +17,7 @@ import { GraphView } from './visualization/graphview/GraphView'
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
     header: {
-        nav: cn('navbar', 'shadow-sm', css({ background: colors.gray.light })),
+        nav: cn('navbar shadow-sm', css({ background: colors.gray.light })),
         link: 'd-flex align-items-center navbar-brand',
         logo: cn('mr-2', css({ width: '2rem', filter: 'invert(1)' })),
         text: css({ color: colors.black, fontSize: '1.5rem' })
