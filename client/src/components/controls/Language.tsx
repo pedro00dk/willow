@@ -26,12 +26,10 @@ const classes = {
 
 export const Language = () => {
     const dispatch = useDispatch()
-    const { fetching, languages, selected, tracerFetching } = useSelection(state => ({
-        fetching: state.language.fetching,
-        languages: state.language.languages,
-        selected: state.language.languages[state.language.selected],
-        tracerFetching: state.tracer.fetching
-    }))
+    const { language } = useSelection(state => ({ language: state.language }))
+    const fetching = language.fetching
+    const languages = language.languages
+    const selected = language.languages[language.selected]
 
     React.useEffect(() => void dispatch(languageActions.fetch()), [])
 
@@ -45,7 +43,6 @@ export const Language = () => {
             </div>
             <select
                 className={classes.select}
-                disabled={tracerFetching}
                 defaultValue={selected}
                 onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
             >

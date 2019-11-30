@@ -20,30 +20,34 @@ const styles = {
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+    const { playAvailable, stepBackAvailable, stepForwardAvailable } = useSelection(state => ({
+        playAvailable: !state.tracer.fetching,
+        stepBackAvailable: state.tracer.steps && state.tracer.index > 0,
+        stepForwardAvailable: state.tracer.steps && state.tracer.index < state.tracer.steps.length - 1
+    }))
 
     return (
         <div className={classes.container}>
             <img
                 className={classes.image}
-                style={styles.image(!tracer.fetching)}
+                style={styles.image(playAvailable)}
                 src={playImg}
                 title={'trace'}
-                onClick={() => dispatch(tracerActions.trace())}
+                onClick={() => playAvailable && dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
-                style={styles.image(tracer.available && tracer.index > 0, 90)}
+                style={styles.image(stepBackAvailable, 90)}
                 src={stepImg}
                 title='step back'
-                onClick={() => dispatch(tracerActions.setIndex(tracer.index - 1))}
+                onClick={() => stepBackAvailable && dispatch(tracerActions.decrementIndex())}
             />
             <img
                 className={classes.image}
-                style={styles.image(tracer.available && tracer.index < tracer.steps.length - 1, -90)}
+                style={styles.image(stepForwardAvailable, 270)}
                 src={stepImg}
                 title='step forward'
-                onClick={() => dispatch(tracerActions.setIndex(tracer.index + 1))}
+                onClick={() => stepForwardAvailable && dispatch(tracerActions.incrementIndex())}
             />
         </div>
     )
