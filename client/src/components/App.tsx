@@ -74,7 +74,7 @@ export const Visualization = () => {
     const tracer = useSelection(state => state.tracer)
 
     const computeNextIndex = (event: React.KeyboardEvent) => {
-        if (!tracer.available || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return tracer.index
+        if (!tracer.steps || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return tracer.index
         const currentStep = tracer.steps[tracer.index]
         const currentSnapshot = currentStep.snapshot
 
