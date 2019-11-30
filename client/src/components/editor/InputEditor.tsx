@@ -1,15 +1,8 @@
 import ace from 'brace'
-import cn from 'classnames'
-import { css } from 'emotion'
 import React from 'react'
-import { colors } from '../../colors'
 import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useSelection } from '../../reducers/Store'
-import { EditorMarker, range, TextEditor } from './TextEditor'
-
-const classes = {
-    marker: cn('position-absolute', css({ backgroundColor: colors.blue.light }))
-}
+import { TextEditor } from './TextEditor'
 
 export const InputEditor = () => {
     const editor = React.useRef<ace.Editor>()
