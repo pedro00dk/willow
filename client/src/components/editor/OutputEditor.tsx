@@ -4,29 +4,21 @@ import { useSelection } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 export const OutputEditor = () => {
-    const [editor, setEditor] = React.useState<ace.Editor>()
-    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
-
-    const outputs = React.useMemo(() => {
-        if (!tracer.available) return []
-        let previous = ''
-        return tracer.steps.map(
-            ({ prints, threw }) =>
-                (previous = `${previous}${threw?.cause ?? threw?.exception.traceback ?? ''}${prints ?? ''}`)
-        )
-    }, [tracer.available])
+    const editor = React.useRef<ace.Editor>()
+    const currentIndex = React.useRef<number>()
 
     React.useEffect(() => {
-        if (!editor) return
-        editor.renderer.setShowGutter(false)
-        editor.setReadOnly(true)
-    }, [editor])
+        editor.current.renderer.setShowGutter(false)
+        editor.current.setReadOnly(true)
+    }, [editor.current])
 
-    React.useEffect(() => {
-        if (!editor || !tracer.available) return
-        editor.session.doc.setValue(outputs[tracer.index])
-        editor.scrollToLine(editor.session.getLength(), true, true, undefined)
-    }, [editor, tracer.available])
+    useSelection(async state => {
+        const index = state.tracer.index
+        if (!editor || index == undefined || index === currentIndex.current) return
+        editor.current.session.doc.setValue(state.output[index])
+        editor.current.scrollToLine(editor.current.session.getLength(), true, true, undefined)
+        currentIndex.current = index
+    })
 
-    return <TextEditor onEditor={setEditor} />
+    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
 }

@@ -26,37 +26,42 @@ const classes = {
 const languages = new Set(['java', 'python'])
 
 export const SourceEditor = () => {
-    const [editor, setEditor] = React.useState<ace.Editor>()
+    const editor = React.useRef<ace.Editor>()
+    let currentLanguage = React.useRef<string>()
+    let currentInfo = React.useRef<string>()
+    let currentLine = React.useRef<number>()
     const dispatch = useDispatch()
-    const { language, tracer } = useSelection(state => ({
-        language: state.language.languages[state.language.selected],
-        tracer: state.tracer
-    }))
 
     React.useEffect(() => {
-        if (!editor) return
-        editor.setTheme('ace/theme/chrome')
-        editor.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true })
-        editor.on('change', () => dispatch(sourceActions.set(editor.session.doc.getAllLines())))
-    }, [editor])
+        editor.current.setTheme('ace/theme/chrome')
+        editor.current.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true
+        })
+        editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines())))
+    }, [editor.current])
 
-    React.useEffect(() => {
-        if (!editor) return
-        editor.session.setMode(`ace/mode/${languages.has(language) ? language : 'text'}`)
-    }, [editor, language])
+    useSelection(async state => {
+        const language = state.language.languages[state.language.selected]
+        if (!editor || language === currentLanguage.current) return
+        editor.current.session.setMode(`ace/mode/${languages.has(language) ? language : 'text'}`)
+        currentLanguage.current = language
+    })
 
-    React.useEffect(() => {
-        if (!editor) return
-        Object.values(editor.session.getMarkers(false) as EditorMarker[])
-            .filter(marker => marker.id > 2)
-            .forEach(marker => editor.session.removeMarker(marker.id))
-        if (!tracer.available) return
-        const snapshot = tracer.steps[tracer.index].snapshot
-        if (!snapshot) return
+    useSelection(async state => {
+        const snapshot = state.tracer.steps?.[state.tracer.index].snapshot
+        const info = snapshot.info
         const line = snapshot.stack[snapshot.stack.length - 1].line
-        editor.session.addMarker(range(line, 0, line, 1), classes[snapshot.info], 'fullLine', false)
-        editor.scrollToLine(line, true, true, undefined)
-    }, [editor, tracer])
+        if (!editor || !snapshot || (info === currentInfo.current && line === currentLine.current)) return
+        Object.values(editor.current.session.getMarkers(false) as EditorMarker[])
+            .filter(marker => marker.id > 2)
+            .forEach(marker => editor.current.session.removeMarker(marker.id))
+        editor.current.session.addMarker(range(line, 0, line, 1), classes[snapshot.info], 'fullLine', false)
+        editor.current.scrollToLine(line, true, true, undefined)
+        currentInfo.current = info
+        currentLine.current = line
+    })
 
-    return <TextEditor onEditor={setEditor} />
+    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
 }

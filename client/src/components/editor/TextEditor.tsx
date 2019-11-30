@@ -34,24 +34,32 @@ export const range = (startRow: number, startColumn: number, endRow: number, end
 
 export const TextEditor = React.memo((props: { onEditor?: (editor: ace.Editor) => void }) => {
     const ref = React.useRef<HTMLDivElement>()
+    const editor = React.useRef<ace.Editor>()
 
     React.useEffect(() => {
-        const editor = ace.edit(ref.current)
-        editor.setFontSize(classes.font)
-        editor.$blockScrolling = Infinity
-        props.onEditor?.(editor)
-
         const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
 
         const interval = setInterval(() => {
             if (size.x === ref.current.clientWidth && size.y === ref.current.clientHeight) return
             size.x = ref.current.clientWidth
             size.y = ref.current.clientHeight
-            editor.resize()
+            editor.current.resize()
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [ref])
+    }, [ref, editor.current])
 
-    return <div ref={ref} className={classes.container} />
+    return (
+        <div
+            ref={r => {
+                if (!r) return
+                ref.current = r
+                editor.current = ace.edit(ref.current)
+                editor.current.setFontSize(classes.font)
+                editor.current.$blockScrolling = Infinity
+                props.onEditor?.(editor.current)
+            }}
+            className={classes.container}
+        />
+    )
 })

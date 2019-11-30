@@ -12,25 +12,21 @@ const classes = {
 }
 
 export const InputEditor = () => {
-    const [editor, setEditor] = React.useState<ace.Editor>()
+    const editor = React.useRef<ace.Editor>()
     const dispatch = useDispatch()
-    const fetching = useSelection(state => state.tracer.fetching)
+    const currentFetching = React.useRef<boolean>()
 
     React.useEffect(() => {
-        if (!editor) return
-        editor.renderer.setShowGutter(false)
-        editor.on('change', () => dispatch(inputActions.set(editor.session.doc.getAllLines().slice(0, -1))))
-    }, [editor])
+        editor.current.renderer.setShowGutter(false)
+        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines())))
+    }, [editor.current])
 
-    React.useEffect(() => {
-        if (!editor) return
-        editor.setReadOnly(fetching)
-        Object.values(editor.session.getMarkers(false) as EditorMarker[])
-            .filter(marker => marker.id > 2)
-            .forEach(marker => editor.session.removeMarker(marker.id))
-        if (!fetching) return
-        editor.session.addMarker(range(0, 0, editor.session.getLength() - 1, 1), classes.marker, 'fullLine', false)
-    }, [editor, fetching])
+    useSelection(async state => {
+        const fetching = state.tracer.fetching
+        if (!editor.current || fetching === currentFetching.current) return
+        editor.current.setReadOnly(fetching)
+        currentFetching.current = fetching
+    })
 
-    return <TextEditor onEditor={setEditor} />
+    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
 }
