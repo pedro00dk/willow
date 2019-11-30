@@ -29,7 +29,7 @@ const styles = {
     })
 }
 
-export const ScopeTrace = (props: { scope: ScopeData; width: number }) => {
+export const ScopeTrace = React.memo((props: { scope: ScopeData; width: number }) => {
     const dispatch = useDispatch()
     const { selected } = useSelection(state => ({
         selected: state.tracer.index >= props.scope.start && state.tracer.index < props.scope.start + props.scope.size
@@ -37,7 +37,7 @@ export const ScopeTrace = (props: { scope: ScopeData; width: number }) => {
 
     return (
         <div className={classes.container}>
-            {props.scope.name == undefined && (
+            {props.scope.name != undefined && (
                 <div
                     className={classes.scope}
                     style={styles.scope(props.width, selected)}
@@ -60,13 +60,9 @@ export const ScopeTrace = (props: { scope: ScopeData; width: number }) => {
                             child.start - ((previousChild?.start ?? 0) + (previousChild?.size ?? 0)) - props.scope.start
                         const childMarginProportion = childMarginSize / props.scope.size
                         const childMarginPercent = `${childMarginProportion * 100}%`
-
+                        // TODO fix margin calculation
                         return (
-                            <div
-                                key={i}
-                                className={classes.child}
-                                style={{ width: childWidthPercent, marginLeft: childMarginPercent }}
-                            >
+                            <div key={i} className={classes.child} style={{ width: childWidthPercent }}>
                                 <ScopeTrace scope={child} width={childWidthPixels} />
                             </div>
                         )
@@ -75,4 +71,4 @@ export const ScopeTrace = (props: { scope: ScopeData; width: number }) => {
             )}
         </div>
     )
-}
+})
