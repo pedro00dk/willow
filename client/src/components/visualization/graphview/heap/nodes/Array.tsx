@@ -61,7 +61,7 @@ export const Node = (props: {
                     : props.obj.members.length === 0
                     ? 'empty'
                     : chunks.map((chunk, i) => (
-                          <div className={'d-flex'} style={{ flexDirection: parameters.direction as any }}>
+                          <div key={i} className={'d-flex'} style={{ flexDirection: parameters.direction as any }}>
                               {chunk.map((member, j) => {
                                   const memberIndex = i * chunkSize + j
                                   const showIndex = !parameters['wrap index'] ? memberIndex : j
