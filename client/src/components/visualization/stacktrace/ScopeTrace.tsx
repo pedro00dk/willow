@@ -35,7 +35,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice; width: nu
         selected: state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
     }))
     const scopeSliceSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
-    const threw = props.scopeSlice.nodes[props.scopeSlice.nodes.length - 1]?.line === undefined ?? false
+    const threw = props.scopeSlice.nodes[props.scopeSlice.nodes.length - 1]?.line == undefined ?? false
 
     const childrenScopeSlices = React.useMemo(() => {
         return props.scopeSlice.children.reduce((acc, [first, ...others], i) => {
