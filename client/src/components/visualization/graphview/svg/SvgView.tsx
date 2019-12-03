@@ -61,7 +61,7 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
         }
         const viewSize = {
             width: clamp(viewBox.current.width - factor, viewBoxRanges.width.min, viewBoxRanges.width.max),
-            height: clamp(viewBox.current.height - factor, viewBoxRanges.height.max, viewBoxRanges.height.max)
+            height: clamp(viewBox.current.height - factor, viewBoxRanges.height.min, viewBoxRanges.height.max)
         }
         if (viewSize.width === viewBox.current.width && viewSize.height === viewBox.current.height) return
         viewBox.current.x = clamp(
