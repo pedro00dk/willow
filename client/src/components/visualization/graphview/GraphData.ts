@@ -9,9 +9,7 @@ export type UnknownParameters = { [name: string]: DefaultParameters[keyof Defaul
 
 export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
 
-export class GraphController {
-    private subscriptionCalls = 0
-    private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
+export class GraphData {
     private index: number = 0
     private animate: boolean = true
     private positions: { [id: string]: { x: number; y: number }[] } = {}
@@ -22,34 +20,17 @@ export class GraphController {
     private parameters: { [id: string]: UnknownParameters } = {}
     private typeNodeName: { [type: string]: string } = {}
     private typeParameters: { [type: string]: UnknownParameters } = {}
+    private subscriptionCalls = 0
+    private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
 
-    constructor(private graphSize: { x: number; y: number }, private endPadding: { x: number; y: number }) {}
+    constructor(private graphSize: { x: number; y: number }, private padding: { x: number; y: number }) {}
 
     getGraphSize() {
         return this.graphSize
     }
 
     getPadding() {
-        return this.endPadding
-    }
-
-    subscribe(id: string, callback: (subscriptionCall: number) => void) {
-        ;(this.subscriptions[id] || (this.subscriptions[id] = [])).push(callback)
-    }
-
-    callSubscriptions(id?: string) {
-        const subscriptionCall = this.subscriptionCalls++
-        if (!id)
-            return Object.values(this.subscriptions)
-                .flat()
-                .forEach(subscription => subscription(subscriptionCall))
-
-        const subscriptions = this.subscriptions[id]
-        if (subscriptions) subscriptions.forEach(subscription => subscription(subscriptionCall))
-    }
-
-    clearSubscriptions() {
-        this.subscriptions = {}
+        return this.padding
     }
 
     getIndex() {
@@ -69,37 +50,35 @@ export class GraphController {
     }
 
     getPosition(id: string, index: number, def = { x: 0, y: 0 }) {
-        const positions = this.positions[id] || (this.positions[id] = [])
-        return positions[index] || this.setPositionRange(id, [index, index], def)
+        return this.positions[id]?.[index] ?? this.setPositionRange(id, [index, index], def)
     }
 
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
-        const positions = this.positions[id] || (this.positions[id] = [])
+        const positions = this.positions[id] ?? (this.positions[id] = [])
         const paddedPosition = {
-            x: Math.min(Math.max(position.x, 0), this.graphSize.x - this.endPadding.x),
-            y: Math.min(Math.max(position.y, 0), this.graphSize.y - this.endPadding.y)
+            x: Math.min(Math.max(position.x, 0), this.graphSize.x - this.padding.x),
+            y: Math.min(Math.max(position.y, 0), this.graphSize.y - this.padding.y)
         }
         for (let i = range[0]; i <= range[1]; i++) positions[i] = paddedPosition
         return paddedPosition
     }
 
     getSize(id: string, index: number, def = { x: 0, y: 0 }) {
-        const sizes = this.sizes[id] || (this.sizes[id] = [])
-        return sizes[index] ? sizes[index] : this.setSizeRange(id, [index, index], def)
+        return this.sizes[id]?.[index] ?? this.setSizeRange(id, [index, index], def)
     }
 
     setSizeRange(id: string, range: [number, number], size: { x: number; y: number }) {
-        const sizes = this.sizes[id] || (this.sizes[id] = [])
+        const sizes = this.sizes[id] ?? (this.sizes[id] = [])
         for (let i = range[0]; i <= range[1]; i++) sizes[i] = size
         return size
     }
 
-    getTargets(id: string) {
-        return this.targets[id] || (this.targets[id] = [])
+    getTargets(id: string, def: { target: string; delta: { x: number; y: number } }[] = []) {
+        return this.targets[id] ?? this.setTargets(id, def)
     }
 
     setTargets(id: string, targets: { target: string; delta: { x: number; y: number } }[]) {
-        this.targets[id] = targets
+        return (this.targets[id] = targets)
     }
 
     clearTargets() {
@@ -107,7 +86,7 @@ export class GraphController {
     }
 
     getSelector(id: string, def: 'id' | 'type' = 'type') {
-        return this.selector[id] || this.setSelector(id, def)
+        return this.selector[id] ?? this.setSelector(id, def)
     }
 
     setSelector(id: string, selector: 'id' | 'type') {
@@ -115,7 +94,7 @@ export class GraphController {
     }
 
     getNodeName(id: string, def?: string) {
-        return this.nodeName[id] || this.setNodeName(id, def)
+        return this.nodeName[id] ?? this.setNodeName(id, def)
     }
 
     setNodeName(id: string, nodeType: string) {
@@ -123,8 +102,7 @@ export class GraphController {
     }
 
     getParameters(id: string, def: UnknownParameters = {}) {
-        console.log(this.parameters[id])
-        return this.parameters[id] || this.setParameters(id, def)
+        return this.parameters[id] ?? this.setParameters(id, def)
     }
 
     setParameters(id: string, parameters: UnknownParameters) {
@@ -132,7 +110,7 @@ export class GraphController {
     }
 
     getTypeNodeName(type: string, def?: string) {
-        return this.typeNodeName[type] || this.setTypeNodeName(type, def)
+        return this.typeNodeName[type] ?? this.setTypeNodeName(type, def)
     }
 
     setTypeNodeName(type: string, nodeType: string) {
@@ -140,11 +118,28 @@ export class GraphController {
     }
 
     getTypeParameters(type: string, def: UnknownParameters = {}) {
-        return this.typeParameters[type] || this.setTypeParameters(type, def)
+        return this.typeParameters[type] ?? this.setTypeParameters(type, def)
     }
 
     setTypeParameters(type: string, parameters: UnknownParameters) {
         return (this.typeParameters[type] = parameters)
+    }
+
+    subscribe(id: string, callback: (subscriptionCall: number) => void) {
+        const subscriptions = this.subscriptions[id] ?? (this.subscriptions[id] = [])
+        subscriptions.push(callback)
+    }
+
+    callSubscriptions(id?: string) {
+        const subscriptionCall = this.subscriptionCalls++
+        if (id != undefined) return this.subscriptions[id]?.forEach(subscription => subscription(subscriptionCall))
+        Object.values(this.subscriptions)
+            .flat()
+            .forEach(subscription => subscription(subscriptionCall))
+    }
+
+    clearSubscriptions() {
+        this.subscriptions = {}
     }
 }
 
