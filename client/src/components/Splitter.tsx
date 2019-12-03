@@ -45,7 +45,7 @@ export const Splitter = (props: {
     const pinnedAxis = direction === 'row' ? 'height' : 'width'
 
     return (
-        <div ref={ref} className={cn(classes.container, `flex-${direction}`, className)}>
+        <div ref={ref} className={cn(classes.container, className)} style={{ flexDirection: direction }}>
             <div
                 className={cn(classes.pane, paneClassName)}
                 style={{ [pinnedAxis]: '100%', [varyingAxis]: styles.size(ratio, draggerSize / 2) }}
