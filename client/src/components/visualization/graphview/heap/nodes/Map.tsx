@@ -2,10 +2,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
-import { ObjData } from '../../../../../reducers/tracer'
 import * as schema from '../../../../../schema/schema'
 import { Base, getDisplayValue, valueChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphController'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
 const classes = {
@@ -43,34 +42,33 @@ const defaultParameters = {
     'value width': { value: 50, range: [10, 100] as [number, number] }
 }
 
-export const defaults: ReadonlySet<schema.Obj['type']> = new Set(['map', 'other'])
-export const supported: ReadonlySet<schema.Obj['type']> = new Set(['array', 'tuple', 'alist', 'llist', 'map', 'other'])
+export const defaults: ReadonlySet<schema.Obj['gType']> = new Set(['map'])
+export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set', 'map'])
 
 export const Node = (props: {
-    objData: ObjData
+    id: string
+    obj: schema.Obj
     parameters: UnknownParameters
     onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
 }) => {
-    const previousMembers = React.useRef<ObjData['members']>([])
+    const previousMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)
 
-    React.useEffect(() => {
-        previousMembers.current = props.objData.members
-    })
+    React.useEffect(() => void (previousMembers.current = props.obj.members))
 
     return (
-        <Base title={props.objData.languageType}>
+        <Base title={props.obj.lType}>
             <div className={classes.container}>
-                {!supported.has(props.objData.type)
+                {!supported.has(props.obj.gType)
                     ? 'incompatible'
-                    : props.objData.members.length === 0
+                    : props.obj.members.length === 0
                     ? 'empty'
-                    : props.objData.members.map((member, i) => {
+                    : props.obj.members.map((member, i) => {
                           const keyIsPrimitive = typeof member.key !== 'object'
                           const valueIsPrimitive = typeof member.value !== 'object'
                           const changed = valueChanged(previousMembers.current[i], member)
-                          const keyDisplayValue = getDisplayValue(props.objData, member.key)
-                          const valueDisplayValue = getDisplayValue(props.objData, member.value)
+                          const keyDisplayValue = getDisplayValue(props.id, member.key)
+                          const valueDisplayValue = getDisplayValue(props.id, member.value)
 
                           return (
                               <div
@@ -84,7 +82,7 @@ export const Node = (props: {
                                           ref={ref =>
                                               ref &&
                                               !keyIsPrimitive &&
-                                              props.onTargetRef(props.objData.id, (member.key as ObjData).id, ref)
+                                              props.onTargetRef(props.id, (member.key as [string])[0], ref)
                                           }
                                           className={classes.key}
                                           style={{ width: parameters['key width'] }}
@@ -96,7 +94,7 @@ export const Node = (props: {
                                       ref={ref =>
                                           ref &&
                                           !valueIsPrimitive &&
-                                          props.onTargetRef(props.objData.id, (member.value as ObjData).id, ref)
+                                          props.onTargetRef(props.id, (member.value as [string])[0], ref)
                                       }
                                       className={classes.value}
                                       style={{ width: parameters['value width'] }}
@@ -112,7 +110,8 @@ export const Node = (props: {
 }
 
 export const NodeParameters = (props: {
-    objData: ObjData
+    id: string
+    obj: schema.Obj
     withReset: boolean
     parameters: UnknownParameters
     onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void

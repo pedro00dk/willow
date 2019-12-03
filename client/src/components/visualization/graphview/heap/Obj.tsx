@@ -12,13 +12,12 @@ import * as ArrayModule from './nodes/Array'
 import * as BarsModule from './nodes/Bars'
 import * as FieldModule from './nodes/Field'
 import * as MapModule from './nodes/Map'
-import { Parameters } from './Parameters'
 
 const modules = {
     array: ArrayModule,
     bars: BarsModule,
-    field: FieldModule
-    // map: MapModule
+    field: FieldModule,
+    map: MapModule
 }
 
 const classes = {
