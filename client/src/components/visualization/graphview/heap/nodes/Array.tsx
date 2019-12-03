@@ -8,6 +8,7 @@ import { readParameters, UnknownParameters } from '../../GraphData'
 
 const classes = {
     container: 'd-flex text-nowrap',
+    chunk: 'd-flex',
     element: cn(
         'd-inline-flex px-1',
         css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
@@ -61,7 +62,7 @@ export const Node = (props: {
                     : props.obj.members.length === 0
                     ? 'empty'
                     : chunks.map((chunk, i) => (
-                          <div key={i} className={'d-flex'} style={{ flexDirection: parameters.direction as any }}>
+                          <div key={i} className={classes.chunk} style={{ flexDirection: parameters.direction as any }}>
                               {chunk.map((member, j) => {
                                   const memberIndex = i * chunkSize + j
                                   const showIndex = !parameters['wrap index'] ? memberIndex : j
