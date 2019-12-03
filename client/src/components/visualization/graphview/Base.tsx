@@ -2,36 +2,29 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../colors'
-import { ObjData } from '../../../reducers/tracer'
+import * as schema from '../../../schema/schema'
 
-export const valueChanged = (previousMember: ObjData['members'][0], member: ObjData['members'][0]) => {
-    if ((!previousMember && member) || (!member && previousMember)) return true
-    if (!previousMember && !member) return false
-    const previousValue = previousMember.value
+export const valueChanged = (currentMember: schema.Member, member: schema.Member) => {
+    if ((!currentMember && member) || (!member && currentMember)) return true
+    if (!currentMember && !member) return false
+    const previousValue = currentMember.value
     const value = member.value
     const isPrimitive = typeof value !== 'object'
     const previousIsPrimitive = typeof previousValue !== 'object'
     return (
         isPrimitive !== previousIsPrimitive ||
         (isPrimitive && value !== previousValue) ||
-        (value as ObjData).id !== (previousValue as ObjData).id
+        (value as [string])[0] !== (previousValue as [string])[0]
     )
 }
 
-export const getDisplayValue = (
-    objData: ObjData,
-    memberKeyOrValue: ObjData['members'][0]['key'] | ObjData['members'][0]['value']
-) =>
-    typeof memberKeyOrValue !== 'object'
-        ? memberKeyOrValue.toString()
-        : memberKeyOrValue.id !== objData.id
-        ? '::'
-        : ':#:'
+export const getDisplayValue = (id: string, value: schema.Value) =>
+    typeof value !== 'object' ? value.toString() : (value as [string])[0] === id ? ':#:' : '::'
 
 const classes = {
-    container: cn('d-flex flex-column'),
+    container: 'd-flex flex-column',
     title: cn('px-1', css({ fontSize: '0.5rem' })),
-    children: cn('d-flex justify-content-center', 'rounded', 'p-1', css({ background: colors.gray.light }))
+    children: cn('d-flex justify-content-center rounded p-1', css({ background: colors.gray.light }))
 }
 
 export const Base = (props: { title: string; children?: React.ReactNode }) => (
