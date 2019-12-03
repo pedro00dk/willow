@@ -2,10 +2,9 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
-import { ObjData } from '../../../../../reducers/tracer'
 import * as schema from '../../../../../schema/schema'
 import { Base, getDisplayValue, valueChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphController'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
 const classes = {
@@ -23,57 +22,52 @@ const styles = {
     background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
 }
 
-const defaultParameters = {
-    'member key': { value: '#', options: [] as string[] }
+export const defaultParameters = {
+    member: { value: '#', options: [] as string[] },
+    references: { value: 'right', options: ['right', 'bottom'] } // TODO
 }
 
-export const defaults: ReadonlySet<schema.Obj['type']> = new Set()
-export const supported: ReadonlySet<schema.Obj['type']> = new Set(['array', 'tuple', 'alist', 'llist', 'map', 'other'])
+export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
+export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'map'])
 
 export const Node = (props: {
-    objData: ObjData
+    id: string
+    obj: schema.Obj
     parameters: UnknownParameters
     onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
 }) => {
-    const previousMembers = React.useRef<ObjData['members']>([])
+    const currentMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)
 
-    React.useEffect(() => {
-        previousMembers.current = props.objData.members
-    })
+    React.useEffect(() => void (currentMembers.current = props.obj.members))
 
     return (
-        <Base title={props.objData.languageType}>
+        <Base title={props.obj.lType}>
             <div className={classes.container}>
-                {!supported.has(props.objData.type)
+                {!supported.has(props.obj.gType)
                     ? 'incompatible'
-                    : parameters['member key'] === '#'
+                    : parameters.member === '#'
                     ? 'choose'
                     : (() => {
-                          const previousFilteredMembers = previousMembers.current.filter(
-                              member =>
-                                  typeof member.key !== 'object' && member.key.toString() === parameters['member key']
+                          const filteredMembers = props.obj.members.filter(
+                              member => typeof member.key !== 'object' && member.key.toString() === parameters.member
                           )
-
-                          const filteredMembers = props.objData.members.filter(
-                              member =>
-                                  typeof member.key !== 'object' && member.key.toString() === parameters['member key']
-                          )
-
                           if (filteredMembers.length === 0) return 'not found'
                           if (filteredMembers.length > 1) return 'many found'
-
+                          const currentMember = currentMembers.current.filter(
+                              member => typeof member.key !== 'object' && member.key.toString() === parameters.member
+                          )[0]
                           const chosenMember = filteredMembers[0]
                           const isPrimitive = typeof chosenMember.value !== 'object'
-                          const changed = valueChanged(previousFilteredMembers[0], chosenMember)
-                          const displayValue = getDisplayValue(props.objData, chosenMember.value)
-                          const objectMemberKeysOrValues = [
-                              ...props.objData.members
+                          const changed = valueChanged(currentMember, chosenMember)
+                          const displayValue = getDisplayValue(props.id, chosenMember.value)
+                          const memberIds = [
+                              ...props.obj.members
                                   .filter(member => typeof member.key === 'object')
-                                  .map(member => member.key as ObjData),
-                              ...props.objData.members
+                                  .map(member => (member.key as [string])[0]),
+                              ...props.obj.members
                                   .filter(member => typeof member.value === 'object' && member !== chosenMember)
-                                  .map(member => member.value as ObjData)
+                                  .map(member => (member.value as [string])[0])
                           ]
 
                           return (
@@ -87,11 +81,7 @@ export const Node = (props: {
                                           ref={ref =>
                                               ref &&
                                               !isPrimitive &&
-                                              props.onTargetRef(
-                                                  props.objData.id,
-                                                  (chosenMember.value as ObjData).id,
-                                                  ref
-                                              )
+                                              props.onTargetRef(props.id, (chosenMember.value as [string])[0], ref)
                                           }
                                           className={classes.value}
                                       >
@@ -99,12 +89,7 @@ export const Node = (props: {
                                       </span>
                                   </div>
                                   <span
-                                      ref={ref =>
-                                          ref &&
-                                          objectMemberKeysOrValues.forEach(objData =>
-                                              props.onTargetRef(props.objData.id, objData.id, ref)
-                                          )
-                                      }
+                                      ref={ref => ref && memberIds.forEach(id => props.onTargetRef(props.id, id, ref))}
                                   />
                               </>
                           )
@@ -115,12 +100,13 @@ export const Node = (props: {
 }
 
 export const NodeParameters = (props: {
-    objData: ObjData
+    id: string
+    obj: schema.Obj
     withReset: boolean
     parameters: UnknownParameters
     onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
 }) => {
-    const memberKeyOptions = props.objData.members
+    const memberOptions = props.obj.members
         .filter(member => typeof member.key !== 'object')
         .map(member => member.key.toString())
     return (
@@ -129,9 +115,9 @@ export const NodeParameters = (props: {
             parameters={props.parameters}
             defaults={{
                 ...defaultParameters,
-                'member key': {
-                    value: defaultParameters['member key'].value,
-                    options: [defaultParameters['member key'].value, ...memberKeyOptions]
+                member: {
+                    value: defaultParameters.member.value,
+                    options: [defaultParameters.member.value, ...memberOptions]
                 }
             }}
             onChange={props.onChange}

@@ -16,8 +16,8 @@ import { Parameters } from './Parameters'
 
 const modules = {
     array: ArrayModule,
-    bars: BarsModule
-    // field: FieldModule,
+    bars: BarsModule,
+    field: FieldModule
     // map: MapModule
 }
 
