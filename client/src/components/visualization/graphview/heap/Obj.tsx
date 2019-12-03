@@ -4,7 +4,6 @@ import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
-import { ObjData } from '../../../../reducers/tracer'
 import * as schema from '../../../../schema/schema'
 import { GraphData, UnknownParameters } from '../GraphData'
 import { Draggable } from '../../../Draggable'
@@ -68,7 +67,7 @@ export const Obj = (props: {
         }
         getLinkedObjs(id, obj, depth).forEach(id => {
             const position = props.graphData.getPosition(id, index)
-            const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
+            const range = [update === 'all' ? 0 : index, props.tracer.steps.length] as [number, number]
             props.graphData.setAnimate(false)
             props.graphData.setPositionRange(id, range, { x: position.x + delta.x, y: position.y + delta.y })
             props.graphData.callSubscriptions(id)
@@ -106,22 +105,24 @@ export const Obj = (props: {
         const positionAnchor = props.graphData.getPosition(id, index)
         const sizeAnchor = props.graphData.getSize(id, index)
         const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
-        const range = [update === 'all' ? 0 : index, props.tracer.heapsData.length] as [number, number]
+        const range = [update === 'all' ? 0 : index, props.tracer.steps.length] as [number, number]
 
         const postLayout = (
-            objData: ObjData,
+            id: string,
+            obj: schema.Obj,
             depth = { x: 0, y: 0 },
             positions: { [id: string]: { x: number; y: number } } = {}
         ) => {
-            if (positions[objData.id]) return [positions, depth] as const
-            positions[objData.id] = { x: 0, y: 0 }
+            if (positions[id]) return [positions, depth] as const
+            positions[id] = { x: 0, y: 0 }
 
             const newDepth = { ...depth }
-            objData.members
-                .filter(member => typeof member.value === 'object' && structure.members.has(member.value.id))
+            obj.members
+                .filter(member => typeof member.value === 'object' && structure.members.has(member.value[0]))
                 .forEach(member => {
                     const [, updatedDepth] = postLayout(
-                        member.value as ObjData,
+                        (member.value as [string])[0],
+                        heap[(member.value as [string])[0]],
                         { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
                         positions
                     )
@@ -129,9 +130,9 @@ export const Obj = (props: {
                     newDepth.y = updatedDepth.y
                 })
             const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
-            positions[objData.id].x =
+            positions[id].x =
                 positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
-            positions[objData.id].y =
+            positions[id].y =
                 positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
             const finalDepth = {
                 x: newDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
@@ -139,7 +140,7 @@ export const Obj = (props: {
             }
             return [positions, finalDepth] as const
         }
-        const [positions] = postLayout(props.tracer.heapsData[index][structure.base])
+        const [positions] = postLayout(structure.base, heap[structure.base])
         const basePosition = positions[structure.base]
         const baseDelta = { x: positionAnchor.x - basePosition.x, y: positionAnchor.y - basePosition.y }
         props.graphData.setAnimate(true)
