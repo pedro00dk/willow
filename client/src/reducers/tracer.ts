@@ -160,12 +160,6 @@ const setIndex = (index: number): DefaultAsyncAction => async (dispatch, getStat
     dispatch({ type: 'tracer/setIndex', payload: Math.min(Math.max(index, 0), tracer.steps.length - 1) })
 }
 
-const decrementIndex = (): DefaultAsyncAction => (dispatch, getState) =>
-    setIndex(getState().tracer.index - 1)(dispatch, getState)
-
-const incrementIndex = (): DefaultAsyncAction => (dispatch, getState) =>
-    setIndex(getState().tracer.index + 1)(dispatch, getState)
-
 const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'out'): DefaultAsyncAction =>
     //
     async (dispatch, getState) => {

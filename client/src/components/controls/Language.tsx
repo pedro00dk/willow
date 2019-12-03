@@ -29,7 +29,7 @@ export const Language = () => {
     const { language } = useSelection(state => ({ language: state.language }))
     const fetching = language.fetching
     const languages = language.languages
-    const selected = language.languages[language.selected]
+    const selectedLanguage = language.languages[language.selected]
 
     React.useEffect(() => void dispatch(languageActions.fetch()), [])
 
@@ -43,7 +43,7 @@ export const Language = () => {
             </div>
             <select
                 className={classes.select}
-                defaultValue={selected}
+                defaultValue={selectedLanguage}
                 onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
             >
                 {languages.length === 0 && <option key={-1} label={fetching ? '...' : '!'} />}

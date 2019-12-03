@@ -50,7 +50,7 @@ const Body = () => (
     <div className={classes.body.container}>
         <Controls />
         <div className={classes.body.panel}>
-            <Splitter base={0.3}>
+            <Splitter baseRatio={0.3}>
                 <Editors />
                 <Visualization />
             </Splitter>
@@ -59,9 +59,9 @@ const Body = () => (
 )
 
 const Editors = () => (
-    <Splitter layout='column'>
+    <Splitter direction='column'>
         <SourceEditor />
-        <Splitter layout='column'>
+        <Splitter direction='column'>
             <InputEditor />
             <OutputEditor />
         </Splitter>
@@ -80,7 +80,7 @@ export const Visualization = () => (
         }}
         tabIndex={0}
     >
-        <Splitter layout='column' base={0.3}>
+        <Splitter direction='column' baseRatio={0.3}>
             <StackTrace />
             <GraphView />
         </Splitter>

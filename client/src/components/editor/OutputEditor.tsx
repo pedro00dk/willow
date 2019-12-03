@@ -12,7 +12,7 @@ export const OutputEditor = () => {
 
     useSelection(async state => {
         const steps = state.tracer.steps
-        if (!editor || steps == undefined || steps === currentSteps.current) return
+        if (!editor.current || !steps || steps === currentSteps.current) return
         let previous = ''
         currentOutput.current = steps.map(
             ({ prints, threw }) =>

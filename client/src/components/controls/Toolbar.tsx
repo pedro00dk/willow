@@ -20,9 +20,9 @@ const styles = {
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const { playAvailable, stepBackAvailable, stepForwardAvailable } = useSelection(state => ({
-        playAvailable: !state.tracer.fetching,
-        stepBackAvailable: state.tracer.steps && state.tracer.index > 0,
+    const { traceAvailable, stepBackwardAvailable, stepForwardAvailable } = useSelection(state => ({
+        traceAvailable: !state.tracer.fetching,
+        stepBackwardAvailable: state.tracer.steps && state.tracer.index > 0,
         stepForwardAvailable: state.tracer.steps && state.tracer.index < state.tracer.steps.length - 1
     }))
 
@@ -30,24 +30,24 @@ export const Toolbar = () => {
         <div className={classes.container}>
             <img
                 className={classes.image}
-                style={styles.image(playAvailable)}
+                style={styles.image(traceAvailable)}
                 src={playImg}
                 title={'trace'}
-                onClick={() => playAvailable && dispatch(tracerActions.trace())}
+                onClick={() => traceAvailable && dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
-                style={styles.image(stepBackAvailable, 90)}
+                style={styles.image(stepBackwardAvailable, 90)}
                 src={stepImg}
-                title='step back'
-                onClick={() => stepBackAvailable && dispatch(tracerActions.decrementIndex())}
+                title='step backward'
+                onClick={() => stepBackwardAvailable && dispatch(tracerActions.stepIndex('backward', 'into'))}
             />
             <img
                 className={classes.image}
                 style={styles.image(stepForwardAvailable, 270)}
                 src={stepImg}
                 title='step forward'
-                onClick={() => stepForwardAvailable && dispatch(tracerActions.incrementIndex())}
+                onClick={() => stepForwardAvailable && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
         </div>
     )
