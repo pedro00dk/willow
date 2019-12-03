@@ -166,4 +166,29 @@ const decrementIndex = (): DefaultAsyncAction => (dispatch, getState) =>
 const incrementIndex = (): DefaultAsyncAction => (dispatch, getState) =>
     setIndex(getState().tracer.index + 1)(dispatch, getState)
 
-export const actions = { trace, setIndex, decrementIndex, incrementIndex }
+const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'out'): DefaultAsyncAction =>
+    //
+    async (dispatch, getState) => {
+        const tracer = getState().tracer
+        if (!tracer.steps) return
+        const currentSnapshot = tracer.steps[tracer.index].snapshot
+
+        const directionFilter = (index: number) =>
+            direction === 'forward' ? index > tracer.index : index < tracer.index
+        const typeFilter = (step: schema.Step) =>
+            !currentSnapshot || !step.snapshot || type === 'into'
+                ? true
+                : type === 'over'
+                ? step.snapshot.stack.length <= currentSnapshot.stack.length
+                : type === 'out'
+                ? step.snapshot.stack.length < currentSnapshot.stack.length
+                : false
+
+        const indices = tracer.steps
+            .map((step, i) => ({ step, i }))
+            .filter(({ step, i }) => directionFilter(i) && typeFilter(step))
+            .map(({ i }) => i)
+        const index = indices[direction === 'forward' ? 0 : indices.length - 1] ?? tracer.index
+        return dispatch({ type: 'tracer/setIndex', payload: index })
+    }
+export const actions = { trace, setIndex, decrementIndex, incrementIndex, stepIndex }
