@@ -2,17 +2,6 @@ import * as schema from '../schema/schema'
 import { serverApi } from '../server'
 import { DefaultAsyncAction } from './Store'
 
-export type HeapData = {
-    [id: string]: ObjData
-}
-
-export type ObjData = {
-    id: string
-    gType: schema.Obj['gType']
-    lType: string
-    members: { key: number | string | ObjData; value: number | string | ObjData }[]
-}
-
 export type GroupData = {
     [id: string]: StructureData
 }
@@ -31,17 +20,12 @@ type State = {
     fetching: boolean
     index?: number
     steps?: schema.Step[]
-    heapsData?: HeapData[]
     groupsData?: GroupData[]
     error?: string
 }
 
 type Action =
-    | {
-          type: 'tracer/execute'
-          payload?: { steps: schema.Step[]; heapsData: HeapData[]; groupsData: GroupData[] }
-          error?: string
-      }
+    | { type: 'tracer/execute'; payload?: { steps: schema.Step[]; groupsData: GroupData[] }; error?: string }
     | { type: 'tracer/setIndex'; payload: number }
 
 const initialState: State = {
@@ -63,25 +47,14 @@ export const reducer = (state: State = initialState, action: Action): State => {
     }
 }
 
-const buildHeapsData = (steps: schema.Step[]) => {
-    let previous: HeapData = {}
-    return steps.map(({ snapshot }) => {
-        if (!snapshot) return previous
-        const heapData: HeapData = {}
-        Object.entries(snapshot.heap)
-            .map(([id, obj]) => (heapData[id] = { id, ...obj, members: [] }))
-            .forEach(objData => {
-                objData.members = snapshot.heap[objData.id].members.map(member => ({
-                    key: typeof member.key !== 'object' ? member.key : heapData[member.key[0]],
-                    value: typeof member.value !== 'object' ? member.value : heapData[member.value[0]]
-                }))
-            })
-        return (previous = heapData)
-    })
-}
-
-const buildStructureData = (objData: ObjData, parentObjData: ObjData, depth: number, structureData: StructureData) => {
-    structureData.members.add(objData.id)
+const buildStructureData = (
+    heap: schema.Snapshot['heap'],
+    id: string,
+    parentId: string,
+    depth: number,
+    structureData: StructureData
+) => {
+    structureData.members.add(id)
     structureData.depth = Math.max(structureData.depth, depth)
     structureData.type =
         structureData.members.size === 1
@@ -91,35 +64,35 @@ const buildStructureData = (objData: ObjData, parentObjData: ObjData, depth: num
             : !structureData.hasCrossEdge
             ? 'tree'
             : 'unknown'
-    objData.members
-        .filter(member => typeof member.value === 'object' && member.value?.lType === objData.lType)
-        .map(member => member.value as ObjData)
-        .forEach(value => {
-            if (!structureData.members.has(value.id))
-                return buildStructureData(value, objData, depth + 1, structureData)
-            structureData.hasCycleEdge = structureData.hasCycleEdge || value === objData
-            structureData.hasParentEdge = structureData.hasParentEdge || value === parentObjData
-            structureData.hasCrossEdge = structureData.hasCrossEdge || (value !== objData && value !== parentObjData)
+    heap[id].members
+        .filter(member => typeof member.value === 'object' && heap[member.value[0]].lType === heap[id].lType)
+        .map(member => (member.value as [string])[0])
+        .forEach(memberId => {
+            if (!structureData.members.has(memberId))
+                return buildStructureData(heap, memberId, id, depth + 1, structureData)
+            structureData.hasCycleEdge = structureData.hasCycleEdge || memberId === id
+            structureData.hasParentEdge = structureData.hasParentEdge || memberId === parentId
+            structureData.hasCrossEdge = structureData.hasCrossEdge || (memberId !== id && memberId !== parentId)
         })
     return structureData
 }
 
-const buildGroupsData = (steps: schema.Step[], heapsData: HeapData[]) => {
+const buildGroupsData = (steps: schema.Step[]) => {
     let previous: GroupData = {}
     return steps.map(({ snapshot }, i) => {
         if (!snapshot) return previous
         const groupData: GroupData = {}
-        const heapData = heapsData[i]
         const references = snapshot.stack
             .flatMap(scope => scope.variables)
             .filter(variable => typeof variable.value === 'object')
-            .map(variable => (variable.value as string[])[0])
+            .map(variable => (variable.value as [string])[0])
             .map(id => [id, snapshot.heap[id].members] as const)
             .map(([id, members]) => [id, members.filter(member => typeof member.value === 'object')] as const)
-            .flatMap(([id, members]) => [id, ...members.map(member => (member.value as string[])[0])])
+            .flatMap(([id, members]) => [id, ...members.map(member => (member.value as [string])[0])])
+        const heap = snapshot?.heap ?? {}
         new Set(references).forEach(id => {
             if (groupData[id]) return
-            const structureData = buildStructureData(heapData[id], undefined, 1, {
+            const structureData = buildStructureData(heap, id, undefined, 1, {
                 base: id,
                 depth: 0,
                 members: new Set(),
@@ -146,9 +119,8 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
             })
         ).data
         const steps = result.steps
-        const heapsData = buildHeapsData(steps)
-        const groupsData = buildGroupsData(steps, heapsData)
-        dispatch({ type: 'tracer/execute', payload: { steps, heapsData, groupsData } })
+        const groupsData = buildGroupsData(steps)
+        dispatch({ type: 'tracer/execute', payload: { steps, groupsData } })
     } catch (error) {
         dispatch({ type: 'tracer/execute', error: error.response ? error.response.data : error.toString() })
     }

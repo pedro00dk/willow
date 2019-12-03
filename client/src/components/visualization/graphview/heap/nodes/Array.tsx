@@ -64,7 +64,6 @@ export const Node = (props: {
                           <div className={'d-flex'} style={{ flexDirection: parameters.direction as any }}>
                               {chunk.map((member, j) => {
                                   const memberIndex = i * chunkSize + j
-                                  console.log(memberIndex, chunkSize, i, j)
                                   const showIndex = !parameters['wrap index'] ? memberIndex : j
                                   const isPrimitive = typeof member.value !== 'object'
                                   const changed = valueChanged(currentMembers.current[memberIndex], member)
