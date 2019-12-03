@@ -15,8 +15,8 @@ import * as MapModule from './nodes/Map'
 import { Parameters } from './Parameters'
 
 const modules = {
-    array: ArrayModule
-    // bars: BarsModule,
+    array: ArrayModule,
+    bars: BarsModule
     // field: FieldModule,
     // map: MapModule
 }
@@ -50,7 +50,7 @@ export const Obj = (props: {
     const nodeName =
         selector === 'id' ? graphData.getNodeName(id, defaultNode) : graphData.getTypeNodeName(lType, defaultNode)
     const parameters = selector === 'id' ? props.graphData.getParameters(id) : props.graphData.getTypeParameters(lType)
-    const { Node, defaultParameters } = modules[nodeName as keyof typeof modules]
+    const { Node, NodeParameters } = modules[nodeName as keyof typeof modules]
 
     const updatePosition = (delta: { x: number; y: number }, depth: number, update: 'from' | 'all') => {
         const getLinkedObjs = (id: string, obj: schema.Obj, depth = 0, pool = new Set<string>()) => {
@@ -210,10 +210,11 @@ export const Obj = (props: {
                 </Submenu>
                 <Separator />
                 <Submenu label='parameters'>
-                    <Parameters
+                    <NodeParameters
+                        id={id}
+                        obj={obj}
                         withReset
                         parameters={parameters}
-                        defaults={defaultParameters}
                         onChange={(updatedParameters: UnknownParameters) => {
                             selector === 'id'
                                 ? props.graphData.setParameters(id, updatedParameters)

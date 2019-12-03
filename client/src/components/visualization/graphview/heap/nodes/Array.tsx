@@ -4,7 +4,8 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
 import { Base, getDisplayValue, valueChanged } from '../../Base'
-import { readParameters, UnknownParameters } from '../../GraphData'
+import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
+import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex text-nowrap',
@@ -21,7 +22,7 @@ const styles = {
     background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
 }
 
-export const defaultParameters = {
+const defaultParameters = {
     index: { value: true },
     width: { value: 30, range: [5, 100] as [number, number] },
     direction: { value: 'row', options: ['row', 'column'] },
@@ -101,3 +102,18 @@ export const Node = (props: {
         </Base>
     )
 }
+
+export const NodeParameters = (props: {
+    id: string
+    obj: schema.Obj
+    withReset: boolean
+    parameters: UnknownParameters
+    onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
+}) => (
+    <Parameters
+        withReset={props.withReset}
+        parameters={props.parameters}
+        defaults={defaultParameters}
+        onChange={props.onChange}
+    />
+)
