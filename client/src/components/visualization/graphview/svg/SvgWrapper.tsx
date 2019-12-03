@@ -1,7 +1,8 @@
 import { css } from 'emotion'
 import React from 'react'
-import { GraphController } from './GraphController'
-import { colors } from '../../../colors'
+import { colors } from '../../../../colors'
+import { GraphData } from '../GraphData'
+import { lerp } from './SvgView'
 
 const classes = {
     container: css({ cursor: 'move' }),
@@ -10,15 +11,11 @@ const classes = {
 
 export const SvgWrapper = (props: {
     id: string
-    paths: number
-    controller: GraphController
-    updateGraph: React.Dispatch<{}>
+    controller: GraphData
     children?: React.ReactNode
 }) => {
     const ref = React.useRef<SVGForeignObjectElement>()
     const pathsRef = React.useRef<SVGForeignObjectElement>()
-
-    const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
     const computePath = (
         sourcePosition: { x: number; y: number },
@@ -98,11 +95,9 @@ export const SvgWrapper = (props: {
                 {props.children}
             </foreignObject>
             <g ref={pathsRef}>
-                {[...Array(props.paths).keys()].map(i => (
-                    <path key={i} className={classes.path} markerEnd='url(#pointer)'>
+                    {/* <path key={i} className={classes.path} markerEnd='url(#pointer)'>
                         <animate attributeName='d' attributeType='XML' begin='indefinite' fill='freeze' />
-                    </path>
-                ))}
+                    </path> */}
             </g>
         </>
     )
