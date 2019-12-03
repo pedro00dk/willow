@@ -1,6 +1,6 @@
 import React from 'react'
 import { Item } from 'react-contexify'
-import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from '../GraphController'
+import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from '../GraphData'
 
 const BooleanParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
