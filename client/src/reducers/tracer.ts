@@ -185,4 +185,4 @@ const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'o
         const index = indices[direction === 'forward' ? 0 : indices.length - 1] ?? tracer.index
         return dispatch({ type: 'tracer/setIndex', payload: index })
     }
-export const actions = { trace, setIndex, decrementIndex, incrementIndex, stepIndex }
+export const actions = { trace, setIndex, stepIndex }

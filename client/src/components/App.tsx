@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../colors'
-import { DefaultStore } from '../reducers/Store'
+import { DefaultStore, useDispatch } from '../reducers/Store'
 import { actions as tracerActions } from '../reducers/tracer'
 import logo from '../../public/logo.svg'
 import { Controls } from './controls/Controls'
@@ -68,21 +68,27 @@ const Editors = () => (
     </Splitter>
 )
 
-export const Visualization = () => (
-    <div
-        className={classes.visualization}
-        onKeyDown={event => {
-            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-            tracerActions.stepIndex(
-                event.key === 'ArrowLeft' ? 'backward' : 'forward',
-                !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'
-            )
-        }}
-        tabIndex={0}
-    >
-        <Splitter direction='column' baseRatio={0.3}>
-            <StackTrace />
-            <GraphView />
-        </Splitter>
-    </div>
-)
+export const Visualization = () => {
+    const dispatch = useDispatch()
+
+    return (
+        <div
+            className={classes.visualization}
+            onKeyDown={event => {
+                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+                dispatch(
+                    tracerActions.stepIndex(
+                        event.key === 'ArrowLeft' ? 'backward' : 'forward',
+                        !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'
+                    )
+                )
+            }}
+            tabIndex={0}
+        >
+            <Splitter direction='column' baseRatio={0.3}>
+                <StackTrace />
+                <GraphView />
+            </Splitter>
+        </div>
+    )
+}
