@@ -13,11 +13,10 @@ export const OutputEditor = () => {
     useSelection(async state => {
         const steps = state.tracer.steps
         if (!editor.current || !steps || steps === currentSteps.current) return
-        let previous = ''
-        currentOutput.current = steps.map(
-            ({ prints, threw }) =>
-                (previous = `${previous}${threw?.cause ?? threw?.exception.traceback ?? ''}${prints ?? ''}`)
-        )
+        currentOutput.current = steps.reduce((acc, { prints, threw }) => {
+            acc.push(`${acc[acc.length - 1] ?? ''}${threw?.cause ?? threw?.exception.traceback ?? ''}${prints ?? ''}`)
+            return acc
+        }, [] as string[])
         currentSteps.current = steps
     })
 
