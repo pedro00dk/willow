@@ -4,7 +4,10 @@ import * as React from 'react'
 import { colors } from '../../../colors'
 import * as schema from '../../../schema/schema'
 
-export const memberChanged = (currentMember: schema.Member, member: schema.Member) => {
+export const memberChanged = (
+    currentMember: schema.Member | schema.Variable,
+    member: schema.Member | schema.Variable
+) => {
     if ((!currentMember && member) || (!member && currentMember)) return true
     if (!currentMember && !member) return false
     return valueChanged(currentMember.value, member.value)
