@@ -1,6 +1,5 @@
 import React from 'react'
 import { DefaultState } from '../../../../reducers/Store'
-import * as schema from '../../../../schema/schema'
 import { GraphData } from '../GraphData'
 
 export const Stack = (props: {
