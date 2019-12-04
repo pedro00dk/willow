@@ -64,13 +64,14 @@ export const Obj = (props: {
                 })
             return pool
         }
-        getLinkedObjs(id, obj, depth).forEach(id => {
+        const linkedObjs = getLinkedObjs(id, obj, depth)
+        linkedObjs.forEach(id => {
             const position = props.graphData.getPosition(id, index)
             const range = [update === 'all' ? 0 : index, props.tracer.steps.length] as [number, number]
             props.graphData.setAnimate(false)
             props.graphData.setPositionRange(id, range, { x: position.x + delta.x, y: position.y + delta.y })
-            props.graphData.callSubscriptions(id)
         })
+        linkedObjs.forEach(id => props.graphData.callSubscriptions(id))
     }
 
     const updateSize = () => {
@@ -147,8 +148,8 @@ export const Obj = (props: {
             position.x += baseDelta.x
             position.y += baseDelta.y
             props.graphData.setPositionRange(id, range, position)
-            props.graphData.callSubscriptions(id)
         })
+        Object.keys(positions).forEach(id => props.graphData.callSubscriptions(id))
     }
 
     return (
