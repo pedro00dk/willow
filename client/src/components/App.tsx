@@ -12,6 +12,7 @@ import { SourceEditor } from './editor/SourceEditor'
 import { Splitter } from './Splitter'
 import { StackTrace } from './visualization/stacktrace/StackTrace'
 import { GraphView } from './visualization/graphview/GraphView'
+import { Stack } from './visualization/stack/Stack'
 
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
@@ -86,7 +87,10 @@ export const Visualization = () => {
             tabIndex={0}
         >
             <Splitter direction='column' baseRatio={0.3}>
-                <StackTrace />
+                <Splitter baseRatio={0.2} minRatio={0.1} maxRatio={0.4}>
+                    <Stack />
+                    <StackTrace />
+                </Splitter>
                 <GraphView />
             </Splitter>
         </div>
