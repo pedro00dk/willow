@@ -6,7 +6,7 @@ import { lerp } from './SvgView'
 
 const classes = {
     container: css({ cursor: 'move' }),
-    path: css({ stroke: colors.gray.dark, strokeWidth: 2, fill: 'none' })
+    path: css({ stroke: colors.gray.dark, strokeWidth: 1, fill: 'none' })
 }
 
 export const SvgWrapper = (props: { id: string; graphData: GraphData; children?: React.ReactNode }) => {
@@ -32,19 +32,6 @@ export const SvgWrapper = (props: { id: string; graphData: GraphData; children?:
 
     return (
         <>
-            <defs>
-                <marker
-                    id='pointer'
-                    markerWidth={10}
-                    markerHeight={8}
-                    refX={8}
-                    refY={4}
-                    orient='auto'
-                    markerUnits='userSpaceOnUse'
-                >
-                    <polyline className={classes.path} points='0 0, 10 4, 0 8' />
-                </marker>
-            </defs>
             <foreignObject ref={ref} className={classes.container}>
                 {props.children}
             </foreignObject>
@@ -53,17 +40,23 @@ export const SvgWrapper = (props: { id: string; graphData: GraphData; children?:
     )
 }
 
+// TODO refactor
 const SvgPaths = (props: { id: string; graphData: GraphData }) => {
     const ref = React.useRef<SVGGElement>()
     const [pathsCount, setPathsCount] = React.useState(0)
 
+    // TODO organize stack computation
     const computePathData = (
         sourcePosition: { x: number; y: number },
         delta: { x: number; y: number },
         targetPosition: { x: number; y: number },
-        targetSize: { x: number; y: number }
+        targetSize: { x: number; y: number },
+        line: boolean = false
     ) => {
         const source = { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
+        if (line)
+            // return `M ${source.x + targetSize.x},${source.y} L ${targetPosition.x + targetSize.x},${targetPosition.y}`
+            return `M ${targetPosition.x + targetSize.x},${targetPosition.y} L ${source.x + targetSize.x},${source.y} `
         const target = {
             x: Math.min(Math.max(source.x, targetPosition.x), targetPosition.x + targetSize.x),
             y: Math.min(Math.max(source.y, targetPosition.y), targetPosition.y + targetSize.y)
@@ -77,17 +70,29 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
 
     const updatePaths = (subscriptionCall?: number) => {
         const targets = props.graphData.getTargets(props.id)
-        const paths = ref.current.children
+        const groups = ref.current.children
         if (pathsCount !== targets.length) return
-        targets.forEach(({ target, delta }, i) => {
-            const path = paths.item(i)
-            const animate = path.firstElementChild as SVGAnimateElement
+        // TODO reverse because stack references are move volatile and added first, (not to cause a mess)
+        ;[...targets].reverse().forEach(({ target, delta, text }, i) => {
+            const group = groups.item(i)
+            const path = group.firstElementChild as SVGPathElement
+            const animate = group.firstElementChild.firstElementChild as SVGAnimateElement
+            const textPath = group.lastElementChild.firstElementChild as SVGTextPathElement
             const sourcePosition = props.graphData.getPosition(props.id, props.graphData.getIndex())
             const targetPosition = props.graphData.getPosition(target, props.graphData.getIndex())
             const targetSize = props.graphData.getSize(target, props.graphData.getIndex())
-            if (!targetPosition) return console.log('no target')
-            const data = computePathData(sourcePosition, delta, targetPosition, targetSize)
+            const data = computePathData(sourcePosition, delta, targetPosition, targetSize, props.id === target)
             const currentData = animate.getAttribute('to')
+            textPath.textContent = text
+
+            // TODO text goes upside-down if path points left (see computePathData), fix marker
+            if (text !== undefined) {
+                path.setAttribute('marker-start', 'url(#start-pointer)')
+                path.setAttribute('marker-end', '')
+            } else {
+                path.setAttribute('marker-start', '')
+                path.setAttribute('marker-end', 'url(#end-pointer)')
+            }
             if (data === currentData) return
             animate.setAttribute('from', currentData)
             animate.setAttribute('to', data)
@@ -104,12 +109,49 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
     })
 
     return (
-        <g ref={ref}>
-            {[...Array(pathsCount).keys()].map(i => (
-                <path key={i} className={classes.path} markerEnd='url(#pointer)'>
-                    <animate attributeName='d' attributeType='XML' begin='indefinite' fill='freeze' dur="0.4s"/>
-                </path>
-            ))}
-        </g>
+        <>
+            <defs>
+                <marker
+                    id='start-pointer'
+                    markerWidth={10}
+                    markerHeight={8}
+                    refX={8}
+                    refY={4}
+                    orient='auto'
+                    markerUnits='userSpaceOnUse'
+                >
+                    <polyline className={classes.path} points='10 0, 0 4, 10 8' />
+                </marker>
+                <marker
+                    id='end-pointer'
+                    markerWidth={10}
+                    markerHeight={8}
+                    refX={8}
+                    refY={4}
+                    orient='auto'
+                    markerUnits='userSpaceOnUse'
+                >
+                    <polyline className={classes.path} points='0 0, 10 4, 0 8' />
+                </marker>
+            </defs>
+            <g ref={ref}>
+                {[...Array(pathsCount).keys()].map(i => (
+                    <g key={i}>
+                        <path id={`${props.id}-${i}`} className={classes.path} markerEnd='url(#end-pointer)'>
+                            <animate
+                                attributeName='d'
+                                attributeType='XML'
+                                begin='indefinite'
+                                fill='freeze'
+                                dur='0.4s'
+                            />
+                        </path>
+                        <text style={{ fontSize: '0.5rem' }}>
+                            <textPath xlinkHref={`#${props.id}-${i}`} startOffset='50%' textAnchor='middle' />
+                        </text>
+                    </g>
+                ))}
+            </g>
+        </>
     )
 }
