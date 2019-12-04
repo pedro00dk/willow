@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, valueChanged } from '../../Base'
+import { Base, getDisplayValue, memberChanged } from '../../Base'
 import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
@@ -84,7 +84,7 @@ export const Node = (props: {
                           const ratios =
                               parameters['mode'] === 'delta' ? computeDeltaRatios(values) : computeFixedRatios(values)
                           return props.obj.members.map((member, i) => {
-                              const changed = valueChanged(currentMembers.current[i], member)
+                              const changed = memberChanged(currentMembers.current[i], member)
                               const displayValue = getDisplayValue(props.id, member.value)
 
                               return (

@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, valueChanged } from '../../Base'
+import { Base, getDisplayValue, memberChanged } from '../../Base'
 import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
@@ -60,7 +60,7 @@ export const Node = (props: {
                           )[0]
                           const chosenMember = filteredMembers[0]
                           const isPrimitive = typeof chosenMember.value !== 'object'
-                          const changed = valueChanged(currentMember, chosenMember)
+                          const changed = memberChanged(currentMember, chosenMember)
                           const displayValue = getDisplayValue(props.id, chosenMember.value)
                           const memberIds = [
                               ...props.obj.members

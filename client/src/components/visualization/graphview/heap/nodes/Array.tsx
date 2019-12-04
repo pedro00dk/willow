@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, valueChanged } from '../../Base'
+import { Base, getDisplayValue, memberChanged } from '../../Base'
 import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
@@ -68,7 +68,7 @@ export const Node = (props: {
                                   const memberIndex = i * chunkSize + j
                                   const showIndex = !parameters['wrap index'] ? memberIndex : j
                                   const isPrimitive = typeof member.value !== 'object'
-                                  const changed = valueChanged(currentMembers.current[memberIndex], member)
+                                  const changed = memberChanged(currentMembers.current[memberIndex], member)
                                   const displayValue = getDisplayValue(props.id, member.value)
 
                                   return (

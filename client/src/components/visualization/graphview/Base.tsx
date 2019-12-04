@@ -4,17 +4,19 @@ import * as React from 'react'
 import { colors } from '../../../colors'
 import * as schema from '../../../schema/schema'
 
-export const valueChanged = (currentMember: schema.Member, member: schema.Member) => {
+export const memberChanged = (currentMember: schema.Member, member: schema.Member) => {
     if ((!currentMember && member) || (!member && currentMember)) return true
     if (!currentMember && !member) return false
-    const previousValue = currentMember.value
-    const value = member.value
+    return valueChanged(currentMember.value, member.value)
+}
+
+export const valueChanged = (currentValue: schema.Value, value: schema.Value) => {
     const isPrimitive = typeof value !== 'object'
-    const previousIsPrimitive = typeof previousValue !== 'object'
+    const previousIsPrimitive = typeof currentValue !== 'object'
     return (
         isPrimitive !== previousIsPrimitive ||
-        (isPrimitive && value !== previousValue) ||
-        (value as [string])[0] !== (previousValue as [string])[0]
+        (isPrimitive && value !== currentValue) ||
+        (value as [string])[0] !== (currentValue as [string])[0]
     )
 }
 

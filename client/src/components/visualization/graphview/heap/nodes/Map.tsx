@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, valueChanged } from '../../Base'
+import { Base, getDisplayValue, memberChanged } from '../../Base'
 import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
 import { Parameters } from '../Parameters'
 
@@ -66,7 +66,7 @@ export const Node = (props: {
                     : props.obj.members.map((member, i) => {
                           const keyIsPrimitive = typeof member.key !== 'object'
                           const valueIsPrimitive = typeof member.value !== 'object'
-                          const changed = valueChanged(previousMembers.current[i], member)
+                          const changed = memberChanged(previousMembers.current[i], member)
                           const keyDisplayValue = getDisplayValue(props.id, member.key)
                           const valueDisplayValue = getDisplayValue(props.id, member.value)
 
