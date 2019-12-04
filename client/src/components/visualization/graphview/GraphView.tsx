@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelection } from '../../../reducers/Store'
 import { GraphData } from './GraphData'
 import { Heap } from './heap/Heap'
+import { Stack } from './stack/Stack'
 import { SvgView } from './svg/SvgView'
 
 const classes = {
@@ -20,6 +21,7 @@ export const GraphView = React.memo(() => {
     return (
         <div className={classes.container}>
             <SvgView graphData={graphData.current}>
+                <Stack graphData={graphData.current} forceUpdate={forceUpdate} tracer={tracer} />
                 <Heap graphData={graphData.current} forceUpdate={forceUpdate} tracer={tracer} />
             </SvgView>
         </div>
