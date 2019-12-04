@@ -114,24 +114,24 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
                 <marker
                     id='start-pointer'
                     markerWidth={10}
-                    markerHeight={8}
-                    refX={8}
-                    refY={4}
+                    markerHeight={6}
+                    refX={0}
+                    refY={3}
                     orient='auto'
                     markerUnits='userSpaceOnUse'
                 >
-                    <polyline className={classes.path} points='10 0, 0 4, 10 8' />
+                    <polyline className={classes.path} points='10 0, 0 3, 10 6' />
                 </marker>
                 <marker
                     id='end-pointer'
                     markerWidth={10}
-                    markerHeight={8}
-                    refX={8}
-                    refY={4}
+                    markerHeight={6}
+                    refX={10}
+                    refY={3}
                     orient='auto'
                     markerUnits='userSpaceOnUse'
                 >
-                    <polyline className={classes.path} points='0 0, 10 4, 0 8' />
+                    <polyline className={classes.path} points='0 0, 10 3, 0 6' />
                 </marker>
             </defs>
             <g ref={ref}>
