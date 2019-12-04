@@ -10,8 +10,7 @@ import { Parameters } from '../Parameters'
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
     element: cn(
-        'd-inline-flex flex-column',
-        'px-1',
+        'd-inline-flex flex-column px-1',
         css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
     ),
     index: cn('text-truncate', css({ fontSize: '0.5rem' })),

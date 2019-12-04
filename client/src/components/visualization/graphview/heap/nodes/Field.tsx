@@ -9,9 +9,9 @@ import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex align-items-center text-nowrap',
+    elements: 'd-flex',
     element: cn(
-        'd-inline-flex flex-column',
-        'px-1',
+        'd-inline-flex flex-column px-1',
         css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
     ),
     index: cn('text-truncate', css({ fontSize: '0.5rem' })),
@@ -19,12 +19,13 @@ const classes = {
 }
 
 const styles = {
+    direction: (references: 'right' | 'bottom') => (references === 'right' ? 'row' : 'column'),
     background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
 }
 
 export const defaultParameters = {
     member: { value: '#', options: [] as string[] },
-    references: { value: 'right', options: ['right', 'bottom'] } // TODO
+    references: { value: 'right', options: ['right', 'bottom'] }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
@@ -71,10 +72,15 @@ export const Node = (props: {
                           ]
 
                           return (
-                              <>
+                              <div
+                                  className={classes.elements}
+                                  style={{ flexDirection: parameters.references === 'right' ? 'row' : 'column' }}
+                              >
                                   <div
                                       className={classes.element}
-                                      style={{ background: styles.background(changed) }}
+                                      style={{
+                                          background: styles.background(changed)
+                                      }}
                                       title={displayValue}
                                   >
                                       <span
@@ -91,7 +97,7 @@ export const Node = (props: {
                                   <span
                                       ref={ref => ref && memberIds.forEach(id => props.onTargetRef(props.id, id, ref))}
                                   />
-                              </>
+                              </div>
                           )
                       })()}
             </div>
