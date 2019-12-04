@@ -12,7 +12,7 @@ export const Heap = (props: {
     <>
         {props.tracer.steps &&
             Object.entries(props.tracer.steps[props.graphData.getIndex()].snapshot?.heap ?? {}).map(([id, obj]) => (
-                <SvgWrapper key={id} id={id} controller={props.graphData}>
+                <SvgWrapper key={id} id={id} graphData={props.graphData}>
                     <Obj id={id} obj={obj} {...props} />
                 </SvgWrapper>
             ))}
