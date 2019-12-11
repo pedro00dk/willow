@@ -1,21 +1,11 @@
-FROM node:12-alpine
+FROM node:13-alpine
 
 WORKDIR /app
 ADD ./package.json ./
 
 RUN npm install
 
-RUN echo \
-    '{\
-    "compilerOptions":{\
-    "allowJs":true,\
-    "downlevelIteration":true,\
-    "lib":["dom", "esnext"],\
-    "outDir": "./dist/",\
-    "target":"esnext"\
-    }\
-    }' > ./tsconfig.json
-
+ADD ./tsconfig.json ./
 ADD ./public ./public
 ADD ./src ./src
 

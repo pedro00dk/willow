@@ -8,11 +8,9 @@ RUN apk update &&\
 
 ADD ./package.json ./
 
-RUN npm install &&\
-    echo \
-        '{"compilerOptions":{"downlevelIteration":true,"lib":["esnext"],"outDir": "./dist/","target":"es5"}}' \
-        > ./tsconfig.json
+RUN npm install
 
+ADD ./tsconfig.json ./
 ADD ./src ./src
 ADD ./test ./test
 
