@@ -14,7 +14,7 @@ export class GraphData {
     private animate: boolean = true
     private positions: { [id: string]: { x: number; y: number }[] } = {}
     private sizes: { [id: string]: { x: number; y: number }[] } = {}
-    private targets: { [id: string]: { target: string; delta: { x: number; y: number }; text?: string }[] } = {}
+    private targets: { [id: string]: { target: string; delta: { x: number; y: number }; text: string }[] } = {}
     private selector: { [id: string]: 'id' | 'type' } = {}
     private nodeName: { [id: string]: string } = {}
     private parameters: { [id: string]: UnknownParameters } = {}
@@ -73,11 +73,11 @@ export class GraphData {
         return size
     }
 
-    getTargets(id: string, def: { target: string; delta: { x: number; y: number }; text?: string }[] = []) {
+    getTargets(id: string, def: { target: string; delta: { x: number; y: number }; text: string }[] = []) {
         return this.targets[id] ?? this.setTargets(id, def)
     }
 
-    setTargets(id: string, targets: { target: string; delta: { x: number; y: number }; text?: string }[]) {
+    setTargets(id: string, targets: { target: string; delta: { x: number; y: number }; text: string }[]) {
         return (this.targets[id] = targets)
     }
 
