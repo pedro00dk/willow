@@ -21,13 +21,10 @@ export const Stack = (props: {
             return acc
         }, {} as { [id: string]: string[] })
 
-    console.log(variables)
     Object.entries(variables).forEach(([id, names]) =>
         names.forEach((name, i) => {
             const angle = (i * 20 + 5) * (Math.PI / 180)
-            console.log(angle)
             const delta = { x: deltaSize * Math.cos(angle), y: deltaSize * -Math.sin(angle) }
-            console.log(delta)
             props.graphData.getTargets(id).push({ target: id, delta, text: name })
         })
     )
