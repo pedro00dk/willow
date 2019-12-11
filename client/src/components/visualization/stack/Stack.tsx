@@ -5,7 +5,7 @@ import { memberChanged, getDisplayValue } from '../graphview/Base'
 import { colors } from '../../../colors'
 
 const classes = {
-    container: 'd-flex flex-column w-100 h-100',
+    container: 'd-flex flex-column position-absolute flex-nowrap overflow-auto',
     table: 'table table-sm table-hover table-striped table-bordered w-100',
     header: 'thread-light w-100',
     body: 'w-100',
@@ -19,12 +19,23 @@ const styles = {
     changed: (changed: boolean) => (changed ? colors.red.lighter : undefined)
 }
 
-// TODO refactor css classes
 export const Stack = () => {
+    const ref = React.useRef<HTMLDivElement>()
+    const [size, setSize] = React.useState({ x: 0, y: 0 })
     const { tracer } = useSelection(state => ({ tracer: state.tracer }))
 
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            const parentSize = { x: ref.current.parentElement.clientWidth, y: ref.current.parentElement.clientHeight }
+            if (size.x === parentSize.x && size.y === parentSize.y) return
+            setSize(parentSize)
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [ref.current, size])
+
     return (
-        <div className={classes.container}>
+        <div ref={ref} className={classes.container} style={{ width: size.x - 1, height: size.y - 1 }}>
             {(tracer.steps?.[tracer.index].snapshot?.stack ?? []).map(scope => (
                 <Scope scope={scope} />
             ))}
