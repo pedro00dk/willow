@@ -60,7 +60,7 @@ const Body = () => (
 )
 
 const Editors = () => (
-    <Splitter direction='column'>
+    <Splitter direction='column' baseRatio={0.66}>
         <SourceEditor />
         <Splitter direction='column'>
             <InputEditor />
@@ -69,7 +69,7 @@ const Editors = () => (
     </Splitter>
 )
 
-export const Visualization = () => {
+const Visualization = () => {
     const dispatch = useDispatch()
 
     return (
@@ -86,7 +86,7 @@ export const Visualization = () => {
             }}
             tabIndex={0}
         >
-            <Splitter direction='column' baseRatio={0.3}>
+            <Splitter direction='column' baseRatio={0.35}>
                 <Splitter baseRatio={0.2} minRatio={0.1} maxRatio={0.4}>
                     <Stack />
                     <StackTrace />
