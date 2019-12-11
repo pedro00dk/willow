@@ -86,7 +86,7 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
                 y: ref.current.parentElement.clientHeight
             }
             const svgSize = { x: ref.current.clientWidth, y: ref.current.clientHeight }
-            if (containerSize.x !== svgSize.x || containerSize.y === svgSize.y) {
+            if (containerSize.x !== svgSize.x || containerSize.y !== svgSize.y) {
                 ref.current.setAttribute('width', containerSize.x.toString())
                 ref.current.setAttribute('height', containerSize.y.toString())
             }
