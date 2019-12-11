@@ -8,7 +8,7 @@ export const Stack = (props: {
     tracer: DefaultState['tracer']
 }) => {
     if (!props.tracer.steps) return <></>
-    const deltaSize = props.graphData.getGraphSize().x * 0.04
+    const deltaSize = props.graphData.getGraphSize().x * 0.05
     const stack = props.tracer.steps[props.graphData.getIndex()].snapshot?.stack ?? []
     const variables = stack
         .flatMap(scope => scope.variables)
@@ -23,8 +23,8 @@ export const Stack = (props: {
 
     Object.entries(variables).forEach(([id, names]) =>
         names.forEach((name, i) => {
-            const angle = (i * 20 + 5) * (Math.PI / 180)
-            const delta = { x: deltaSize * Math.cos(angle), y: deltaSize * -Math.sin(angle) }
+            const angle = (i * 20 + 10) * (Math.PI / 180)
+            const delta = { x: -deltaSize * Math.cos(angle), y: deltaSize * -Math.sin(angle) }
             props.graphData.getTargets(id).push({ target: id, delta, text: name })
         })
     )

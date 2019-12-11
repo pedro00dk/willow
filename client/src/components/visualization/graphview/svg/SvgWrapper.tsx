@@ -51,51 +51,39 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
         delta: { x: number; y: number },
         targetPosition: { x: number; y: number },
         targetSize: { x: number; y: number },
-        line: boolean = false
+        curvature: number = 0.2
     ) => {
-        const source = { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
-        if (line)
-            // return `M ${source.x + targetSize.x},${source.y} L ${targetPosition.x + targetSize.x},${targetPosition.y}`
-            return `M ${targetPosition.x + targetSize.x},${targetPosition.y} L ${source.x + targetSize.x},${source.y} `
-        const target = {
+        let source = { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
+        let target = {
             x: Math.min(Math.max(source.x, targetPosition.x), targetPosition.x + targetSize.x),
             y: Math.min(Math.max(source.y, targetPosition.y), targetPosition.y + targetSize.y)
         }
         const center = { x: lerp(source.x, target.x, 0.5), y: lerp(source.y, target.y, 0.5) }
-        const parallelVector = { x: target.x - source.x, y: target.y - source.y }
-        const orthogonalVector = { x: parallelVector.y / 4, y: -parallelVector.x / 4 }
-        const control = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
+        const parallel = { x: target.x - source.x, y: target.y - source.y }
+        const orthogonal = { x: parallel.y * curvature, y: -parallel.x * curvature }
+        const control = { x: center.x + orthogonal.x, y: center.y + orthogonal.y }
         return `M ${source.x},${source.y} Q ${control.x},${control.y} ${target.x},${target.y}`
     }
 
     const updatePaths = (subscriptionCall?: number) => {
         const targets = props.graphData.getTargets(props.id)
         const groups = ref.current.children
-        if (pathsCount !== targets.length) return
-        // TODO reverse because stack references are move volatile and added first, (not to cause a mess)
+        if (pathsCount !== targets.length)
+            return // TODO reverse because stack references are move volatile and added first, (not to cause a mess)
         ;[...targets].reverse().forEach(({ target, delta, text }, i) => {
             const group = groups.item(i)
-            const path = group.firstElementChild as SVGPathElement
             const animate = group.firstElementChild.firstElementChild as SVGAnimateElement
             const textPath = group.lastElementChild.firstElementChild as SVGTextPathElement
             const sourcePosition = props.graphData.getPosition(props.id, props.graphData.getIndex())
             const targetPosition = props.graphData.getPosition(target, props.graphData.getIndex())
             const targetSize = props.graphData.getSize(target, props.graphData.getIndex())
-            const data = computePathData(sourcePosition, delta, targetPosition, targetSize, props.id === target)
+            const curvature = props.id !== target ? 0.2 : 0
+            const data = computePathData(sourcePosition, delta, targetPosition, targetSize, curvature)
             const currentData = animate.getAttribute('to')
             textPath.textContent = text
-
-            // TODO text goes upside-down if path points left (see computePathData), fix marker
-            if (text !== undefined) {
-                path.setAttribute('marker-start', 'url(#start-pointer)')
-                path.setAttribute('marker-end', '')
-            } else {
-                path.setAttribute('marker-start', '')
-                path.setAttribute('marker-end', 'url(#end-pointer)')
-            }
-            if (data === currentData) return
             animate.setAttribute('from', currentData)
             animate.setAttribute('to', data)
+            if (data === currentData) return
             ;(animate as any).beginElement()
         })
     }
@@ -112,17 +100,6 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
         <>
             <defs>
                 <marker
-                    id='start-pointer'
-                    markerWidth={10}
-                    markerHeight={6}
-                    refX={0}
-                    refY={3}
-                    orient='auto'
-                    markerUnits='userSpaceOnUse'
-                >
-                    <polyline className={classes.path} points='10 0, 0 3, 10 6' />
-                </marker>
-                <marker
                     id='end-pointer'
                     markerWidth={10}
                     markerHeight={6}
@@ -138,13 +115,7 @@ const SvgPaths = (props: { id: string; graphData: GraphData }) => {
                 {[...Array(pathsCount).keys()].map(i => (
                     <g key={i}>
                         <path id={`${props.id}-${i}`} className={classes.path} markerEnd='url(#end-pointer)'>
-                            <animate
-                                attributeName='d'
-                                attributeType='XML'
-                                begin='indefinite'
-                                fill='freeze'
-                                dur='0.4s'
-                            />
+                            <animate attributeName='d' begin='indefinite' fill='freeze' dur='0.4s' />
                         </path>
                         <text style={{ fontSize: '0.5rem' }}>
                             <textPath xlinkHref={`#${props.id}-${i}`} startOffset='50%' textAnchor='middle' />
