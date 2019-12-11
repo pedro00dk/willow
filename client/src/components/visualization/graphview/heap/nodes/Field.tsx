@@ -35,7 +35,7 @@ export const Node = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
+    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
 }) => {
     const currentMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -61,15 +61,14 @@ export const Node = (props: {
                           const chosenMember = filteredMembers[0]
                           const isPrimitive = typeof chosenMember.value !== 'object'
                           const changed = memberChanged(currentMember, chosenMember)
+                          const displayKey = getDisplayValue(props.id, chosenMember.key)
                           const displayValue = getDisplayValue(props.id, chosenMember.value)
-                          const memberIds = [
-                              ...props.obj.members
-                                  .filter(member => typeof member.key === 'object')
-                                  .map(member => (member.key as [string])[0]),
-                              ...props.obj.members
-                                  .filter(member => typeof member.value === 'object' && member !== chosenMember)
-                                  .map(member => (member.value as [string])[0])
-                          ]
+                          const membersData = props.obj.members
+                              .filter(member => typeof member.value === 'object' && member !== chosenMember)
+                              .map(
+                                  member =>
+                                      [(member.value as [string])[0], getDisplayValue(props.id, member.key)] as const
+                              )
 
                           return (
                               <div
@@ -87,7 +86,12 @@ export const Node = (props: {
                                           ref={ref =>
                                               ref &&
                                               !isPrimitive &&
-                                              props.onTargetRef(props.id, (chosenMember.value as [string])[0], ref)
+                                              props.onTarget(
+                                                  props.id,
+                                                  (chosenMember.value as [string])[0],
+                                                  ref,
+                                                  displayKey
+                                              )
                                           }
                                           className={classes.value}
                                       >
@@ -95,7 +99,12 @@ export const Node = (props: {
                                       </span>
                                   </div>
                                   <span
-                                      ref={ref => ref && memberIds.forEach(id => props.onTargetRef(props.id, id, ref))}
+                                      ref={ref =>
+                                          ref &&
+                                          membersData.forEach(([id, display]) =>
+                                              props.onTarget(props.id, id, ref, display)
+                                          )
+                                      }
                                   />
                               </div>
                           )

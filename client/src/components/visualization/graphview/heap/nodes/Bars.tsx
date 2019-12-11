@@ -37,7 +37,7 @@ export const Node = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
+    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
 }) => {
     const currentMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)

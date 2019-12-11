@@ -37,7 +37,7 @@ export const Node = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
+    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
 }) => {
     const currentMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -69,6 +69,7 @@ export const Node = (props: {
                                   const showIndex = !parameters['wrap index'] ? memberIndex : j
                                   const isPrimitive = typeof member.value !== 'object'
                                   const changed = memberChanged(currentMembers.current[memberIndex], member)
+                                  const displayKey = getDisplayValue(props.id, member.key)
                                   const displayValue = getDisplayValue(props.id, member.value)
 
                                   return (
@@ -87,7 +88,12 @@ export const Node = (props: {
                                               ref={ref =>
                                                   ref &&
                                                   !isPrimitive &&
-                                                  props.onTargetRef(props.id, (member.value as [string])[0], ref)
+                                                  props.onTarget(
+                                                      props.id,
+                                                      (member.value as [string])[0],
+                                                      ref,
+                                                      displayKey
+                                                  )
                                               }
                                               className={classes.value}
                                           >

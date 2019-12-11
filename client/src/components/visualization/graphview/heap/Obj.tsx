@@ -33,7 +33,7 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const ref = React.useRef<HTMLDivElement>()
-    const targets = React.useRef<[string, HTMLSpanElement][]>()
+    const targets = React.useRef<{ target: string; ref: HTMLSpanElement; text: string }[]>()
     targets.current = []
     const { id, obj, graphData, forceUpdate, tracer } = props
     const index = graphData.getIndex()
@@ -86,15 +86,15 @@ export const Obj = (props: {
 
     const updateTargets = () => {
         if (!ref.current) return
-        targets.current.forEach(([target, spanRef]) => {
+        targets.current.forEach(({ target, ref: sourceRef, text }) => {
             const rect = ref.current.getBoundingClientRect()
-            const spanRect = spanRef.getBoundingClientRect()
-            const screenDelta = { x: spanRect.left - rect.left, y: spanRect.top - rect.top }
-            const screenSize = { x: spanRect.width, y: spanRect.height }
+            const sourceRect = sourceRef.getBoundingClientRect()
+            const screenDelta = { x: sourceRect.left - rect.left, y: sourceRect.top - rect.top }
+            const screenSize = { x: sourceRect.width, y: sourceRect.height }
             const svg = ref.current.closest('svg')
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.getTargets(id).push({ target, delta })
+            props.graphData.getTargets(id).push({ target, delta, text })
         })
     }
 
@@ -177,7 +177,7 @@ export const Obj = (props: {
                         id={id}
                         obj={obj}
                         parameters={parameters}
-                        onTargetRef={(id, target, spanRef) => targets.current.push([target, spanRef])}
+                        onTarget={(id, target, ref, text) => targets.current.push({ target, ref, text })}
                     />
                 </div>
             </MenuProvider>

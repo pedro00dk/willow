@@ -49,7 +49,7 @@ export const Node = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTargetRef: (id: string, target: string, ref: HTMLSpanElement) => void
+    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
 }) => {
     const previousMembers = React.useRef<schema.Member[]>([])
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -67,39 +67,44 @@ export const Node = (props: {
                           const keyIsPrimitive = typeof member.key !== 'object'
                           const valueIsPrimitive = typeof member.value !== 'object'
                           const changed = memberChanged(previousMembers.current[i], member)
-                          const keyDisplayValue = getDisplayValue(props.id, member.key)
-                          const valueDisplayValue = getDisplayValue(props.id, member.value)
+                          const displayKey = getDisplayValue(props.id, member.key)
+                          const displayValue = getDisplayValue(props.id, member.value)
 
                           return (
                               <div
                                   key={i}
                                   className={classes.element}
                                   style={{ background: styles.background(changed) }}
-                                  title={valueDisplayValue}
+                                  title={displayValue}
                               >
                                   {parameters['show keys'] && (
                                       <span
                                           ref={ref =>
                                               ref &&
                                               !keyIsPrimitive &&
-                                              props.onTargetRef(props.id, (member.key as [string])[0], ref)
+                                              props.onTarget(props.id, (member.key as [string])[0], ref, displayKey)
                                           }
                                           className={classes.key}
                                           style={{ width: parameters['key width'] }}
                                       >
-                                          {keyDisplayValue}
+                                          {displayKey}
                                       </span>
                                   )}
                                   <span
                                       ref={ref =>
                                           ref &&
                                           !valueIsPrimitive &&
-                                          props.onTargetRef(props.id, (member.value as [string])[0], ref)
+                                          props.onTarget(
+                                              props.id,
+                                              (member.value as [string])[0],
+                                              ref,
+                                              displayKey
+                                          )
                                       }
                                       className={classes.value}
                                       style={{ width: parameters['value width'] }}
                                   >
-                                      {valueDisplayValue}
+                                      {displayValue}
                                   </span>
                               </div>
                           )
