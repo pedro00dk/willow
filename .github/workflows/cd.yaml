@@ -1,0 +1,33 @@
+name: cd
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: get-instance
+        run: |
+          echo ${GCLOUD_SERVICE_ACCOUNT_KEY} > key.json
+          du -sh key.json
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud config set project ${GCLOUD_PROJECT_NAME}
+          gcloud config set compute/zone ${GCLOUD_PROJECT_ZONE}
+          gcloud config list
+          gcloud compute instances create willow-instance \
+              --service-account=${GCLOUD_SERVICE_ACCOUNT_NAME} \
+              --machine-type=${VM_MACHINE_TYPE} \
+              --image-family=cos-stable --image-project=cos-cloud \
+              --subnet=default --tags=http-server --boot-disk-size=10GB || true
+          gcloud compute firewall-rules create default-allow-http \
+              --direction=INGRESS --priority=1000 --network=default --action=ALLOW \
+              --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server || true
+
+      - name: deploy
+        run: |
+          gcloud compute ssh willow-instance -- sh -c "$(cat ./.github/deploy.sh)"
