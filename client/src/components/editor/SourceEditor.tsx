@@ -27,20 +27,21 @@ const languages = new Set(['java', 'python'])
 
 export const SourceEditor = () => {
     const editor = React.useRef<ace.Editor>()
+    const setEditor = React.useCallback(e => (editor.current = e), [])
     let currentLanguage = React.useRef<string>()
     let currentInfo = React.useRef<string>()
     let currentLine = React.useRef<number>()
     const dispatch = useDispatch()
 
-    React.useEffect(() => {
-        editor.current.setTheme('ace/theme/chrome')
-        editor.current.setOptions({
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true
-        })
-        editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines())))
-    }, [editor.current])
+React.useEffect(() => {
+    editor.current.setTheme('ace/theme/chrome')
+    editor.current.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: true
+    })
+    editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines())))
+}, [editor.current])
 
     useSelection(async state => {
         const language = state.language.languages[state.language.selected]
@@ -63,5 +64,5 @@ export const SourceEditor = () => {
         currentLine.current = line
     })
 
-    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
+    return <TextEditor onEditor={setEditor} />
 }

@@ -6,6 +6,7 @@ import { TextEditor } from './TextEditor'
 
 export const OutputEditor = () => {
     const editor = React.useRef<ace.Editor>()
+    const setEditor = React.useCallback(e => (editor.current = e), [])
     const currentSteps = React.useRef<schema.Step[]>()
     const currentOutput = React.useRef<string[]>()
     const currentIndex = React.useRef<number>()
@@ -28,5 +29,5 @@ export const OutputEditor = () => {
         currentIndex.current = index
     })
 
-    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
+    return <TextEditor onEditor={setEditor} />
 }

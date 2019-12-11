@@ -36,6 +36,13 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
     const ref = React.useRef<HTMLDivElement>()
     const editor = React.useRef<ace.Editor>()
 
+    React.useLayoutEffect(() => {
+        editor.current = ace.edit(ref.current)
+        editor.current.setFontSize(classes.font)
+        editor.current.$blockScrolling = Infinity
+        props.onEditor?.(editor.current)
+    }, [ref.current])
+
     React.useEffect(() => {
         const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
 
@@ -49,17 +56,5 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
         return () => clearInterval(interval)
     }, [ref, editor.current])
 
-    return (
-        <div
-            ref={r => {
-                if (!r) return
-                ref.current = r
-                editor.current = ace.edit(ref.current)
-                editor.current.setFontSize(classes.font)
-                editor.current.$blockScrolling = Infinity
-                props.onEditor?.(editor.current)
-            }}
-            className={classes.container}
-        />
-    )
+    return <div ref={ref} className={classes.container} />
 }

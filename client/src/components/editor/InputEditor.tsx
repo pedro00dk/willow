@@ -6,6 +6,7 @@ import { TextEditor } from './TextEditor'
 
 export const InputEditor = () => {
     const editor = React.useRef<ace.Editor>()
+    const setEditor = React.useCallback(e => (editor.current = e), [])
     const dispatch = useDispatch()
     const currentFetching = React.useRef<boolean>()
 
@@ -21,5 +22,5 @@ export const InputEditor = () => {
         currentFetching.current = fetching
     })
 
-    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
+    return <TextEditor onEditor={setEditor} />
 }
