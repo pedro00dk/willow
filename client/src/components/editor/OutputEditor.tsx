@@ -11,6 +11,8 @@ export const OutputEditor = () => {
     const currentOutput = React.useRef<string[]>()
     const currentIndex = React.useRef<number>()
 
+    React.useEffect(() => void editor.current.renderer.setShowGutter(false), [editor.current])
+
     useSelection(async state => {
         const steps = state.tracer.steps
         if (!editor.current || !steps || steps === currentSteps.current) return
