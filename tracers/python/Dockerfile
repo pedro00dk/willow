@@ -7,4 +7,4 @@ ADD ./res ./res/
 ADD ./src ./src/
 ADD ./Dockerfile ./Makefile ./
 
-CMD ["make", "run"]
+ENTRYPOINT ["make", "run"]
