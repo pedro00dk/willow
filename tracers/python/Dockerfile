@@ -1,8 +1,10 @@
 FROM python:3.8-alpine
 
+RUN apk add make
+
 WORKDIR /app
 ADD ./res ./res/
 ADD ./src ./src/
-ADD ./package.sh ./
+ADD ./Dockerfile ./Makefile ./
 
-CMD ["sh", "./package.sh", "start"]
+CMD ["make", "run"]
