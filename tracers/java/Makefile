@@ -1,9 +1,3 @@
-docker-build:
-	docker image build --tag willow-tracer-java .
-
-docker-run:
-	docker container run --interactive --tty willow-tracer-java ${ARGS}
-
 build:
 	javac -cp src/:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out/ src/Main.java
 
