@@ -13,7 +13,7 @@ Python tracer CLI
 optional arguments:
   -h, --help  show this help message and exit
   --pretty    Pretty print output
-  --test      Run the test source, ignoring the provided
+  --test      Run the test source
 ```
 
 The program data to be traced must be provided through the tracer standard input stream. The tracer result is print to the standard output stream.
