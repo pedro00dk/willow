@@ -1,11 +1,13 @@
 FROM openjdk:13-alpine
 
+RUN apk add make
+
 WORKDIR /app
-ADD ./package.sh ./
+ADD ./Dockerfile ./Makefile ./
 ADD ./lib ./lib
 ADD ./res ./res
 ADD ./src ./src
 
-RUN . package.sh build
+RUN make build
 
-CMD ["sh", "package.sh", "start"]
+ENTRYPOINT ["make", "run"]

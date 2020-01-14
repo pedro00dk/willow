@@ -1,6 +1,8 @@
 # Java Tracer
 
-A tool to inspect java code, analyzing it line by line and returning its state (stack and heap data).
+A tool to inspect java code.
+This tool analyses the execution of a source at each step.
+Snapshots of the stack and heap, and errors generated during execution are composed in a record of the program states, this result records is then returned.
 
 ```
 usage: tracer [options]
@@ -11,10 +13,13 @@ Java tracer CLI
 named arguments:
   -h, --help             show this help message and exit
   --pretty               Pretty print output
-  --test                 Run the test code ignoring the provided
+  --test                 Run the test code
 ```
-The tracer receives the input through standard input stream and its result will be generated in the standard output stream.
+
+The program data to be traced must be provided through the tracer standard input stream. The tracer result is print to the standard output stream.
+
 The input must be in the json format with the following properties:
+
 ```json
 {
     "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
@@ -22,5 +27,3 @@ The input must be in the json format with the following properties:
     "steps": "the maximum amount of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
 }
 ```
-
-The output follows the JSON-Schema found in the schemas folder in this project.
