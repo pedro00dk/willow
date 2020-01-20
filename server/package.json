@@ -7,7 +7,7 @@
         "@types/jest": "latest",
         "@types/node": "latest",
         "@types/npmlog": "4.1.2",
-        "@types/yargs": "13.0.3",
+        "@types/yargs": "15.0.0",
         "jest": "latest",
         "json-schema-to-typescript": "latest",
         "prettier": "latest",
@@ -18,11 +18,11 @@
         "cors": "2.8.5",
         "express": "4.17.1",
         "npmlog": "4.1.2",
-        "yargs": "15.0.2"
+        "yargs": "15.1.0"
     },
     "config": {
-        "java-tracer": "cd ../tracers/java/ && . ./package.sh start",
-        "python-tracer": "cd ../tracers/python/ && . ./package.sh start"
+        "java-tracer": "cd ../tracers/java/ && make run --silent",
+        "python-tracer": "cd ../tracers/python/ && make run --silent"
     },
     "scripts": {
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
