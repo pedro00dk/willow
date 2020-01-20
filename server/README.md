@@ -15,17 +15,20 @@ Options:
   --tracer    Tracer <language> <command>                                [array]
   -h, --help  Show help                                                [boolean]
 
-$ # start server with two tracer associated
-$ # the <cmd> must be a shell command that starts the tracer
-$ # ex: cd ../tracers/python && make run --silent
+$ # npm run start does not have any tracer registered by default
+$ # use --tracer <language> <command> to set tracers
+$ # <command> ex: cd ../tracers/python && make run --silent
 $ npm run start -- --port 80 --tracer python <cmd> --tracer java <cmd>
+
+$ # the start:t script automatically registers the local tracers
+$ npm tun start:t
 ```
 
 The tracer server expects a set of optional arguments to work properly.
 The `--tracer` option must be set for each available tracer that will be exposed by the server.
 This option expects a tuple with the language of the tracer and the shell command to start it.
 
-Check tracers README files for more info.
+Check tracers README.md files for more info.
 
 ## Routes
 
@@ -52,7 +55,7 @@ The server image does not require especial options to build or run. However, it 
 ```shell
 $ docker image build --tag willow-server -- ./
 
-$ # docker ENTRYPOINT='npm run start:base' CMD=''
+$ # docker ENTRYPOINT='npm run start' CMD=''
 $ # ex:
 $ docker container run --rm --interactive --tty -- willow-server -- --help
 $ docker container run --rm --interactive --tty -- willow-server
@@ -71,7 +74,7 @@ There are three main options to run a server image with tracers.
         --rm --interactive --tty \
         --volume /var/run/docker.sock:/var/run/docker.sock \ # mount socket
         -- \
-        willow-server \ # ENTRYPOINT='npm run start:base'
+        willow-server \ # ENTRYPOINT='npm run start'
         -- \ # skip npm options (script options here)
         --tracer python 'docker run --rm -i willow-tracer-python' # docker script (runs on host but server container access it (and its I/O) through docker host socket)
     ```

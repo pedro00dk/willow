@@ -14,4 +14,4 @@ RUN npm install
 ADD ./src ./src
 ADD ./test ./test
 
-ENTRYPOINT ["npm", "run", "start:base"]
+ENTRYPOINT ["npm", "run", "start"]
