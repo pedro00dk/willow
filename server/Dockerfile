@@ -1,6 +1,5 @@
 FROM node:13-alpine
 
-
 RUN apk update &&\
     apk add docker &&\
     rm -rf /var/cache/apk/*
