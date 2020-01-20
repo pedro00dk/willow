@@ -38,3 +38,16 @@ The input must be in the json format with the following properties:
     "steps": "the maximum amount of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
 }
 ```
+
+## Docker
+
+This tracer image does not require especial options to build or run. Attention must be payed when passing arguments to the docker container.
+
+```shell
+$ docker image build --tag willow-tracer-java -- ./
+
+$ # docker ENTRYPOINT='make run' CMD=''
+$ # ex:
+$ docker container run --rm --interactive --tty -- willow-tracer-java
+$ docker container run --rm --interactive --tty -- willow-tracer-java --silent ARGS='--pretty'
+```
