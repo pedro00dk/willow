@@ -11,11 +11,11 @@ export class Server {
 
     constructor(
         private readonly tracers: { [language: string]: string },
-        private readonly port: number,
         private readonly steps: number,
         private readonly timeout: number,
-        private readonly debug: boolean,
-        readonly clients: string
+        readonly clients: string,
+        private readonly port: number,
+        private readonly verbose: boolean
     ) {
         this.server = express()
         this.server.use(express.json())
@@ -49,7 +49,7 @@ export class Server {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language]).run(trace, this.timeout)
                 res.send(result)
-                log.info(Server.name, req.path, 'ok', this.debug && JSON.stringify({ trace, result }, undefined, 4))
+                log.info(Server.name, req.path, 'ok', this.verbose && JSON.stringify({ trace, result }, undefined, 4))
             } catch (error) {
                 res.status(400)
                 res.send(error.message)
