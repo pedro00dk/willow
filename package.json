@@ -1,9 +1,8 @@
 {
     "name": "willow",
-    "version": "0.0.1",
     "author": {
         "name": "Pedro Henrique",
         "email": "pedro00dk@gmail.com"
     },
-    "license": "ISC"
+    "license": "MIT"
 }
