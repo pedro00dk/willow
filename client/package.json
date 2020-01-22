@@ -24,28 +24,8 @@
     "scripts": {
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
-        "//00": "",
-        "//01": "environment variables",
-        "//02": "",
-        "//03": "SERVER: sets the API server address in the bundle, does nothing to the bundle server",
-        "//04": "                            bundle requests  +---------------+",
-        "//05": "                        +--------------------| bundle server |",
-        "//06": "+--------+   requests   |                    +---------------+",
-        "//07": "| client |--------------+",
-        "//08": "+--------+              |                    +---------------+",
-        "//09": "                        +--------------------| api server    |",
-        "//10": "                            api requests     +---------------+",
-        "//11": "",
-        "//12": "PROXY: sets bundle to use origin as proxy to access the API, sets the API server address to the bundle server",
-        "//13": "+--------+   bundle and api requests   +---------------+   api requests   +---------------+",
-        "//14": "| client |-----------------------------| bundle server |------------------| api server    |",
-        "//15": "+--------+                             +---------------+                  +---------------+",
-        "//16": "",
-        "//19": "PORT: sets the server development server port ",
-        "//20": "",
         "build": "parcel build --no-cache --no-source-maps --public-url ./ -d ./dist/build -- \"$npm_package_main\"",
-        "start": "parcel serve --no-cache -d ./dist/ -p \"$PORT\" -- \"$npm_package_main\"",
-        "start:server": "npm run build && http-server -p \"$PORT\" -- ./dist/build",
-        "start:proxy": "npm run build && http-server -p \"$PORT\" --proxy \"$PROXY\" -- ./dist/build"
+        "start": "{ [ \"$PORT\" ] || PORT=1234; } && { [ \"$SERVER\" ] || { echo 'SERVER not defined!' && exit 2; }; } && { [ \"$PROXY\" ] && PROXY=1 PROXY_OPT=\"--proxy $SERVER\" || PROXY=0; } && echo \"PORT: $PORT, SERVER: $SERVER, PROXY: $PROXY\" && npm run build && http-server -p \"$PORT\" $PROXY_OPT -- ./dist/build",
+        "start:dev": "parcel serve --no-cache -d ./dist/ -p \"$PORT\" -- \"$npm_package_main\""
     }
 }
