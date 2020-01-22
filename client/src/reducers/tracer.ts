@@ -1,5 +1,5 @@
+import { api } from '../api'
 import * as schema from '../schema/schema'
-import { serverApi } from '../server'
 import { DefaultAsyncAction } from './Store'
 
 export type GroupData = {
@@ -112,7 +112,7 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     try {
         const { language, source, input } = getState()
         const result = (
-            await serverApi.post<schema.Result>('/trace', {
+            await api.post<schema.Result>('/trace', {
                 language: language.languages[language.selected],
                 source: source.join('\n'),
                 input: input.join('\n')

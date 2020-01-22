@@ -1,4 +1,4 @@
-import { serverApi } from '../server'
+import { api } from '../api'
 import { DefaultAsyncAction } from './Store'
 
 type State = {
@@ -36,7 +36,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
 const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'language/fetch' })
     try {
-        const languages = (await serverApi.get<string[]>('/languages')).data
+        const languages = (await api.get<string[]>('/languages')).data
         dispatch({ type: 'language/fetch', payload: languages })
     } catch (error) {
         dispatch({ type: 'language/fetch', error: error?.response?.data ?? error.toString() })
