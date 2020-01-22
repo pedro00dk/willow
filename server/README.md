@@ -1,6 +1,9 @@
 # Tracer Server
 
 Exposes tracers CLI through HTTP API.
+The tracer server expects a set of optional arguments to work properly.
+The `--tracer` option must be set for each available tracer that will be exposed by the server.
+This option expects a tuple with the language of the tracer and the shell command to start it.
 
 ```shell
 $ npm run start -- --help
@@ -20,13 +23,9 @@ $ # use --tracer <language> <command> to set tracers
 $ # <command> ex: cd ../tracers/python && make run --silent
 $ npm run start -- --port 80 --tracer python <cmd> --tracer java <cmd>
 
-$ # the start:t script automatically registers the local tracers
+$ # the start:t script automatically registers local tracers
 $ npm tun start:t
 ```
-
-The tracer server expects a set of optional arguments to work properly.
-The `--tracer` option must be set for each available tracer that will be exposed by the server.
-This option expects a tuple with the language of the tracer and the shell command to start it.
 
 Check tracers README.md files for more info.
 
@@ -60,7 +59,6 @@ $ # ex:
 $ docker container run --rm --interactive --tty -- willow-server -- --help
 $ docker container run --rm --interactive --tty -- willow-server
 ```
-
 
 There are three main options to run a server image with tracers.
 
