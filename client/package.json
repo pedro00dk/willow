@@ -24,7 +24,7 @@
     "scripts": {
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
-        "build": "parcel build --no-cache --no-source-maps --public-url ./ -d ./dist/build -- \"$npm_package_main\"",
+        "build": "parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
         "start": "{ [ \"$PORT\" ] || PORT=1234; } && { [ \"$SERVER\" ] || { echo 'SERVER not defined!' && exit 1; }; } && { [ \"$PROXY\" ] && PROXY=1 PROXY_OPT=\"--proxy $SERVER\" || PROXY=0; } && echo \"PORT: $PORT, SERVER: $SERVER, PROXY: $PROXY\" && npm run build && http-server -p \"$PORT\" $PROXY_OPT -- ./dist/build",
         "start:dev": "{ [ \"$PORT\" ] || PORT=1234; } && { [ \"$SERVER\" ] || { echo 'SERVER not defined!' && exit 1; }; } && { [ \"$PROXY\" ] && { echo 'PROXY not supported in dev server' && exit 1; } || true; } && echo \"PORT: $PORT. SERVER: $SERVER, proxy not supported\" && parcel serve --no-cache -d ./dist/ -p \"$PORT\" -- \"$npm_package_main\""
     }
