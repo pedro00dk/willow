@@ -49,7 +49,7 @@ Content-Type: application/json
 
 ## Docker
 
-The server image does not require especial options to build or run. However, it does not pack any tracer implementation inside it.
+The server image does not require especial options to build or run. However, it does not pack any tracer implementation inside it. Remember to expose ports if your configuration needs it.
 
 ```shell
 $ docker image build --tag willow-server -- ./
