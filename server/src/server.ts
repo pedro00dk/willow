@@ -1,5 +1,5 @@
 import cors from 'cors'
-import express, { json } from 'express'
+import express from 'express'
 import log from 'npmlog'
 import { Tracer } from './tracer'
 
