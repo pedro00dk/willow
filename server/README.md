@@ -13,7 +13,7 @@ Options:
   --tracer    Tracer <language> <command>                                [array]
   --steps     Maximum number of allowed steps of a program       [default: 1000]
   --timeout   Maximum tracer run time (milliseconds)             [default: 8000]
-  --clients   Client origin (enable CORS)                         [default: "*"]
+  --client    Client origin (enable CORS)                         [default: "*"]
   --port      Set the server port                                [default: 8000]
   --verbose   Log traces calls and results                             [boolean]
   -h, --help  Show help                                                [boolean]

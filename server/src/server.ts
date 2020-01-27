@@ -4,11 +4,21 @@ import log from 'npmlog'
 import { Tracer } from './tracer'
 
 /**
- * Server to expose tracers through http.
+ * Server to expose registered tracers through http.
  */
 export class Server {
     private server: express.Express
 
+    /**
+     * Initializes the server setup its routes.
+     *
+     * @param tracers object with tracer languages as keys and init command as values
+     * @param steps maximum number of steps tracers are allowed to execute
+     * @param timeout maximum time for the tracer to finish its execution
+     * @param clients specific client address for restricted CORS.
+     * @param port port to server
+     * @param verbose print trace and result objects
+     */
     constructor(
         private readonly tracers: { [language: string]: string },
         private readonly steps: number,
@@ -31,6 +41,15 @@ export class Server {
         this.configureRoutes()
     }
 
+    /**
+     * Set server routes.
+     * 
+     * GET /languages
+     * Returns a list of available tracer languages.
+     * 
+     * POST/ trace
+     * Receives a trace request, process it and returns the generated result.
+     */
     private configureRoutes() {
         this.server.get('/languages', (req, res) => {
             log.http(Server.name, req.path)
@@ -45,19 +64,23 @@ export class Server {
                 input: req.body['input'] as string,
                 steps: this.steps
             }
+            log.info(Server.name, req.path, language, this.verbose && JSON.stringify(trace))
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language]).run(trace, this.timeout)
                 res.send(result)
-                log.info(Server.name, req.path, 'ok', this.verbose && JSON.stringify({ trace, result }, undefined, 4))
+                log.info(Server.name, req.path, 'ok', this.verbose && JSON.stringify(result, undefined, 4))
             } catch (error) {
                 res.status(400)
                 res.send(error.message)
-                log.info(Server.name, req.path, 'error', error.message, JSON.stringify({ trace }, undefined, 4))
+                log.info(Server.name, req.path, 'error', error.message)
             }
         })
     }
 
+    /**
+     * Start the server.
+     */
     listen() {
         log.info(Server.name, 'listen', { port: this.port })
         this.server.listen(this.port)
