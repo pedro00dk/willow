@@ -1,0 +1,96 @@
+@hostname = localhost
+@port = 8000
+@host = {{hostname}}:{{port}}
+@contentType = application/json
+
+###
+GET http://{{host}}/languages
+
+### Fail ###
+###
+POST http://{{host}}/trace
+
+###
+POST http://{{host}}/trace
+
+{
+    "language": "python"
+}
+
+###
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "qwerty"
+}
+
+
+### Java ###
+
+
+### Python ###
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": ""
+}
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "print('hello world!')"
+}
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "print(input('type the input\n'))"
+}
+
+###
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "print(input('type the input\\n'))",
+    "input": "some random input"
+}
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "while True:\n    pass"
+}
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "while True: pass"
+}
+
+### 
+POST http://{{host}}/trace
+Content-Type: {{contentType}}
+
+{
+    "language": "python",
+    "source": "import time\ntime.sleep(10)"
+}
