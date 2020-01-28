@@ -13,21 +13,19 @@ export type State<T extends SubReducers> = { [name in keyof T]: Parameters<T[nam
 export type Action<T extends SubReducers> = { [name in keyof T]: Parameters<T[name]>[1] }[keyof T] | {}
 export type Reducer<T extends SubReducers> = (state: State<T>, action: Action<T>) => State<T>
 
-export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getState: GetState<T>) => Promise<void>
 export type GetState<T extends SubReducers> = () => State<T>
 export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>) => Promise<void>
+export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getState: GetState<T>) => Promise<void>
 export type Subscribe = (listener: () => void) => () => void
 export type Store<T extends SubReducers> = { getState: GetState<T>; dispatch: Dispatch<T>; subscribe: Subscribe }
+
 export type Hooks<T extends SubReducers> = {
     useDispatch: () => Dispatch<T>
     useSelection: <U>(query: (state: State<T>) => U) => U
 }
 
-// prettier-ignore
-const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> =>
-    (state: State<typeof reducers>, action: Action<typeof reducers>): State<typeof reducers> =>
-        Object.fromEntries(Object.entries(reducers).map(([name, reducer]) => [name, reducer(state[name], action)])) as
-        State<typeof reducers>
+const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> => (state, action) =>
+    Object.fromEntries(Object.entries(reducers).map(([name, r]) => [name, r(state[name], action)])) as State<T>
 
 const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
     const state = { value: reducer({} as State<T>, {}) }
@@ -102,25 +100,22 @@ export const Store = <T extends SubReducers>(props: {
     </props.context.Provider>
 )
 
-// default store including all reducers
+// default store
+
 const reducers = {
     input: inputReducer,
     language: languageReducer,
     source: sourceReducer,
     tracer: tracerReducer
 }
-const context = React.createContext<Hooks<typeof reducers>>(undefined)
 
 export type DefaultState = State<typeof reducers>
 export type DefaultAsyncAction = AsyncAction<typeof reducers>
 
-export const useDispatch = () => React.useContext(context).useDispatch()
+const context = React.createContext<Hooks<typeof reducers>>(undefined)
 
-export const useSelection = <V extends any>(query: (state: State<typeof reducers>) => V) =>
+export const useDispatch = () => React.useContext(context).useDispatch()
+export const useSelection = <U extends any>(query: (state: State<typeof reducers>) => U) =>
     React.useContext(context).useSelection(query)
 
-export const DefaultStore = (props: { children?: React.ReactNode }) => (
-    <Store reducers={reducers} context={context}>
-        {props.children}
-    </Store>
-)
+export const DefaultStore = (props: { children?: React.ReactNode }) => Store({ reducers, context, ...props })

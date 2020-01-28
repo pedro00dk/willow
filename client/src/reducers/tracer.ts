@@ -25,7 +25,7 @@ type State = {
 }
 
 type Action =
-    | { type: 'tracer/execute'; payload?: { steps: schema.Step[]; groupsData: GroupData[] }; error?: string }
+    | { type: 'tracer/trace'; payload?: { steps: schema.Step[]; groupsData: GroupData[] }; error?: string }
     | { type: 'tracer/setIndex'; payload: number }
 
 const initialState: State = {
@@ -34,7 +34,7 @@ const initialState: State = {
 
 export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
-        case 'tracer/execute':
+        case 'tracer/trace':
             return action.payload
                 ? { ...state, fetching: false, index: 0, ...action.payload }
                 : action.error
@@ -108,7 +108,7 @@ const buildGroupsData = (steps: schema.Step[]) => {
 }
 
 const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
-    dispatch({ type: 'tracer/execute' })
+    dispatch({ type: 'tracer/trace' })
     try {
         const { language, source, input } = getState()
         const result = (
@@ -120,9 +120,9 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
         ).data
         const steps = result.steps
         const groupsData = buildGroupsData(steps)
-        dispatch({ type: 'tracer/execute', payload: { steps, groupsData } })
+        dispatch({ type: 'tracer/trace', payload: { steps, groupsData } })
     } catch (error) {
-        dispatch({ type: 'tracer/execute', error: error.response ? error.response.data : error.toString() })
+        dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
     }
 }
 
