@@ -17,36 +17,44 @@ export type GetState<T extends SubReducers> = () => State<T>
 export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>) => Promise<void>
 export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getState: GetState<T>) => Promise<void>
 export type Subscribe = (listener: () => void) => () => void
-export type Store<T extends SubReducers> = { getState: GetState<T>; dispatch: Dispatch<T>; subscribe: Subscribe }
+export type Store<T extends SubReducers> = {
+    getState: GetState<T>
+    getPreviousState: GetState<T>
+    dispatch: Dispatch<T>
+    subscribe: Subscribe
+}
 
 export type Hooks<T extends SubReducers> = {
     useDispatch: () => Dispatch<T>
-    useSelection: <U>(query: (state: State<T>) => U) => U
+    useSelection: <U>(query: (state: State<T>, previousState?: State<T>) => U) => U
 }
 
 const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> => (state, action) =>
     Object.fromEntries(Object.entries(reducers).map(([name, r]) => [name, r(state[name], action)])) as State<T>
 
 const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
-    const state = { value: reducer({} as State<T>, {}) }
+    let state = {} as State<T>
+    let previousState = state
     const subscriptions = [] as (() => void)[]
 
-    const getState = () => state.value
+    const getState = () => state
+
+    const getPreviousState = () => previousState
 
     const dispatch: Dispatch<T> = action => {
         if (typeof action === 'function') return action(dispatch, getState)
-        state.value = reducer(state.value, action)
+        previousState = state
+        state = reducer(state, action)
         subscriptions.forEach(listener => listener())
     }
 
     const subscribe = (listener: () => void) => {
-        let subscribed = true
         subscriptions.push(listener)
-
-        return () => subscribed && (subscriptions.splice(subscriptions.indexOf(listener), 1), (subscribed = false))
+        return () => subscriptions.includes(listener) && subscriptions.splice(subscriptions.indexOf(listener), 1)
     }
 
-    return { getState, dispatch, subscribe }
+    dispatch({})
+    return { getState, getPreviousState, dispatch, subscribe }
 }
 
 const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
@@ -64,14 +72,14 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
 
     const useDispatch = () => store.dispatch
 
-    const useSelection = <V extends any>(query: (state: State<T>) => V) => {
+    const useSelection = <U extends any>(query: (state: State<T>, previousState?: State<T>) => U) => {
         const memoQuery = React.useCallback(query, [])
-        const [selection, setSelection] = React.useState(() => memoQuery(store.getState()))
+        const [selection, setSelection] = React.useState(() => memoQuery(store.getState(), store.getPreviousState()))
         const selectionRef = React.useRef(selection)
 
         React.useEffect(() => {
             const checkSelectionUpdate = () => {
-                const updatedSelection = memoQuery(store.getState())
+                const updatedSelection = memoQuery(store.getState(), store.getPreviousState())
                 const isPromise = typeof updatedSelection.then === 'function'
                 const areEqual = areSelectionsEqual(selectionRef.current, updatedSelection)
                 if (isPromise || areEqual) return
@@ -109,13 +117,14 @@ const reducers = {
     tracer: tracerReducer
 }
 
-export type DefaultState = State<typeof reducers>
-export type DefaultAsyncAction = AsyncAction<typeof reducers>
+type Reducers = typeof reducers
+export type DefaultState = State<Reducers>
+export type DefaultAsyncAction = AsyncAction<Reducers>
 
-const context = React.createContext<Hooks<typeof reducers>>(undefined)
+const context = React.createContext<Hooks<Reducers>>(undefined)
 
 export const useDispatch = () => React.useContext(context).useDispatch()
-export const useSelection = <U extends any>(query: (state: State<typeof reducers>) => U) =>
+export const useSelection = <U extends any>(query: (state: State<Reducers>, previousState?: State<Reducers>) => U) =>
     React.useContext(context).useSelection(query)
 
 export const DefaultStore = (props: { children?: React.ReactNode }) => Store({ reducers, context, ...props })
