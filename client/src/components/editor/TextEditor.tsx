@@ -29,32 +29,34 @@ const classes = {
     font: '1rem'
 }
 
+const AceRange = ace.acequire('ace/range').Range
+
 export const range = (startRow: number, startColumn: number, endRow: number, endColumn: number): ace.Range =>
-    new (ace.acequire('ace/range').Range)(startRow, startColumn, endRow, endColumn)
+    new AceRange(startRow, startColumn, endRow, endColumn)
 
 export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) => {
-    const ref = React.useRef<HTMLDivElement>()
+    const container$ = React.useRef<HTMLDivElement>()
     const editor = React.useRef<ace.Editor>()
 
     React.useLayoutEffect(() => {
-        editor.current = ace.edit(ref.current)
+        editor.current = ace.edit(container$.current)
         editor.current.setFontSize(classes.font)
         editor.current.$blockScrolling = Infinity
         props.onEditor?.(editor.current)
-    }, [ref.current])
+    }, [container$.current])
 
     React.useEffect(() => {
-        const size = { x: ref.current.clientWidth, y: ref.current.clientHeight }
+        const size = { x: container$.current.clientWidth, y: container$.current.clientHeight }
 
         const interval = setInterval(() => {
-            if (size.x === ref.current.clientWidth && size.y === ref.current.clientHeight) return
-            size.x = ref.current.clientWidth
-            size.y = ref.current.clientHeight
+            if (size.x === container$.current.clientWidth && size.y === container$.current.clientHeight) return
+            size.x = container$.current.clientWidth
+            size.y = container$.current.clientHeight
             editor.current.resize()
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [ref, editor.current])
+    }, [container$.current, editor.current])
 
-    return <div ref={ref} className={classes.container} />
+    return <div ref={container$} className={classes.container} />
 }

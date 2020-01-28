@@ -6,21 +6,16 @@ import { TextEditor } from './TextEditor'
 
 export const InputEditor = () => {
     const editor = React.useRef<ace.Editor>()
-    const setEditor = React.useCallback(e => (editor.current = e), [])
     const dispatch = useDispatch()
-    const currentFetching = React.useRef<boolean>()
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
         editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines())))
-    }, [editor.current])
+    }, [editor])
 
-    useSelection(async state => {
-        const fetching = state.tracer.fetching
-        if (!editor.current || fetching === currentFetching.current) return
-        editor.current.setReadOnly(fetching)
-        currentFetching.current = fetching
+    useSelection(async (state, previousState) => {
+        state.tracer?.fetching !== previousState.tracer?.fetching && editor.current?.setReadOnly(state.tracer.fetching)
     })
 
-    return <TextEditor onEditor={setEditor} />
+    return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />
 }
