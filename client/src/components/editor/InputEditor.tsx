@@ -13,8 +13,8 @@ export const InputEditor = () => {
         editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines())))
     }, [editor])
 
-    useSelection(async (state, previousState) => {
-        state.tracer?.fetching !== previousState.tracer?.fetching && editor.current?.setReadOnly(state.tracer.fetching)
+    useSelection(async state => {
+        state.tracer.fetching !== editor.current?.getReadOnly() && editor.current?.setReadOnly(state.tracer.fetching)
     })
 
     return <TextEditor onEditor={React.useCallback(e => (editor.current = e), [])} />

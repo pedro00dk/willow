@@ -10,7 +10,7 @@ export const OutputEditor = () => {
     React.useLayoutEffect(() => void editor.current.renderer.setShowGutter(false), [editor.current])
 
     useSelection(async (state, previousState) => {
-        if (!state.tracer?.steps || state.tracer?.steps === previousState.tracer?.steps) return
+        if (!state.tracer.steps || state.tracer.steps === previousState.tracer?.steps) return
         const steps = state.tracer.steps
         output.current = steps.reduce((acc, { prints, threw }) => {
             acc.push(`${acc[acc.length - 1] ?? ''}${prints ?? ''}${threw?.cause ?? threw?.exception.traceback ?? ''}`)
