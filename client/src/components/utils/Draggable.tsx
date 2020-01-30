@@ -6,6 +6,12 @@ export const Draggable = (props: {
     children?: React.ReactNode
 }) => {
     const anchor = React.useRef<{ x: number; y: number }>()
+    const ghostImage = React.useMemo(() => {
+        const image = new Image()
+        image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+        return image
+    }, [])
+    const eventStopPropagation = React.useCallback((event: React.MouseEvent) => event.stopPropagation(), [])
 
     return (
         <div
@@ -13,22 +19,20 @@ export const Draggable = (props: {
             draggable
             onDragStart={event => {
                 anchor.current = { x: event.clientX, y: event.clientY }
-                const emptyGhostImage = new Image()
-                emptyGhostImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-                event.dataTransfer.setDragImage(emptyGhostImage, 0, 0)
+                event.dataTransfer.setDragImage(ghostImage, 0, 0)
             }}
-            onDragEnd={event => (anchor.current = undefined)}
             onDrag={event => {
                 if (event.clientX === 0 && event.clientY === 0) return
                 const delta = { x: event.clientX - anchor.current.x, y: event.clientY - anchor.current.y }
                 anchor.current = { x: event.clientX, y: event.clientY }
                 props.onDrag(delta, event)
             }}
-            onMouseDown={event => event.stopPropagation()}
-            onMouseUp={event => event.stopPropagation()}
-            onMouseEnter={event => event.stopPropagation()}
-            onMouseLeave={event => event.stopPropagation()}
-            onMouseMove={event => event.stopPropagation()}
+            onDragEnd={event => (anchor.current = undefined)}
+            onMouseDown={eventStopPropagation}
+            onMouseUp={eventStopPropagation}
+            onMouseEnter={eventStopPropagation}
+            onMouseLeave={eventStopPropagation}
+            onMouseMove={eventStopPropagation}
         >
             {props.children}
         </div>
