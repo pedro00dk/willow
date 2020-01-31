@@ -21,7 +21,7 @@ export const Language = () => {
     React.useEffect(() => void dispatch(languageActions.fetch()), [])
 
     return (
-        <div className={classes.container}>
+        <div className={classes.container} title='Pick a language'>
             <div className={classes.group}>
                 <span className={classes.label}>Language</span>
             </div>
