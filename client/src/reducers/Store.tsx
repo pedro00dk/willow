@@ -14,7 +14,7 @@ export type Action<T extends SubReducers> = { [name in keyof T]: Parameters<T[na
 export type Reducer<T extends SubReducers> = (state: State<T>, action: Action<T>) => State<T>
 
 export type GetState<T extends SubReducers> = () => State<T>
-export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>) => Promise<void>
+export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>, ignore?: boolean) => Promise<void>
 export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getState: GetState<T>) => Promise<void>
 export type Subscribe = (listener: () => void) => () => void
 export type Store<T extends SubReducers> = {
@@ -41,11 +41,11 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
 
     const getPreviousState = () => previousState
 
-    const dispatch: Dispatch<T> = action => {
+    const dispatch: Dispatch<T> = (action, ignore) => {
         if (typeof action === 'function') return action(dispatch, getState)
         previousState = state
         state = reducer(state, action)
-        subscriptions.forEach(listener => listener())
+        !ignore && subscriptions.forEach(listener => listener())
     }
 
     const subscribe = (listener: () => void) => {
