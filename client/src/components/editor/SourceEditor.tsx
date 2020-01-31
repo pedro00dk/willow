@@ -36,7 +36,7 @@ export const SourceEditor = () => {
             enableLiveAutocompletion: true,
             enableSnippets: true
         })
-        editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines())))
+        editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines()), true))
     }, [editor.current])
 
     useSelection(async (state, previousState) => {

@@ -10,7 +10,7 @@ export const InputEditor = () => {
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
-        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines())))
+        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines()), true))
     }, [editor])
 
     useSelection(async state => {
