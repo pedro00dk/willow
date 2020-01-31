@@ -17,17 +17,14 @@ export const Draggable = (props: {
         <div
             {...props.props}
             draggable
-            onDragStart={event => {
-                anchor.current = { x: event.clientX, y: event.clientY }
-                event.dataTransfer.setDragImage(ghostImage, 0, 0)
-            }}
+            onDragStart={event => event.dataTransfer.setDragImage(ghostImage, 0, 0)}
             onDrag={event => {
-                if (event.clientX === 0 && event.clientY === 0) return
+                if (event.clientX === 0 && event.clientY === 0) return (anchor.current = undefined)
+                if (!anchor.current) anchor.current = { x: event.clientX, y: event.clientY }
                 const delta = { x: event.clientX - anchor.current.x, y: event.clientY - anchor.current.y }
                 anchor.current = { x: event.clientX, y: event.clientY }
                 props.onDrag(delta, event)
             }}
-            onDragEnd={event => (anchor.current = undefined)}
             onMouseDown={eventStopPropagation}
             onMouseUp={eventStopPropagation}
             onMouseEnter={eventStopPropagation}
