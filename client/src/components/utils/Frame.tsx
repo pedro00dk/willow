@@ -2,7 +2,7 @@ import React from 'react'
 
 const classes = {
     container: 'd-flex flex-column w-100 h-100',
-    title: 'shadow-sm px-2 mb-1 h6',
+    title: 'text-secondary shadow-sm px-2 py-1 mb-1',
     children: 'd-flex flex-fill'
 }
 
