@@ -24,7 +24,5 @@ export const colors = {
         main: 'darkgray',
         light: 'lightgray',
         dark: 'gray'
-    },
-    black: 'black',
-    white: 'white'
+    }
 }
