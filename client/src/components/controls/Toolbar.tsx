@@ -8,46 +8,47 @@ import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
     container: 'd-flex align-items-center',
-    image: cn('mx-3', css({ height: '1.5rem', width: '1.5rem' }))
+    image: cn('mx-3', css({ width: '1.5rem' }))
 }
 
 const styles = {
     image: (available: boolean, rotation: number = 0) => ({
-        transform: `rotate(${rotation}deg)`,
-        ...(available ? { cursor: 'pointer' } : { filter: 'grayscale(100%)' })
+        cursor: available ? 'pointer' : undefined,
+        filter: !available ? 'grayscale(100%)' : undefined,
+        transform: `rotate(${rotation}deg)`
     })
 }
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const { traceAvailable, stepBackwardAvailable, stepForwardAvailable } = useSelection(state => ({
-        traceAvailable: !state.tracer.fetching,
-        stepBackwardAvailable: state.tracer.steps && state.tracer.index > 0,
-        stepForwardAvailable: state.tracer.steps && state.tracer.index < state.tracer.steps.length - 1
+    const { canTrace, canStepBack, canStepForward } = useSelection(state => ({
+        canTrace: !state.tracer.fetching,
+        canStepBack: state.tracer.steps && state.tracer.index > 0,
+        canStepForward: state.tracer.steps && state.tracer.index < state.tracer.steps.length - 1
     }))
 
     return (
         <div className={classes.container}>
             <img
                 className={classes.image}
-                style={styles.image(traceAvailable)}
+                style={styles.image(canTrace)}
                 src={playImg}
-                title={'trace'}
-                onClick={() => traceAvailable && dispatch(tracerActions.trace())}
+                title='Start tracing'
+                onClick={() => canTrace && dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
-                style={styles.image(stepBackwardAvailable, 90)}
+                style={styles.image(canStepBack, 90)}
                 src={stepImg}
-                title='step backward'
-                onClick={() => stepBackwardAvailable && dispatch(tracerActions.stepIndex('backward', 'into'))}
+                title='Step backward'
+                onClick={() => canStepBack && dispatch(tracerActions.stepIndex('backward', 'into'))}
             />
             <img
                 className={classes.image}
-                style={styles.image(stepForwardAvailable, 270)}
+                style={styles.image(canStepForward, 270)}
                 src={stepImg}
-                title='step forward'
-                onClick={() => stepForwardAvailable && dispatch(tracerActions.stepIndex('forward', 'into'))}
+                title='Step forward'
+                onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
         </div>
     )
