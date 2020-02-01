@@ -20,10 +20,13 @@ const styles = {
 }
 
 export const Stack = () => {
+    const container$ = React.useRef<HTMLDivElement>()
     const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
 
+    React.useLayoutEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
+
     return (
-        <div className={classes.container}>
+        <div ref={container$} className={classes.container}>
             {!stack && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
             {(stack ?? []).map((scope, i) => (
                 <Scope key={i} scope={scope} />
