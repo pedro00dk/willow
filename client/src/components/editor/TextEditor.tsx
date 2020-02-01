@@ -48,14 +48,15 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
     React.useEffect(() => {
         const size = { x: container$.current.clientWidth, y: container$.current.clientHeight }
 
-        const interval = setInterval(() => {
+        const onResize = (event: UIEvent) => {
             if (size.x === container$.current.clientWidth && size.y === container$.current.clientHeight) return
             size.x = container$.current.clientWidth
             size.y = container$.current.clientHeight
             editor.current.resize()
-        }, 1000)
+        }
 
-        return () => clearInterval(interval)
+        globalThis.addEventListener('resize', onResize)
+        return () => globalThis.removeEventListener('resize', onResize)
     }, [container$.current, editor.current])
 
     return <div ref={container$} className={classes.container} />
