@@ -7,7 +7,7 @@ import { memberChanged, getDisplayValue } from '../graphview/Base'
 import { colors } from '../../../colors'
 
 const classes = {
-    container: 'd-flex flex-column overflow-auto w-100',
+    container: 'd-flex flex-column position-absolute overflow-auto',
     table: 'd-flex flex-column table table-sm table-hover border',
     row: 'd-flex',
     column: 'd-flex flex-column',
@@ -22,6 +22,26 @@ const styles = {
 export const Stack = () => {
     const container$ = React.useRef<HTMLDivElement>()
     const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
+
+    React.useLayoutEffect(() => {
+        const onResize = (event?: UIEvent) => {
+            const parentSize = {
+                width: container$.current.parentElement.clientWidth,
+                height: container$.current.parentElement.clientHeight
+            }
+            const size = {
+                width: container$.current.clientWidth,
+                height: container$.current.clientHeight
+            }
+            if (size.width === parentSize.width && size.height === parentSize.height) return
+            container$.current.style.width = `${parentSize.width}px`
+            container$.current.style.height = `${parentSize.height}px`
+        }
+
+        onResize()
+        globalThis.addEventListener('resize', onResize)
+        return () => globalThis.removeEventListener('resize', onResize)
+    }, [container$])
 
     React.useLayoutEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
 
