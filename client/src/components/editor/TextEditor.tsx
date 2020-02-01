@@ -45,7 +45,7 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
         props.onEditor?.(editor.current)
     }, [container$.current])
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const size = { x: container$.current.clientWidth, y: container$.current.clientHeight }
 
         const onResize = (event: UIEvent) => {
