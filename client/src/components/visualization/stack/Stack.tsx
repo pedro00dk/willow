@@ -20,12 +20,12 @@ const styles = {
 }
 
 export const Stack = () => {
-    const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack ?? [] }))
+    const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
 
     return (
         <div className={classes.container}>
-            {stack.length === 0 && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
-            {stack.map((scope, i) => (
+            {!stack && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
+            {(stack ?? []).map((scope, i) => (
                 <Scope key={i} scope={scope} />
             ))}
         </div>
