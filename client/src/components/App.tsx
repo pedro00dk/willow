@@ -1,7 +1,6 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
-import { colors } from '../colors'
 import { DefaultStore, useDispatch } from '../reducers/Store'
 import { actions as tracerActions } from '../reducers/tracer'
 import logo from '../../public/logo.svg'
@@ -9,7 +8,8 @@ import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'
 import { SourceEditor } from './editor/SourceEditor'
-import { Splitter } from './Splitter'
+import { Frame } from './utils/Frame'
+import { SplitPane } from './utils/SplitPane'
 import { StackTrace } from './visualization/stacktrace/StackTrace'
 import { GraphView } from './visualization/graphview/GraphView'
 import { Stack } from './visualization/stack/Stack'
@@ -17,10 +17,9 @@ import { Stack } from './visualization/stack/Stack'
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
     header: {
-        nav: cn('navbar shadow-sm', css({ background: colors.gray.light })),
-        link: 'd-flex align-items-center navbar-brand',
-        logo: cn('mr-2', css({ width: '2rem', filter: 'invert(1)' })),
-        text: css({ color: colors.black, fontSize: '1.5rem' })
+        nav: 'navbar navbar-light bg-light shadow-sm mb-1',
+        brand: 'd-flex navbar-brand align-items-center',
+        logo: cn('mr-2', css({ filter: 'invert(1)', width: '2rem' }))
     },
     body: {
         container: 'd-flex flex-column flex-fill',
@@ -40,9 +39,9 @@ export const App = () => (
 
 const Header = () => (
     <nav className={classes.header.nav}>
-        <a className={classes.header.link} href='#'>
-            <img src={logo} className={classes.header.logo} />
-            <span className={classes.header.text}>Willow</span>
+        <a className={classes.header.brand} href='#'>
+            <img className={classes.header.logo} src={logo} />
+            Willow
         </a>
     </nav>
 )
@@ -51,22 +50,28 @@ const Body = () => (
     <div className={classes.body.container}>
         <Controls />
         <div className={classes.body.panel}>
-            <Splitter baseRatio={0.3}>
+            <SplitPane ratio={0.3}>
                 <Editors />
                 <Visualization />
-            </Splitter>
+            </SplitPane>
         </div>
     </div>
 )
 
 const Editors = () => (
-    <Splitter direction='column' baseRatio={0.66}>
-        <SourceEditor />
-        <Splitter direction='column'>
-            <InputEditor />
-            <OutputEditor />
-        </Splitter>
-    </Splitter>
+    <SplitPane orientation='column' ratio={0.66}>
+        <Frame title='Editor'>
+            <SourceEditor />
+        </Frame>
+        <SplitPane orientation='column'>
+            <Frame title='Input'>
+                <InputEditor />
+            </Frame>
+            <Frame title='Output'>
+                <OutputEditor />
+            </Frame>
+        </SplitPane>
+    </SplitPane>
 )
 
 const Visualization = () => {
@@ -86,13 +91,13 @@ const Visualization = () => {
             }}
             tabIndex={0}
         >
-            <Splitter direction='column' baseRatio={0.35}>
-                <Splitter baseRatio={0.2} minRatio={0.1} maxRatio={0.4}>
+            <SplitPane orientation='column' ratio={0.35}>
+                <SplitPane ratio={0.25} range={[0.1, 0.6]}>
                     <Stack />
                     <StackTrace />
-                </Splitter>
+                </SplitPane>
                 <GraphView />
-            </Splitter>
+            </SplitPane>
         </div>
     )
 }
