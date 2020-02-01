@@ -57,6 +57,7 @@ export const SplitPane = (props: {
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])
                     firstPane$.current.style[freeDimension] = styles.size(ratio.current)
                     secondPane$.current.style[freeDimension] = styles.size(1 - ratio.current)
+                    globalThis.dispatchEvent(new Event('resize'))
                 }}
             />
             <div ref={secondPane$} className={classes.pane} style={{ [freeDimension]: styles.size(1 - ratio.current) }}>
