@@ -1,8 +1,10 @@
+import cn from 'classnames'
+import { css } from 'emotion'
 import React from 'react'
 
 const classes = {
     container: 'd-flex flex-column w-100 h-100',
-    title: 'text-secondary shadow-sm px-2 py-1 mb-1',
+    title: cn('text-secondary shadow-sm px-2 py-1 mb-1', css({ fontSize: '1rem' })),
     children: 'd-flex flex-fill'
 }
 
