@@ -46,12 +46,12 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
     }, [container$.current])
 
     React.useLayoutEffect(() => {
-        const size = { x: container$.current.clientWidth, y: container$.current.clientHeight }
+        const size = { width: container$.current.clientWidth, height: container$.current.clientHeight }
 
         const onResize = (event: UIEvent) => {
-            if (size.x === container$.current.clientWidth && size.y === container$.current.clientHeight) return
-            size.x = container$.current.clientWidth
-            size.y = container$.current.clientHeight
+            if (size.width === container$.current.clientWidth && size.height === container$.current.clientHeight) return
+            size.width = container$.current.clientWidth
+            size.height = container$.current.clientHeight
             editor.current.resize()
         }
 
