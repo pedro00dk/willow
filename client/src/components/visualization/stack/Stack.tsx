@@ -5,39 +5,26 @@ import { memberChanged, getDisplayValue } from '../graphview/Base'
 import { colors } from '../../../colors'
 
 const classes = {
-    container: 'd-flex flex-column position-absolute flex-nowrap overflow-auto',
-    table: 'table table-sm table-hover table-striped table-bordered w-100',
-    header: 'thread-light w-100',
-    body: 'w-100',
-    headerRow: 'w-100',
-    bodyRow: 'w-100',
-    nameCell: 'd-inline-block text-nowrap text-truncate w-25',
-    valueCell: 'd-inline-block text-nowrap text-truncate w-75'
+    container: 'd-flex flex-column overflow-auto w-100',
+    table: 'd-flex flex-column table table-sm table-hover border',
+    row: 'd-flex',
+    column: 'd-flex flex-column',
+    headerCell: 'text-truncate w-100',
+    cell: 'text-truncate w-50'
 }
 
 const styles = {
-    changed: (changed: boolean) => (changed ? colors.red.lighter : undefined)
+    changed: (changed: boolean) => (changed ? colors.yellow.lighter : undefined)
 }
 
 export const Stack = () => {
-    const ref = React.useRef<HTMLDivElement>()
-    const [size, setSize] = React.useState({ x: 0, y: 0 })
-    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
-
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            const parentSize = { x: ref.current.parentElement.clientWidth, y: ref.current.parentElement.clientHeight }
-            if (size.x === parentSize.x && size.y === parentSize.y) return
-            setSize(parentSize)
-        }, 1000)
-
-        return () => clearInterval(interval)
-    }, [ref.current, size])
+    const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack ?? [] }))
 
     return (
-        <div ref={ref} className={classes.container} style={{ width: size.x - 1, height: size.y - 1 }}>
-            {(tracer.steps?.[tracer.index].snapshot?.stack ?? []).map(scope => (
-                <Scope scope={scope} />
+        <div className={classes.container}>
+            {stack.length === 0 && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
+            {stack.map((scope, i) => (
+                <Scope key={i} scope={scope} />
             ))}
         </div>
     )
@@ -45,36 +32,34 @@ export const Stack = () => {
 
 const Scope = (props: { scope: schema.Scope }) => {
     const currentVariables = React.useRef<{ [name: string]: schema.Variable }>({})
+
     React.useEffect(() => {
         currentVariables.current = props.scope.variables.reduce(
             (acc, next) => ((acc[next.name] = next), acc),
             {} as { [name: string]: schema.Variable }
         )
     })
+
     return (
         <table className={classes.table}>
-            <thead className={classes.header}>
-                <tr className={classes.headerRow} title={props.scope.name}>
-                    <th className={classes.nameCell} scope='col'>
-                        {props.scope.name}
-                    </th>
-                    <th className={classes.valueCell} scope='col'>
-                        value
-                    </th>
+            <thead className={classes.column}>
+                <tr className={classes.row}>
+                    <th className={classes.headerCell}>{props.scope.name}</th>
                 </tr>
             </thead>
-            <tbody className={classes.body}>
-                {props.scope.variables.map(variable => {
-                    const changed = memberChanged(currentVariables.current[variable.name], variable)
+            <tbody className={classes.column}>
+                {props.scope.variables.map((variable, i) => {
                     const displayValue = getDisplayValue(undefined, variable.value)
+                    const changed = memberChanged(currentVariables.current[variable.name], variable)
                     return (
                         <tr
-                            className={classes.bodyRow}
+                            key={i}
+                            className={classes.row}
                             style={{ background: styles.changed(changed) }}
                             title={displayValue}
                         >
-                            <td className={classes.nameCell}>{variable.name}</td>
-                            <td className={classes.valueCell}>{displayValue}</td>
+                            <td className={classes.cell}>{variable.name}</td>
+                            <td className={classes.cell}>{displayValue}</td>
                         </tr>
                     )
                 })}
