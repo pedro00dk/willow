@@ -11,10 +11,11 @@ const classes = {
     scope: cn(
         'text-truncate w-100',
         css({
-            fontSize: '1rem',
             backgroundClip: 'content-box !important',
+            border: '1px solid transparent',
             cursor: 'default',
-            ':hover': { borderColor: `${colors.gray.dark} !important` }
+            fontSize: '1rem',
+            ':hover': { borderColor: colors.gray.dark }
         })
     ),
     children: 'd-flex',
@@ -22,19 +23,25 @@ const classes = {
 }
 
 const styles = {
-    scope: (width: number, selected: boolean, threw: boolean) => ({
-        opacity: width >= 20 ? 1 : 0.5,
-        border: `1px ${selected ? colors.gray.main : 'transparent'} solid`,
-        background: !threw ? colors.blue.light : colors.red.light
+    scope: (selected: boolean, threw: boolean) => ({
+        background: selected
+            ? !threw
+                ? colors.blue.light
+                : colors.red.light
+            : !threw
+            ? colors.blue.lighter
+            : colors.red.lighter
     })
 }
 
-export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice; width: number }) => {
+export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
+    const container$ = React.useRef<HTMLDivElement>()
+    const [displayMode, setDisplay] = React.useState<'all' | 'dim' | 'hide'>()
     const dispatch = useDispatch()
-    const { selected } = useSelection(state => ({
-        selected: state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
-    }))
-    const scopeSliceSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
+    const selected = useSelection(
+        state => state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
+    )
+    const scopeSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
     const threw = props.scopeSlice.nodes[props.scopeSlice.nodes.length - 1]?.line == undefined ?? false
 
     const childrenScopeSlices = React.useMemo(() => {
@@ -59,37 +66,43 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice; width: nu
         }, [] as ScopeSlice[])
     }, [props.scopeSlice])
 
+    React.useLayoutEffect(() => {
+        const onResize = (event?: UIEvent) => {
+            const width = container$.current.getBoundingClientRect().width
+            const newDisplayMode = width >= 40 ? 'all' : width >= 10 ? 'dim' : 'hide'
+            displayMode !== newDisplayMode && setDisplay(newDisplayMode)
+        }
+        onResize()
+        console.log('here')
+        globalThis.addEventListener('resize', onResize)
+        return () => globalThis.removeEventListener('resize', onResize)
+    }, [displayMode])
+
     return (
-        <div className={classes.container}>
+        <div ref={container$} className={classes.container}>
             {props.scopeSlice.name != undefined && (
                 <div
                     className={classes.scope}
-                    style={styles.scope(props.width, selected, threw)}
+                    style={styles.scope(selected, threw)}
                     title={props.scopeSlice.name}
                     onClick={event => dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))}
                 >
-                    {props.width >= 20 ? props.scopeSlice.name : '\u200b'}
+                    {displayMode === 'all' ? props.scopeSlice.name : '\u200b'}
                 </div>
             )}
-            {props.width >= 10 && (
+            {displayMode !== 'hide' && (
                 <div className={classes.children}>
                     {childrenScopeSlices.map((child, i) => {
                         const childSize = child.range[1] - child.range[0] + 1
-                        const childWidthProportion = childSize / scopeSliceSize
-                        const childWidthPercent = `${childWidthProportion * 100}%`
-                        const childWidthPixels = childWidthProportion * props.width
+                        const widthRatio = childSize / scopeSize
+                        const width = `${widthRatio * 100}%`
                         const previousChild = childrenScopeSlices[i - 1]
-                        const childMarginSize =
-                            child.range[0] - (previousChild?.range[1] + 1 || props.scopeSlice.range[0])
-                        const childMarginProportion = childMarginSize / scopeSliceSize
-                        const childMarginPercent = `${childMarginProportion * 100}%`
+                        const marginSize = child.range[0] - (previousChild?.range[1] + 1 || props.scopeSlice.range[0])
+                        const marginRatio = marginSize / scopeSize
+                        const marginLeft = `${marginRatio * 100}%`
                         return (
-                            <div
-                                key={i}
-                                className={classes.child}
-                                style={{ width: childWidthPercent, marginLeft: childMarginPercent }}
-                            >
-                                <ScopeTrace scopeSlice={child} width={childWidthPixels} />
+                            <div key={i} className={classes.child} style={{ width, marginLeft }}>
+                                <ScopeTrace scopeSlice={child} />
                             </div>
                         )
                     })}
