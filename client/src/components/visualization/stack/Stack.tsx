@@ -1,3 +1,5 @@
+import cn from 'classnames'
+import { css } from 'emotion'
 import React from 'react'
 import * as schema from '../../../schema/schema'
 import { useSelection } from '../../../reducers/Store'
@@ -9,8 +11,8 @@ const classes = {
     table: 'd-flex flex-column table table-sm table-hover border',
     row: 'd-flex',
     column: 'd-flex flex-column',
-    headerCell: 'text-truncate w-100',
-    cell: 'text-truncate w-50'
+    headerCell: cn('text-truncate w-100', css({ fontSize: '1rem' })),
+    cell: cn('text-truncate w-50', css({ fontSize: '1rem' }))
 }
 
 const styles = {
