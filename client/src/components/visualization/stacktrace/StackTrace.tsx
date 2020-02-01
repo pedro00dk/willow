@@ -6,10 +6,11 @@ import { ScopeTrace } from './ScopeTrace'
 export type ScopeSlice = { name: string; range: [number, number]; nodes: schema.Scope[]; children: schema.Scope[][] }
 
 const classes = {
-    container: 'd-flex  overflow-auto w-100'
+    container: 'd-flex position-absolute overflow-auto'
 }
 
 export const StackTrace = () => {
+    const container$ = React.useRef<HTMLDivElement>()
     const { steps } = useSelection(state => ({ steps: state.tracer.steps }))
 
     const scopeSlice = React.useMemo(() => {
@@ -20,5 +21,29 @@ export const StackTrace = () => {
         return { name: undefined, range: [0, steps.length - 1], nodes: [], children } as ScopeSlice
     }, [steps])
 
-    return <div className={classes.container}>{steps && <ScopeTrace scopeSlice={scopeSlice} />}</div>
+    React.useLayoutEffect(() => {
+        const onResize = (event?: UIEvent) => {
+            const parentSize = {
+                width: container$.current.parentElement.clientWidth,
+                height: container$.current.parentElement.clientHeight
+            }
+            const size = {
+                width: container$.current.clientWidth,
+                height: container$.current.clientHeight
+            }
+            if (size.width === parentSize.width && size.height === parentSize.height) return
+            container$.current.style.width = `${parentSize.width}px`
+            container$.current.style.height = `${parentSize.height}px`
+        }
+
+        onResize()
+        globalThis.addEventListener('resize', onResize)
+        return () => globalThis.removeEventListener('resize', onResize)
+    }, [container$])
+
+    return (
+        <div ref={container$} className={classes.container}>
+            {steps && <ScopeTrace scopeSlice={scopeSlice} />}
+        </div>
+    )
 }
