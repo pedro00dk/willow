@@ -32,8 +32,8 @@ export const StackTrace = () => {
                 height: container$.current.clientHeight
             }
             if (size.width === parentSize.width && size.height === parentSize.height) return
-            container$.current.style.width = `${parentSize.width}px`
-            container$.current.style.height = `${parentSize.height}px`
+            container$.current.style.width = `${parentSize.width - 1}px`
+            container$.current.style.height = `${parentSize.height - 1}px`
         }
 
         onResize()
