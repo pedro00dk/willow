@@ -36,7 +36,7 @@ const styles = {
 
 export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
     const container$ = React.useRef<HTMLDivElement>()
-    const [displayMode, setDisplay] = React.useState<'all' | 'dim' | 'hide'>()
+    const [displayMode, setDisplayMode] = React.useState<'all' | 'dim' | 'hide'>()
     const dispatch = useDispatch()
     const selected = useSelection(
         state => state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
@@ -68,12 +68,11 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
 
     React.useLayoutEffect(() => {
         const onResize = (event?: UIEvent) => {
-            const width = container$.current.getBoundingClientRect().width
+            const width = container$.current.clientWidth
             const newDisplayMode = width >= 40 ? 'all' : width >= 10 ? 'dim' : 'hide'
-            displayMode !== newDisplayMode && setDisplay(newDisplayMode)
+            displayMode !== newDisplayMode && setDisplayMode(newDisplayMode)
         }
-        onResize()
-        console.log('here')
+        displayMode ?? onResize()
         globalThis.addEventListener('resize', onResize)
         return () => globalThis.removeEventListener('resize', onResize)
     }, [displayMode])
