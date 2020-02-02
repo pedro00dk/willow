@@ -1,4 +1,5 @@
 import React from 'react'
+import { GraphData } from '../GraphData'
 
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
@@ -24,15 +25,16 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-export const SvgView = (props: { size: { width: number; height: number }; children?: React.ReactNode }) => {
+export const SvgView = (props: { graphData: GraphData; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
-    const box = React.useRef({ x: 0, y: 0, width: props.size.width * 0.5, height: props.size.height * 0.5 })
+    const viewSize = props.graphData.getViewSize()
+    const box = React.useRef({ x: 0, y: 0, width: viewSize.width * 0.5, height: viewSize.height * 0.5 })
     const ranges = {
-        x: { min: 0, max: props.size.width },
-        y: { min: 0, max: props.size.height },
-        width: { min: props.size.width * 0.3, max: props.size.width },
-        height: { min: props.size.height * 0.3, max: props.size.height }
+        x: { min: 0, max: viewSize.width },
+        y: { min: 0, max: viewSize.height },
+        width: { min: viewSize.width * 0.3, max: viewSize.width },
+        height: { min: viewSize.height * 0.3, max: viewSize.height }
     }
 
     const translateBox = (delta: { x: number; y: number }) => {
@@ -42,7 +44,7 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
     }
 
     const scaleBox = (point: { x: number; y: number }, direction: 'in' | 'out') => {
-        const factor = (box.current.width / props.size.width) * (direction === 'in' ? 50 : -50)
+        const factor = (box.current.width / viewSize.width) * (direction === 'in' ? 50 : -50)
         const ratio = {
             x: ilerp(point.x, box.current.x, box.current.x + box.current.width),
             y: ilerp(point.y, box.current.y, box.current.y + box.current.height)
@@ -57,8 +59,6 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
         box.current.width = size.width
         box.current.height = size.height
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
-
-        console.log(factor)
     }
 
     React.useLayoutEffect(() => {
@@ -102,12 +102,12 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
             }}
         >
             <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
-                <rect width={props.size.width} height={props.size.height} />
+                <rect width={viewSize.width} height={viewSize.height} />
                 <rect
-                    x={props.size.width / 4}
-                    y={props.size.height / 4}
-                    width={props.size.width / 2}
-                    height={props.size.height / 2}
+                    x={viewSize.width / 4}
+                    y={viewSize.height / 4}
+                    width={viewSize.width / 2}
+                    height={viewSize.height / 2}
                 />
             </g>
             {props.children}
