@@ -8,7 +8,7 @@ export const Stack = (props: {
     tracer: DefaultState['tracer']
 }) => {
     if (!props.tracer.steps) return <></>
-    const deltaSize = props.graphData.getGraphSize().x * 0.05
+    const deltaSize = props.graphData.getGraphSize().width * 0.05
     const stack = props.tracer.steps[props.graphData.getIndex()].snapshot?.stack ?? []
     const variables = stack
         .flatMap(scope => scope.variables)

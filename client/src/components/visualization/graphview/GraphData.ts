@@ -23,7 +23,7 @@ export class GraphData {
     private subscriptionCalls = 0
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
 
-    constructor(private graphSize: { x: number; y: number }, private padding: { x: number; y: number }) {}
+    constructor(private graphSize: { width: number; height: number }, private padding: { x: number; y: number }) {}
 
     getGraphSize() {
         return this.graphSize
@@ -56,8 +56,8 @@ export class GraphData {
     setPositionRange(id: string, range: [number, number], position: { x: number; y: number }) {
         const positions = this.positions[id] ?? (this.positions[id] = [])
         const paddedPosition = {
-            x: Math.min(Math.max(position.x, 0), this.graphSize.x - this.padding.x),
-            y: Math.min(Math.max(position.y, 0), this.graphSize.y - this.padding.y)
+            x: Math.min(Math.max(position.x, 0), this.graphSize.width - this.padding.x),
+            y: Math.min(Math.max(position.y, 0), this.graphSize.height - this.padding.y)
         }
         for (let i = range[0]; i <= range[1]; i++) positions[i] = paddedPosition
         return paddedPosition
