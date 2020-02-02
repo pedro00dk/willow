@@ -67,16 +67,15 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
     }, [props.scopeSlice])
 
     React.useLayoutEffect(() => {
-        const onResize = async (event?: UIEvent) => {
-            await undefined
+        const onResize = (event: Event) => {
             const width = container$.current.clientWidth
             const newDisplayMode = width >= 40 ? 'all' : width >= 10 ? 'dim' : 'hide'
             displayMode !== newDisplayMode && setDisplayMode(newDisplayMode)
         }
 
-        displayMode ?? onResize()
-        globalThis.addEventListener('resize', onResize)
-        return () => globalThis.removeEventListener('resize', onResize)
+        displayMode ?? onResize(undefined)
+        globalThis.addEventListener('paneResizeEnd', onResize)
+        return () => globalThis.removeEventListener('paneResizeEnd', onResize)
     }, [displayMode])
 
     return (

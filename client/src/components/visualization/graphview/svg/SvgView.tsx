@@ -62,8 +62,7 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
     }
 
     React.useLayoutEffect(() => {
-        const onResize = async (event?: UIEvent) => {
-            await undefined
+        const onResize = (event: Event) => {
             const parentSize = {
                 width: container$.current.parentElement.clientWidth,
                 height: container$.current.parentElement.clientHeight
@@ -77,9 +76,9 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
             container$.current.style.height = `${parentSize.height - 1}px`
         }
 
-        onResize()
-        globalThis.addEventListener('resize', onResize)
-        return () => globalThis.removeEventListener('resize', onResize)
+        onResize(undefined)
+        globalThis.addEventListener('paneResize', onResize)
+        return () => globalThis.removeEventListener('paneResize', onResize)
     }, [container$])
 
     return (
