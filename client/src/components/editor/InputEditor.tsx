@@ -14,6 +14,7 @@ export const InputEditor = () => {
     }, [editor])
 
     useSelection(async state => {
+        await undefined
         state.tracer.fetching !== editor.current?.getReadOnly() && editor.current?.setReadOnly(state.tracer.fetching)
     })
 

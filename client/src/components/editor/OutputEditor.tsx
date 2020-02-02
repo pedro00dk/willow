@@ -19,6 +19,7 @@ export const OutputEditor = () => {
     })
 
     useSelection(async (state, previousState) => {
+        await undefined
         if (!editor || state.tracer.index == undefined || state.tracer.index === previousState.tracer?.index) return
         editor.current.session.doc.setValue(output.current[state.tracer.index])
         editor.current.scrollToLine(editor.current.session.getLength(), true, true, undefined)

@@ -40,13 +40,15 @@ export const SourceEditor = () => {
     }, [editor.current])
 
     useSelection(async (state, previousState) => {
+        await undefined
         const language = state.language.languages[state.language.selected]
         const previousLanguage = previousState.language?.languages[previousState.language.selected]
         if (!editor.current || language === previousLanguage) return
         editor.current.session.setMode(`ace/mode/${supportedLanguages.has(language) ? language : 'text'}`)
     })
-
+    
     useSelection(async (state, previousState) => {
+        await undefined
         const step = state.tracer.steps?.[state.tracer.index]
         const previousStep = previousState.tracer?.steps?.[previousState.tracer.index]
         if (!editor.current || !step || step === previousStep) return
