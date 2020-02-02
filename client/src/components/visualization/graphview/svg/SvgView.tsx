@@ -1,11 +1,8 @@
 import React from 'react'
-import { GraphData } from '../GraphData'
-
-export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
-
-export const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
 
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
+
+export const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
 
 export const svgScreenTransformPoint = (
     direction: 'toSvg' | 'toScreen',
@@ -27,78 +24,67 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-export const SvgView = (props: { graphData: GraphData; children?: React.ReactNode }) => {
-    const ref = React.useRef<SVGSVGElement>()
+export const SvgView = (props: { size: { width: number; height: number }; children?: React.ReactNode }) => {
+    const container$ = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
-    const size = props.graphData.getGraphSize()
-    const viewBox = React.useRef({ x: 0, y: 0, width: size.x * 0.5, height: size.y * 0.5 })
-    const viewBoxRanges = {
-        x: { min: 0, max: size.x },
-        y: { min: 0, max: size.y },
-        width: { min: size.x * 0.3, max: size.x },
-        height: { min: size.y * 0.3, max: size.y }
+    const box = React.useRef({ x: 0, y: 0, width: props.size.width * 0.5, height: props.size.height * 0.5 })
+    const ranges = {
+        x: { min: 0, max: props.size.width },
+        y: { min: 0, max: props.size.height },
+        width: { min: props.size.width * 0.3, max: props.size.width },
+        height: { min: props.size.height * 0.3, max: props.size.height }
     }
 
-    const moveView = (delta: { x: number; y: number }) => {
-        viewBox.current.x = clamp(
-            viewBox.current.x - delta.x,
-            viewBoxRanges.x.min,
-            viewBoxRanges.x.max - viewBox.current.width
-        )
-        viewBox.current.y = clamp(
-            viewBox.current.y - delta.y,
-            viewBoxRanges.y.min,
-            viewBoxRanges.y.max - viewBox.current.height
-        )
-        ref.current.setAttribute('viewBox', Object.values(viewBox.current).join(' '))
+    const translateBox = (delta: { x: number; y: number }) => {
+        box.current.x = Math.min(Math.max(box.current.x - delta.x, ranges.x.min), ranges.x.max - box.current.width)
+        box.current.y = Math.min(Math.max(box.current.y - delta.y, ranges.y.min), ranges.y.max - box.current.height)
+        container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
     }
 
-    const scaleView = (scaleRoot: { x: number; y: number }, multiplier: number) => {
-        const factor = Math.min(size.x, size.y) * multiplier
+    const scaleBox = (point: { x: number; y: number }, direction: 'in' | 'out') => {
+        const factor = (box.current.width / props.size.width) * (direction === 'in' ? 50 : -50)
         const ratio = {
-            x: ilerp(scaleRoot.x, viewBox.current.x, viewBox.current.x + viewBox.current.width),
-            y: ilerp(scaleRoot.y, viewBox.current.y, viewBox.current.y + viewBox.current.height)
+            x: ilerp(point.x, box.current.x, box.current.x + box.current.width),
+            y: ilerp(point.y, box.current.y, box.current.y + box.current.height)
         }
-        const viewSize = {
-            width: clamp(viewBox.current.width - factor, viewBoxRanges.width.min, viewBoxRanges.width.max),
-            height: clamp(viewBox.current.height - factor, viewBoxRanges.height.min, viewBoxRanges.height.max)
+        const size = {
+            width: Math.min(Math.max(box.current.width - factor, ranges.width.min), ranges.width.max),
+            height: Math.min(Math.max(box.current.height - factor, ranges.height.min), ranges.height.max)
         }
-        if (viewSize.width === viewBox.current.width && viewSize.height === viewBox.current.height) return
-        viewBox.current.x = clamp(
-            viewBox.current.x + factor * ratio.x,
-            viewBoxRanges.x.min,
-            viewBoxRanges.x.max - viewSize.width
-        )
-        viewBox.current.y = clamp(
-            viewBox.current.y + factor * ratio.y,
-            viewBoxRanges.y.min,
-            viewBoxRanges.y.max - viewSize.height
-        )
-        viewBox.current.width = viewSize.width
-        viewBox.current.height = viewSize.height
-        ref.current.setAttribute('viewBox', Object.values(viewBox.current).join(' '))
+        if (size.width === box.current.width && size.height === box.current.height) return
+        box.current.x = Math.min(Math.max(box.current.x + factor * ratio.x, ranges.x.min), ranges.x.max - size.width)
+        box.current.y = Math.min(Math.max(box.current.y + factor * ratio.y, ranges.y.min), ranges.y.max - size.height)
+        box.current.width = size.width
+        box.current.height = size.height
+        container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
+
+        console.log(factor)
     }
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            const containerSize = {
-                x: ref.current.parentElement.clientWidth,
-                y: ref.current.parentElement.clientHeight
+    React.useLayoutEffect(() => {
+        const onResize = (event?: UIEvent) => {
+            const parentSize = {
+                width: container$.current.parentElement.clientWidth,
+                height: container$.current.parentElement.clientHeight
             }
-            const svgSize = { x: ref.current.clientWidth, y: ref.current.clientHeight }
-            if (containerSize.x !== svgSize.x || containerSize.y !== svgSize.y) {
-                ref.current.setAttribute('width', containerSize.x.toString())
-                ref.current.setAttribute('height', containerSize.y.toString())
+            const size = {
+                width: container$.current.clientWidth,
+                height: container$.current.clientHeight
             }
-        }, 1000)
+            if (size.width === parentSize.width && size.height === parentSize.height) return
+            container$.current.style.width = `${parentSize.width - 1}px`
+            container$.current.style.height = `${parentSize.height - 1}px`
+        }
 
-        return () => clearInterval(interval)
-    }, [ref])
+        onResize()
+        globalThis.addEventListener('resize', onResize)
+        return () => globalThis.removeEventListener('resize', onResize)
+    }, [container$])
 
     return (
         <svg
-            ref={ref}
-            viewBox={Object.values(viewBox.current).join(' ')}
+            ref={container$}
+            viewBox={Object.values(box.current).join(' ')}
             preserveAspectRatio='xMidYMid meet'
             onMouseDown={event => (click.current = true)}
             onMouseUp={event => (click.current = false)}
@@ -106,18 +92,23 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
             onMouseMove={event => {
                 if (!click.current) return
                 const screenDelta = { x: event.movementX, y: event.movementY }
-                const [svgDelta] = svgScreenTransformVector('toSvg', ref.current, screenDelta)
-                moveView(svgDelta)
+                const [svgDelta] = svgScreenTransformVector('toSvg', container$.current, screenDelta)
+                translateBox(svgDelta)
             }}
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
-                const [svgPoint] = svgScreenTransformPoint('toSvg', ref.current, screenPoint)
-                scaleView(svgPoint, event.deltaY < 0 ? 0.02 : -0.02)
+                const [svgPoint] = svgScreenTransformPoint('toSvg', container$.current, screenPoint)
+                scaleBox(svgPoint, event.deltaY < 0 ? 'in' : 'out')
             }}
         >
             <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
-                <rect width={size.x} height={size.y} />
-                <rect x={size.x / 4} y={size.y / 4} width={size.x / 2} height={size.y / 2} />
+                <rect width={props.size.width} height={props.size.height} />
+                <rect
+                    x={props.size.width / 4}
+                    y={props.size.height / 4}
+                    width={props.size.width / 2}
+                    height={props.size.height / 2}
+                />
             </g>
             {props.children}
         </svg>
