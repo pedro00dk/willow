@@ -28,6 +28,14 @@ const styles = {
     cursor: (layout: 'row' | 'column') => (layout === 'row' ? 'ew-resize' : 'ns-resize')
 }
 
+const createSharedState = <T extends any>(initialValue: T) => {
+    const get = () => initialValue
+    const set = (value: T) => (initialValue = value)
+    return { get, set }
+}
+
+const resizeTransformIsSetContext = React.createContext(createSharedState(false))
+
 export const SplitPane = (props: {
     orientation?: 'row' | 'column'
     ratio?: number
@@ -38,8 +46,35 @@ export const SplitPane = (props: {
     const container$ = React.useRef<HTMLDivElement>()
     const firstPane$ = React.useRef<HTMLDivElement>()
     const secondPane$ = React.useRef<HTMLDivElement>()
+    const resizeTransformIsSet = React.useContext(resizeTransformIsSetContext)
     const ratio = React.useRef(Math.min(Math.max(initialRatio, range[0]), range[1]))
     const freeDimension = orientation === 'row' ? 'width' : 'height'
+
+    React.useLayoutEffect(() => {
+        if (resizeTransformIsSet.get()) return
+        resizeTransformIsSet.set(true)
+        let timeout: NodeJS.Timeout
+        const onResize = (event: Event) => {
+            if (!timeout) globalThis.dispatchEvent(new Event('paneResizeStart'))
+            globalThis.dispatchEvent(new Event('paneResize'))
+            clearTimeout(timeout)
+            console.log('cleaning', timeout)
+            timeout = setTimeout(
+                () => (
+                    dispatchEvent(new Event('paneResizeEnd')), console.log('removing', timeout), (timeout = undefined)
+                ),
+                100
+            )
+        }
+
+        globalThis.addEventListener('resize', onResize)
+
+        globalThis.addEventListener('paneResizeStart', () => console.log('start'))
+        globalThis.addEventListener('paneResize', () => console.log('middle'))
+        globalThis.addEventListener('paneResizeEnd', () => console.log('end'))
+
+        return () => globalThis.removeEventListener('resize', onResize)
+    }, [])
 
     return (
         <div ref={container$} className={classes.container} style={{ flexDirection: orientation }}>
@@ -51,16 +86,16 @@ export const SplitPane = (props: {
                     className: cn(classes.dragger.base, classes.dragger[orientation]),
                     style: { cursor: styles.cursor(orientation) }
                 }}
-                onDragStart={event => globalThis.dispatchEvent(new Event('splitPaneResizeStart'))}
+                onDragStart={event => globalThis.dispatchEvent(new Event('paneResizeStart'))}
                 onDrag={delta => {
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])
                     firstPane$.current.style[freeDimension] = styles.size(ratio.current)
                     secondPane$.current.style[freeDimension] = styles.size(1 - ratio.current)
-                    globalThis.dispatchEvent(new Event('splitPaneResize', { cancelable: true }))
+                    globalThis.dispatchEvent(new Event('paneResize', { cancelable: true }))
                 }}
-                onDragEnd={event => globalThis.dispatchEvent(new Event('splitPaneResizeEnd'))}
+                onDragEnd={event => globalThis.dispatchEvent(new Event('paneResizeEnd'))}
             />
             <div ref={secondPane$} className={classes.pane} style={{ [freeDimension]: styles.size(1 - ratio.current) }}>
                 {children[1]}
