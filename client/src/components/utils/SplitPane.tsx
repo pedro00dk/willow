@@ -68,11 +68,6 @@ export const SplitPane = (props: {
         }
 
         globalThis.addEventListener('resize', onResize)
-
-        globalThis.addEventListener('paneResizeStart', () => console.log('start'))
-        globalThis.addEventListener('paneResize', () => console.log('middle'))
-        globalThis.addEventListener('paneResizeEnd', () => console.log('end'))
-
         return () => globalThis.removeEventListener('resize', onResize)
     }, [])
 
