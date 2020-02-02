@@ -51,15 +51,16 @@ export const SplitPane = (props: {
                     className: cn(classes.dragger.base, classes.dragger[orientation]),
                     style: { cursor: styles.cursor(orientation) }
                 }}
-                onDrag={async delta => {
-                    await undefined
+                onDragStart={event => globalThis.dispatchEvent(new Event('splitPaneResizeStart'))}
+                onDrag={delta => {
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])
                     firstPane$.current.style[freeDimension] = styles.size(ratio.current)
                     secondPane$.current.style[freeDimension] = styles.size(1 - ratio.current)
-                    globalThis.dispatchEvent(new Event('resize'))
+                    globalThis.dispatchEvent(new Event('splitPaneResize', { cancelable: true }))
                 }}
+                onDragEnd={event => globalThis.dispatchEvent(new Event('splitPaneResizeEnd'))}
             />
             <div ref={secondPane$} className={classes.pane} style={{ [freeDimension]: styles.size(1 - ratio.current) }}>
                 {children[1]}
