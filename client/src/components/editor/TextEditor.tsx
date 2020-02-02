@@ -48,16 +48,15 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
     React.useLayoutEffect(() => {
         const size = { width: container$.current.clientWidth, height: container$.current.clientHeight }
 
-        const onResize = async (event: UIEvent) => {
-            await undefined
+        const onResize = (event: Event) => {
             if (size.width === container$.current.clientWidth && size.height === container$.current.clientHeight) return
             size.width = container$.current.clientWidth
             size.height = container$.current.clientHeight
             editor.current.resize()
         }
 
-        globalThis.addEventListener('resize', onResize)
-        return () => globalThis.removeEventListener('resize', onResize)
+        addEventListener('paneResizeEnd', onResize)
+        return () => removeEventListener('paneResizeEnd', onResize)
     }, [container$.current, editor.current])
 
     return <div ref={container$} className={classes.container} />
