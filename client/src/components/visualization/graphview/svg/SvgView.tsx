@@ -62,7 +62,8 @@ export const SvgView = (props: { size: { width: number; height: number }; childr
     }
 
     React.useLayoutEffect(() => {
-        const onResize = (event?: UIEvent) => {
+        const onResize = async (event?: UIEvent) => {
+            await undefined
             const parentSize = {
                 width: container$.current.parentElement.clientWidth,
                 height: container$.current.parentElement.clientHeight

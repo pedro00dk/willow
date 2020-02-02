@@ -51,7 +51,8 @@ export const SplitPane = (props: {
                     className: cn(classes.dragger.base, classes.dragger[orientation]),
                     style: { cursor: styles.cursor(orientation) }
                 }}
-                onDrag={delta => {
+                onDrag={async delta => {
+                    await undefined
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])

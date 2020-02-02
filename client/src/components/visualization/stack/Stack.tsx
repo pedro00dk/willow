@@ -24,7 +24,8 @@ export const Stack = () => {
     const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
 
     React.useLayoutEffect(() => {
-        const onResize = (event?: UIEvent) => {
+        const onResize = async (event?: UIEvent) => {
+            await undefined
             const parentSize = {
                 width: container$.current.parentElement.clientWidth,
                 height: container$.current.parentElement.clientHeight
@@ -43,7 +44,7 @@ export const Stack = () => {
         return () => globalThis.removeEventListener('resize', onResize)
     }, [container$])
 
-    React.useLayoutEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
+    React.useEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
 
     return (
         <div ref={container$} className={classes.container}>

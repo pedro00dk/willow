@@ -22,7 +22,8 @@ export const StackTrace = () => {
     }, [steps])
 
     React.useLayoutEffect(() => {
-        const onResize = (event?: UIEvent) => {
+        const onResize = async (event?: UIEvent) => {
+            await undefined
             const parentSize = {
                 width: container$.current.parentElement.clientWidth,
                 height: container$.current.parentElement.clientHeight
