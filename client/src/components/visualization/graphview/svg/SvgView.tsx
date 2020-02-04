@@ -79,7 +79,7 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
         onResize(undefined)
         globalThis.addEventListener('paneResize', onResize)
         return () => globalThis.removeEventListener('paneResize', onResize)
-    }, [container$])
+    }, [container$.current])
 
     return (
         <svg

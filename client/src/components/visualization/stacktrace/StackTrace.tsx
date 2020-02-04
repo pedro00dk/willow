@@ -39,7 +39,7 @@ export const StackTrace = () => {
         onResize(undefined)
         globalThis.addEventListener('paneResize', onResize)
         return () => globalThis.removeEventListener('paneResize', onResize)
-    }, [container$])
+    }, [container$.current])
 
     return (
         <div ref={container$} className={classes.container}>
