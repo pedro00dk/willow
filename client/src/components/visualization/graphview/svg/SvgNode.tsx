@@ -20,8 +20,8 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
             container$.current.style.transition = styles.animate(props.graphData.getAnimate())
             container$.current.setAttribute('x', position.x.toString())
             container$.current.setAttribute('y', position.y.toString())
-            container$.current.setAttribute('width', size.width.toString())
-            container$.current.setAttribute('height', size.height.toString())
+            container$.current.setAttribute('width', size.x.toString())
+            container$.current.setAttribute('height', size.y.toString())
         }
 
         updateRect()

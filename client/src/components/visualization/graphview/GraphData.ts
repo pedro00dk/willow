@@ -13,7 +13,7 @@ export type Node = {
     id: string
     render: boolean
     positions: { x: number; y: number }[]
-    sizes: { width: number; height: number }[]
+    sizes: { x: number; y: number }[]
     mode: 'id' | 'type'
     shape: { id: string; type: string }
     parameters: { id: UnknownParameters; type: UnknownParameters }
@@ -179,10 +179,10 @@ export class GraphData {
     }
 
     getNodeSize(id: string, index: number) {
-        return this.getNode(id).sizes[index] ?? this.setNodeSizes(id, [index, index], { width: 0, height: 0 })
+        return this.getNode(id).sizes[index] ?? this.setNodeSizes(id, [index, index], { x: 0, y: 0 })
     }
 
-    setNodeSizes(id: string, range: [number, number], size: { width: number; height: number }) {
+    setNodeSizes(id: string, range: [number, number], size: { x: number; y: number }) {
         const sizes = this.getNode(id).sizes
         for (let i = range[0]; i <= range[1]; i++) sizes[i] = size
         return size
