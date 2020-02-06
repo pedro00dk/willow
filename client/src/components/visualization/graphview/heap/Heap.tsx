@@ -11,9 +11,9 @@ export const Heap = (props: {
 }) => (
     <>
         {props.tracer.steps &&
-            Object.entries(props.tracer.steps[props.graphData.getIndex()].snapshot?.heap ?? {}).map(([id, obj]) => (
+            Object.keys(props.tracer.steps[props.graphData.getIndex()].snapshot?.heap ?? {}).map(id => (
                 <SvgNode key={id} id={id} graphData={props.graphData}>
-                    <Obj id={id} obj={obj} {...props} />
+                    <Obj id={id} {...props} />
                 </SvgNode>
             ))}
     </>
