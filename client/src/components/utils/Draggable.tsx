@@ -13,7 +13,6 @@ export const Draggable = (props: {
         image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
         return image
     }, [])
-    const eventStopPropagation = React.useCallback((event: React.MouseEvent) => event.stopPropagation(), [])
 
     return (
         <div
@@ -34,11 +33,11 @@ export const Draggable = (props: {
                 anchor.current = undefined
                 props.onDragEnd?.(event)
             }}
-            onMouseDown={eventStopPropagation}
-            onMouseUp={eventStopPropagation}
-            onMouseEnter={eventStopPropagation}
-            onMouseLeave={eventStopPropagation}
-            onMouseMove={eventStopPropagation}
+            onMouseDown={event => event.stopPropagation()}
+            onMouseUp={event => event.stopPropagation()}
+            onMouseEnter={event => event.stopPropagation()}
+            onMouseLeave={event => event.stopPropagation()}
+            onMouseMove={event => event.stopPropagation()}
         >
             {props.children}
         </div>
