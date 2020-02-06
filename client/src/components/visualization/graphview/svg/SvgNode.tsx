@@ -13,8 +13,8 @@ const styles = {
 export const SvgNode = (props: { id: string; graphData: GraphData; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGForeignObjectElement>()
 
-    React.useEffect(() => {
-        const updateRect = (callId?: number) => {
+    React.useLayoutEffect(() => {
+        const updateContainer = (callId?: number) => {
             const position = props.graphData.getNodePosition(props.id, props.graphData.getIndex())
             const size = props.graphData.getNodeSize(props.id, props.graphData.getIndex())
             container$.current.style.transition = styles.animate(props.graphData.getAnimate())
@@ -24,8 +24,8 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
             container$.current.setAttribute('height', size.y.toString())
         }
 
-        updateRect()
-        props.graphData.subscribe(props.id, updateRect)
+        updateContainer()
+        props.graphData.subscribe(props.id, updateContainer)
     }, [container$.current, props.id, props.graphData])
 
     return (
