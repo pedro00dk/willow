@@ -38,9 +38,9 @@ export const Heap = (props: { graphData: GraphData; update: React.Dispatch<{}>; 
     return (
         <>
             {props.tracer.steps &&
-                Object.entries(depths).map(([id, depth]) => (
+                Object.keys(heap).map(id => (
                     <SvgNode key={id} id={id} graphData={props.graphData}>
-                        <Obj id={id} {...props} />
+                        <Obj id={id} depth={depths.current[index][id]} {...props} />
                     </SvgNode>
                 ))}
         </>
