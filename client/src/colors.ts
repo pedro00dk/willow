@@ -1,3 +1,7 @@
+/**
+ * The color scheme of the interface is mostly white.
+ * These extra colors are used to add highlight in certain components.
+ */
 export const colors = {
     blue: {
         main: 'rgba(185,201,237,1)',
