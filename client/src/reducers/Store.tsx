@@ -121,7 +121,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
         const keysB = Object.keys(selectionB)
         return (
             keysA.length === keysB.length &&
-            keysB.reduce((acc, next) => acc && selectionA[next] === selectionB[next], true)
+            keysB.reduce((acc, key) => acc && selectionA[key] === selectionB[key], true)
         )
     }
 

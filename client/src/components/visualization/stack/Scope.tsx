@@ -21,10 +21,10 @@ export const Scope = (props: { scope: schema.Scope }) => {
     const currentVariables = React.useRef<{ [name: string]: schema.Variable }>({})
 
     React.useEffect(() => {
-        currentVariables.current = props.scope.variables.reduce(
-            (acc, next) => ((acc[next.name] = next), acc),
-            {} as { [name: string]: schema.Variable }
-        )
+        currentVariables.current = props.scope.variables.reduce((acc, variable) => {
+            acc[variable.name] = variable
+            return acc
+        }, {} as { [name: string]: schema.Variable })
     })
 
     return (
