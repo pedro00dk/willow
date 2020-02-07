@@ -5,7 +5,7 @@ import { Heap } from './heap/Heap'
 import { Stack } from './stack/Stack'
 import { SvgView } from './svg/SvgView'
 
-export const GraphView = React.memo(() => {
+export const GraphView = () => {
     const forceUpdate = React.useState({})[1]
     const { tracer } = useSelection(state => ({ tracer: state.tracer }))
     const graphData = React.useRef(new GraphData({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
@@ -20,4 +20,4 @@ export const GraphView = React.memo(() => {
             <Heap graphData={graphData.current} forceUpdate={forceUpdate} tracer={tracer} />
         </SvgView>
     )
-})
+}
