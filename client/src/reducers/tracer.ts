@@ -1,3 +1,6 @@
+/**
+ * Tracer reducer updates the state that stores the result of a tracing process and the current tracing index.
+ */
 import { api } from '../api'
 import * as schema from '../schema/schema'
 import { DefaultAsyncAction } from './Store'

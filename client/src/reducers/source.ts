@@ -1,3 +1,6 @@
+/**
+ * Source reducer updates the state that stores the program source code.
+ */
 type State = string[]
 
 type Action = { type: 'source/set'; payload: string[] }

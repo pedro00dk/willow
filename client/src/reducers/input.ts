@@ -1,3 +1,6 @@
+/**
+ * Input reducer updates the piece of state that stores program inputs written by the user.
+ */
 type State = string[]
 
 type Action = { type: 'input/set'; payload: string[] }
