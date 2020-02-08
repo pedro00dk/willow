@@ -1,6 +1,7 @@
 import { css } from 'emotion'
 import React from 'react'
 import { GraphData } from '../GraphData'
+import { SvgEdges } from './SvgEdge'
 
 const classes = {
     container: css({ cursor: 'move' })
@@ -12,10 +13,10 @@ const styles = {
 
 export const SvgNode = (props: { id: string; graphData: GraphData; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGForeignObjectElement>()
+    const node = props.graphData.getNode(props.id)
 
     React.useLayoutEffect(() => {
-        const updateContainer = (callId?: number) => {
-            const node = props.graphData.getNode(props.id)
+        const updateNode = (callId?: number) => {
             const position = props.graphData.getNodePosition(node)
             const size = props.graphData.getNodeSize(node)
             container$.current.style.transition = styles.animate(props.graphData.getAnimate())
@@ -25,13 +26,16 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
             container$.current.setAttribute('height', size.y.toString())
         }
 
-        updateContainer()
-        props.graphData.subscribe(props.id, updateContainer)
+        updateNode()
+        props.graphData.subscribe(props.id, updateNode)
     }, [container$.current, props.id, props.graphData])
 
     return (
-        <foreignObject ref={container$} className={classes.container}>
-            {props.children}
-        </foreignObject>
+        <>
+            <foreignObject ref={container$} className={classes.container}>
+                {props.children}
+            </foreignObject>
+            <SvgEdges id={props.id} graphData={props.graphData} />
+        </>
     )
 }
