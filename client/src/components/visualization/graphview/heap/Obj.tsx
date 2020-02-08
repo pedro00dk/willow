@@ -33,6 +33,9 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
+    const targets = React.useRef<{ name: string; targetId: string; ref$: HTMLSpanElement; text: string }[]>()
+    targets.current = []
+
     const id = props.id
     const index = props.graphData.getIndex()
     const obj = props.tracer.steps[index].snapshot.heap[id]
@@ -54,13 +57,27 @@ export const Obj = (props: {
     const { Node: Shape, NodeParameters: ShapeParameters } = modules[shape as keyof typeof modules]
 
     React.useLayoutEffect(() => {
+        const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
         const screenSize = { x: rect.width, y: rect.height }
-        const svg = container$.current.closest('svg')
         const [svgSize] = svgScreenTransformVector('toSvg', svg, screenSize)
         props.graphData.setNodeSizes(node, svgSize)
-        props.graphData.callSubscriptions(id)
     })
+
+    React.useLayoutEffect(() => {
+        const svg = container$.current.closest('svg')
+        const rect = container$.current.getBoundingClientRect()
+        targets.current.forEach(({ name, targetId, ref$, text }) => {
+            const refRect = ref$.getBoundingClientRect()
+            const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
+            const screenSize = { x: refRect.width, y: refRect.height }
+            const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
+            const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
+            props.graphData.putEdge(id, name, { from: { delta }, to: { id: targetId, mode: 'nearest' }, text })
+        })
+    })
+
+    React.useLayoutEffect(() => props.graphData.callSubscriptions(id))
 
     return (
         <Draggable
@@ -89,13 +106,7 @@ export const Obj = (props: {
                         id={id}
                         obj={obj}
                         parameters={parameters}
-                        onTarget={(id, target, ref, text) => {
-                            // props.graphData.getEdge('', {
-                            //     from: { nodeId: id, mode: 'nearest' },
-                            //     to: { nodeId: target, mode: 'nearest' },
-                            //     text
-                            // })
-                        }}
+                        onTarget={(name, targetId, ref$, text) => targets.current.push({ name, targetId, ref$, text })}
                     />
                 </div>
             </MenuProvider>
