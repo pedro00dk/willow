@@ -4,10 +4,8 @@ import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
-import * as schema from '../../../../schema/schema'
-import { GraphData, UnknownParameters } from '../GraphData'
 import { Draggable } from '../../../utils/Draggable'
-import { svgScreenTransformVector } from '../svg/SvgView'
+import { GraphData, svgScreenTransformVector, UnknownParameters } from '../GraphData'
 import * as ArrayModule from './shapes/Array'
 import * as BarsModule from './shapes/Bars'
 import * as FieldModule from './shapes/Field'
@@ -73,7 +71,7 @@ export const Obj = (props: {
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(id, { from: { delta }, to: { id: targetId, mode: 'nearest' }, text })
+            props.graphData.pushEdge(id, { from: { delta }, to: { targetId, mode: 'nearest' }, text })
         })
     })
 

@@ -1,29 +1,5 @@
 import React from 'react'
-import { GraphData } from '../GraphData'
-
-export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
-
-export const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
-
-export const svgScreenTransformPoint = (
-    direction: 'toSvg' | 'toScreen',
-    svgElement: SVGGraphicsElement,
-    ...points: { x: number; y: number }[]
-) => {
-    const toScreenTransformMatrix = svgElement.getScreenCTM()
-    const matrix = direction === 'toSvg' ? toScreenTransformMatrix.inverse() : toScreenTransformMatrix
-    return points.map(point => new DOMPoint(point.x, point.y).matrixTransform(matrix) as { x: number; y: number })
-}
-
-export const svgScreenTransformVector = (
-    direction: 'toSvg' | 'toScreen',
-    svgElement: SVGGraphicsElement,
-    ...vectors: { x: number; y: number }[]
-) => {
-    const [root, ...shiftedVectors] = svgScreenTransformPoint(direction, svgElement, { x: 0, y: 0 }, ...vectors)
-    shiftedVectors.forEach(vector => ((vector.x -= root.x), (vector.y -= root.y)))
-    return shiftedVectors
-}
+import { GraphData, ilerp, svgScreenTransformPoint, svgScreenTransformVector } from '../GraphData'
 
 export const SvgView = (props: { graphData: GraphData; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGSVGElement>()
