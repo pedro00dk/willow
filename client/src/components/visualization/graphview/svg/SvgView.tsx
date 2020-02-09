@@ -38,6 +38,26 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
         height: { min: viewSize.height * 0.3, max: viewSize.height }
     }
 
+    React.useLayoutEffect(() => {
+        const onResize = (event: Event) => {
+            const parentSize = {
+                width: container$.current.parentElement.clientWidth,
+                height: container$.current.parentElement.clientHeight
+            }
+            const size = {
+                width: container$.current.clientWidth,
+                height: container$.current.clientHeight
+            }
+            if (size.width === parentSize.width && size.height === parentSize.height) return
+            container$.current.style.width = `${parentSize.width - 1}px`
+            container$.current.style.height = `${parentSize.height - 1}px`
+        }
+
+        onResize(undefined)
+        globalThis.addEventListener('paneResize', onResize)
+        return () => globalThis.removeEventListener('paneResize', onResize)
+    }, [container$.current])
+
     const translateBox = (delta: { x: number; y: number }) => {
         box.current.x = Math.min(Math.max(box.current.x - delta.x, ranges.x.min), ranges.x.max - box.current.width)
         box.current.y = Math.min(Math.max(box.current.y - delta.y, ranges.y.min), ranges.y.max - box.current.height)
@@ -63,26 +83,6 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
         props.graphData.setViewBox(box.current)
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
     }
-
-    React.useLayoutEffect(() => {
-        const onResize = (event: Event) => {
-            const parentSize = {
-                width: container$.current.parentElement.clientWidth,
-                height: container$.current.parentElement.clientHeight
-            }
-            const size = {
-                width: container$.current.clientWidth,
-                height: container$.current.clientHeight
-            }
-            if (size.width === parentSize.width && size.height === parentSize.height) return
-            container$.current.style.width = `${parentSize.width - 1}px`
-            container$.current.style.height = `${parentSize.height - 1}px`
-        }
-
-        onResize(undefined)
-        globalThis.addEventListener('paneResize', onResize)
-        return () => globalThis.removeEventListener('paneResize', onResize)
-    }, [container$.current])
 
     return (
         <svg
