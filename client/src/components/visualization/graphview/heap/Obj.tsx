@@ -93,9 +93,9 @@ export const Obj = (props: {
                 const [svgDelta] = svgScreenTransformVector('toSvg', svg, delta)
                 const depth = event.altKey ? Infinity : 0
                 const range = [event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
-                props.graphData.moveNodePositions(node, svgDelta, depth, index, range)
+                const movedNodes = props.graphData.moveNodePositions(node, svgDelta, depth, index, range)
                 props.graphData.setAnimate(false)
-                props.graphData.callSubscriptions(id)
+                Object.keys(movedNodes).forEach(id => props.graphData.callSubscriptions(id))
             }}
         >
             <MenuProvider id={id} className={classes.menuProvider}>
