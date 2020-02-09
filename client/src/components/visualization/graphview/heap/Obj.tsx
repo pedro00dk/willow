@@ -93,8 +93,8 @@ export const Obj = (props: {
             onDrag={(delta, event) => {
                 const svg = container$.current.closest('svg')
                 const [svgDelta] = svgScreenTransformVector('toSvg', svg, delta)
-                const depth = !event.altKey ? 0 : Infinity
-                const range = [!event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
+                const depth = event.altKey ? Infinity : 0
+                const range = [event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
                 props.graphData.moveNodePositions(node, svgDelta, depth, index, range)
                 props.graphData.setAnimate(false)
                 props.graphData.callSubscriptions(id)
