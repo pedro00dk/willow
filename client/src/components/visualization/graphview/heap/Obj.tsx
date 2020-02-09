@@ -33,7 +33,7 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
-    const targets = React.useRef<{ name: string; targetId: string; ref$: HTMLSpanElement; text: string }[]>()
+    const targets = React.useRef<{ targetId: string; ref$: HTMLSpanElement; text: string }[]>()
     targets.current = []
 
     const id = props.id
@@ -67,13 +67,13 @@ export const Obj = (props: {
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
-        targets.current.forEach(({ name, targetId, ref$, text }) => {
+        targets.current.forEach(({ targetId, ref$, text }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.putEdge(id, name, { from: { delta }, to: { id: targetId, mode: 'nearest' }, text })
+            props.graphData.pushEdge(id, { from: { delta }, to: { id: targetId, mode: 'nearest' }, text })
         })
     })
 
@@ -106,7 +106,7 @@ export const Obj = (props: {
                         id={id}
                         obj={obj}
                         parameters={parameters}
-                        onTarget={(name, targetId, ref$, text) => targets.current.push({ name, targetId, ref$, text })}
+                        onTarget={(_, targetId, ref$, text) => targets.current.push({ targetId, ref$, text })}
                     />
                 </div>
             </MenuProvider>
