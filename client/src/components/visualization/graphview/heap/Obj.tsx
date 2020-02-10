@@ -81,9 +81,11 @@ export const Obj = (props: {
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const horizontal = !event.altKey
-                    const update = !event.ctrlKey ? 'from' : 'all'
-                    // autoLayout(horizontal, update)
+                    const direction = event.altKey ? 'vertical' : 'horizontal'
+                    const range = [event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
+                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, index, range)
+                    props.graphData.setAnimate(true)
+                    Object.keys(structure.members).forEach(id => props.graphData.callSubscriptions(id))
                 }
             }}
             onDrag={(delta, event) => {

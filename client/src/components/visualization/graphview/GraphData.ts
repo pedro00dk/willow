@@ -206,12 +206,13 @@ export class GraphData {
         for (let i = range[0]; i <= range[1]; i++) node.sizes[i] = size
         return size
     }
-    getNodeChildren(node: Node, depth = 0, pool: { [id: string]: Node } = {}) {
+
+    getNodeChildren(node: Node, depth = 0, skipParent = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
-        pool[node.id] = node
+        if (!skipParent) pool[node.id] = node
         Object.values(this.getEdges(node.id))
             .filter(edge => (edge.from as any).delta && (edge.to as any).targetId != undefined)
-            .forEach(edge => this.getNodeChildren(this.getNode((edge.to as any).targetId), depth - 1, pool))
+            .forEach(edge => this.getNodeChildren(this.getNode((edge.to as any).targetId), depth - 1, false, pool))
         return pool
     }
 
@@ -223,11 +224,119 @@ export class GraphData {
         range = [this.index, this.index] as const
     ) {
         const children = this.getNodeChildren(node, depth)
-        Object.values(children).forEach(node => {
-            const position = this.getNodePosition(node, baseIndex)
-            this.setNodePositions(node, { x: position.x + delta.x, y: position.y + delta.y }, range)
+        Object.values(children).forEach(child => {
+            const position = this.getNodePosition(child, baseIndex)
+            this.setNodePositions(child, { x: position.x + delta.x, y: position.y + delta.y }, range)
         })
         return children
+    }
+
+    findNodeStructure(
+        node: Node,
+        parent: Node = undefined,
+        depth = 0,
+        structure = {
+            members: {} as { [id: string]: Node },
+            links: {} as { [id: string]: Node[] },
+            base: undefined as Node,
+            count: 0,
+            depth: 0,
+            type: 'unknown' as 'node' | 'list' | 'tree' | 'unknown',
+            hasCycleEdge: false,
+            hasParentEdge: false,
+            hasCrossEdge: false
+        }
+    ) {
+        if (structure.members[node.id]) return
+        structure.members[node.id] = node
+        structure.links[node.id] = []
+        if (parent) structure.links[parent.id].push(node)
+        structure.base = node.depth < (structure.base?.depth ?? Infinity) ? node : structure.base
+        structure.count++
+        structure.depth = Math.max(structure.depth, depth)
+        structure.type =
+            structure.count === 1
+                ? 'node'
+                : structure.count === structure.depth + 1
+                ? 'list'
+                : !structure.hasCrossEdge
+                ? 'tree'
+                : 'unknown'
+
+        // TODO also get parents
+        Object.values(this.getNodeChildren(node, 1, true))
+            .filter(child => child.type === node.type)
+            .forEach(child => {
+                if (!structure.members[child.id]) return this.findNodeStructure(child, node, depth + 1, structure)
+                structure.hasCycleEdge = structure.hasCycleEdge || child.id === node.id
+                structure.hasParentEdge = structure.hasParentEdge || child.id === parent.id
+                structure.hasCrossEdge = structure.hasCrossEdge || (child.id !== node.id && child.id !== parent.id)
+            })
+        return structure
+    }
+
+    computeNodeLayout(
+        structure: ReturnType<GraphData['findNodeStructure']>,
+        horizontal: boolean,
+        increment: { x: number; y: number },
+        positions: { [id: string]: { x: number; y: number } } = {},
+        node = structure.base,
+        depth = { x: 0, y: 0 }
+    ) {
+        if (positions[node.id]) return [positions, depth] as const
+        positions[node.id] = { x: 0, y: 0 }
+
+        const childrenEndDepth = structure.links[node.id].reduce(
+            (acc, child) => {
+                const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
+                const [, childEndDepth] = this.computeNodeLayout(
+                    structure,
+                    horizontal,
+                    increment,
+                    positions,
+                    child,
+                    childDepth
+                )
+                return childEndDepth
+            },
+            { ...depth }
+        )
+
+        const isLeaf = horizontal ? depth.y === childrenEndDepth.y : depth.x === childrenEndDepth.x
+        positions[node.id].x = increment.x * (horizontal || isLeaf ? depth.x : (depth.x + childrenEndDepth.x - 1) / 2)
+        positions[node.id].y = increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + childrenEndDepth.y - 1) / 2)
+        const endDepth: typeof depth = {
+            x: childrenEndDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
+            y: childrenEndDepth.y + (!horizontal ? -1 : isLeaf ? 1 : 0)
+        }
+
+        if (node === structure.base) {
+            const originDelta = { x: -positions[node.id].x, y: -positions[node.id].y }
+            Object.values(positions).forEach(position => ((position.x += originDelta.x), (position.y += originDelta.y)))
+        }
+
+        return [positions, endDepth] as const
+    }
+
+    applyNodeAutoLayout(
+        node: Node,
+        direction = 'horizontal' as 'horizontal' | 'vertical',
+        incrementRatio = { x: 1.5, y: 1.5 },
+        baseIndex = this.index,
+        range = [this.index, this.index] as const
+    ) {
+        const structure = this.findNodeStructure(node)
+        if (structure.type === 'unknown') return
+        const anchor = this.getNodePosition(node, baseIndex)
+        const sizeAnchor = this.getNodeSize(node, baseIndex)
+        const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
+
+        const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment)
+
+        Object.entries(positions).forEach(([id, delta]) =>
+            this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, range)
+        )
+        return structure
     }
 
     // Edge helper methods
@@ -295,148 +404,4 @@ export class GraphData {
         const controlPoint = this.computeEdgeCurvatureControlPoint(edge, 0.1, startPoint, endPoint)
         return `M ${startPoint.x},${startPoint.y} Q ${controlPoint.x},${controlPoint.y} ${endPoint.x},${endPoint.y}`
     }
-
-    // findNodeStructure(node: Node) {
-
-    // }
-
-    // postLayout(
-    //     id: string,
-    //     obj: schema.Obj,
-    //     depth = { x: 0, y: 0 },
-    //     positions: { [id: string]: { x: number; y: number } } = {}
-    // ) {
-    //     if (positions[id]) return [positions, depth] as const
-    //     positions[id] = { x: 0, y: 0 }
-
-    //     const newDepth = { ...depth }
-    //     obj.members
-    //         .filter(member => typeof member.value === 'object' && structure.members.has(member.value[0]))
-    //         .forEach(member => {
-    //             const [, updatedDepth] = postLayout(
-    //                 (member.value as [string])[0],
-    //                 heap[(member.value as [string])[0]],
-    //                 { x: newDepth.x + Number(horizontal), y: newDepth.y + Number(!horizontal) },
-    //                 positions
-    //             )
-    //             newDepth.x = updatedDepth.x
-    //             newDepth.y = updatedDepth.y
-    //         })
-    //     const isLeaf = horizontal ? newDepth.y === depth.y : newDepth.x === depth.x
-    //     positions[id].x =
-    //         positionAnchor.x + increment.x * (horizontal || isLeaf ? depth.x : (depth.x + newDepth.x - 1) / 2)
-    //     positions[id].y =
-    //         positionAnchor.y + increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + newDepth.y - 1) / 2)
-    //     const finalDepth = {
-    //         x: newDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
-    //         y: newDepth.y + (!horizontal ? -1 : isLeaf ? 1 : 0)
-    //     }
-    //     return [positions, finalDepth] as const
-    // }
-
-    // autoLayout(
-    //     node: Node,
-    //     direction: 'horizontal' | 'vertical',
-    //     incrementRatio: { x: number; y: number },
-    //     range: [number, number]
-    // ) {
-    //     const groupData = props.tracer.groupsData[index]
-    //     const structure = groupData[id]
-    //     if (!structure || structure.type === 'unknown') return
-    //     const positionAnchor = props.graphData.getNodePosition(id, index)
-    //     const sizeAnchor = props.graphData.getNodeSize(id, index)
-    //     const increment = { x: sizeAnchor.x * 1.5, y: sizeAnchor.y * 1.5 }
-    //     const range = [update === 'all' ? 0 : index, props.tracer.steps.length] as [number, number]
-
-    //     const [positions] = postLayout(structure.base, heap[structure.base])
-    //     const basePosition = positions[structure.base]
-    //     const baseDelta = { x: positionAnchor.x - basePosition.x, y: positionAnchor.y - basePosition.y }
-    //     props.graphData.setAnimate(true)
-    //     Object.entries(positions).forEach(([id, position]) => {
-    //         position.x += baseDelta.x
-    //         position.y += baseDelta.y
-    //         props.graphData.setNodePositions(id, range, position)
-    //     })
-    //     Object.keys(positions).forEach(id => props.graphData.callSubscriptions(id))
-    // }
 }
-// export type GroupData = {
-//     [id: string]: StructureData
-// }
-
-// export type StructureData = {
-//     base: string
-//     depth: number
-//     members: Set<string>
-//     hasCycleEdge: boolean
-//     hasParentEdge: boolean
-//     hasCrossEdge: boolean
-//     type: 'node' | 'list' | 'tree' | 'unknown'
-// }
-
-// // type State = {
-//     fetching: boolean
-//     index?: number
-//     steps?: schema.Step[]
-//     groupsData?: GroupData[]
-//     error?: string
-// }
-// const buildStructureData = (
-//     heap: schema.Snapshot['heap'],
-//     id: string,
-//     parentId: string,
-//     depth: number,
-//     structureData: StructureData
-// ) => {
-//     structureData.members.add(id)
-//     structureData.depth = Math.max(structureData.depth, depth)
-//     structureData.type =
-//         structureData.members.size === 1
-//             ? 'node'
-//             : structureData.members.size === structureData.depth
-//             ? 'list'
-//             : !structureData.hasCrossEdge
-//             ? 'tree'
-//             : 'unknown'
-//     heap[id].members
-//         .filter(member => typeof member.value === 'object' && heap[member.value[0]].lType === heap[id].lType)
-//         .map(member => (member.value as [string])[0])
-//         .forEach(memberId => {
-//             if (!structureData.members.has(memberId))
-//                 return buildStructureData(heap, memberId, id, depth + 1, structureData)
-//             structureData.hasCycleEdge = structureData.hasCycleEdge || memberId === id
-//             structureData.hasParentEdge = structureData.hasParentEdge || memberId === parentId
-//             structureData.hasCrossEdge = structureData.hasCrossEdge || (memberId !== id && memberId !== parentId)
-//         })
-//     return structureData
-// }
-
-// const buildGroupsData = (steps: schema.Step[]) => {
-//     let previous: GroupData = {}
-//     return steps.map(({ snapshot }, i) => {
-//         if (!snapshot) return previous
-//         const groupData: GroupData = {}
-//         const references = snapshot.stack
-//             .flatMap(scope => scope.variables)
-//             .filter(variable => typeof variable.value === 'object')
-//             .map(variable => (variable.value as [string])[0])
-//             .map(id => [id, snapshot.heap[id].members] as const)
-//             .map(([id, members]) => [id, members.filter(member => typeof member.value === 'object')] as const)
-//             .flatMap(([id, members]) => [id, ...members.map(member => (member.value as [string])[0])])
-//         const heap = snapshot?.heap ?? {}
-//         new Set(references).forEach(id => {
-//             if (groupData[id]) return
-//             const structureData = buildStructureData(heap, id, undefined, 1, {
-//                 base: id,
-//                 depth: 0,
-//                 members: new Set(),
-//                 hasCycleEdge: false,
-//                 hasParentEdge: false,
-//                 hasCrossEdge: false,
-//                 type: 'unknown'
-//             })
-//             structureData.members.forEach(id => (groupData[id] = structureData))
-//         })
-//         return (previous = groupData)
-//     })
-// }
