@@ -23,7 +23,7 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
     ) as ComputedParameters<U>
 
 export type Node = {
-    id: string
+    readonly id: string
     render: boolean
     positions: { x: number; y: number }[]
     sizes: { x: number; y: number }[]
@@ -35,19 +35,19 @@ export type Node = {
 }
 
 export type Edge = {
-    id: string
-    color: string
-    width: number
-    text: string
-    draw: 'line' | 'curve'
-    from:
+    readonly id: string
+    readonly from:
         | { delta: { x: number; y: number } }
         | { targetDelta: { x: number; y: number } }
         | { point: { x: number; y: number } }
-    to:
+    readonly to:
         | { targetId: string; mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
         | { targetId: string; delta: { x: number; y: number } }
         | { point: { x: number; y: number } }
+    draw: 'line' | 'curve'
+    color: string
+    width: number
+    text: string
 }
 
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
@@ -82,6 +82,7 @@ export class GraphData {
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
     private nodes: { [id: string]: Node } = {}
     private edges: { [id: string]: Edge[] } = {}
+    private parentEdges: { [id: string]: Edge[] } = {}
 
     constructor(private viewSize: { width: number; height: number }, private viewPadding: { x: number; y: number }) {}
 
@@ -167,23 +168,31 @@ export class GraphData {
         return this.edges[id] ?? (this.edges[id] = [])
     }
 
+    getParentEdges(id: string) {
+        return this.parentEdges[id] ?? (this.parentEdges[id] = [])
+    }
+
     pushEdge(id: string, partialEdge: Partial<Edge> = {}) {
-        this.getEdges(id).push({
+        const edge = {
             id,
+            from: partialEdge.from ?? { point: { x: 0, y: 0 } },
+            to: partialEdge.to ?? { point: { x: 0, y: 0 } },
+            draw: partialEdge.draw ?? 'curve',
             color: partialEdge.color ?? colors.gray.dark,
             width: partialEdge.width ?? 1,
-            text: partialEdge.text ?? '',
-            draw: partialEdge.draw ?? 'curve',
-            from: partialEdge.from ?? { point: { x: 0, y: 0 } },
-            to: partialEdge.to ?? { point: { x: 0, y: 0 } }
-        })
+            text: partialEdge.text ?? ''
+        }
+        this.getEdges(id).push(edge)
+        const targetId = (edge.to as any).targetId as string
+        if ((edge.from as any).delta && targetId != undefined) this.getParentEdges(targetId).push(edge)
     }
 
     clearEdges() {
         this.edges = {}
+        this.parentEdges = {}
     }
 
-    // Node helper methods
+    // Node helper methods (properties changed by all following methods must not be changed directly)
 
     getNodePosition(node: Node, index: number = this.index) {
         return node.positions[index] ?? this.setNodePositions(node, { x: 0, y: 0 }, [index, index])
@@ -207,9 +216,18 @@ export class GraphData {
         return size
     }
 
-    getNodeChildren(node: Node, depth = 0, skipParent = false, pool: { [id: string]: Node } = {}) {
+    getNodeParents(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
-        if (!skipParent) pool[node.id] = node
+        if (!skipBase) pool[node.id] = node
+        Object.values(this.getParentEdges(node.id)).forEach(edge =>
+            this.getNodeParents(this.getNode(edge.id), depth - 1, false, pool)
+        )
+        return pool
+    }
+
+    getNodeChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
+        if (depth < 0 || pool[node.id]) return pool
+        if (!skipBase) pool[node.id] = node
         Object.values(this.getEdges(node.id))
             .filter(edge => (edge.from as any).delta && (edge.to as any).targetId != undefined)
             .forEach(edge => this.getNodeChildren(this.getNode((edge.to as any).targetId), depth - 1, false, pool))
@@ -231,43 +249,50 @@ export class GraphData {
         return children
     }
 
-    findNodeStructure(
-        node: Node,
+    // TODO write better implementation
+    findStructureBaseNode(node: Node) {
+        let base = node
+        for (;;) {
+            const higherParents = Object.values(this.getNodeParents(base, 1, true)).filter(parent => {
+                const isHigher = parent.depth < base.depth && parent.type === base.type
+                if (isHigher) base = parent
+                return isHigher
+            })
+            if (higherParents.length === 0) break
+        }
+        return base
+    }
+
+    // TODO write better implementation
+    findStructure(
+        base: Node,
+        node = base,
         parent: Node = undefined,
         depth = 0,
         structure = {
             members: {} as { [id: string]: Node },
             links: {} as { [id: string]: Node[] },
-            base: undefined as Node,
+            base,
             count: 0,
             depth: 0,
-            type: 'unknown' as 'node' | 'list' | 'tree' | 'unknown',
             hasCycleEdge: false,
             hasParentEdge: false,
-            hasCrossEdge: false
+            hasCrossEdge: false,
+            organizable: true
         }
     ) {
-        if (structure.members[node.id]) return
+        if (structure.members[node.id]) return structure
         structure.members[node.id] = node
         structure.links[node.id] = []
         if (parent) structure.links[parent.id].push(node)
-        structure.base = node.depth < (structure.base?.depth ?? Infinity) ? node : structure.base
         structure.count++
         structure.depth = Math.max(structure.depth, depth)
-        structure.type =
-            structure.count === 1
-                ? 'node'
-                : structure.count === structure.depth + 1
-                ? 'list'
-                : !structure.hasCrossEdge
-                ? 'tree'
-                : 'unknown'
+        structure.organizable = structure.organizable && !structure.hasCrossEdge
 
-        // TODO also get parents
-        Object.values(this.getNodeChildren(node, 1, true))
+        Object.values({ ...this.getNodeChildren(node, 1, true), ...this.getNodeParents(node, 1, true) })
             .filter(child => child.type === node.type)
             .forEach(child => {
-                if (!structure.members[child.id]) return this.findNodeStructure(child, node, depth + 1, structure)
+                if (!structure.members[child.id]) return this.findStructure(base, child, node, depth + 1, structure)
                 structure.hasCycleEdge = structure.hasCycleEdge || child.id === node.id
                 structure.hasParentEdge = structure.hasParentEdge || child.id === parent.id
                 structure.hasCrossEdge = structure.hasCrossEdge || (child.id !== node.id && child.id !== parent.id)
@@ -275,8 +300,9 @@ export class GraphData {
         return structure
     }
 
+    // TODO write better implementation
     computeNodeLayout(
-        structure: ReturnType<GraphData['findNodeStructure']>,
+        structure: ReturnType<GraphData['findStructure']>,
         horizontal: boolean,
         increment: { x: number; y: number },
         positions: { [id: string]: { x: number; y: number } } = {},
@@ -318,6 +344,7 @@ export class GraphData {
         return [positions, endDepth] as const
     }
 
+    // TODO write better implementation
     applyNodeAutoLayout(
         node: Node,
         direction = 'horizontal' as 'horizontal' | 'vertical',
@@ -325,8 +352,10 @@ export class GraphData {
         baseIndex = this.index,
         range = [this.index, this.index] as const
     ) {
-        const structure = this.findNodeStructure(node)
-        if (structure.type === 'unknown') return
+        const structure = this.findStructure(this.findStructureBaseNode(node))
+        console.log(this.findStructureBaseNode(node))
+        console.log(structure)
+        if (!structure.organizable) return
         const anchor = this.getNodePosition(node, baseIndex)
         const sizeAnchor = this.getNodeSize(node, baseIndex)
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
