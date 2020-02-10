@@ -1,7 +1,7 @@
 import { css } from 'emotion'
 import React from 'react'
 import { GraphData } from '../GraphData'
-import { SvgEdges } from './SvgEdge'
+import { SvgEdges } from './SvgEdges'
 
 const classes = {
     container: css({ cursor: 'move' })
