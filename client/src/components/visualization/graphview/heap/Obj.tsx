@@ -1,5 +1,3 @@
-import cn from 'classnames'
-import { css } from 'emotion'
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
@@ -19,7 +17,7 @@ const modules = {
 }
 
 const classes = {
-    container: cn('d-flex position-absolute', css({ userSelect: 'none' })),
+    container: 'd-flex position-absolute',
     menuProvider: 'd-flex'
 }
 

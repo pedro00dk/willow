@@ -4,7 +4,7 @@ import { GraphData } from '../GraphData'
 import { SvgEdges } from './SvgEdges'
 
 const classes = {
-    container: css({ cursor: 'move' })
+    container: css({ cursor: 'move', userSelect: 'none' })
 }
 
 const styles = {

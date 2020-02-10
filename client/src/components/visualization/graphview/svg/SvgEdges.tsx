@@ -58,7 +58,7 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
                     <path id={`${props.id}-${i}`} markerEnd={`url(#${props.id}-${i}-marker)`} fill='none'>
                         <animate attributeName='d' begin='indefinite' fill='freeze' />
                     </path>
-                    <text fontSize='0.75rem'>
+                    <text style={{ userSelect: 'none' }} fontSize='0.75rem'>
                         <textPath xlinkHref={`#${props.id}-${i}`} startOffset='50%' textAnchor='middle' />
                     </text>
                 </g>
