@@ -76,7 +76,7 @@ export const Shape = (props: {
         const memberIndex = member.key as number
         const displayIndex = wrapIndices ? cellIndex : memberIndex
         const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[memberIndex])
+        const changed = !isSameMember(member, currentMembers.current[getMemberName(member)])
         const displayValue = getDisplayValue(member.value, props.id)
 
         return (
