@@ -12,7 +12,7 @@ import * as MapModule from './shapes/Map'
 const modules = {
     array: ArrayModule,
     column: ColumnModule,
-    // field: FieldModule,
+    field: FieldModule,
     map: MapModule
 }
 
