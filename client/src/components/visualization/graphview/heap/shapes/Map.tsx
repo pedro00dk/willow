@@ -3,58 +3,95 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, memberChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
+import { Base } from './Base'
+import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
 import { Parameters } from '../Parameters'
 
 const classes = {
-    container: 'd-flex flex-column justify-content-center text-nowrap',
-    element: cn('d-inline-flex', css({ cursor: 'default' })),
-    key: cn(
-        'text-center text-truncate',
-        css({
-            borderLeft: `0.5px solid ${colors.gray.dark}`,
-            borderTop: `0.5px solid ${colors.gray.dark}`,
-            borderBottom: `0.5px solid ${colors.gray.dark}`,
-            borderRight: `0.5px solid ${colors.gray.light}`,
-            fontSize: '0.75rem'
-        })
-    ),
-    value: cn(
-        'text-center text-truncate',
-        css({
-            borderLeft: `0.5px solid ${colors.gray.light}`,
-            borderTop: `0.5px solid ${colors.gray.dark}`,
-            borderBottom: `0.5px solid ${colors.gray.dark}`,
-            borderRight: `0.5px solid ${colors.gray.dark}`,
-            fontSize: '0.75rem'
-        })
-    )
+    container: 'd-flex flex-column text-nowrap',
+    element: cn('d-flex px-1', css({ border: `0.5px solid ${colors.gray.dark}` })),
+    key: cn('text-truncate mr-1', css({ borderRight: `0.5px solid ${colors.gray.light}`, fontSize: '0.75rem' })),
+    value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
+    background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light),
+    edge: (changed: boolean) => (changed ? colors.yellow.darker : undefined)
 }
 
 const defaultParameters = {
     'show keys': { value: true },
-    'key width': { value: 30, range: [10, 100] as [number, number] },
-    'value width': { value: 50, range: [10, 100] as [number, number] }
+    'key width': { value: 35, range: [5, 100] as [number, number] },
+    'value width': { value: 35, range: [5, 100] as [number, number] }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set(['map'])
 export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set', 'map'])
 
-export const Node = (props: {
+export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
+    onLink: (
+        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
+    ) => void
 }) => {
-    const previousMembers = React.useRef<schema.Member[]>([])
+    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
+    const showKeys = parameters['show keys']
+    const keyWidth = parameters['key width']
+    const valueWidth = parameters['value width']
 
-    React.useEffect(() => void (previousMembers.current = props.obj.members))
+    React.useEffect(() => {
+        currentMembers.current = props.obj.members.reduce((acc, member) => {
+            acc[getMemberName(member)] = member
+            return acc
+        }, {} as { [name: string]: schema.Member })
+    })
+
+    const renderEntry = (member: schema.Member) => {
+        const displayKey = getDisplayValue(member.key, props.id)
+        const displayValue = getDisplayValue(member.value, props.id)
+        const isKeyObject = isValueObject(member.key)
+        const isValObject = isValueObject(member.value)
+        const memberName = getMemberName(member)
+        const changed = !isSameMember(member, currentMembers.current[memberName])
+
+        return (
+            <div
+                key={memberName}
+                className={classes.element}
+                style={{ background: styles.background(changed) }}
+                title={displayValue}
+            >
+                {showKeys && (
+                    <span
+                        ref={ref$ => {
+                            if (!ref$ || !isKeyObject) return
+                            const targetId = (member.key as [string])[0]
+                            props.onLink({ id: targetId, ref$, color: styles.edge(changed) })
+                        }}
+                        className={classes.key}
+                        style={{ width: keyWidth }}
+                    >
+                        {displayKey}
+                    </span>
+                )}
+                <span
+                    ref={ref$ => {
+                        if (!ref$ || !isValObject) return
+                        const targetId = (member.value as [string])[0]
+                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayKey })
+                    }}
+                    className={classes.value}
+                    style={{ width: valueWidth }}
+                >
+                    {displayValue}
+                </span>
+            </div>
+        )
+    }
 
     return (
         <Base title={props.obj.lType}>
@@ -63,58 +100,13 @@ export const Node = (props: {
                     ? 'incompatible'
                     : props.obj.members.length === 0
                     ? 'empty'
-                    : props.obj.members.map((member, i) => {
-                          const keyIsPrimitive = typeof member.key !== 'object'
-                          const valueIsPrimitive = typeof member.value !== 'object'
-                          const changed = memberChanged(previousMembers.current[i], member)
-                          const displayKey = getDisplayValue(props.id, member.key)
-                          const displayValue = getDisplayValue(props.id, member.value)
-
-                          return (
-                              <div
-                                  key={i}
-                                  className={classes.element}
-                                  style={{ background: styles.background(changed) }}
-                                  title={displayValue}
-                              >
-                                  {parameters['show keys'] && (
-                                      <span
-                                          ref={ref =>
-                                              ref &&
-                                              !keyIsPrimitive &&
-                                              props.onTarget(props.id, (member.key as [string])[0], ref, displayKey)
-                                          }
-                                          className={classes.key}
-                                          style={{ width: parameters['key width'] }}
-                                      >
-                                          {displayKey}
-                                      </span>
-                                  )}
-                                  <span
-                                      ref={ref =>
-                                          ref &&
-                                          !valueIsPrimitive &&
-                                          props.onTarget(
-                                              props.id,
-                                              (member.value as [string])[0],
-                                              ref,
-                                              displayKey
-                                          )
-                                      }
-                                      className={classes.value}
-                                      style={{ width: parameters['value width'] }}
-                                  >
-                                      {displayValue}
-                                  </span>
-                              </div>
-                          )
-                      })}
+                    : props.obj.members.map(member => renderEntry(member))}
             </div>
         </Base>
     )
 }
 
-export const NodeParameters = (props: {
+export const ShapeParameters = (props: {
     id: string
     obj: schema.Obj
     withReset: boolean

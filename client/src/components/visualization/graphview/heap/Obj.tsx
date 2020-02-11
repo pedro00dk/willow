@@ -11,9 +11,9 @@ import * as MapModule from './shapes/Map'
 
 const modules = {
     array: ArrayModule,
-    column: ColumnModule
+    column: ColumnModule,
     // field: FieldModule,
-    // map: MapModule
+    map: MapModule
 }
 
 const classes = {
