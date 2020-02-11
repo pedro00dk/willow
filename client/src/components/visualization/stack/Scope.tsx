@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import * as schema from '../../../schema/schema'
-import { memberChanged, getDisplayValue } from '../graphview/Base'
+import { getDisplayValue, isSameVariable } from '../graphview/SchemaUtils'
 import { colors } from '../../../colors'
 
 const classes = {
@@ -36,8 +36,8 @@ export const Scope = (props: { scope: schema.Scope }) => {
             </thead>
             <tbody className={classes.column}>
                 {props.scope.variables.map((variable, i) => {
-                    const displayValue = getDisplayValue(undefined, variable.value)
-                    const changed = memberChanged(currentVariables.current[variable.name], variable)
+                    const changed = !isSameVariable(variable, currentVariables.current[variable.name])
+                    const displayValue = getDisplayValue(variable.value)
                     return (
                         <tr
                             key={i}
