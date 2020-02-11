@@ -62,12 +62,14 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
             {Object.entries(parameters).map(([name, value]) =>
                 typeof value === 'boolean' ? (
                     <BooleanParameter
+                        key={name}
                         name={name}
                         value={value}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : typeof value === 'number' ? (
                     <NumberParameter
+                        key={name}
                         name={name}
                         value={value}
                         range={(props.defaults[name] as any)['range']}
@@ -75,6 +77,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                     />
                 ) : typeof value === 'string' ? (
                     <StringParameter
+                        key={name}
                         name={name}
                         value={value}
                         options={(props.defaults[name] as any)['options']}
