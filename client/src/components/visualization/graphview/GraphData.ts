@@ -16,7 +16,7 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
         Object.entries(defaults).map(([name, defaults]) =>
             !parameters
                 ? [name, defaults.value]
-                : typeof parameters[name] !== typeof defaults.value
+                : defaults.value !== undefined && typeof parameters[name] !== typeof defaults.value
                 ? [name, defaults.value]
                 : [name, parameters[name]]
         )
