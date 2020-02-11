@@ -5,13 +5,13 @@ import { DefaultState } from '../../../../reducers/Store'
 import { Draggable } from '../../../utils/Draggable'
 import { GraphData, svgScreenTransformVector, UnknownParameters, Edge } from '../GraphData'
 import * as ArrayModule from './shapes/Array'
-import * as BarsModule from './shapes/Bars'
+import * as ColumnModule from './shapes/Column'
 import * as FieldModule from './shapes/Field'
 import * as MapModule from './shapes/Map'
 
 const modules = {
-    array: ArrayModule
-    // bars: BarsModule,
+    array: ArrayModule,
+    column: ColumnModule
     // field: FieldModule,
     // map: MapModule
 }

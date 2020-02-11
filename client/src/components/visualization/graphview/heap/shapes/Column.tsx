@@ -3,19 +3,17 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, memberChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
+import { Base } from './Base'
+import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { getDisplayValue, getMemberName, isSameMember } from '../../SchemaUtils'
 import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
-    element: cn(
-        'd-inline-flex flex-column px-1',
-        css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
-    ),
-    index: cn('text-truncate', css({ fontSize: '0.5rem' })),
+    element: cn('d-flex flex-column px-1', css({ border: `0.5px solid ${colors.gray.dark}` })),
+    index: cn('text-truncate mr-1', css({ fontSize: '0.5rem' })),
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' })),
-    bar: css({ borderBottom: `1px solid ${colors.gray.dark}` })
+    column: css({ borderBottom: `1px solid ${colors.gray.dark}` })
 }
 
 const styles = {
@@ -23,33 +21,47 @@ const styles = {
 }
 
 const defaultParameters = {
-    mode: { value: 'delta', options: ['delta', 'fixed'] },
-    index: { value: true },
-    values: { value: true },
-    width: { value: 30, range: [5, 100] as [number, number] },
-    height: { value: 50, range: [5, 200] as [number, number] }
+    'show indices': { value: true },
+    'show values': { value: true },
+    'column width': { value: 35, range: [5, 100] as [number, number] },
+    'column height': { value: 60, range: [5, 200] as [number, number] },
+    'delta mode': { value: 'diff', options: ['diff', 'step'] }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
 export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked'])
 
-export const Node = (props: {
+export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
+    onLink: (
+        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
+    ) => void
 }) => {
-    const currentMembers = React.useRef<schema.Member[]>([])
+    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
+    const showIndices = parameters['show indices']
+    const showValues = parameters['show values']
+    const columnWidth = parameters['column width']
+    const columnHeight = parameters['column height']
+    const deltaMode = parameters['delta mode']
 
-    const computeDeltaRatios = (values: number[]) => {
+    React.useEffect(() => {
+        currentMembers.current = props.obj.members.reduce((acc, member) => {
+            acc[getMemberName(member)] = member
+            return acc
+        }, {} as { [name: string]: schema.Member })
+    })
+
+    const computeDiffRatios = (values: number[]) => {
         const min = Math.min(...values)
         const max = Math.max(...values)
         const delta = max - min !== 0 ? max - min : 1
         return values.map(value => (value - min) / delta)
     }
 
-    const computeFixedRatios = (values: number[]) => {
+    const computeStepRatios = (values: number[]) => {
         const indexedValues = values.map((value, i) => [value, i])
         indexedValues.sort((a, b) => a[0] - b[0])
         const sequenceGenerator = { previous: -Infinity, sequence: 0 }
@@ -68,7 +80,24 @@ export const Node = (props: {
         return ratioIndices.map(([value, i]) => value)
     }
 
-    React.useEffect(() => void (currentMembers.current = props.obj.members))
+    const renderColumn = (member: schema.Member, ratio: number, columnIndex: number) => {
+        const displayIndex = member.key as number
+        const displayValue = getDisplayValue(member.value, props.id)
+        const changed = !isSameMember(member, currentMembers.current[getMemberName(member)])
+
+        return (
+            <div
+                key={columnIndex}
+                className={classes.element}
+                style={{ background: styles.background(changed), width: columnWidth }}
+                title={displayValue}
+            >
+                <div className={classes.column} style={{ height: `${ratio * columnHeight}px` }} />
+                {showIndices && <span className={classes.index}>{displayIndex}</span>}
+                {showValues && <span className={classes.value}>{displayValue}</span>}
+            </div>
+        )
+    }
 
     return (
         <Base title={props.obj.lType}>
@@ -78,38 +107,18 @@ export const Node = (props: {
                     : props.obj.members.length === 0
                     ? 'empty'
                     : props.obj.members.some(member => typeof member.value !== 'number' || !isFinite(member.value))
-                    ? 'not a number'
+                    ? 'contains non number'
                     : (() => {
                           const values = props.obj.members.map(member => member.value as number)
-                          const ratios =
-                              parameters['mode'] === 'delta' ? computeDeltaRatios(values) : computeFixedRatios(values)
-                          return props.obj.members.map((member, i) => {
-                              const changed = memberChanged(currentMembers.current[i], member)
-                              const displayValue = getDisplayValue(props.id, member.value)
-
-                              return (
-                                  <div
-                                      key={i}
-                                      className={classes.element}
-                                      style={{ width: parameters['width'], background: styles.background(changed) }}
-                                      title={displayValue}
-                                  >
-                                      <div
-                                          className={classes.bar}
-                                          style={{ height: `${ratios[i] * parameters['height']}px` }}
-                                      />
-                                      {parameters.index && <span className={classes.index}>{i}</span>}
-                                      {parameters.values && <span className={classes.value}>{values[i]}</span>}
-                                  </div>
-                              )
-                          })
+                          const ratios = deltaMode === 'diff' ? computeDiffRatios(values) : computeStepRatios(values)
+                          return props.obj.members.map((member, i) => renderColumn(member, ratios[i], i))
                       })()}
             </div>
         </Base>
     )
 }
 
-export const NodeParameters = (props: {
+export const ShapeParameters = (props: {
     id: string
     obj: schema.Obj
     withReset: boolean
