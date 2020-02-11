@@ -23,7 +23,7 @@ const classes = {
 }
 
 const styles = {
-    scope: (selected: boolean, threw: boolean) =>
+    background: (selected: boolean, threw: boolean) =>
         selected ? (!threw ? colors.blue.light : colors.red.light) : !threw ? colors.blue.lighter : colors.red.lighter
 }
 
@@ -76,7 +76,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
             {props.scopeSlice.name != undefined && (
                 <div
                     className={classes.scope}
-                    style={{ background: styles.scope(selected, threw) }}
+                    style={{ background: styles.background(selected, threw) }}
                     title={props.scopeSlice.name}
                     onClick={event => dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))}
                 >

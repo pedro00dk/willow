@@ -14,7 +14,7 @@ const classes = {
 }
 
 const styles = {
-    variable: (changed: boolean) => (changed ? colors.yellow.lighter : undefined)
+    background: (changed: boolean) => (changed ? colors.yellow.lighter : undefined)
 }
 
 export const Scope = (props: { scope: schema.Scope }) => {
@@ -42,7 +42,7 @@ export const Scope = (props: { scope: schema.Scope }) => {
                         <tr
                             key={i}
                             className={classes.row}
-                            style={{ background: styles.variable(changed) }}
+                            style={{ background: styles.background(changed) }}
                             title={displayValue}
                         >
                             <td className={classes.cell}>{variable.name}</td>
