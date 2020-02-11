@@ -3,8 +3,9 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
-import { Base, getDisplayValue, memberChanged } from '../../Base'
-import { ComputedParameters, readParameters, UnknownParameters } from '../../GraphData'
+import { Base } from './Base'
+import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
 import { Parameters } from '../Parameters'
 
 const classes = {
@@ -19,15 +20,16 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
+    background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light),
+    edge: (changed: boolean) => (changed ? colors.red.darker : undefined)
 }
 
 const defaultParameters = {
-    index: { value: true },
-    width: { value: 30, range: [5, 100] as [number, number] },
-    direction: { value: 'row', options: ['row', 'column'] },
-    wrap: { value: 'Infinity', options: [...[...Array(100).keys()].map(i => (i + 1).toString()), Infinity.toString()] },
-    'wrap index': { value: false }
+    'show indices': { value: true },
+    'cell width': { value: 30, range: [5, 100] as [number, number] },
+    orientation: { value: 'horizontal', options: ['horizontal', 'vertical'] },
+    'wrap array': { value: 'disabled', options: ['disabled', ...[...Array(21).keys()].map(i => (i + 1).toString())] },
+    'wrap indices': { value: false }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set'])
@@ -37,73 +39,80 @@ export const Node = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onTarget: (id: string, target: string, ref: HTMLSpanElement, text: string) => void
+    onLink: (
+        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
+    ) => void
 }) => {
-    const currentMembers = React.useRef<schema.Member[]>([])
+    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
-    const wrap = parseFloat(parameters.wrap)
-    const chunkSize = isFinite(wrap) ? wrap : props.obj.members.length
-    const chunks = props.obj.members.reduce((acc, next, i) => {
-        const chunkIndex = Math.floor(i / chunkSize)
+    const showIndices = parameters['show indices']
+    const cellWidth = parameters['cell width']
+    const orientation = parameters.orientation === 'horizontal' ? 'row' : 'column'
+    const wrapArray =
+        parameters['wrap array'] === 'disabled' ? props.obj.members.length : parseInt(parameters['wrap array'])
+    const wrapIndices = parameters['wrap indices']
+
+    React.useEffect(() => {
+        currentMembers.current = props.obj.members.reduce((acc, member) => {
+            acc[getMemberName(member)] = member
+            return acc
+        }, {} as { [name: string]: schema.Member })
+    })
+
+    const chunks = props.obj.members.reduce((acc, member, i) => {
+        const chunkIndex = Math.floor(i / wrapArray)
         const chunk = acc[chunkIndex] ?? (acc[chunkIndex] = [])
-        chunk.push(next)
+        chunk.push(member)
         return acc
     }, [] as schema.Member[][])
 
-    React.useEffect(() => void (currentMembers.current = props.obj.members))
+    const renderChunk = (chunk: schema.Member[], chunkIndex: number) => (
+        <div key={chunkIndex} className={classes.chunk} style={{ flexDirection: orientation }}>
+            {chunk.map((member, i) => renderCell(member, chunkIndex, i))}
+        </div>
+    )
+
+    const renderCell = (member: schema.Member, chunkIndex: number, cellIndex: number) => {
+        const memberIndex = member.key as number
+        const displayIndex = wrapIndices ? cellIndex : memberIndex
+        const isObject = isValueObject(member.value)
+        const changed = !isSameMember(member, currentMembers.current[memberIndex])
+        const displayValue = getDisplayValue(member.value, props.id)
+
+        return (
+            <div
+                key={memberIndex}
+                className={classes.element}
+                style={{
+                    background: styles.background(changed),
+                    flexDirection: orientation === 'row' ? 'column' : 'row',
+                    width: cellWidth
+                }}
+                title={displayValue}
+            >
+                {showIndices && <span className={classes.index}>{displayIndex}</span>}
+                <span
+                    ref={ref$ => {
+                        if (!ref$ || !isObject) return
+                        const targetId = (member.value as [string])[0]
+                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: memberIndex.toString() })
+                    }}
+                    className={classes.value}
+                >
+                    {displayValue}
+                </span>
+            </div>
+        )
+    }
 
     return (
         <Base title={props.obj.lType}>
-            <div
-                className={classes.container}
-                style={{ flexDirection: parameters.direction === 'row' ? 'column' : 'row' }}
-            >
+            <div className={classes.container} style={{ flexDirection: orientation === 'row' ? 'column' : 'row' }}>
                 {!supported.has(props.obj.gType)
                     ? 'incompatible'
                     : props.obj.members.length === 0
                     ? 'empty'
-                    : chunks.map((chunk, i) => (
-                          <div key={i} className={classes.chunk} style={{ flexDirection: parameters.direction as any }}>
-                              {chunk.map((member, j) => {
-                                  const memberIndex = i * chunkSize + j
-                                  const showIndex = !parameters['wrap index'] ? memberIndex : j
-                                  const isPrimitive = typeof member.value !== 'object'
-                                  const changed = memberChanged(currentMembers.current[memberIndex], member)
-                                  const displayKey = getDisplayValue(props.id, member.key)
-                                  const displayValue = getDisplayValue(props.id, member.value)
-
-                                  return (
-                                      <div
-                                          key={memberIndex}
-                                          className={classes.element}
-                                          style={{
-                                              width: parameters.width,
-                                              background: styles.background(changed),
-                                              flexDirection: parameters.direction === 'row' ? 'column' : 'row'
-                                          }}
-                                          title={displayValue}
-                                      >
-                                          {parameters.index && <span className={classes.index}>{showIndex}</span>}
-                                          <span
-                                              ref={ref =>
-                                                  ref &&
-                                                  !isPrimitive &&
-                                                  props.onTarget(
-                                                      props.id,
-                                                      (member.value as [string])[0],
-                                                      ref,
-                                                      displayKey
-                                                  )
-                                              }
-                                              className={classes.value}
-                                          >
-                                              {displayValue}
-                                          </span>
-                                      </div>
-                                  )
-                              })}
-                          </div>
-                      ))}
+                    : chunks.map((chunk, i) => renderChunk(chunk, i))}
             </div>
         </Base>
     )
