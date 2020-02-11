@@ -56,7 +56,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
         <>
             {props.withReset && (
                 <Item onClick={args => props.onChange(readParameters(undefined, props.defaults))}>
-                    <span>reset</span>
+                    <span>{'reset parameters'}</span>
                 </Item>
             )}
             {Object.entries(parameters).map(([name, value]) =>
@@ -81,7 +81,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : (
-                    <span>unknown property</span>
+                    <span>{'unknown property'}</span>
                 )
             )}
         </>
