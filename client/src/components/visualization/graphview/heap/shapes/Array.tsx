@@ -35,7 +35,7 @@ const defaultParameters = {
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set'])
 export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set'])
 
-export const Node = (props: {
+export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
@@ -118,7 +118,7 @@ export const Node = (props: {
     )
 }
 
-export const NodeParameters = (props: {
+export const ShapeParameters = (props: {
     id: string
     obj: schema.Obj
     withReset: boolean
