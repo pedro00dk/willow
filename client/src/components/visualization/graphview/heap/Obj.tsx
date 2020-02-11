@@ -3,17 +3,17 @@ import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
 import { Draggable } from '../../../utils/Draggable'
-import { GraphData, svgScreenTransformVector, UnknownParameters } from '../GraphData'
+import { GraphData, svgScreenTransformVector, UnknownParameters, Edge } from '../GraphData'
 import * as ArrayModule from './shapes/Array'
 import * as BarsModule from './shapes/Bars'
 import * as FieldModule from './shapes/Field'
 import * as MapModule from './shapes/Map'
 
 const modules = {
-    array: ArrayModule,
-    bars: BarsModule,
-    field: FieldModule,
-    map: MapModule
+    array: ArrayModule
+    // bars: BarsModule,
+    // field: FieldModule,
+    // map: MapModule
 }
 
 const classes = {
@@ -29,8 +29,10 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
-    const targets = React.useRef<{ targetId: string; ref$: HTMLSpanElement; text: string }[]>()
-    targets.current = []
+    const links = React.useRef<
+        ({ id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>)[]
+    >()
+    links.current = []
 
     const id = props.id
     const index = props.graphData.getIndex()
@@ -63,13 +65,13 @@ export const Obj = (props: {
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
-        targets.current.forEach(({ targetId, ref$, text }) => {
+        links.current.forEach(({ id: targetId, ref$, ...edgeProps }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(id, { from: { delta }, to: { targetId, mode: 'nearest' }, text })
+            props.graphData.pushEdge(id, { from: { delta }, to: { targetId, mode: 'nearest' }, ...edgeProps })
         })
     })
 
@@ -100,12 +102,7 @@ export const Obj = (props: {
         >
             <MenuProvider id={id} className={classes.menuProvider}>
                 <div className={classes.menuProvider}>
-                    <Shape
-                        id={id}
-                        obj={obj}
-                        parameters={parameters}
-                        onTarget={(_, targetId, ref$, text) => targets.current.push({ targetId, ref$, text })}
-                    />
+                    <Shape id={id} obj={obj} parameters={parameters} onLink={link => links.current.push(link)} />
                 </div>
             </MenuProvider>
 
