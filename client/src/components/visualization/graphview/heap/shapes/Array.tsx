@@ -11,10 +11,7 @@ import { Parameters } from '../Parameters'
 const classes = {
     container: 'd-flex text-nowrap',
     chunk: 'd-flex',
-    element: cn(
-        'd-inline-flex px-1',
-        css({ border: `0.5px solid ${colors.gray.dark}`, cursor: 'default', fontSize: '1rem' })
-    ),
+    element: cn('d-flex px-1', css({ border: `0.5px solid ${colors.gray.dark}` })),
     index: cn('text-truncate mr-1', css({ fontSize: '0.5rem' })),
     value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
 }
@@ -26,7 +23,7 @@ const styles = {
 
 const defaultParameters = {
     'show indices': { value: true },
-    'cell width': { value: 30, range: [5, 100] as [number, number] },
+    'cell width': { value: 35, range: [5, 100] as [number, number] },
     orientation: { value: 'horizontal', options: ['horizontal', 'vertical'] },
     'wrap array': { value: 'disabled', options: ['disabled', ...[...Array(21).keys()].map(i => (i + 1).toString())] },
     'wrap indices': { value: false }
@@ -73,15 +70,14 @@ export const Shape = (props: {
     )
 
     const renderCell = (member: schema.Member, chunkIndex: number, cellIndex: number) => {
-        const memberIndex = member.key as number
-        const displayIndex = wrapIndices ? cellIndex : memberIndex
+        const displayIndex = wrapIndices ? cellIndex : (member.key as number)
+        const displayValue = getDisplayValue(member.value, props.id)
         const isObject = isValueObject(member.value)
         const changed = !isSameMember(member, currentMembers.current[getMemberName(member)])
-        const displayValue = getDisplayValue(member.value, props.id)
 
         return (
             <div
-                key={memberIndex}
+                key={cellIndex}
                 className={classes.element}
                 style={{
                     background: styles.background(changed),
@@ -95,7 +91,7 @@ export const Shape = (props: {
                     ref={ref$ => {
                         if (!ref$ || !isObject) return
                         const targetId = (member.value as [string])[0]
-                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: memberIndex.toString() })
+                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayIndex.toString() })
                     }}
                     className={classes.value}
                 >
