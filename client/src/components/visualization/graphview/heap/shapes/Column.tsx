@@ -17,7 +17,7 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light)
+    background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light)
 }
 
 const defaultParameters = {

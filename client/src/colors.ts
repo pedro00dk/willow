@@ -22,7 +22,7 @@ export const colors = {
         light: 'rgba(255,254,211,1)',
         lighter: 'rgba(255,254,230,1)',
         dark: 'rgba(255,252,173,1)',
-        darker: 'rgba(255,252,154,1)'
+        darker: 'rgba(153,153,0,1)'
     },
     gray: {
         main: 'darkgray',

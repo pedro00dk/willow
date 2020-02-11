@@ -17,8 +17,8 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.red.light : colors.blue.light),
-    edge: (changed: boolean) => (changed ? colors.red.darker : undefined)
+    background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light),
+    edge: (changed: boolean) => (changed ? colors.yellow.darker : undefined)
 }
 
 const defaultParameters = {
