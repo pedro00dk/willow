@@ -40,11 +40,6 @@ export const Obj = (props: {
     const node = props.graphData.getNode(id)
     node.depth = props.depth
     node.type = obj.lType
-
-    const supportedShapes = Object.entries(modules)
-        .filter(([, mod]) => mod.supported.has(obj.gType))
-        .map(([name]) => name)
-
     const defaultShape = Object.entries(modules)
         .filter(([, mod]) => mod.defaults.has(obj.gType))
         .map(([name]) => name)[0]
@@ -52,7 +47,7 @@ export const Obj = (props: {
     const shape = node.shape[node.mode] !== '' ? node.shape[node.mode] : (node.shape[node.mode] = defaultShape)
     const parameters = node.parameters[node.mode]
 
-    const { Node: Shape, NodeParameters: ShapeParameters } = modules[shape as keyof typeof modules]
+    const { Shape } = modules[shape as keyof typeof modules]
 
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
@@ -105,33 +100,56 @@ export const Obj = (props: {
                     <Shape id={id} obj={obj} parameters={parameters} onLink={link => links.current.push(link)} />
                 </div>
             </MenuProvider>
-
-            {/* <Menu id={id}>
-                <Item onClick={args => ((node.mode = node.mode === 'own' ? 'type' : 'own'), props.update({}))}>
-                    <span title='change mode'>{`using ${node.mode} parameters`}</span>
-                </Item>
-                <Separator />
-                <Submenu label='node'>
-                    <Item onClick={args => ((node.shape[node.mode] = ''), props.update({}))}>reset shape</Item>
-                    {supportedShapes.map((shape, i) => (
-                        <Item key={i} onClick={args => ((node.shape[node.mode] = shape), props.update({}))}>
-                            {shape}
-                        </Item>
-                    ))}
-                </Submenu>
-                <Separator />
-                <Submenu label='parameters'>
-                    <ShapeParameters
-                        id={id}
-                        obj={heap[id]}
-                        withReset
-                        parameters={parameters}
-                        onChange={(updatedParameters: UnknownParameters) => (
-                            props.graphData.setNodeParameters(id, updatedParameters), props.update({})
-                        )}
-                    />
-                </Submenu>
-            </Menu> */}
+            <ObjMenu {...props} />
         </Draggable>
+    )
+}
+
+const ObjMenu = (props: {
+    id: string
+    graphData: GraphData
+    update: React.Dispatch<{}>
+    tracer: DefaultState['tracer']
+}) => {
+    const id = props.id
+    const index = props.graphData.getIndex()
+    const obj = props.tracer.steps[index].snapshot.heap[id]
+    const node = props.graphData.getNode(id)
+    const supportedShapes = Object.entries(modules)
+        .filter(([, mod]) => mod.supported.has(obj.gType))
+        .map(([name]) => name)
+
+    const shape = node.shape[node.mode]
+    const parameters = node.parameters[node.mode]
+
+    const { ShapeParameters } = modules[shape as keyof typeof modules]
+
+    return (
+        <Menu id={id}>
+            <Item onClick={args => ((node.mode = node.mode === 'own' ? 'type' : 'own'), props.update({}))}>
+                <span title='click to change'>{`using ${node.mode} parameters`}</span>
+            </Item>
+            <Separator />
+            <Submenu label='shape'>
+                <Item onClick={args => ((node.shape[node.mode] = ''), props.update({}))}>{'reset shape'}</Item>
+                {supportedShapes.map((shape, i) => (
+                    <Item key={i} onClick={args => ((node.shape[node.mode] = shape), props.update({}))}>
+                        {shape}
+                    </Item>
+                ))}
+            </Submenu>
+            <Separator />
+            <Submenu label='parameters'>
+                <ShapeParameters
+                    id={id}
+                    obj={obj}
+                    withReset
+                    parameters={parameters}
+                    onChange={(updatedParameters: UnknownParameters) => (
+                        (node.parameters[node.mode] = updatedParameters), props.update({})
+                    )}
+                />
+            </Submenu>
+        </Menu>
     )
 }
