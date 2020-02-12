@@ -180,9 +180,9 @@ export class GraphData {
         }
         const fromSelf = edge.from.self
         const targetId = edge.to.targetId
-        if (!fromSelf || targetId === undefined) return this.edges[id].loose.push(edge)
-        this.edges[id].children.push(edge)
-        this.edges[targetId].parents.push(edge)
+        if (!fromSelf || targetId == undefined) return this.getEdges(id).loose.push(edge)
+        this.getEdges(id).children.push(edge)
+        this.getEdges(targetId).parents.push(edge)
     }
 
     clearEdges() {
