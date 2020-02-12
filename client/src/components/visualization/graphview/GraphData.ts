@@ -412,7 +412,7 @@ export class GraphData {
             if (targetId != undefined) {
                 const targetNode = this.getNode(targetId)
                 const targetPosition = this.getNodePosition(targetNode)
-                return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
+                return { x: targetPosition.x + targetDelta.x, y: targetPosition.y + targetDelta.y }
             } else {
                 const targetPoint = (edge.to as any).point as { x: number; y: number }
                 return { x: targetPoint.x + delta.x, y: targetPoint.y + delta.y }
