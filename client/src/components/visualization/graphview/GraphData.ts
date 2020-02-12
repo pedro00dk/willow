@@ -36,14 +36,16 @@ export type Node = {
 
 export type Edge = {
     readonly id: string
-    readonly from:
+    readonly from: { self: boolean } & (
         | { delta: { x: number; y: number } }
         | { targetDelta: { x: number; y: number } }
         | { point: { x: number; y: number } }
-    readonly to:
-        | { targetId: string; mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
-        | { targetId: string; delta: { x: number; y: number } }
+    )
+    readonly to: { targetId: string } & (
+        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
+        | { delta: { x: number; y: number } }
         | { point: { x: number; y: number } }
+    )
     draw: 'line' | 'curve'
     color: string
     width: number
@@ -175,8 +177,8 @@ export class GraphData {
     pushEdge(id: string, partialEdge: Partial<Edge> = {}) {
         const edge = {
             id,
-            from: partialEdge.from ?? { point: { x: 0, y: 0 } },
-            to: partialEdge.to ?? { point: { x: 0, y: 0 } },
+            from: partialEdge.from ?? { self: false, point: { x: 0, y: 0 } },
+            to: partialEdge.to ?? { targetId: undefined, point: { x: 0, y: 0 } },
             draw: partialEdge.draw ?? 'curve',
             color: partialEdge.color ?? colors.gray.dark,
             width: partialEdge.width ?? 1,
@@ -184,7 +186,7 @@ export class GraphData {
         }
         this.getEdges(id).push(edge)
         const targetId = (edge.to as any).targetId as string
-        if ((edge.from as any).delta && targetId != undefined) this.getParentEdges(targetId).push(edge)
+        if ((edge.from as any).self && targetId != undefined) this.getParentEdges(targetId).push(edge)
     }
 
     clearEdges() {
@@ -229,7 +231,7 @@ export class GraphData {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
         Object.values(this.getEdges(node.id))
-            .filter(edge => (edge.from as any).delta && (edge.to as any).targetId != undefined)
+            .filter(edge => (edge.from as any).self && (edge.to as any).targetId != undefined)
             .forEach(edge => this.getNodeChildren(this.getNode((edge.to as any).targetId), depth - 1, false, pool))
         return pool
     }
@@ -381,7 +383,7 @@ export class GraphData {
         } else if (targetDelta) {
             const targetId = (edge.to as any).targetId as string
             if (targetId != undefined) {
-                const targetNode = this.getNode(edge.id)
+                const targetNode = this.getNode(targetId)
                 const targetPosition = this.getNodePosition(targetNode)
                 return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
             } else {
