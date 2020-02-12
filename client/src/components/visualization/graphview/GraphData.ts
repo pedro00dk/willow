@@ -22,36 +22,6 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
         )
     ) as ComputedParameters<U>
 
-export type Node = {
-    readonly id: string
-    render: boolean
-    positions: { x: number; y: number }[]
-    sizes: { x: number; y: number }[]
-    depth: number
-    type: string
-    mode: 'own' | 'type'
-    shape: { own: string; type: string }
-    parameters: { own: UnknownParameters; type: UnknownParameters }
-}
-
-export type Edge = {
-    readonly id: string
-    readonly from: { self: boolean } & (
-        | { delta: { x: number; y: number } }
-        | { targetDelta: { x: number; y: number } }
-        | { point: { x: number; y: number } }
-    )
-    readonly to: { targetId: string } & (
-        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
-        | { delta: { x: number; y: number } }
-        | { point: { x: number; y: number } }
-    )
-    draw: 'line' | 'curve'
-    color: string
-    width: number
-    text: string
-}
-
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
 export const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
@@ -76,6 +46,36 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
+export type Node = {
+    readonly id: string
+    render: boolean
+    positions: { x: number; y: number }[]
+    sizes: { x: number; y: number }[]
+    depth: number
+    type: string
+    mode: 'own' | 'type'
+    shape: string
+    parameters: UnknownParameters
+}
+
+export type Edge = {
+    readonly id: string
+    readonly from: { self: boolean } & (
+        | { delta: { x: number; y: number } }
+        | { targetDelta: { x: number; y: number } }
+        | { point: { x: number; y: number } }
+    )
+    readonly to: { targetId: string } & (
+        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
+        | { delta: { x: number; y: number } }
+        | { point: { x: number; y: number } }
+    )
+    draw: 'line' | 'curve'
+    color: string
+    width: number
+    text: string
+}
+
 export class GraphData {
     private index: number = 0
     private animate: boolean = true
@@ -83,8 +83,8 @@ export class GraphData {
     private subscriptionCalls = 0
     private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
     private nodes: { [id: string]: Node } = {}
-    private edges: { [id: string]: Edge[] } = {}
-    private parentEdges: { [id: string]: Edge[] } = {}
+    private types: { [type: string]: { shape: string; parameters: UnknownParameters } } = {}
+    private edges: { [id: string]: { children: Edge[]; parents: Edge[]; loose: Edge[] } } = {}
 
     constructor(private viewSize: { width: number; height: number }, private viewPadding: { x: number; y: number }) {}
 
@@ -137,25 +137,22 @@ export class GraphData {
         this.subscriptions = {}
     }
 
-    getNode(id: string, partialNode: Partial<Node> = {}) {
+    getNode(id: string, partial: Partial<Node> = {}) {
         return (
             this.nodes[id] ??
             (this.nodes[id] = {
-                id,
-                render: partialNode.render ?? true,
-                positions: partialNode.positions ?? [],
-                sizes: partialNode.sizes ?? (partialNode.sizes = []),
-                depth: partialNode.depth ?? 0,
-                type: partialNode.type ?? '',
-                mode: partialNode.mode ?? 'own',
-                shape: partialNode.shape ?? { own: '', type: '' },
-                parameters: partialNode.parameters ?? { own: {}, type: {} }
+                render: true,
+                positions: [],
+                sizes: [],
+                depth: 0,
+                type: '',
+                mode: 'type',
+                shape: '',
+                parameters: {},
+                ...partial,
+                id
             })
         )
-    }
-
-    hasNode(id: string) {
-        return !!this.nodes[id]
     }
 
     clearRenders() {
@@ -167,31 +164,29 @@ export class GraphData {
     }
 
     getEdges(id: string) {
-        return this.edges[id] ?? (this.edges[id] = [])
+        return this.edges[id] ?? (this.edges[id] = { children: [], parents: [], loose: [] })
     }
 
-    getParentEdges(id: string) {
-        return this.parentEdges[id] ?? (this.parentEdges[id] = [])
-    }
-
-    pushEdge(id: string, partialEdge: Partial<Edge> = {}) {
-        const edge = {
-            id,
-            from: partialEdge.from ?? { self: false, point: { x: 0, y: 0 } },
-            to: partialEdge.to ?? { targetId: undefined, point: { x: 0, y: 0 } },
-            draw: partialEdge.draw ?? 'curve',
-            color: partialEdge.color ?? colors.gray.dark,
-            width: partialEdge.width ?? 1,
-            text: partialEdge.text ?? ''
+    pushEdge(id: string, partial: Partial<Edge> = {}) {
+        const edge: Edge = {
+            from: { self: false, point: { x: 0, y: 0 } },
+            to: { targetId: undefined, point: { x: 0, y: 0 } },
+            draw: 'curve',
+            color: colors.gray.dark,
+            width: 1,
+            text: '',
+            ...partial,
+            id
         }
-        this.getEdges(id).push(edge)
-        const targetId = (edge.to as any).targetId as string
-        if ((edge.from as any).self && targetId != undefined) this.getParentEdges(targetId).push(edge)
+        const fromSelf = edge.from.self
+        const targetId = edge.to.targetId
+        if (!fromSelf || targetId === undefined) return this.edges[id].loose.push(edge)
+        this.edges[id].children.push(edge)
+        this.edges[targetId].parents.push(edge)
     }
 
     clearEdges() {
         this.edges = {}
-        this.parentEdges = {}
     }
 
     // Node helper methods (properties changed by all following methods must not be changed directly)
@@ -218,10 +213,42 @@ export class GraphData {
         return size
     }
 
+    getNodeShape(node: Node, def = '') {
+        return node.mode === 'own'
+            ? node.shape
+            : this.types[node.type]
+            ? this.types[node.type].shape
+            : this.setNodeShape(node, def)
+    }
+
+    setNodeShape(node: Node, shape: string) {
+        if (node.mode === 'own') return (node.shape = shape)
+        this.types[node.type]
+            ? (this.types[node.type].shape = shape)
+            : (this.types[node.type] = { shape, parameters: {} })
+        return shape
+    }
+
+    getNodeParameters(node: Node, def: UnknownParameters = {}) {
+        return node.mode === 'own'
+            ? node.parameters
+            : this.types[node.type]
+            ? this.types[node.type].parameters
+            : this.setNodeParameters(node, def)
+    }
+
+    setNodeParameters(node: Node, parameters: UnknownParameters) {
+        if (node.mode === 'own') return (node.parameters = parameters)
+        this.types[node.type]
+            ? (this.types[node.type].parameters = parameters)
+            : (this.types[node.type] = { shape: '', parameters })
+        return parameters
+    }
+
     getNodeParents(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
-        Object.values(this.getParentEdges(node.id)).forEach(edge =>
+        Object.values(this.getEdges(node.id).parents).forEach(edge =>
             this.getNodeParents(this.getNode(edge.id), depth - 1, false, pool)
         )
         return pool
@@ -230,9 +257,9 @@ export class GraphData {
     getNodeChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
-        Object.values(this.getEdges(node.id))
-            .filter(edge => (edge.from as any).self && (edge.to as any).targetId != undefined)
-            .forEach(edge => this.getNodeChildren(this.getNode((edge.to as any).targetId), depth - 1, false, pool))
+        Object.values(this.getEdges(node.id).children).forEach(edge =>
+            this.getNodeChildren(this.getNode(edge.to.targetId), depth - 1, false, pool)
+        )
         return pool
     }
 
