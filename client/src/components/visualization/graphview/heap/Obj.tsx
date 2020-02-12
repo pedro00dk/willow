@@ -43,9 +43,8 @@ export const Obj = (props: {
     const defaultShape = Object.entries(modules)
         .filter(([, mod]) => mod.defaults.has(obj.gType))
         .map(([name]) => name)[0]
-
-    const shape = node.shape[node.mode] !== '' ? node.shape[node.mode] : (node.shape[node.mode] = defaultShape)
-    const parameters = node.parameters[node.mode]
+    const shape = props.graphData.getNodeShape(node, defaultShape)
+    const parameters = props.graphData.getNodeParameters(node, {})
 
     const { Shape } = modules[shape as keyof typeof modules]
 
@@ -60,13 +59,13 @@ export const Obj = (props: {
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
-        links.current.forEach(({ id: targetId, ref$, ...edgeProps }) => {
+        links.current.forEach(({ id: targetId, ref$, ...data }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(id, { from: { delta }, to: { targetId, mode: 'nearest' }, ...edgeProps })
+            props.graphData.pushEdge(id, { from: { self: true, delta }, to: { targetId, mode: 'nearest' }, ...data })
         })
     })
 
@@ -118,9 +117,8 @@ const ObjMenu = (props: {
     const supportedShapes = Object.entries(modules)
         .filter(([, mod]) => mod.supported.has(obj.gType))
         .map(([name]) => name)
-
-    const shape = node.shape[node.mode]
-    const parameters = node.parameters[node.mode]
+    const shape = props.graphData.getNodeShape(node)
+    const parameters = props.graphData.getNodeParameters(node)
 
     const { ShapeParameters } = modules[shape as keyof typeof modules]
 
@@ -131,9 +129,9 @@ const ObjMenu = (props: {
             </Item>
             <Separator />
             <Submenu label='shape'>
-                <Item onClick={args => ((node.shape[node.mode] = ''), props.update({}))}>{'reset shape'}</Item>
+                <Item onClick={args => (props.graphData.setNodeShape(node, ''), props.update({}))}>{'reset'}</Item>
                 {supportedShapes.map((shape, i) => (
-                    <Item key={i} onClick={args => ((node.shape[node.mode] = shape), props.update({}))}>
+                    <Item key={i} onClick={args => (props.graphData.setNodeShape(node, shape), props.update({}))}>
                         {shape}
                     </Item>
                 ))}
@@ -145,8 +143,8 @@ const ObjMenu = (props: {
                     obj={obj}
                     withReset
                     parameters={parameters}
-                    onChange={(updatedParameters: UnknownParameters) => (
-                        (node.parameters[node.mode] = updatedParameters), props.update({})
+                    onChange={(parameters: UnknownParameters) => (
+                        props.graphData.setNodeParameters(node, parameters), props.update({})
                     )}
                 />
             </Submenu>
