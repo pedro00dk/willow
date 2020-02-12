@@ -6,8 +6,8 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
     const firstDraw = React.useRef(true)
     const [edgesLength, setEdgesLength] = React.useState(0)
     const node = props.graphData.getNode(props.id)
-    const edges = props.graphData.getEdges(props.id)
-    
+    const edges = props.graphData.getEdges(node.id)
+
     React.useLayoutEffect(() => {
         const localEdges = [...edges.children, ...edges.loose]
         if (edgesLength !== localEdges.length) return setEdgesLength(localEdges.length)

@@ -29,7 +29,7 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
 
         updateNode()
         firstDraw.current = false
-        props.graphData.subscribe(props.id, updateNode)
+        props.graphData.subscribe(node.id, updateNode)
     })
 
     return (
