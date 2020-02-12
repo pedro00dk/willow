@@ -107,7 +107,7 @@ export const Shape = (props: {
                 props.obj.members.forEach(refMember => {
                     if (!isValueObject(refMember.value) || refMember === member) return
                     const targetId = (refMember.value as [string])[0]
-                    const displayKey = getDisplayValue(member.key, props.id)
+                    const displayKey = getDisplayValue(refMember.key, props.id)
                     const changed = !isSameMember(refMember, currentMembers.current[getMemberName(refMember)])
                     props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayKey })
                 })
