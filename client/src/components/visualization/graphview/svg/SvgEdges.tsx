@@ -7,12 +7,13 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
     const [edgesLength, setEdgesLength] = React.useState(0)
     const node = props.graphData.getNode(props.id)
     const edges = props.graphData.getEdges(props.id)
-
+    
     React.useLayoutEffect(() => {
-        if (edgesLength !== edges.length) return setEdgesLength(edges.length)
+        const localEdges = [...edges.children, ...edges.loose]
+        if (edgesLength !== localEdges.length) return setEdgesLength(localEdges.length)
 
         const updateEdges = (callId?: number) => {
-            Object.values(edges).forEach((edge, i) => {
+            localEdges.forEach((edge, i) => {
                 const group = container$.current.children.item(i)
                 const marker = group.children.item(0) as SVGMarkerElement
                 const path = group.children.item(1) as SVGPathElement
