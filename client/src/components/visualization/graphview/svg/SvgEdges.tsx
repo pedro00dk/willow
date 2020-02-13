@@ -14,7 +14,6 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
 
         const updateEdges = (callId?: number) =>
             sourceEdges.forEach((edge, i) => {
-                console.log(edge.color)
                 const group = container$.current.children.item(i)
                 const marker = group.children.item(0) as SVGMarkerElement
                 const path = group.children.item(1) as SVGPathElement
