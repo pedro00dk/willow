@@ -19,7 +19,7 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
     React.useLayoutEffect(() => {
         const updateNode = (callId?: number) => {
             const position = props.graphData.getNodePosition(node)
-            const size = props.graphData.getNodeSize(node)
+            const size = node.size
             container$.current.style.transition = styles.animate(!firstUpdate.current && props.graphData.getAnimate())
             container$.current.setAttribute('x', position.x.toString())
             container$.current.setAttribute('y', position.y.toString())

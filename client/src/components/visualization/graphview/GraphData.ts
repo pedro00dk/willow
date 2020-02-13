@@ -50,7 +50,7 @@ export type Node = {
     readonly id: string
     render: boolean
     positions: { x: number; y: number }[]
-    sizes: { x: number; y: number }[]
+    size: { x: number; y: number }
     depth: number
     type: string
     mode: 'own' | 'type'
@@ -144,7 +144,7 @@ export class GraphData {
             (this.nodes[id] = {
                 render: true,
                 positions: [],
-                sizes: [],
+                size: { x: 0, y: 0 },
                 depth: 0,
                 type: '',
                 mode: 'type',
@@ -204,15 +204,6 @@ export class GraphData {
         }
         for (let i = range[0]; i <= range[1]; i++) node.positions[i] = padPosition
         return padPosition
-    }
-
-    getNodeSize(node: Node, index = this.index) {
-        return node.sizes[index] ?? this.setNodeSizes(node, { x: 0, y: 0 }, [index, index])
-    }
-
-    setNodeSizes(node: Node, size: { x: number; y: number }, range = [this.index, this.index] as const) {
-        for (let i = range[0]; i <= range[1]; i++) node.sizes[i] = size
-        return size
     }
 
     getNodeShape(node: Node, def = '') {
@@ -386,7 +377,7 @@ export class GraphData {
         const structure = this.findStructure(this.findStructureBaseNode(node))
         if (!structure.organizable) return
         const anchor = this.getNodePosition(node, baseIndex)
-        const sizeAnchor = this.getNodeSize(node, baseIndex)
+        const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
 
         const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment)
@@ -428,7 +419,7 @@ export class GraphData {
         if (targetId != undefined) {
             const targetNode = this.getNode(targetId)
             const targetPosition = this.getNodePosition(targetNode)
-            const targetSize = this.getNodeSize(targetNode)
+            const targetSize = targetNode.size
             if (mode != undefined) {
                 switch (mode) {
                     case 'position':

@@ -51,7 +51,7 @@ export const Obj = (props: {
         const rect = container$.current.getBoundingClientRect()
         const screenSize = { x: rect.width, y: rect.height }
         const [svgSize] = svgScreenTransformVector('toSvg', svg, screenSize)
-        props.graphData.setNodeSizes(node, svgSize)
+        node.size = svgSize
     })
 
     React.useLayoutEffect(() => {
