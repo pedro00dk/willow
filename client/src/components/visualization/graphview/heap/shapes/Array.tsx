@@ -36,9 +36,7 @@ export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onLink: (
-        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
-    ) => void
+    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
     const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -70,10 +68,11 @@ export const Shape = (props: {
     )
 
     const renderCell = (member: schema.Member, chunkIndex: number, cellIndex: number) => {
-        const displayIndex = wrapIndices ? cellIndex : (member.key as number)
+        const name = getMemberName(member)
+        const displayIndex = (wrapIndices ? cellIndex : (member.key as number)).toString()
         const displayValue = getDisplayValue(member.value, props.id)
         const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[getMemberName(member)])
+        const changed = !isSameMember(member, currentMembers.current[name])
 
         return (
             <div
@@ -91,7 +90,7 @@ export const Shape = (props: {
                     ref={ref$ => {
                         if (!ref$ || !isObject) return
                         const targetId = (member.value as [string])[0]
-                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayIndex.toString() })
+                        props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayIndex })
                     }}
                     className={classes.value}
                 >

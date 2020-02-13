@@ -29,9 +29,7 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
-    const links = React.useRef<
-        ({ id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>)[]
-    >()
+    const links = React.useRef<({ id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>)[]>()
     links.current = []
 
     const id = props.id
@@ -59,13 +57,13 @@ export const Obj = (props: {
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
-        links.current.forEach(({ id: targetId, ref$, ...data }) => {
+        links.current.forEach(({ id: targetId, name, ref$, ...data }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(id, { from: { self: true, delta }, to: { targetId, mode: 'nearest' }, ...data })
+            props.graphData.pushEdge(id, name, { ...data, from: { self: true, delta }, to: { targetId, mode: 'near' } })
         })
     })
 

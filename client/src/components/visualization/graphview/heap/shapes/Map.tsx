@@ -33,9 +33,7 @@ export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onLink: (
-        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
-    ) => void
+    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
     const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -51,16 +49,16 @@ export const Shape = (props: {
     })
 
     const renderEntry = (member: schema.Member) => {
+        const name = getMemberName(member)
         const displayKey = getDisplayValue(member.key, props.id)
         const displayValue = getDisplayValue(member.value, props.id)
         const isKeyObject = isValueObject(member.key)
         const isValObject = isValueObject(member.value)
-        const memberName = getMemberName(member)
-        const changed = !isSameMember(member, currentMembers.current[memberName])
+        const changed = !isSameMember(member, currentMembers.current[name])
 
         return (
             <div
-                key={memberName}
+                key={name}
                 className={classes.element}
                 style={{ background: styles.background(changed) }}
                 title={displayValue}
@@ -70,7 +68,7 @@ export const Shape = (props: {
                         ref={ref$ => {
                             if (!ref$ || !isKeyObject) return
                             const targetId = (member.key as [string])[0]
-                            props.onLink({ id: targetId, ref$, color: styles.edge(changed) })
+                            props.onLink({ id: targetId, name: `${name}-key`, ref$, color: styles.edge(changed) })
                         }}
                         className={classes.key}
                         style={{ width: keyWidth }}
@@ -82,7 +80,7 @@ export const Shape = (props: {
                     ref={ref$ => {
                         if (!ref$ || !isValObject) return
                         const targetId = (member.value as [string])[0]
-                        props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayKey })
+                        props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
                     }}
                     className={classes.value}
                     style={{ width: valueWidth }}

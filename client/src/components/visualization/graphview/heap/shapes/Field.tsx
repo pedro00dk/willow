@@ -49,9 +49,7 @@ export const Shape = (props: {
     id: string
     obj: schema.Obj
     parameters: UnknownParameters
-    onLink: (
-        link: { id: string; ref$: HTMLSpanElement } & Pick<Partial<Edge>, 'draw' | 'color' | 'width' | 'text'>
-    ) => void
+    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
     const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
@@ -68,10 +66,11 @@ export const Shape = (props: {
     })
 
     const renderField = (member: schema.Member) => {
+        const name = getMemberName(member)
         const displayKey = getDisplayValue(member.key, props.id)
         const displayValue = getDisplayValue(member.value, props.id)
         const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[getMemberName(member)])
+        const changed = !isSameMember(member, currentMembers.current[name])
 
         return (
             <div
@@ -88,7 +87,7 @@ export const Shape = (props: {
                         ref={ref$ => {
                             if (!ref$ || !isObject) return
                             const targetId = (member.value as [string])[0]
-                            props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayKey })
+                            props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
                         }}
                         className={classes.value}
                     >
@@ -107,9 +106,10 @@ export const Shape = (props: {
                 props.obj.members.forEach(refMember => {
                     if (!isValueObject(refMember.value) || refMember === member) return
                     const targetId = (refMember.value as [string])[0]
+                    const name = getMemberName(refMember)
                     const displayKey = getDisplayValue(refMember.key, props.id)
-                    const changed = !isSameMember(refMember, currentMembers.current[getMemberName(refMember)])
-                    props.onLink({ id: targetId, ref$, color: styles.edge(changed), text: displayKey })
+                    const changed = !isSameMember(refMember, currentMembers.current[name])
+                    props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
                 })
             }}
         />
