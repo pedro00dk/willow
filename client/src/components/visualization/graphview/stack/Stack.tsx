@@ -1,33 +1,61 @@
 import React from 'react'
+import { colors } from '../../../../colors'
 import { DefaultState } from '../../../../reducers/Store'
+import * as schema from '../../../../schema/schema'
 import { GraphData } from '../GraphData'
+import { isValueObject, isSameVariable } from '../SchemaUtils'
+import { SvgNode } from '../svg/SvgNode'
 
-export const Stack = (props: {
-    graphData: GraphData
-    forceUpdate: React.Dispatch<{}>
-    tracer: DefaultState['tracer']
-}) => {
-    if (!props.tracer.steps) return <></>
-    const deltaSize = props.graphData.getGraphSize().width * 0.05
-    const stack = props.tracer.steps[props.graphData.getIndex()].snapshot?.stack ?? []
-    const variables = stack
-        .flatMap(scope => scope.variables)
-        .filter(variable => typeof variable.value === 'object')
-        .reduce((acc, next) => {
-            const id = (next.value as [string])[0]
-            if (!acc[id]) acc[id] = []
-            if (acc[id].length > 3) return acc
-            acc[id].push(next.name)
-            return acc
-        }, {} as { [id: string]: string[] })
+const styles = {
+    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
+}
 
-    Object.entries(variables).forEach(([id, names]) =>
-        names.forEach((name, i) => {
-            const angle = (i * 20 + 10) * (Math.PI / 180)
-            const delta = { x: -deltaSize * Math.cos(angle), y: deltaSize * -Math.sin(angle) }
-            props.graphData.getTargets(id).push({ target: id, delta, text: name })
-        })
+export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>; tracer: DefaultState['tracer'] }) => {
+    const currentVariables = React.useRef<{ [name: string]: { [depth: number]: schema.Variable } }>({})
+    const index = props.graphData.getIndex()
+    const { stack = [] } = props.tracer.steps?.[index].snapshot ?? {}
+    const variableScopes = stack
+        .map((scope, i) => [scope, i] as const)
+        .flatMap(([scope, depth]) => scope.variables.map(variable => [variable, depth] as const))
+        .filter(([variable]) => isValueObject(variable.value))
+    const variablesPerObject = variableScopes.reduce((acc, [variable, depth]) => {
+        const id = (variable.value as [string])[0]
+        if (!acc[id]) acc[id] = []
+        acc[id].push({ variable, depth })
+        return acc
+    }, {} as { [id: string]: { variable: schema.Variable; depth: number }[] })
+    const deltas = [
+        { x: -65, y: -25 },
+        { x: -75, y: 0 },
+        { x: -65, y: 25 }
+    ]
+
+    Object.entries(variablesPerObject).forEach(([id, variables]) =>
+        variables
+            .slice(-3)
+            .reverse()
+            .forEach(({ variable, depth }, i) => {
+                const changed = !isSameVariable(variable, currentVariables.current[variable.name]?.[depth])
+                const width = depth === stack.length - 1 ? 2.5 : i < 2 ? 1 : 0.5
+                props.graphData.pushEdge('stack', `${depth}-${variable.name}`, {
+                    from: { self: true, targetDelta: deltas[i] },
+                    to: { targetId: id, mode: 'position' },
+                    draw: 'line',
+                    color: styles.edge(changed),
+                    width,
+                    text: variable.name
+                })
+            })
     )
 
-    return <></>
+    React.useEffect(() => {
+        currentVariables.current = variableScopes.reduce((acc, [variable, depth]) => {
+            const name = variable.name
+            if (!acc[name]) acc[name] = {}
+            acc[name][depth] = variable
+            return acc
+        }, {} as { [name: string]: { [depth: number]: schema.Variable } })
+    })
+
+    return <>{stack.length > 0 && <SvgNode id='stack' graphData={props.graphData} />}</>
 }
