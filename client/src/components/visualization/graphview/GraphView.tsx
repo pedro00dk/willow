@@ -9,6 +9,7 @@ export const GraphView = () => {
     const graphData = React.useRef(new GraphData({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
     const update = React.useState({})[1]
     const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+    graphData.current.setSize(tracer.steps?.length ?? 0)
     graphData.current.setIndex(tracer.index ?? 0)
     graphData.current.setAnimate(true)
     graphData.current.clearSubscriptions()

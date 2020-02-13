@@ -79,6 +79,7 @@ export type Edge = {
 
 export class GraphData {
     private index: number = 0
+    private size: number = 0
     private animate: boolean = true
     private viewBox: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 0, height: 0 }
     private subscriptionCalls = 0
@@ -95,6 +96,14 @@ export class GraphData {
 
     setIndex(index: number) {
         return (this.index = index)
+    }
+
+    getSize() {
+        return this.size
+    }
+
+    setSize(programSize: number) {
+        return (this.size = programSize)
     }
 
     getAnimate() {
