@@ -431,6 +431,8 @@ export class GraphData {
             const targetSize = this.getNodeSize(targetNode)
             if (mode != undefined) {
                 switch (mode) {
+                    case 'position':
+                        return { x: targetPosition.x, y: targetPosition.y }
                     case 'near': // TODO implement other cases
                     default:
                         return {
