@@ -382,8 +382,6 @@ export class GraphData {
         range = [this.index, this.index] as const
     ) {
         const structure = this.findStructure(this.findStructureBaseNode(node))
-        console.log(this.findStructureBaseNode(node))
-        console.log(structure)
         if (!structure.organizable) return
         const anchor = this.getNodePosition(node, baseIndex)
         const sizeAnchor = this.getNodeSize(node, baseIndex)
