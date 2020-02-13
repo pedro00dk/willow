@@ -60,13 +60,14 @@ export type Node = {
 
 export type Edge = {
     readonly id: string
+    readonly name: string
     readonly from: { self: boolean } & (
         | { delta: { x: number; y: number } }
         | { targetDelta: { x: number; y: number } }
         | { point: { x: number; y: number } }
     )
     readonly to: { targetId: string } & (
-        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'nearest' }
+        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'near' }
         | { delta: { x: number; y: number } }
         | { point: { x: number; y: number } }
     )
@@ -167,7 +168,7 @@ export class GraphData {
         return this.edges[id] ?? (this.edges[id] = { children: [], parents: [], loose: [] })
     }
 
-    pushEdge(id: string, partial: Partial<Edge> = {}) {
+    pushEdge(id: string, name: string, partial: Partial<Edge> = {}) {
         const edge: Edge = {
             from: { self: false, point: { x: 0, y: 0 } },
             to: { targetId: undefined, point: { x: 0, y: 0 } },
@@ -176,7 +177,8 @@ export class GraphData {
             width: 1,
             text: '',
             ...partial,
-            id
+            id,
+            name
         }
         const fromSelf = edge.from.self
         const targetId = edge.to.targetId
@@ -429,7 +431,7 @@ export class GraphData {
             const targetSize = this.getNodeSize(targetNode)
             if (mode != undefined) {
                 switch (mode) {
-                    case 'nearest': // TODO implement other cases
+                    case 'near': // TODO implement other cases
                     default:
                         return {
                             x: Math.min(Math.max(startPoint.x, targetPosition.x), targetPosition.x + targetSize.x),
