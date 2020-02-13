@@ -7,6 +7,14 @@ class Inspector:
     Inspect frames and produces dictionaries with their state data.
     """
 
+    def __init__(self):
+        """
+        Initialize the inspector and the ordered id generators.
+        """
+        self.ordered_id_count = 0
+        self.ordered_ids = {}
+        self.previous_ordered_ids = {}
+
     # types that can be converted to a JSON string
     STRING_LIKE_TYPES = (bool, complex, str, type(None))
 
@@ -22,6 +30,8 @@ class Inspector:
 
         > return `dict`: the processed frame data
         """
+        self.previous_ordered_ids = self.ordered_ids
+        self.ordered_ids = {}
 
         snapshot = {'info': 'ok' if event != 'exception' else 'warn'}
 
@@ -73,8 +83,16 @@ class Inspector:
             return str(obj)
 
         id_ = str(id(obj))
-        if id_ in snapshot['heap']:
-            return [id_]
+        if id_ in self.ordered_ids:
+            ordered_id = self.ordered_ids[id_]
+        elif id_ in self.previous_ordered_ids:
+            ordered_id = self.ordered_ids[id_] = self.previous_ordered_ids[id_]
+        else:
+            ordered_id = self.ordered_ids[id_] = self.ordered_id_count
+            self.ordered_id_count += 1
+        
+        if ordered_id in snapshot['heap']:
+            return [ordered_id]
 
         g_type = 'other'
         l_type = type(obj).__name__
@@ -92,7 +110,7 @@ class Inspector:
 
         if members is not None:  # known object type
             # add object id to the heap before further inspections to avoid stack overflows
-            obj = snapshot['heap'][id_] = {}
+            obj = snapshot['heap'][ordered_id] = {}
             obj['gType'] = g_type
             obj['lType'] = l_type
             obj['members'] = [
@@ -102,7 +120,7 @@ class Inspector:
                 }
                 for key, value in members
             ]
-            return [id_]
+            return [ordered_id]
         else:  # unknown object type
             # instead of inspecting unknown objects, inspect their type only
             return self._inspect_object(snapshot, type(obj), classes, module)
