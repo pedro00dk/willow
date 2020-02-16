@@ -21,8 +21,8 @@ export const isSameValue = (valueA: schema.Value, valueB: schema.Value) => {
     const aIsObject = isValueObject(valueA)
     const bIsObject = isValueObject(valueB)
     return (
-        (!aIsObject && !bIsObject && valueB === valueA) ||
-        (aIsObject && bIsObject && (valueA as [string]))[0] === (valueB as [string])[0]
+        (!aIsObject && !bIsObject && valueA === valueB) ||
+        (aIsObject && bIsObject && (valueA as [string])[0] === (valueB as [string])[0])
     )
 }
 
