@@ -1,16 +1,19 @@
 import React from 'react'
-import { GraphData } from '../GraphData'
+import { Edge, GraphData } from '../GraphData'
 
 export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
     const container$ = React.useRef<SVGGElement>()
-    const [edgesLength, setEdgesLength] = React.useState(0)
+    const [currentSourceEdges, setCurrentSourceEdges] = React.useState<Edge[]>([])
     const node = props.graphData.getNode(props.id)
     const edges = props.graphData.getEdges(node.id)
-    const sourceEdges = [...edges.children, ...edges.loose]
 
     React.useLayoutEffect(() => {
         const sourceEdges = [...edges.children, ...edges.loose]
-        if (edgesLength !== sourceEdges.length) return setEdgesLength(sourceEdges.length)
+        if (
+            currentSourceEdges.length !== sourceEdges.length ||
+            !sourceEdges.reduce((acc, edge, i) => acc && edge === currentSourceEdges[i], true)
+        )
+            return setCurrentSourceEdges(sourceEdges)
 
         const updateEdges = (callId?: number) =>
             sourceEdges.forEach((edge, i) => {
@@ -41,7 +44,7 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
 
     return (
         <g ref={container$}>
-            {sourceEdges.map(edge => {
+            {currentSourceEdges.map(edge => {
                 const pathId = `${edge.id}-${edge.name}`
                 const markerId = `${pathId}-marker`
                 return (
