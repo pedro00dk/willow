@@ -2,8 +2,10 @@ import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
+import * as schema from '../../../../schema/schema'
 import { Draggable } from '../../../utils/Draggable'
 import { GraphData, svgScreenTransformVector, UnknownParameters, Edge } from '../GraphData'
+import { getMemberName } from '../SchemaUtils'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
 import * as FieldModule from './shapes/Field'
@@ -29,6 +31,8 @@ export const Obj = (props: {
     tracer: DefaultState['tracer']
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
+    const previousIndex = React.useRef(undefined)
+    const previousMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const links = React.useRef<({ id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>)[]>()
     links.current = []
 
@@ -70,6 +74,15 @@ export const Obj = (props: {
 
     React.useLayoutEffect(() => props.graphData.callSubscriptions(id))
 
+    React.useEffect(() => {
+        if (previousIndex.current === index) return
+        previousIndex.current = index
+        previousMembers.current = obj.members.reduce((acc, member) => {
+            acc[getMemberName(member)] = member
+            return acc
+        }, {} as { [name: string]: schema.Member })
+    })
+
     return (
         <Draggable
             props={{
@@ -95,7 +108,13 @@ export const Obj = (props: {
         >
             <MenuProvider id={id} className={classes.menuProvider}>
                 <div className={classes.menuProvider}>
-                    <Shape id={id} obj={obj} parameters={parameters} onLink={link => links.current.push(link)} />
+                    <Shape
+                        id={id}
+                        obj={obj}
+                        previousMembers={previousMembers.current}
+                        parameters={parameters}
+                        onLink={link => links.current.push(link)}
+                    />
                 </div>
             </MenuProvider>
             <ObjMenu {...props} />

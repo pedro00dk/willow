@@ -32,21 +32,14 @@ export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'li
 export const Shape = (props: {
     id: string
     obj: schema.Obj
+    previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
     onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
-    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
     const showKeys = parameters['show keys']
     const keyWidth = parameters['key width']
     const valueWidth = parameters['value width']
-
-    React.useEffect(() => {
-        currentMembers.current = props.obj.members.reduce((acc, member) => {
-            acc[getMemberName(member)] = member
-            return acc
-        }, {} as { [name: string]: schema.Member })
-    })
 
     const renderEntry = (member: schema.Member) => {
         const name = getMemberName(member)
@@ -54,7 +47,7 @@ export const Shape = (props: {
         const displayValue = getDisplayValue(member.value, props.id)
         const isKeyObject = isValueObject(member.key)
         const isValObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[name])
+        const changed = !isSameMember(member, props.previousMembers[name])
 
         return (
             <div

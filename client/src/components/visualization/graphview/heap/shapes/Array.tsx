@@ -35,10 +35,10 @@ export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'li
 export const Shape = (props: {
     id: string
     obj: schema.Obj
+    previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
     onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
-    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
     const showIndices = parameters['show indices']
     const cellWidth = parameters['cell width']
@@ -46,13 +46,6 @@ export const Shape = (props: {
     const wrapArray =
         parameters['wrap array'] === 'disabled' ? props.obj.members.length : parseInt(parameters['wrap array'])
     const wrapIndices = parameters['wrap indices']
-
-    React.useEffect(() => {
-        currentMembers.current = props.obj.members.reduce((acc, member) => {
-            acc[getMemberName(member)] = member
-            return acc
-        }, {} as { [name: string]: schema.Member })
-    })
 
     const chunks = props.obj.members.reduce((acc, member, i) => {
         const chunkIndex = Math.floor(i / wrapArray)
@@ -72,7 +65,7 @@ export const Shape = (props: {
         const displayIndex = (wrapIndices ? cellIndex : (member.key as number)).toString()
         const displayValue = getDisplayValue(member.value, props.id)
         const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[name])
+        const changed = !isSameMember(member, props.previousMembers[name])
 
         return (
             <div

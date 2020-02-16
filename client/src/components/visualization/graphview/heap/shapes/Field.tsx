@@ -48,29 +48,22 @@ export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'li
 export const Shape = (props: {
     id: string
     obj: schema.Obj
+    previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
     onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
 }) => {
-    const currentMembers = React.useRef<{ [id: string]: schema.Member }>({})
     const parameters = readParameters(props.parameters, defaultParameters)
     const { chosenMember } = getChosenMember(parameters, props.obj.members)
     const showKey = parameters['show key']
     const showReferences = parameters['show references']
     const referencesPosition = parameters['references position']
 
-    React.useEffect(() => {
-        currentMembers.current = props.obj.members.reduce((acc, member) => {
-            acc[getMemberName(member)] = member
-            return acc
-        }, {} as { [name: string]: schema.Member })
-    })
-
     const renderField = (member: schema.Member) => {
         const name = getMemberName(member)
         const displayKey = getDisplayValue(member.key, props.id)
         const displayValue = getDisplayValue(member.value, props.id)
         const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, currentMembers.current[name])
+        const changed = !isSameMember(member, props.previousMembers[name])
 
         return (
             <div
@@ -108,7 +101,7 @@ export const Shape = (props: {
                     const targetId = (refMember.value as [string])[0]
                     const name = getMemberName(refMember)
                     const displayKey = getDisplayValue(refMember.key, props.id)
-                    const changed = !isSameMember(refMember, currentMembers.current[name])
+                    const changed = !isSameMember(refMember, props.previousMembers[name])
                     props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
                 })
             }}
