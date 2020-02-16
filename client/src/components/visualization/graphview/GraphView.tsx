@@ -9,7 +9,11 @@ export const GraphView = () => {
     const graphData = React.useRef(new GraphData({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
     const [zoom, setZoom] = React.useState(globalThis.devicePixelRatio)
     const update = React.useState({})[1]
-    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+    const { preserveLayout, tracer } = useSelection(state => ({
+        preserveLayout: state.options.preserveLayout,
+        tracer: state.tracer
+    }))
+    if (!preserveLayout && !tracer.steps) graphData.current.clearNodes()
     graphData.current.setSize(tracer.steps?.length ?? 0)
     graphData.current.setIndex(tracer.index ?? 0)
     graphData.current.setAnimate(true)
