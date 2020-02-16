@@ -174,6 +174,7 @@ export class GraphData {
 
     clearNodes() {
         this.nodes = {}
+        this.types = {}
     }
 
     getEdges(id: string) {
