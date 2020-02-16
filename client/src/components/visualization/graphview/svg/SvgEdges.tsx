@@ -3,20 +3,20 @@ import { Edge, GraphData } from '../GraphData'
 
 export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
     const container$ = React.useRef<SVGGElement>()
-    const [currentSourceEdges, setCurrentSourceEdges] = React.useState<Edge[]>([])
+    const [sourceEdges, setSourceEdges] = React.useState<Edge[]>([])
     const node = props.graphData.getNode(props.id)
     const edges = props.graphData.getEdges(node.id)
 
     React.useLayoutEffect(() => {
-        const sourceEdges = [...edges.children, ...edges.loose]
+        const newSourceEdges = [...edges.children, ...edges.loose]
         if (
-            currentSourceEdges.length !== sourceEdges.length ||
-            !sourceEdges.reduce((acc, edge, i) => acc && edge === currentSourceEdges[i], true)
+            sourceEdges.length !== newSourceEdges.length ||
+            !newSourceEdges.reduce((acc, edge, i) => acc && edge === sourceEdges[i], true)
         )
-            return setCurrentSourceEdges(sourceEdges)
+            return setSourceEdges(newSourceEdges)
 
         const updateEdges = (callId?: number) =>
-            sourceEdges.forEach((edge, i) => {
+            newSourceEdges.forEach((edge, i) => {
                 const group = container$.current.children.item(i)
                 const marker = group.children.item(0) as SVGMarkerElement
                 const path = group.children.item(1) as SVGPathElement
@@ -25,10 +25,10 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
                 const animate = path.firstElementChild as SVGAnimateElement
                 const textPath = text.firstElementChild as SVGTextPathElement
                 const data = props.graphData.computeEdgePathData(edge)
-                const currentData = animate.getAttribute('to')
-                const newEdge = currentData == undefined
+                const previousData = animate.getAttribute('to')
+                const newEdge = previousData == undefined
                 animate.setAttribute('dur', !newEdge && props.graphData.getAnimate() ? '0.4s' : '0.001s')
-                animate.setAttribute('from', currentData)
+                animate.setAttribute('from', previousData)
                 animate.setAttribute('to', data)
                 path.setAttribute('stroke', edge.color)
                 path.setAttribute('stroke-width', edge.width.toString())
@@ -44,7 +44,7 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
 
     return (
         <g ref={container$}>
-            {currentSourceEdges.map(edge => {
+            {sourceEdges.map(edge => {
                 const pathId = `${edge.id}-${edge.name}`
                 const markerId = `${pathId}-marker`
                 return (

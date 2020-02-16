@@ -11,7 +11,7 @@ const styles = {
 }
 
 export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>; tracer: DefaultState['tracer'] }) => {
-    const currentVariables = React.useRef<{ [name: string]: { [depth: number]: schema.Variable } }>({})
+    const previousVariables = React.useRef<{ [name: string]: { [depth: number]: schema.Variable } }>({})
     const index = props.graphData.getIndex()
     const { stack = [] } = props.tracer.steps?.[index].snapshot ?? {}
     const variableScopes = stack
@@ -35,7 +35,7 @@ export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>;
             .slice(-3)
             .reverse()
             .forEach(({ variable, depth }, i) => {
-                const changed = !isSameVariable(variable, currentVariables.current[variable.name]?.[depth])
+                const changed = !isSameVariable(variable, previousVariables.current[variable.name]?.[depth])
                 const width = depth === stack.length - 1 ? 2.5 : i < 2 ? 1 : 0.5
                 props.graphData.pushEdge('stack', `${depth}-${variable.name}`, {
                     from: { self: true, targetDelta: deltas[i] },
@@ -49,7 +49,7 @@ export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>;
     )
 
     React.useEffect(() => {
-        currentVariables.current = variableScopes.reduce((acc, [variable, depth]) => {
+        previousVariables.current = variableScopes.reduce((acc, [variable, depth]) => {
             const name = variable.name
             if (!acc[name]) acc[name] = {}
             acc[name][depth] = variable

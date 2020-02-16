@@ -1,5 +1,5 @@
 /**
- * Tracer reducer updates the state that stores the result of a tracing process and the current tracing index.
+ * Tracer reducer updates the state that stores the result of a tracing process and keep track of the tracing index.
  */
 import { api } from '../api'
 import * as schema from '../schema/schema'
@@ -63,17 +63,17 @@ const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'o
     async (dispatch, getState) => {
         const tracer = getState().tracer
         if (!tracer.steps) return
-        const currentSnapshot = tracer.steps[tracer.index].snapshot
+        const snapshot = tracer.steps[tracer.index].snapshot
 
         const directionFilter = (index: number) =>
             direction === 'forward' ? index > tracer.index : index < tracer.index
         const typeFilter = (step: schema.Step) =>
-            !currentSnapshot || !step.snapshot || type === 'into'
+            !snapshot || !step.snapshot || type === 'into'
                 ? true
                 : type === 'over'
-                ? step.snapshot.stack.length <= currentSnapshot.stack.length
+                ? step.snapshot.stack.length <= snapshot.stack.length
                 : type === 'out'
-                ? step.snapshot.stack.length < currentSnapshot.stack.length
+                ? step.snapshot.stack.length < snapshot.stack.length
                 : false
 
         const indices = tracer.steps

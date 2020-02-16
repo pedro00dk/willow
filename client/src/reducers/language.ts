@@ -1,5 +1,5 @@
 /**
- * Language reducer stores the current available programming languages and which one is chosen.
+ * Language reducer stores the available programming languages and which one is chosen.
  */
 import { api } from '../api'
 import { DefaultAsyncAction } from './Store'

@@ -18,10 +18,10 @@ const styles = {
 }
 
 export const Scope = (props: { scope: schema.Scope }) => {
-    const currentVariables = React.useRef<{ [name: string]: schema.Variable }>({})
+    const previousVariables = React.useRef<{ [name: string]: schema.Variable }>({})
 
     React.useEffect(() => {
-        currentVariables.current = props.scope.variables.reduce((acc, variable) => {
+        previousVariables.current = props.scope.variables.reduce((acc, variable) => {
             acc[variable.name] = variable
             return acc
         }, {} as { [name: string]: schema.Variable })
@@ -36,7 +36,7 @@ export const Scope = (props: { scope: schema.Scope }) => {
             </thead>
             <tbody className={classes.column}>
                 {props.scope.variables.map((variable, i) => {
-                    const changed = !isSameVariable(variable, currentVariables.current[variable.name])
+                    const changed = !isSameVariable(variable, previousVariables.current[variable.name])
                     const displayValue = getDisplayValue(variable.value)
                     return (
                         <tr

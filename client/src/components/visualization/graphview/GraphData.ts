@@ -215,30 +215,30 @@ export class GraphData {
         index = this.index,
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
-        const padPosition = {
+        const paddedPosition = {
             x: Math.min(Math.max(position.x, 0), this.viewSize.width - this.viewPadding.x),
             y: Math.min(Math.max(position.y, 0), this.viewSize.height - this.viewPadding.y)
         }
         switch (mode) {
             case 'all':
-                for (let i = 0; i < this.getSize(); i++) node.positions[i] = padPosition
+                for (let i = 0; i < this.getSize(); i++) node.positions[i] = paddedPosition
                 break
             case 'index':
-                node.positions[index] = padPosition
+                node.positions[index] = paddedPosition
             case 'override':
-                for (let i = index; i < this.getSize(); i++) node.positions[i] = padPosition
+                for (let i = index; i < this.getSize(); i++) node.positions[i] = paddedPosition
                 break
             case 'available':
-                const currentPosition = node.positions[index]
+                const basePosition = node.positions[index]
                 for (
                     let i = index;
-                    i < this.getSize() && (!node.positions[i] || node.positions[i] === currentPosition);
+                    i < this.getSize() && (!node.positions[i] || node.positions[i] === basePosition);
                     i++
                 )
-                    node.positions[i] = padPosition
+                    node.positions[i] = paddedPosition
                 break
         }
-        return padPosition
+        return paddedPosition
     }
 
     getNodeShape(node: Node, def = '') {
