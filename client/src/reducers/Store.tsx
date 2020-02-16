@@ -5,6 +5,7 @@
 import React from 'react'
 import { reducer as inputReducer } from './input'
 import { reducer as languageReducer } from './language'
+import { reducer as optionsReducer } from './options'
 import { reducer as sourceReducer } from './source'
 import { reducer as tracerReducer } from './tracer'
 
@@ -172,6 +173,7 @@ export const Store = <T extends SubReducers>(props: {
 const reducers = {
     input: inputReducer,
     language: languageReducer,
+    options: optionsReducer,
     source: sourceReducer,
     tracer: tracerReducer
 }
