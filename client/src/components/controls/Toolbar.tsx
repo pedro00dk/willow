@@ -8,7 +8,8 @@ import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
     container: 'd-flex align-items-center',
-    image: cn('mx-3', css({ width: '1.5rem' }))
+    image: cn('mx-3', css({ width: '1.5rem' })),
+    span: 'mx-3'
 }
 
 const styles = {
@@ -21,11 +22,11 @@ const styles = {
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const { canTrace, canStepBack, canStepForward } = useSelection(state => ({
-        canTrace: !state.tracer.fetching,
-        canStepBack: state.tracer.steps && state.tracer.index > 0,
-        canStepForward: state.tracer.steps && state.tracer.index < state.tracer.steps.length - 1
-    }))
+    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+    const canTrace = !tracer.fetching
+    const canStepBack = tracer.steps && tracer.index > 0
+    const canStepForward = tracer.steps && tracer.index < tracer.steps.length - 1
+    const stepMessage = tracer.steps ? `Step ${tracer.index + 1} of ${tracer.steps.length}` : ''
 
     return (
         <div className={classes.container}>
@@ -50,6 +51,7 @@ export const Toolbar = () => {
                 title='Step forward'
                 onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
+            <span className={classes.span}>{stepMessage}</span>
         </div>
     )
 }
