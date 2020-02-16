@@ -203,15 +203,38 @@ export class GraphData {
     // Node helper methods (properties changed by all following methods must not be changed directly)
 
     getNodePosition(node: Node, index: number = this.index) {
-        return node.positions[index] ?? this.setNodePositions(node, { x: 0, y: 0 }, [index, index])
+        return node.positions[index] ?? this.setNodePositions(node, { x: 0, y: 0 })
     }
 
-    setNodePositions(node: Node, position: { x: number; y: number }, range = [this.index, this.index] as const) {
+    setNodePositions(
+        node: Node,
+        position: { x: number; y: number },
+        index = this.index,
+        mode: 'all' | 'index' | 'override' | 'available' = 'available'
+    ) {
         const padPosition = {
             x: Math.min(Math.max(position.x, 0), this.viewSize.width - this.viewPadding.x),
             y: Math.min(Math.max(position.y, 0), this.viewSize.height - this.viewPadding.y)
         }
-        for (let i = range[0]; i <= range[1]; i++) node.positions[i] = padPosition
+        switch (mode) {
+            case 'all':
+                for (let i = 0; i < this.getSize(); i++) node.positions[i] = padPosition
+                break
+            case 'index':
+                node.positions[index] = padPosition
+            case 'override':
+                for (let i = index; i < this.getSize(); i++) node.positions[i] = padPosition
+                break
+            case 'available':
+                const currentPosition = node.positions[index]
+                for (
+                    let i = index;
+                    i < this.getSize() && (!node.positions[i] || node.positions[i] === currentPosition);
+                    i++
+                )
+                    node.positions[i] = padPosition
+                break
+        }
         return padPosition
     }
 
@@ -269,13 +292,13 @@ export class GraphData {
         node: Node,
         delta: { x: number; y: number },
         depth = 0,
-        baseIndex = this.index,
-        range = [this.index, this.index] as const
+        index = this.index,
+        mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
         const children = this.getNodeChildren(node, depth)
         Object.values(children).forEach(child => {
-            const position = this.getNodePosition(child, baseIndex)
-            this.setNodePositions(child, { x: position.x + delta.x, y: position.y + delta.y }, range)
+            const position = this.getNodePosition(child, index)
+            this.setNodePositions(child, { x: position.x + delta.x, y: position.y + delta.y }, index, mode)
         })
         return children
     }
@@ -380,19 +403,19 @@ export class GraphData {
         node: Node,
         direction = 'horizontal' as 'horizontal' | 'vertical',
         incrementRatio = { x: 1.5, y: 1.5 },
-        baseIndex = this.index,
-        range = [this.index, this.index] as const
+        index = this.index,
+        mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
         const structure = this.findStructure(this.findStructureBaseNode(node))
         if (!structure.organizable) return
-        const anchor = this.getNodePosition(node, baseIndex)
+        const anchor = this.getNodePosition(node, index)
         const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
 
         const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment)
 
         Object.entries(positions).forEach(([id, delta]) =>
-            this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, range)
+            this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, index, mode)
         )
         return structure
     }

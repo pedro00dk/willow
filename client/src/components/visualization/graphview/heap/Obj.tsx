@@ -75,9 +75,9 @@ export const Obj = (props: {
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const direction = event.altKey ? 'vertical' : 'horizontal'
-                    const range = [event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
-                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, index, range)
+                    const direction = !event.altKey ? 'horizontal' : 'vertical'
+                    const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
+                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, index, mode)
                     props.graphData.setAnimate(true)
                     Object.keys(structure.members).forEach(id => props.graphData.callSubscriptions(id))
                 }
@@ -86,8 +86,8 @@ export const Obj = (props: {
                 const svg = container$.current.closest('svg')
                 const [svgDelta] = svgScreenTransformVector('toSvg', svg, delta)
                 const depth = event.altKey ? Infinity : 0
-                const range = [event.ctrlKey ? 0 : index, props.tracer.steps.length] as const
-                const movedNodes = props.graphData.moveNodePositions(node, svgDelta, depth, index, range)
+                const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
+                const movedNodes = props.graphData.moveNodePositions(node, svgDelta, depth, index, mode)
                 props.graphData.setAnimate(false)
                 Object.keys(movedNodes).forEach(id => props.graphData.callSubscriptions(id))
             }}
