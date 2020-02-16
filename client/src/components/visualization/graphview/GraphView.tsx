@@ -7,6 +7,7 @@ import { SvgView } from './svg/SvgView'
 
 export const GraphView = () => {
     const graphData = React.useRef(new GraphData({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
+    const [zoom, setZoom] = React.useState(globalThis.devicePixelRatio)
     const update = React.useState({})[1]
     const { tracer } = useSelection(state => ({ tracer: state.tracer }))
     graphData.current.setSize(tracer.steps?.length ?? 0)
@@ -17,11 +18,11 @@ export const GraphView = () => {
     graphData.current.clearEdges()
 
     React.useLayoutEffect(() => {
-        const onResize = (event: Event) => update({})
+        const onResize = (event: Event) => zoom !== globalThis.devicePixelRatio && setZoom(globalThis.devicePixelRatio)
 
         globalThis.addEventListener('paneResize', onResize)
         return () => globalThis.removeEventListener('paneResize', onResize)
-    }, [])
+    }, [zoom])
 
     return (
         <SvgView graphData={graphData.current}>
