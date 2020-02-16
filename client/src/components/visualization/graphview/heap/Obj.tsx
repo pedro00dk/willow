@@ -50,7 +50,8 @@ export const Obj = (props: {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
         const screenSize = { x: rect.width, y: rect.height }
-        const [svgSize] = svgScreenTransformVector('toSvg', svg, screenSize)
+        const [svgSize] = svgScreenTransformVector('toSvg', svg, true, screenSize)
+        if (node.id === '0') console.log(screenSize, svgSize)
         node.size = svgSize
     })
 
@@ -61,7 +62,7 @@ export const Obj = (props: {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
-            const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, screenDelta, screenSize)
+            const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, true, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
             props.graphData.pushEdge(id, name, { ...data, from: { self: true, delta }, to: { targetId, mode: 'near' } })
         })
@@ -84,7 +85,7 @@ export const Obj = (props: {
             }}
             onDrag={(delta, event) => {
                 const svg = container$.current.closest('svg')
-                const [svgDelta] = svgScreenTransformVector('toSvg', svg, delta)
+                const [svgDelta] = svgScreenTransformVector('toSvg', svg, false, delta)
                 const depth = event.altKey ? Infinity : 0
                 const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
                 const movedNodes = props.graphData.moveNodePositions(node, svgDelta, depth, index, mode)

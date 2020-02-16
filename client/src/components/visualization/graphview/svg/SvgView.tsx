@@ -71,12 +71,12 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
             onMouseMove={event => {
                 if (!click.current) return
                 const screenDelta = { x: event.movementX, y: event.movementY }
-                const [svgDelta] = svgScreenTransformVector('toSvg', container$.current, screenDelta)
+                const [svgDelta] = svgScreenTransformVector('toSvg', container$.current, true, screenDelta)
                 translateBox(svgDelta)
             }}
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
-                const [svgPoint] = svgScreenTransformPoint('toSvg', container$.current, screenPoint)
+                const [svgPoint] = svgScreenTransformPoint('toSvg', container$.current, false, screenPoint)
                 scaleBox(svgPoint, event.deltaY < 0 ? 'in' : 'out')
             }}
         >
