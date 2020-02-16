@@ -55,7 +55,6 @@ export const Obj = (props: {
         const rect = container$.current.getBoundingClientRect()
         const screenSize = { x: rect.width, y: rect.height }
         const [svgSize] = svgScreenTransformVector('toSvg', svg, true, screenSize)
-        if (node.id === '0') console.log(screenSize, svgSize)
         node.size = svgSize
     })
 
@@ -75,12 +74,14 @@ export const Obj = (props: {
     React.useLayoutEffect(() => props.graphData.callSubscriptions(id))
 
     React.useEffect(() => {
+        console.log('check members', previousIndex.current, previousMembers.current)
         if (previousIndex.current === index) return
         previousIndex.current = index
         previousMembers.current = obj.members.reduce((acc, member) => {
             acc[getMemberName(member)] = member
             return acc
         }, {} as { [name: string]: schema.Member })
+        console.log('update members', previousIndex.current, previousMembers.current)
     })
 
     return (
