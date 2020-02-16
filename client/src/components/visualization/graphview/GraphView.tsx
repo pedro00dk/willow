@@ -16,6 +16,13 @@ export const GraphView = () => {
     graphData.current.clearRenders()
     graphData.current.clearEdges()
 
+    React.useLayoutEffect(() => {
+        const onResize = (event: Event) => update({})
+
+        globalThis.addEventListener('paneResize', onResize)
+        return () => globalThis.removeEventListener('paneResize', onResize)
+    }, [])
+
     return (
         <SvgView graphData={graphData.current}>
             <Stack graphData={graphData.current} update={update} tracer={tracer} />
