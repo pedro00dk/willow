@@ -4,6 +4,7 @@ import React from 'react'
 import playImg from '../../../public/buttons/play.png'
 import stepImg from '../../../public/buttons/stepInto.png'
 import { useDispatch, useSelection } from '../../reducers/Store'
+import { actions as optionsActions } from '../../reducers/options'
 import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
@@ -22,7 +23,7 @@ const styles = {
 
 export const Toolbar = () => {
     const dispatch = useDispatch()
-    const { tracer } = useSelection(state => ({ tracer: state.tracer }))
+    const { options, tracer } = useSelection(state => ({ options: state.options, tracer: state.tracer }))
     const canTrace = !tracer.fetching
     const canStepBack = tracer.steps && tracer.index > 0
     const canStepForward = tracer.steps && tracer.index < tracer.steps.length - 1
@@ -50,6 +51,20 @@ export const Toolbar = () => {
                 src={stepImg}
                 title='Step forward'
                 onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
+            />
+            <span className='ml-3 mr-1'>{'Live Programming'}</span>
+            <input
+                className='ml-1 mr-3'
+                type='checkbox'
+                checked={options.liveProgramming}
+                onChange={event => dispatch(optionsActions.setLiveProgramming(event.target.checked))}
+            />
+            <span className='ml-3 mr-1'>{'Preserve Layout'}</span>
+            <input
+                className='ml-1 mr-3'
+                type='checkbox'
+                checked={options.preserveLayout}
+                onChange={event => dispatch(optionsActions.setPreserveLayout(event.target.checked))}
             />
             <span className={classes.span}>{stepMessage}</span>
         </div>
