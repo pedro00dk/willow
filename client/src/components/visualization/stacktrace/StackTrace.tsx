@@ -3,23 +3,26 @@ import { useSelection } from '../../../reducers/Store'
 import * as schema from '../../../schema/schema'
 import { ScopeTrace } from './ScopeTrace'
 
-export type ScopeSlice = { name: string; range: [number, number]; nodes: schema.Scope[]; children: schema.Scope[][] }
-
 const classes = {
     container: 'd-flex position-absolute overflow-auto'
 }
 
+export type ScopeSlice = { name: string; range: [number, number]; nodes: schema.Scope[]; children: schema.Scope[][] }
+
 export const StackTrace = () => {
     const container$ = React.useRef<HTMLDivElement>()
-    const { steps } = useSelection(state => ({ steps: state.tracer.steps }))
+    const { available, steps } = useSelection(state => ({
+        available: state.tracer.available,
+        steps: state.tracer.steps
+    }))
 
-    const scopeSlice = React.useMemo(() => {
-        if (!steps) return
-        const children = steps.map(({ snapshot, threw }) => {
-            return snapshot?.stack ?? [{ name: threw.cause ?? threw.exception.type } as schema.Scope]
-        })
+    const rootScopeSlice = React.useMemo(() => {
+        if (!available) return
+        const children = steps.map(
+            step => step.snapshot?.stack ?? [{ name: step.threw.cause ?? step.threw.exception.type } as schema.Scope]
+        )
         return { name: undefined, range: [0, steps.length - 1], nodes: [], children } as ScopeSlice
-    }, [steps])
+    }, [available, steps])
 
     React.useLayoutEffect(() => {
         const onResize = (event: Event) => {
@@ -31,13 +34,13 @@ export const StackTrace = () => {
         }
 
         onResize(undefined)
-        globalThis.addEventListener('paneResize', onResize)
-        return () => globalThis.removeEventListener('paneResize', onResize)
+        addEventListener('paneResize', onResize)
+        return () => removeEventListener('paneResize', onResize)
     }, [container$.current])
 
     return (
         <div ref={container$} className={classes.container}>
-            {steps && <ScopeTrace scopeSlice={scopeSlice} />}
+            {available && <ScopeTrace scopeSlice={rootScopeSlice} />}
         </div>
     )
 }
