@@ -31,8 +31,8 @@ export const TextEditor = (props: { onEditor?: (editor: ace.Editor) => void }) =
             editor.current.resize()
         }
 
-        globalThis.addEventListener('paneResizeEnd', onResize)
-        return () => globalThis.removeEventListener('paneResizeEnd', onResize)
+        addEventListener('paneResizeEnd', onResize)
+        return () => removeEventListener('paneResizeEnd', onResize)
     }, [container$.current, editor.current])
 
     return <div ref={container$} className={classes.container} />
