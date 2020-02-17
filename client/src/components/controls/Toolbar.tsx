@@ -3,8 +3,8 @@ import { css } from 'emotion'
 import React from 'react'
 import playImg from '../../../public/buttons/play.png'
 import stepImg from '../../../public/buttons/stepInto.png'
-import { useDispatch, useSelection } from '../../reducers/Store'
 import { actions as optionsActions } from '../../reducers/options'
+import { useDispatch, useSelection } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
