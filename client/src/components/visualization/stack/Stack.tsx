@@ -9,25 +9,18 @@ const classes = {
 export const Stack = () => {
     const container$ = React.useRef<HTMLDivElement>()
     const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
-
     React.useLayoutEffect(() => {
         const onResize = (event: Event) => {
-            const parentSize = {
-                width: container$.current.parentElement.clientWidth,
-                height: container$.current.parentElement.clientHeight
-            }
-            const size = {
-                width: container$.current.clientWidth,
-                height: container$.current.clientHeight
-            }
-            if (size.width === parentSize.width && size.height === parentSize.height) return
-            container$.current.style.width = `${parentSize.width - 1}px`
-            container$.current.style.height = `${parentSize.height - 1}px`
+            const element$ = container$.current
+            const parent$ = element$.parentElement
+            if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
+            element$.style.width = `${parent$.clientWidth}px`
+            element$.style.height = `${parent$.clientHeight}px`
         }
 
         onResize(undefined)
-        globalThis.addEventListener('paneResize', onResize)
-        return () => globalThis.removeEventListener('paneResize', onResize)
+        addEventListener('paneResize', onResize)
+        return () => removeEventListener('paneResize', onResize)
     }, [container$.current])
 
     React.useEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
