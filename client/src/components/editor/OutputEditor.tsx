@@ -7,18 +7,27 @@ export const OutputEditor = () => {
     const editor = React.useRef<ace.Editor>()
     const output = React.useRef<string[]>()
 
-    React.useLayoutEffect(() => void editor.current.renderer.setShowGutter(false), [editor.current])
+    React.useLayoutEffect(() => {
+        editor.current.renderer.setShowGutter(false)
+    }, [editor.current])
 
     useSelection(async (state, previousState) => {
-        if (!state.tracer.steps || state.tracer.steps === previousState.tracer?.steps) return
-        output.current = state.tracer.steps.reduce((acc, { prints, threw }) => {
-            acc.push(`${acc[acc.length - 1] ?? ''}${prints ?? ''}${threw?.cause ?? threw?.exception.traceback ?? ''}`)
+        const tracer = state.tracer
+        const previousTracer = previousState.tracer
+        if (!tracer.available || tracer.steps === previousTracer?.steps) return
+        output.current = tracer.steps.reduce((acc, step) => {
+            const previousContent = acc[acc.length - 1] ?? ''
+            const prints = step.prints ?? ''
+            const threw = step.threw?.cause ?? step.threw?.exception.traceback ?? ''
+            acc.push(`${previousContent}${prints}${threw}`)
             return acc
         }, [] as string[])
     })
 
     useSelection(async (state, previousState) => {
-        if (!editor || state.tracer.index == undefined || state.tracer.index === previousState.tracer?.index) return
+        const tracer = state.tracer
+        const previousTracer = previousState.tracer
+        if (!editor.current || !tracer.available || tracer.index === previousTracer?.index) return
         editor.current.session.doc.setValue(output.current[state.tracer.index])
         editor.current.scrollToLine(editor.current.session.getLength(), true, true, undefined)
     })

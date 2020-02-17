@@ -11,7 +11,7 @@ export const InputEditor = () => {
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
         editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines()), true))
-    }, [editor])
+    }, [editor.current])
 
     useSelection(async state => {
         state.tracer.fetching !== editor.current?.getReadOnly() && editor.current?.setReadOnly(state.tracer.fetching)

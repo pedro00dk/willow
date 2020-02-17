@@ -5,7 +5,7 @@ import React from 'react'
 import { colors } from '../../colors'
 import { actions as sourceActions } from '../../reducers/source'
 import { useDispatch, useSelection } from '../../reducers/Store'
-import { EditorMarker, range, TextEditor } from './TextEditor'
+import { EditorMarker, Range, TextEditor } from './TextEditor'
 
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
@@ -31,11 +31,8 @@ export const SourceEditor = () => {
 
     React.useLayoutEffect(() => {
         editor.current.setTheme('ace/theme/chrome')
-        editor.current.setOptions({
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true
-        })
+        const options = { enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true }
+        editor.current.setOptions(options)
         editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines()), true))
     }, [editor.current])
 
@@ -45,7 +42,7 @@ export const SourceEditor = () => {
         if (!editor.current || language === previousLanguage) return
         editor.current.session.setMode(`ace/mode/${supportedLanguages.has(language) ? language : 'text'}`)
     })
-    
+
     useSelection(async (state, previousState) => {
         const step = state.tracer.steps?.[state.tracer.index]
         const previousStep = previousState.tracer?.steps?.[previousState.tracer.index]
@@ -55,7 +52,7 @@ export const SourceEditor = () => {
             .forEach(marker => editor.current.session.removeMarker(marker.id))
         if (!step.snapshot) return
         const line = step.snapshot.stack[step.snapshot.stack.length - 1].line
-        editor.current.session.addMarker(range(line, 0, line, 1), classes[step.snapshot.info], 'fullLine', false)
+        editor.current.session.addMarker(new Range(line, 0, line, 1), classes[step.snapshot.info], 'fullLine', false)
         editor.current.scrollToLine(line, true, true, undefined)
     })
 
