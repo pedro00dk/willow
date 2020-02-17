@@ -7,6 +7,7 @@ import { DefaultAsyncAction } from './Store'
 
 type State = {
     fetching: boolean
+    available: boolean
     index?: number
     steps?: schema.Step[]
     error?: string
@@ -17,14 +18,15 @@ type Action =
     | { type: 'tracer/setIndex'; payload: number }
 
 const initialState: State = {
-    fetching: false
+    fetching: false,
+    available: false
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
         case 'tracer/trace':
             return action.payload
-                ? { ...state, fetching: false, index: 0, ...action.payload }
+                ? { ...state, fetching: false, available: true, index: 0, ...action.payload }
                 : action.error
                 ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
@@ -35,38 +37,43 @@ export const reducer = (state: State = initialState, action: Action): State => {
     }
 }
 
-const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
-    dispatch({ type: 'tracer/trace' })
-    try {
-        const { language, source, input } = getState()
-        const result = (
-            await api.post<schema.Result>('/trace', {
-                language: language.languages[language.selected],
-                source: source.join('\n'),
-                input: input.join('\n')
-            })
-        ).data
-        dispatch({ type: 'tracer/trace', payload: { steps: result.steps } })
-    } catch (error) {
-        dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
+const trace = (): DefaultAsyncAction =>
+    //
+    async (dispatch, getState) => {
+        dispatch({ type: 'tracer/trace' })
+        try {
+            const { language, source, input } = getState()
+            const result = (
+                await api.post<schema.Result>('/trace', {
+                    language: language.languages[language.selected],
+                    source: source.join('\n'),
+                    input: input.join('\n')
+                })
+            ).data
+            dispatch({ type: 'tracer/trace', payload: { steps: result.steps } })
+        } catch (error) {
+            dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
+        }
     }
-}
 
-const setIndex = (index: number): DefaultAsyncAction => async (dispatch, getState) => {
-    const tracer = getState().tracer
-    if (!tracer.steps) return
-    dispatch({ type: 'tracer/setIndex', payload: Math.min(Math.max(index, 0), tracer.steps.length - 1) })
-}
+const setIndex = (index: number): DefaultAsyncAction =>
+    //
+    async (dispatch, getState) => {
+        const tracer = getState().tracer
+        if (!tracer.steps) return
+        dispatch({ type: 'tracer/setIndex', payload: Math.min(Math.max(index, 0), tracer.steps.length - 1) })
+    }
 
 const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'out'): DefaultAsyncAction =>
     //
     async (dispatch, getState) => {
         const tracer = getState().tracer
-        if (!tracer.steps) return
+        if (!tracer.available) return
         const snapshot = tracer.steps[tracer.index].snapshot
 
         const directionFilter = (index: number) =>
             direction === 'forward' ? index > tracer.index : index < tracer.index
+
         const typeFilter = (step: schema.Step) =>
             !snapshot || !step.snapshot || type === 'into'
                 ? true
