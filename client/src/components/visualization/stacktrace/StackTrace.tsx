@@ -16,7 +16,7 @@ export const StackTrace = () => {
         steps: state.tracer.steps
     }))
 
-    const rootScopeSlice = React.useMemo(() => {
+    const baseScopeSlice = React.useMemo(() => {
         if (!available) return
         const children = steps.map(
             step => step.snapshot?.stack ?? [{ name: step.threw.cause ?? step.threw.exception.type } as schema.Scope]
@@ -40,7 +40,7 @@ export const StackTrace = () => {
 
     return (
         <div ref={container$} className={classes.container}>
-            {available && <ScopeTrace scopeSlice={rootScopeSlice} />}
+            {available && <ScopeTrace scopeSlice={baseScopeSlice} />}
         </div>
     )
 }
