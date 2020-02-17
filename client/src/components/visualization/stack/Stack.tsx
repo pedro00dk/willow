@@ -28,9 +28,7 @@ export const Stack = () => {
     return (
         <div ref={container$} className={classes.container}>
             {!stack && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
-            {(stack ?? []).map((scope, i) => (
-                <Scope key={i} scope={scope} />
-            ))}
+            {stack && stack.map((scope, i) => <Scope key={i} scope={scope} />)}
         </div>
     )
 }

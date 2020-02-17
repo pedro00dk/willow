@@ -1,9 +1,9 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
+import { colors } from '../../../colors'
 import * as schema from '../../../schema/schema'
 import { getDisplayValue, isSameVariable } from '../graphview/SchemaUtils'
-import { colors } from '../../../colors'
 
 const classes = {
     container: 'd-flex flex-column table table-sm table-hover border',
