@@ -53,12 +53,22 @@ export const SplitPane = (props: {
     React.useLayoutEffect(() => {
         if (resizeIsCaptured.get()) return
         resizeIsCaptured.set(true)
-        let timeout: NodeJS.Timeout
+        let eventThrottle: NodeJS.Timeout
+        let eventFired: boolean
         const onResize = (event: Event) => {
-            if (!timeout) dispatchEvent(new Event('paneResizeStart'))
-            dispatchEvent(new Event('paneResize'))
-            clearTimeout(timeout)
-            timeout = setTimeout(() => (dispatchEvent(new Event('paneResizeEnd')), (timeout = undefined)), 100)
+            eventFired = true
+            if (eventThrottle != undefined) return
+            dispatchEvent(new Event('paneResizeStart'))
+            eventThrottle = setInterval(() => {
+                if (eventFired) {
+                    dispatchEvent(new Event('paneResize'))
+                    eventFired = false
+                    return
+                }
+                dispatchEvent(new Event('paneResizeEnd'))
+                clearInterval(eventThrottle)
+                eventThrottle = undefined
+            }, 50)
         }
 
         addEventListener('resize', onResize)
@@ -75,16 +85,16 @@ export const SplitPane = (props: {
                     className: cn(classes.dragger.base, classes.dragger[orientation]),
                     style: { cursor: styles.cursor(orientation) }
                 }}
-                onDragStart={event => dispatchEvent(new Event('paneResizeStart'))}
+                onDragStart={event => dispatchEvent(new Event('resize'))}
                 onDrag={(delta, event) => {
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])
                     firstPane$.current.style[freeDimension] = styles.size(ratio.current)
                     secondPane$.current.style[freeDimension] = styles.size(1 - ratio.current)
-                    dispatchEvent(new Event('paneResize', { cancelable: true }))
+                    dispatchEvent(new Event('resize', { cancelable: true }))
                 }}
-                onDragEnd={event => dispatchEvent(new Event('paneResizeEnd'))}
+                onDragEnd={event => dispatchEvent(new Event('resize'))}
             />
             <div ref={secondPane$} className={classes.pane} style={{ [freeDimension]: styles.size(1 - ratio.current) }}>
                 {children[1]}
