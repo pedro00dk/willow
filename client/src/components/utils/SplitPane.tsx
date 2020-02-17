@@ -34,7 +34,7 @@ const createSharedState = <T extends any>(initialValue: T) => {
     return { get, set }
 }
 
-const resizeTransformIsSetContext = React.createContext(createSharedState(false))
+const resizeIsCapturedContext = React.createContext(createSharedState(false))
 
 export const SplitPane = (props: {
     orientation?: 'row' | 'column'
@@ -46,13 +46,13 @@ export const SplitPane = (props: {
     const container$ = React.useRef<HTMLDivElement>()
     const firstPane$ = React.useRef<HTMLDivElement>()
     const secondPane$ = React.useRef<HTMLDivElement>()
-    const resizeTransformIsSet = React.useContext(resizeTransformIsSetContext)
+    const resizeIsCaptured = React.useContext(resizeIsCapturedContext)
     const ratio = React.useRef(Math.min(Math.max(initialRatio, range[0]), range[1]))
     const freeDimension = orientation === 'row' ? 'width' : 'height'
 
     React.useLayoutEffect(() => {
-        if (resizeTransformIsSet.get()) return
-        resizeTransformIsSet.set(true)
+        if (resizeIsCaptured.get()) return
+        resizeIsCaptured.set(true)
         let timeout: NodeJS.Timeout
         const onResize = (event: Event) => {
             if (!timeout) dispatchEvent(new Event('paneResizeStart'))
@@ -76,7 +76,7 @@ export const SplitPane = (props: {
                     style: { cursor: styles.cursor(orientation) }
                 }}
                 onDragStart={event => dispatchEvent(new Event('paneResizeStart'))}
-                onDrag={delta => {
+                onDrag={(delta, event) => {
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])

@@ -1,5 +1,10 @@
 import React from 'react'
 
+// Firefox trash does not provide coordinates in drag operations with the exception of ondragover
+const isFirefox = typeof (globalThis as any).InstallTrigger !== 'undefined'
+let documentPosition = { x: 0, y: 0 }
+if (isFirefox) document.addEventListener('dragover', event => (documentPosition = { x: event.pageX, y: event.pageY }))
+
 export const Draggable = (props: {
     props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
     onDragStart?: (event: React.DragEvent) => void
@@ -19,20 +24,19 @@ export const Draggable = (props: {
             {...props.props}
             draggable
             onDragStart={event => {
-                anchor.current = { x: event.clientX, y: event.clientY }
+                anchor.current = !isFirefox ? { x: event.pageX, y: event.pageY } : documentPosition
                 event.dataTransfer.setDragImage(ghostImage, 0, 0)
                 props.onDragStart?.(event)
             }}
             onDrag={event => {
-                if (event.clientX === 0 && event.clientY === 0) return
-                const delta = { x: event.clientX - anchor.current.x, y: event.clientY - anchor.current.y }
-                anchor.current = { x: event.clientX, y: event.clientY }
+                const position = !isFirefox ? { x: event.pageX, y: event.pageY } : documentPosition
+                if (!isFirefox && position.x === 0 && position.y === 0) return
+                if (isFirefox && anchor.current.x === 0 && anchor.current.y === 0) return (anchor.current = position)
+                const delta = { x: position.x - anchor.current.x, y: position.y - anchor.current.y }
+                anchor.current = position
                 props.onDrag?.(delta, event)
             }}
-            onDragEnd={event => {
-                anchor.current = undefined
-                props.onDragEnd?.(event)
-            }}
+            onDragEnd={event => (anchor.current = undefined)}
             onMouseDown={event => event.stopPropagation()}
             onMouseUp={event => event.stopPropagation()}
             onMouseEnter={event => event.stopPropagation()}
