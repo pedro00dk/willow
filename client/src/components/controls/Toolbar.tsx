@@ -52,13 +52,14 @@ export const Toolbar = () => {
                 title='Step forward'
                 onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
+            {/* TODO implement live programming mode
             <span className='ml-3 mr-1'>{'Live Programming'}</span>
             <input
                 className='ml-1 mr-3'
                 type='checkbox'
                 checked={options.liveProgramming}
                 onChange={event => dispatch(optionsActions.setLiveProgramming(event.target.checked))}
-            />
+            /> */}
             <span className='ml-3 mr-1'>{'Preserve Layout'}</span>
             <input
                 className='ml-1 mr-3'
