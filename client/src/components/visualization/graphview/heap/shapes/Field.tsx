@@ -34,9 +34,9 @@ const getChosenMember = (parameters: ComputedParameters<typeof defaultParameters
     let selectableMembers = members
         .filter(member => !isValueObject(member.key))
         .map(member => {
-            const memberKey = member.key.toString()
-            chosenMemberIsSelectable = chosenMemberIsSelectable || memberKey === chosenMember
-            return memberKey
+            const memberName = getMemberName(member)
+            chosenMemberIsSelectable = chosenMemberIsSelectable || memberName === chosenMember
+            return memberName
         })
     if (chosenMember == undefined || !chosenMemberIsSelectable) chosenMember = selectableMembers[0]
     return { chosenMember, selectableMembers }
@@ -113,7 +113,7 @@ export const Shape = (props: {
             <div className={classes.container}>
                 {!supported.has(props.obj.gType)
                     ? 'incompatible'
-                    : chosenMember === undefined
+                    : chosenMember == undefined
                     ? 'empty'
                     : (() => {
                           const member = props.obj.members.filter(

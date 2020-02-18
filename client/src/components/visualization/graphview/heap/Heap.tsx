@@ -14,7 +14,7 @@ export const Heap = (props: { graphData: GraphData; update: React.Dispatch<{}>; 
     const computeDepths = (ids: string[], depths: { [id: string]: number } = {}, depth = 0) => {
         if (ids.length === 0) return depths
         const childrenIds = ids.reduce((acc, next, i) => {
-            if (depths[next] !== undefined) return acc
+            if (depths[next] != undefined) return acc
             depths[next] = depth + i
             acc.push(
                 ...heap[next].members
