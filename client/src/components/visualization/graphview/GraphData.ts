@@ -1,5 +1,3 @@
-import { colors } from '../../../colors'
-
 export type DefaultParameters = {
     [name: string]:
         | { value: boolean }
@@ -21,6 +19,13 @@ export const readParameters = <T extends UnknownParameters, U extends DefaultPar
                 : [name, parameters[name]]
         )
     ) as ComputedParameters<U>
+
+export const layoutParameters = {
+    automatic: { value: false },
+    direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
+    selfAsTarget: { value: false },
+    memberAsTarget: { value: undefined as string, options: [] as string[] }
+}
 
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
@@ -59,37 +64,98 @@ export type Node = {
     mode: 'own' | 'type'
     shape: string
     parameters: UnknownParameters
+    layout: ComputedParameters<typeof layoutParameters>
 }
 
-export type Edge = {
-    readonly id: string
-    readonly name: string
-    readonly from: { self: boolean } & (
+export type NodeType = {
+    shape: string
+    parameters: UnknownParameters
+}
+
+export type NodeEdges = { children: Edge[]; parents: Edge[]; loose: Edge[] }
+
+export type Edge = Readonly<{
+    id: string
+    name: string
+    self: boolean
+    target: string
+    from:
         | { delta: { x: number; y: number } }
         | { targetDelta: { x: number; y: number } }
         | { point: { x: number; y: number } }
-    )
-    readonly to: { targetId: string } & (
-        | { mode: 'position' | 'size' | 'center' | 'third' | 'quarter' | 'corner' | 'near' }
+    to:
         | { delta: { x: number; y: number } }
+        | { mode: 'position' | 'size' | 'center' | 'corner' | 'near' }
         | { point: { x: number; y: number } }
-    )
     draw: 'line' | 'curve'
-    color: string
     width: number
+    color: string
     text: string
+}>
+
+export type Structure = {
+    members: { [id: string]: Node }
+    links: { [id: string]: { children: { [id: string]: Node }; parents: { [id: string]: Node } } }
+    base: Node
+    size: number
+    depth: number
+    hasCycleEdge: boolean
+    hasParentEdge: boolean
+    hasCrossEdge: boolean
 }
+
+const createBaseNode = (id: string): Node => ({
+    id,
+    render: true,
+    positions: [],
+    size: { x: 0, y: 0 },
+    depth: 0,
+    type: undefined,
+    mode: 'type',
+    shape: undefined,
+    parameters: {},
+    layout: readParameters(undefined, layoutParameters)
+})
+
+const createBaseNodeType = (): NodeType => ({
+    shape: undefined,
+    parameters: {}
+})
+
+const createBaseNodeEdges = (): NodeEdges => ({ children: [], parents: [], loose: [] })
+
+const createBaseEdge = (id: string, name: string): Edge => ({
+    id,
+    name,
+    self: true,
+    target: undefined,
+    from: { point: { x: 0, y: 0 } },
+    to: { point: { x: 0, y: 0 } },
+    draw: 'curve',
+    width: 1,
+    color: 'black',
+    text: undefined
+})
+
+const createBaseStructure = (): Structure => ({
+    members: {},
+    links: {},
+    base: undefined,
+    size: 0,
+    depth: 0,
+    hasCycleEdge: false,
+    hasParentEdge: false,
+    hasCrossEdge: false
+})
 
 export class GraphData {
     private index: number = 0
     private size: number = 0
     private animate: boolean = true
-    private viewBox: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 0, height: 0 }
-    private subscriptionCalls = 0
-    private subscriptions: { [id: string]: ((subscriptionIndex: number) => void)[] } = {}
+    private subscriptions: { [id: string]: (() => void)[] } = {}
     private nodes: { [id: string]: Node } = {}
-    private types: { [type: string]: { shape: string; parameters: UnknownParameters } } = {}
-    private edges: { [id: string]: { children: Edge[]; parents: Edge[]; loose: Edge[] } } = {}
+    private types: { [type: string]: NodeType } = {}
+    private edges: { [id: string]: NodeEdges } = {}
 
     constructor(private viewSize: { width: number; height: number }, private viewPadding: { x: number; y: number }) {}
 
@@ -98,7 +164,7 @@ export class GraphData {
     }
 
     setIndex(index: number) {
-        return (this.index = index)
+        return (this.index = Math.min(Math.max(index, 0), this.size))
     }
 
     getSize() {
@@ -106,7 +172,7 @@ export class GraphData {
     }
 
     setSize(programSize: number) {
-        return (this.size = programSize)
+        return (this.size = Math.max(programSize, 0))
     }
 
     getAnimate() {
@@ -117,14 +183,6 @@ export class GraphData {
         return (this.animate = animate)
     }
 
-    getViewBox() {
-        return this.viewBox
-    }
-
-    setViewBox(viewBox: { x: number; y: number; width: number; height: number }) {
-        return (this.viewBox = viewBox)
-    }
-
     getViewSize() {
         return this.viewSize
     }
@@ -133,17 +191,13 @@ export class GraphData {
         return this.viewPadding
     }
 
-    subscribe(id: string, callback: (subscriptionCall: number) => void) {
+    subscribe(id: string, callback: () => void) {
         const subscriptions = this.subscriptions[id] ?? (this.subscriptions[id] = [])
         subscriptions.push(callback)
     }
 
-    callSubscriptions(id?: string) {
-        const callId = this.subscriptionCalls++
-        if (id != undefined) return this.subscriptions[id]?.forEach(subscription => subscription(callId))
-        Object.values(this.subscriptions).forEach(subscriptions =>
-            subscriptions.forEach(subscription => subscription(callId))
-        )
+    callSubscriptions(id: string) {
+        this.subscriptions[id]?.forEach(subscription => subscription())
     }
 
     clearSubscriptions() {
@@ -151,25 +205,11 @@ export class GraphData {
     }
 
     getNode(id: string, partial: Partial<Node> = {}) {
-        return (
-            this.nodes[id] ??
-            (this.nodes[id] = {
-                render: true,
-                positions: [],
-                size: { x: 0, y: 0 },
-                depth: 0,
-                type: '',
-                mode: 'type',
-                shape: '',
-                parameters: {},
-                ...partial,
-                id
-            })
-        )
+        return this.nodes[id] ?? (this.nodes[id] = { ...createBaseNode(id), ...partial, id })
     }
 
-    clearRenders() {
-        Object.values(this.nodes).forEach(node => (node.render = true))
+    getNodeType(type: string, partial: Partial<NodeType> = {}) {
+        return this.types[type] ?? (this.types[type] = { ...createBaseNodeType(), ...partial })
     }
 
     clearNodes() {
@@ -177,34 +217,26 @@ export class GraphData {
         this.types = {}
     }
 
+    clearNodeRenders() {
+        Object.values(this.nodes).forEach(node => (node.render = true))
+    }
+
     getEdges(id: string) {
-        return this.edges[id] ?? (this.edges[id] = { children: [], parents: [], loose: [] })
+        return this.edges[id] ?? (this.edges[id] = createBaseNodeEdges())
     }
 
     pushEdge(id: string, name: string, partial: Partial<Edge> = {}) {
-        const edge: Edge = {
-            from: { self: false, point: { x: 0, y: 0 } },
-            to: { targetId: undefined, point: { x: 0, y: 0 } },
-            draw: 'curve',
-            color: colors.gray.dark,
-            width: 1,
-            text: '',
-            ...partial,
-            id,
-            name
-        }
-        const fromSelf = edge.from.self
-        const targetId = edge.to.targetId
-        if (!fromSelf || targetId == undefined) return this.getEdges(id).loose.push(edge)
+        const edge: Edge = { ...createBaseEdge(id, name), ...partial, id, name }
+        if (!edge.self || edge.target == undefined) return this.getEdges(id).loose.push(edge)
         this.getEdges(id).children.push(edge)
-        this.getEdges(targetId).parents.push(edge)
+        this.getEdges(edge.target).parents.push(edge)
     }
 
     clearEdges() {
         this.edges = {}
     }
 
-    // Node helper methods (properties changed by all following methods must not be changed directly)
+    // Helper methods (properties changed by all following methods must not be changed directly)
 
     getNodePosition(node: Node, index: number = this.index) {
         return node.positions[index] ?? this.setNodePositions(node, { x: 0, y: 0 })
@@ -226,6 +258,7 @@ export class GraphData {
                 break
             case 'index':
                 node.positions[index] = paddedPosition
+                break
             case 'override':
                 for (let i = index; i < this.getSize(); i++) node.positions[i] = paddedPosition
                 break
@@ -242,42 +275,28 @@ export class GraphData {
         return paddedPosition
     }
 
-    getNodeShape(node: Node, def = '') {
-        return node.mode === 'own'
-            ? node.shape
-            : this.types[node.type]
-            ? this.types[node.type].shape
-            : this.setNodeShape(node, def)
+    getNodeShape(node: Node) {
+        return node.mode === 'own' ? node.shape : this.getNodeType(node.type).shape
     }
 
     setNodeShape(node: Node, shape: string) {
-        if (node.mode === 'own') return (node.shape = shape)
-        this.types[node.type]
-            ? (this.types[node.type].shape = shape)
-            : (this.types[node.type] = { shape, parameters: {} })
-        return shape
+        return node.mode === 'own' ? (node.shape = shape) : (this.getNodeType(node.type).shape = shape)
     }
 
-    getNodeParameters(node: Node, def: UnknownParameters = {}) {
-        return node.mode === 'own'
-            ? node.parameters
-            : this.types[node.type]
-            ? this.types[node.type].parameters
-            : this.setNodeParameters(node, def)
+    getNodeParameters(node: Node) {
+        return node.mode === 'own' ? node.parameters : this.getNodeType(node.type).parameters
     }
 
     setNodeParameters(node: Node, parameters: UnknownParameters) {
-        if (node.mode === 'own') return (node.parameters = parameters)
-        this.types[node.type]
-            ? (this.types[node.type].parameters = parameters)
-            : (this.types[node.type] = { shape: '', parameters })
-        return parameters
+        return node.mode === 'own'
+            ? (node.parameters = parameters)
+            : (this.getNodeType(node.type).parameters = parameters)
     }
 
     getNodeParents(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
-        Object.values(this.getEdges(node.id).parents).forEach(edge =>
+        this.getEdges(node.id).parents.forEach(edge =>
             this.getNodeParents(this.getNode(edge.id), depth - 1, false, pool)
         )
         return pool
@@ -286,16 +305,16 @@ export class GraphData {
     getNodeChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
-        Object.values(this.getEdges(node.id).children).forEach(edge =>
-            this.getNodeChildren(this.getNode(edge.to.targetId), depth - 1, false, pool)
+        this.getEdges(node.id).children.forEach(edge =>
+            this.getNodeChildren(this.getNode(edge.target), depth - 1, false, pool)
         )
         return pool
     }
 
     moveNodePositions(
         node: Node,
-        delta: { x: number; y: number },
         depth = 0,
+        delta: { x: number; y: number },
         index = this.index,
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
@@ -307,79 +326,66 @@ export class GraphData {
         return children
     }
 
-    // TODO write better implementation
-    findStructureBaseNode(node: Node) {
-        let base = node
-        for (;;) {
-            const higherParents = Object.values(this.getNodeParents(base, 1, true)).filter(parent => {
-                const isHigher = parent.depth < base.depth && parent.type === base.type
-                if (isHigher) base = parent
-                return isHigher
-            })
-            if (higherParents.length === 0) break
-        }
-        return base
+    findStructureBaseNode(node: Node): Node {
+        const highestParent = Object.values(this.getNodeParents(node, 1, true)).reduce(
+            (acc, parent) => (parent.type === acc.type && parent.depth < acc.depth ? parent : acc),
+            node
+        )
+        return highestParent === node ? node : this.findStructureBaseNode(highestParent)
     }
 
-    // TODO write better implementation
-    findStructure(
-        base: Node,
-        node = base,
-        parent: Node = undefined,
-        depth = 0,
-        structure = {
-            members: {} as { [id: string]: Node },
-            links: {} as { [id: string]: Node[] },
-            base,
-            count: 0,
-            depth: 0,
-            hasCycleEdge: false,
-            hasParentEdge: false,
-            hasCrossEdge: false,
-            organizable: true
+    findStructure(node: Node, parent: Node = undefined, depth = 0, structure = createBaseStructure()): Structure {
+        if (!structure.base) {
+            structure.base = this.findStructureBaseNode(node)
+            return this.findStructure(structure.base, undefined, 0, structure)
         }
-    ) {
-        if (structure.members[node.id]) return structure
-        structure.members[node.id] = node
-        structure.links[node.id] = []
-        if (parent) structure.links[parent.id].push(node)
-        structure.count++
-        structure.depth = Math.max(structure.depth, depth)
-        structure.organizable = structure.organizable && !structure.hasCrossEdge
-
-        Object.values({ ...this.getNodeChildren(node, 1, true), ...this.getNodeParents(node, 1, true) })
-            .filter(child => child.type === node.type)
-            .forEach(child => {
-                if (!structure.members[child.id]) return this.findStructure(base, child, node, depth + 1, structure)
-                structure.hasCycleEdge = structure.hasCycleEdge || child.id === node.id
-                structure.hasParentEdge = structure.hasParentEdge || child.id === parent.id
-                structure.hasCrossEdge = structure.hasCrossEdge || (child.id !== node.id && child.id !== parent.id)
+        const isMember = !!structure.members[node.id]
+        if (!isMember) {
+            structure.members[node.id] = node
+            structure.links[node.id] = { children: {}, parents: {} }
+            structure.size++
+            structure.depth = Math.max(structure.depth, depth)
+        }
+        if (parent && node.id !== parent.id) {
+            structure.links[parent.id].children[node.id] = node
+            structure.links[node.id].parents[parent.id] = parent
+        }
+        !isMember &&
+            Object.values(this.getNodeChildren(node, 1, true)).forEach(child => {
+                if (child.type !== structure.base.type) return
+                this.findStructure(child, node, depth + 1, structure)
+                const isSameAsParent = node.id === parent?.id
+                const childIsSameAsParent = child.id === parent?.id
+                structure.hasCycleEdge = structure.hasCycleEdge || isSameAsParent
+                structure.hasParentEdge = structure.hasParentEdge || (!isSameAsParent && childIsSameAsParent)
+                structure.hasCrossEdge = structure.hasCrossEdge || (!isSameAsParent && !childIsSameAsParent)
             })
         return structure
     }
 
-    // TODO write better implementation
     computeNodeLayout(
-        structure: ReturnType<GraphData['findStructure']>,
+        structure: Structure,
         horizontal: boolean,
         increment: { x: number; y: number },
-        positions: { [id: string]: { x: number; y: number } } = {},
+        normalize: boolean = true,
         node = structure.base,
-        depth = { x: 0, y: 0 }
-    ) {
-        if (positions[node.id]) return [positions, depth] as const
+        depth = { x: 0, y: 0 },
+        positions: { [id: string]: { x: number; y: number } } = {}
+    ): [{ [id: string]: { x: number; y: number } }, { x: number; y: number }] {
+        if (positions[node.id]) return [positions, depth]
         positions[node.id] = { x: 0, y: 0 }
 
-        const childrenEndDepth = structure.links[node.id].reduce(
+        const childrenEndDepth = Object.values(structure.links[node.id].children).reduce(
             (acc, child) => {
                 const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
                 const [, childEndDepth] = this.computeNodeLayout(
                     structure,
                     horizontal,
                     increment,
-                    positions,
+                    normalize,
                     child,
-                    childDepth
+                    childDepth,
+                    positions
                 )
                 return childEndDepth
             },
@@ -389,42 +395,35 @@ export class GraphData {
         const isLeaf = horizontal ? depth.y === childrenEndDepth.y : depth.x === childrenEndDepth.x
         positions[node.id].x = increment.x * (horizontal || isLeaf ? depth.x : (depth.x + childrenEndDepth.x - 1) / 2)
         positions[node.id].y = increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + childrenEndDepth.y - 1) / 2)
-        const endDepth: typeof depth = {
+        const endDepth = {
             x: childrenEndDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
             y: childrenEndDepth.y + (!horizontal ? -1 : isLeaf ? 1 : 0)
         }
-
-        if (node === structure.base) {
-            const originDelta = { x: -positions[node.id].x, y: -positions[node.id].y }
-            Object.values(positions).forEach(position => ((position.x += originDelta.x), (position.y += originDelta.y)))
+        if (normalize && node === structure.base) {
+            const origin = { x: positions[structure.base.id].x, y: positions[structure.base.id].y }
+            Object.values(positions).forEach(position => ((position.x -= origin.x), (position.y -= origin.y)))
         }
-
-        return [positions, endDepth] as const
+        return [positions, endDepth]
     }
 
-    // TODO write better implementation
     applyNodeAutoLayout(
         node: Node,
         direction = 'horizontal' as 'horizontal' | 'vertical',
         incrementRatio = { x: 1.5, y: 1.5 },
+        normalize = true,
         index = this.index,
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
-        const structure = this.findStructure(this.findStructureBaseNode(node))
-        if (!structure.organizable) return
-        const anchor = this.getNodePosition(node, index)
+        const structure = this.findStructure(node)
         const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
-
-        const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment)
-
+        const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment, normalize)
+        const anchor = this.getNodePosition(node, index)
         Object.entries(positions).forEach(([id, delta]) =>
             this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, index, mode)
         )
         return structure
     }
-
-    // Edge helper methods
 
     computeEdgeStartPoint(edge: Edge) {
         const delta = (edge.from as any).delta as { x: number; y: number }
@@ -435,25 +434,24 @@ export class GraphData {
             const sourcePosition = this.getNodePosition(sourceNode)
             return { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
         } else if (targetDelta) {
-            const targetId = (edge.to as any).targetId as string
-            if (targetId != undefined) {
-                const targetNode = this.getNode(targetId)
+            if (edge.target != undefined) {
+                const targetNode = this.getNode(edge.target)
                 const targetPosition = this.getNodePosition(targetNode)
                 return { x: targetPosition.x + targetDelta.x, y: targetPosition.y + targetDelta.y }
             } else {
                 const targetPoint = (edge.to as any).point as { x: number; y: number }
                 return { x: targetPoint.x + delta.x, y: targetPoint.y + delta.y }
             }
-        } else return point
+        }
+        return point
     }
 
     computeEdgeEndPoint(edge: Edge, startPoint = this.computeEdgeStartPoint(edge)) {
-        const targetId = (edge.to as any).targetId as string
         const mode = (edge.to as any).mode as string
         const delta = (edge.to as any).delta as { x: number; y: number }
         const point = (edge.to as any).point as { x: number; y: number }
-        if (targetId != undefined) {
-            const targetNode = this.getNode(targetId)
+        if (edge.target != undefined) {
+            const targetNode = this.getNode(edge.target)
             const targetPosition = this.getNodePosition(targetNode)
             const targetSize = targetNode.size
             if (mode != undefined) {
@@ -467,8 +465,10 @@ export class GraphData {
                             y: Math.min(Math.max(startPoint.y, targetPosition.y), targetPosition.y + targetSize.y)
                         }
                 }
-            } else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
-        } else return point
+            }
+            return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
+        }
+        return point
     }
 
     computeEdgeCurvatureControlPoint(

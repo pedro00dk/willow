@@ -13,12 +13,11 @@ export const GraphView = () => {
         preserveLayout: state.options.preserveLayout,
         tracer: state.tracer
     }))
-    if (!preserveLayout && !tracer.steps) graphData.current.clearNodes()
-    graphData.current.setSize(tracer.steps?.length ?? 0)
-    graphData.current.setIndex(tracer.index ?? 0)
+    if (!tracer.available && !preserveLayout) graphData.current.clearNodes()
+    graphData.current.setSize(tracer.available ? tracer.steps.length : 0)
+    graphData.current.setIndex(tracer.available ? tracer.index : 0)
     graphData.current.setAnimate(true)
     graphData.current.clearSubscriptions()
-    graphData.current.clearRenders()
     graphData.current.clearEdges()
 
     React.useLayoutEffect(() => {

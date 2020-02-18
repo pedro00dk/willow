@@ -38,8 +38,10 @@ export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>;
                 const changed = !isSameVariable(variable, previousVariables.current[variable.name]?.[depth])
                 const width = depth === stack.length - 1 ? 2.5 : i < 2 ? 1 : 0.5
                 props.graphData.pushEdge('stack', `${depth}-${variable.name}`, {
-                    from: { self: true, targetDelta: deltas[i] },
-                    to: { targetId: id, mode: 'position' },
+                    self: true,
+                    target: id,
+                    from: { targetDelta: deltas[i] },
+                    to: { mode: 'position' },
                     draw: 'line',
                     color: styles.edge(changed),
                     width,

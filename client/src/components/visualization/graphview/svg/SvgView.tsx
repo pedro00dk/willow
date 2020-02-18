@@ -6,7 +6,6 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
     const click = React.useRef(false)
     const viewSize = props.graphData.getViewSize()
     const box = React.useRef({ x: 0, y: 0, width: viewSize.width * 0.5, height: viewSize.height * 0.5 })
-    props.graphData.setViewBox(box.current)
     const ranges = {
         x: { min: 0, max: viewSize.width },
         y: { min: 0, max: viewSize.height },
@@ -37,7 +36,6 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
     const translateBox = (delta: { x: number; y: number }) => {
         box.current.x = Math.min(Math.max(box.current.x - delta.x, ranges.x.min), ranges.x.max - box.current.width)
         box.current.y = Math.min(Math.max(box.current.y - delta.y, ranges.y.min), ranges.y.max - box.current.height)
-        props.graphData.setViewBox(box.current)
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
     }
 
@@ -56,7 +54,6 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
         box.current.y = Math.min(Math.max(box.current.y + factor * ratio.y, ranges.y.min), ranges.y.max - size.height)
         box.current.width = size.width
         box.current.height = size.height
-        props.graphData.setViewBox(box.current)
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
     }
 

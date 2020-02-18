@@ -1,15 +1,16 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
-import { MenuProvider, Menu, Item, Separator, Submenu } from 'react-contexify'
+import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { DefaultState } from '../../../../reducers/Store'
 import * as schema from '../../../../schema/schema'
 import { Draggable } from '../../../utils/Draggable'
-import { GraphData, svgScreenTransformVector, UnknownParameters, Edge } from '../GraphData'
+import { Edge, GraphData, layoutParameters, svgScreenTransformVector, UnknownParameters } from '../GraphData'
 import { getMemberName } from '../SchemaUtils'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
 import * as FieldModule from './shapes/Field'
 import * as MapModule from './shapes/Map'
+import { Parameters } from './Parameters'
 
 const modules = {
     array: ArrayModule,
@@ -45,8 +46,8 @@ export const Obj = (props: {
     const defaultShape = Object.entries(modules)
         .filter(([, mod]) => mod.defaults.has(obj.gType))
         .map(([name]) => name)[0]
-    const shape = props.graphData.getNodeShape(node, defaultShape)
-    const parameters = props.graphData.getNodeParameters(node, {})
+    const shape = props.graphData.getNodeShape(node) ?? props.graphData.setNodeShape(node, defaultShape)
+    const parameters = props.graphData.getNodeParameters(node)
 
     const { Shape } = modules[shape as keyof typeof modules]
 
@@ -61,27 +62,28 @@ export const Obj = (props: {
     React.useLayoutEffect(() => {
         const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
-        links.current.forEach(({ id: targetId, name, ref$, ...data }) => {
+        links.current.forEach(({ id: target, name, ref$, ...data }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
             const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, true, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(id, name, { ...data, from: { self: true, delta }, to: { targetId, mode: 'near' } })
+            props.graphData.pushEdge(id, name, { ...data, self: true, from: { delta }, target, to: { mode: 'near' } })
         })
     })
 
     React.useLayoutEffect(() => props.graphData.callSubscriptions(id))
 
     React.useEffect(() => {
-        console.log('check members', previousIndex.current, previousMembers.current)
+        // TODO check this implementation
+        // console.log('check members', previousIndex.current, previousMembers.current)
         if (previousIndex.current === index) return
         previousIndex.current = index
         previousMembers.current = obj.members.reduce((acc, member) => {
             acc[getMemberName(member)] = member
             return acc
         }, {} as { [name: string]: schema.Member })
-        console.log('update members', previousIndex.current, previousMembers.current)
+        // console.log('update members', previousIndex.current, previousMembers.current)
     })
 
     return (
@@ -92,7 +94,7 @@ export const Obj = (props: {
                 onDoubleClick: event => {
                     const direction = !event.altKey ? 'horizontal' : 'vertical'
                     const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
-                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, index, mode)
+                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, true, index, mode)
                     props.graphData.setAnimate(true)
                     Object.keys(structure.members).forEach(id => props.graphData.callSubscriptions(id))
                 }
@@ -102,7 +104,7 @@ export const Obj = (props: {
                 const [svgDelta] = svgScreenTransformVector('toSvg', svg, false, delta)
                 const depth = event.altKey ? Infinity : 0
                 const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
-                const movedNodes = props.graphData.moveNodePositions(node, svgDelta, depth, index, mode)
+                const movedNodes = props.graphData.moveNodePositions(node, depth, svgDelta, index, mode)
                 props.graphData.setAnimate(false)
                 Object.keys(movedNodes).forEach(id => props.graphData.callSubscriptions(id))
             }}
@@ -166,6 +168,15 @@ const ObjMenu = (props: {
                         props.graphData.setNodeParameters(node, parameters), props.update({})
                     )}
                 />
+            </Submenu>
+            <Separator />
+            <Submenu label='layout'>
+                <Parameters
+                    defaults={layoutParameters}
+                    parameters={node.layout}
+                    withReset
+                    onChange={parameters => ((node.layout = parameters), props.update)}
+                ></Parameters>
             </Submenu>
         </Menu>
     )
