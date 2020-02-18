@@ -1,31 +1,4 @@
-export type DefaultParameters = {
-    [name: string]:
-        | { value: boolean }
-        | { value: number; range: [number, number] }
-        | { value: string; options: string[] }
-}
-
-export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
-
-export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
-
-export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) =>
-    Object.fromEntries(
-        Object.entries(defaults).map(([name, defaults]) =>
-            !parameters
-                ? [name, defaults.value]
-                : defaults.value !== undefined && typeof parameters[name] !== typeof defaults.value
-                ? [name, defaults.value]
-                : [name, parameters[name]]
-        )
-    ) as ComputedParameters<U>
-
-export const layoutParameters = {
-    automatic: { value: false },
-    direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    selfAsTarget: { value: false },
-    memberAsTarget: { value: undefined as string, options: [] as string[] }
-}
+// Math and svg transform helper functions
 
 export const lerp = (from: number, to: number, gradient: number) => from * (1 - gradient) + to * gradient
 
@@ -53,6 +26,8 @@ export const svgScreenTransformVector = (
     shiftedVectors.forEach(vector => ((vector.x -= root.x), (vector.y -= root.y)))
     return shiftedVectors
 }
+
+// GraphData component types definitions
 
 export type Node = {
     readonly id: string
@@ -104,6 +79,19 @@ export type Structure = {
     hasCrossEdge: boolean
 }
 
+export type DefaultParameters = {
+    [name: string]:
+        | { value: boolean }
+        | { value: number; range: [number, number] }
+        | { value: string; options: string[] }
+}
+
+export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
+
+export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
+
+// Default object creation functions for defined types
+
 const createBaseNode = (id: string): Node => ({
     id,
     render: true,
@@ -147,6 +135,32 @@ const createBaseStructure = (): Structure => ({
     hasParentEdge: false,
     hasCrossEdge: false
 })
+
+// Helper objects and functions for Parameters and Layout components of Node
+
+export const layoutParameters = {
+    automatic: { value: false },
+    direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
+    member: { value: undefined as string, options: [] as string[] }
+}
+
+export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(
+    parameters: T,
+    defaults: U
+) => {
+    const keys = Object.keys(defaults)
+    const result = {} as ComputedParameters<U>
+    for (const key of keys) {
+        ;(result as any)[key] = !parameters
+            ? defaults[key].value
+            : defaults[key].value != undefined && typeof parameters[key] !== typeof defaults[key].value
+            ? defaults[key].value
+            : parameters[key]
+    }
+    return result
+}
+
+// GraphData computes all manipulations in the Graph visualization
 
 export class GraphData {
     private index: number = 0
