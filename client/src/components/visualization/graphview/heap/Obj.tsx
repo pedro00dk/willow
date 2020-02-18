@@ -92,9 +92,9 @@ export const Obj = (props: {
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const direction = !event.altKey ? 'horizontal' : 'vertical'
+                    const dir = !event.altKey ? 'horizontal' : 'vertical'
                     const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
-                    const structure = props.graphData.applyNodeAutoLayout(node, direction, undefined, true, index, mode)
+                    const structure = props.graphData.applyStructureLayout(node, dir, undefined, true, index, mode)
                     props.graphData.setAnimate(true)
                     Object.keys(structure.members).forEach(id => props.graphData.callSubscriptions(id))
                 }

@@ -363,7 +363,7 @@ export class GraphData {
         return structure
     }
 
-    computeNodeLayout(
+    computeStructureLayout(
         structure: Structure,
         horizontal: boolean,
         increment: { x: number; y: number },
@@ -378,7 +378,7 @@ export class GraphData {
         const childrenEndDepth = Object.values(structure.links[node.id].children).reduce(
             (acc, child) => {
                 const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
-                const [, childEndDepth] = this.computeNodeLayout(
+                const [, childEndDepth] = this.computeStructureLayout(
                     structure,
                     horizontal,
                     increment,
@@ -406,7 +406,7 @@ export class GraphData {
         return [positions, endDepth]
     }
 
-    applyNodeAutoLayout(
+    applyStructureLayout(
         node: Node,
         direction = 'horizontal' as 'horizontal' | 'vertical',
         incrementRatio = { x: 1.5, y: 1.5 },
@@ -417,7 +417,7 @@ export class GraphData {
         const structure = this.findStructure(node)
         const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
-        const [positions] = this.computeNodeLayout(structure, direction === 'horizontal', increment, normalize)
+        const [positions] = this.computeStructureLayout(structure, direction === 'horizontal', increment, normalize)
         const anchor = this.getNodePosition(node, index)
         Object.entries(positions).forEach(([id, delta]) =>
             this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, index, mode)
