@@ -36,6 +36,7 @@ const StringParameter = (props: {
     <Item>
         <span>{props.name}</span>
         <select value={props.value} onChange={event => props.onChange(event.target.value)}>
+            {!props.options.includes(props.value) && <option value={undefined}>{'not selected'}</option>}
             {props.options.map(option => (
                 <option key={option} value={option}>
                     {option}
@@ -52,6 +53,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
     onChange: (parameters: ComputedParameters<U>) => void
 }) => {
     const parameters = readParameters(props.parameters, props.defaults)
+    console.log(parameters)
     return (
         <>
             {props.withReset && <Item onClick={args => props.onChange(undefined)}>{'reset'}</Item>}
