@@ -83,7 +83,7 @@ export type DefaultParameters = {
     [name: string]:
         | { value: boolean }
         | { value: number; range: [number, number] }
-        | { value: string; options: string[] }
+        | { value: string | undefined; options: string[] }
 }
 
 export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
