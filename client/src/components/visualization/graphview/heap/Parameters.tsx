@@ -35,13 +35,17 @@ const StringParameter = (props: {
 }) => (
     <Item>
         <span>{props.name}</span>
-        <select value={props.value} onChange={event => props.onChange(event.target.value)}>
-            {props.options.map(option => (
-                <option key={option} value={option}>
-                    {option}
-                </option>
-            ))}
-        </select>
+        {props.options.length !== 0 ? (
+            <select value={props.value} onChange={event => props.onChange(event.target.value)}>
+                {props.options.map(option => (
+                    <option key={option} value={option}>
+                        {option}
+                    </option>
+                ))}
+            </select>
+        ) : (
+            <span>{'not available'}</span>
+        )}
     </Item>
 )
 
@@ -60,31 +64,31 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                 </Item>
             )}
             {Object.entries(parameters).map(([name, value]) =>
-                typeof value === 'boolean' ? (
+                typeof props.defaults[name].value === 'boolean' ? (
                     <BooleanParameter
                         key={name}
                         name={name}
-                        value={value}
+                        value={value as boolean}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : typeof value === 'number' ? (
+                ) : (props.defaults[name] as any).range != undefined ? (
                     <NumberParameter
                         key={name}
                         name={name}
-                        value={value}
-                        range={(props.defaults[name] as any)['range']}
+                        value={value as number}
+                        range={(props.defaults[name] as any).range}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : typeof value === 'string' ? (
+                ) : (props.defaults[name] as any).options != undefined ? (
                     <StringParameter
                         key={name}
                         name={name}
-                        value={value}
-                        options={(props.defaults[name] as any)['options']}
+                        value={value as string}
+                        options={(props.defaults[name] as any).options}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : (
-                    <span>{'unknown  parameter type'}</span>
+                    <span key={name}>{'unknown  parameter type'}</span>
                 )
             )}
         </>
