@@ -101,8 +101,8 @@ const createBaseNode = (id: string): Node => ({
     type: undefined,
     mode: 'type',
     shape: undefined,
-    parameters: {},
-    layout: readParameters(undefined, layoutParameters)
+    parameters: undefined,
+    layout: undefined
 })
 
 const createBaseNodeType = (): NodeType => ({
@@ -144,21 +144,10 @@ export const layoutParameters = {
     member: { value: undefined as string, options: [] as string[] }
 }
 
-export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(
-    parameters: T,
-    defaults: U
-) => {
-    const keys = Object.keys(defaults)
-    const result = {} as ComputedParameters<U>
-    for (const key of keys) {
-        ;(result as any)[key] = !parameters
-            ? defaults[key].value
-            : defaults[key].value != undefined && typeof parameters[key] !== typeof defaults[key].value
-            ? defaults[key].value
-            : parameters[key]
-    }
-    return result
-}
+export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) =>
+    Object.fromEntries(
+        Object.entries(defaults).map(([name, def]) => [name, parameters ? parameters[name] : def.value])
+    ) as ComputedParameters<U>
 
 // GraphData computes all manipulations in the Graph visualization
 
