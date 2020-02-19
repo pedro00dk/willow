@@ -107,7 +107,7 @@ const createBaseNode = (id: string): Node => ({
 
 const createBaseNodeType = (): NodeType => ({
     shape: undefined,
-    parameters: {}
+    parameters: undefined
 })
 
 const createBaseNodeEdges = (): NodeEdges => ({ children: [], parents: [], loose: [] })
