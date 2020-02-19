@@ -35,17 +35,13 @@ const StringParameter = (props: {
 }) => (
     <Item>
         <span>{props.name}</span>
-        {props.options.length !== 0 ? (
-            <select value={props.value} onChange={event => props.onChange(event.target.value)}>
-                {props.options.map(option => (
-                    <option key={option} value={option}>
-                        {option}
-                    </option>
-                ))}
-            </select>
-        ) : (
-            <span>{'not available'}</span>
-        )}
+        <select value={props.value} onChange={event => props.onChange(event.target.value)}>
+            {props.options.map(option => (
+                <option key={option} value={option}>
+                    {option}
+                </option>
+            ))}
+        </select>
     </Item>
 )
 
@@ -58,20 +54,16 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
     const parameters = readParameters(props.parameters, props.defaults)
     return (
         <>
-            {props.withReset && (
-                <Item onClick={args => props.onChange(readParameters(undefined, props.defaults))}>
-                    <span>{'reset'}</span>
-                </Item>
-            )}
+            {props.withReset && <Item onClick={args => props.onChange(undefined)}>{'reset'}</Item>}
             {Object.entries(parameters).map(([name, value]) =>
-                typeof props.defaults[name].value === 'boolean' ? (
+                typeof value === 'boolean' ? (
                     <BooleanParameter
                         key={name}
                         name={name}
                         value={value as boolean}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : (props.defaults[name] as any).range != undefined ? (
+                ) : typeof value === 'number' ? (
                     <NumberParameter
                         key={name}
                         name={name}
@@ -79,7 +71,7 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                         range={(props.defaults[name] as any).range}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : (props.defaults[name] as any).options != undefined ? (
+                ) : (
                     <StringParameter
                         key={name}
                         name={name}
@@ -87,8 +79,6 @@ export const Parameters = <T extends UnknownParameters, U extends DefaultParamet
                         options={(props.defaults[name] as any).options}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : (
-                    <span key={name}>{'unknown  parameter type'}</span>
                 )
             )}
         </>
