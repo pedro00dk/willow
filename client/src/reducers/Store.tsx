@@ -84,8 +84,7 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
         if (typeof action === 'function') return action(dispatch, getState)
         state.previous = state.current
         state.current = reducer(state.current, action)
-        if (ignore) return
-        subscriptions.forEach(listener => listener())
+        ignore || subscriptions.forEach(listener => listener())
     }
 
     const subscribe = (subscription: () => void) => {
@@ -127,8 +126,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
                 const updatedSelection = memoQuery(store.getState(), store.getPreviousState())
                 const isPromise = typeof updatedSelection.then === 'function'
                 const equals = isPromise || areSelectionsEqual(selectionRef.current, updatedSelection)
-                if (isPromise || equals) return
-                setSelection((selectionRef.current = updatedSelection))
+                !isPromise && !equals && setSelection((selectionRef.current = updatedSelection))
             }
 
             checkSelectionUpdate()
