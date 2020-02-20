@@ -1,8 +1,8 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
-import playImg from '../../../public/buttons/play.png'
-import stepImg from '../../../public/buttons/stepInto.png'
+import playImage from '../../../public/buttons/play.png'
+import stepImage from '../../../public/buttons/stepInto.png'
 import { actions as optionsActions } from '../../reducers/options'
 import { useDispatch, useSelection } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer'
@@ -35,21 +35,21 @@ export const Toolbar = () => {
             <img
                 className={classes.image}
                 style={styles.image(canTrace)}
-                src={playImg}
+                src={playImage}
                 title='Start tracing'
                 onClick={event => canTrace && dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepBack, 90)}
-                src={stepImg}
+                src={stepImage}
                 title='Step backward'
                 onClick={event => canStepBack && dispatch(tracerActions.stepIndex('backward', 'into'))}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepForward, 270)}
-                src={stepImg}
+                src={stepImage}
                 title='Step forward'
                 onClick={event => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
