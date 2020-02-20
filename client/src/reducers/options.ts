@@ -11,8 +11,8 @@ type Action =
     | { type: 'options/setPreserveLayout'; payload: boolean }
 
 const initialState: State = {
-    liveProgramming: true,
-    preserveLayout: true
+    liveProgramming: true, // TODO Implement
+    preserveLayout: true // TODO Write requirements in schema (from 0 ordered obj references)
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
