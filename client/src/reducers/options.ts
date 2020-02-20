@@ -1,15 +1,18 @@
 /**
  * Input reducer updates some tracing and visualization options.
  */
-type State = { liveProgramming: boolean; preserveLayout: boolean }
+type State = {
+    liveProgramming: boolean
+    preserveLayout: boolean
+}
 
 type Action =
     | { type: 'options/setLiveProgramming'; payload: boolean }
     | { type: 'options/setPreserveLayout'; payload: boolean }
 
 const initialState: State = {
-    liveProgramming: false,
-    preserveLayout: false
+    liveProgramming: true,
+    preserveLayout: true
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
