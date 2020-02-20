@@ -8,8 +8,8 @@ import { DefaultAsyncAction } from './Store'
 type State = {
     fetching: boolean
     available: boolean
-    index?: number
-    steps?: schema.Step[]
+    index: number
+    steps: schema.Step[]
     error?: string
 }
 
@@ -19,7 +19,9 @@ type Action =
 
 const initialState: State = {
     fetching: false,
-    available: false
+    available: false,
+    index: 0,
+    steps: []
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
