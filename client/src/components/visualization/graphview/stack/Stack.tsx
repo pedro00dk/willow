@@ -7,23 +7,29 @@ import { isValueObject, isSameVariable } from '../SchemaUtils'
 import { SvgNode } from '../svg/SvgNode'
 
 const styles = {
-    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
+    color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark),
+    width: (variableIndex: number, variableDepth: number, stackDepth: number) =>
+        variableDepth === stackDepth - 1 ? 2.5 : variableIndex < 2 ? 1 : 0.5
 }
 
 export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>; tracer: DefaultState['tracer'] }) => {
-    const previousVariables = React.useRef<{ [name: string]: { [depth: number]: schema.Variable } }>({})
-    const index = props.graphData.getIndex()
-    const { stack = [] } = props.tracer.steps?.[index].snapshot ?? {}
+    const previousVariables = React.useRef<{ [depth: number]: { [name: string]: schema.Variable } }>({})
+    const available = props.tracer.available
+    const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
+    const node = props.graphData.getNode('stack')
+
     const variableScopes = stack
-        .map((scope, i) => [scope, i] as const)
-        .flatMap(([scope, depth]) => scope.variables.map(variable => [variable, depth] as const))
-        .filter(([variable]) => isValueObject(variable.value))
-    const variablesPerObject = variableScopes.reduce((acc, [variable, depth]) => {
+        .map((scope, i) => ({ scope, depth: i }))
+        .flatMap(({ scope, depth }) => scope.variables.map(variable => ({ variable, depth })))
+        .filter(({ variable }) => isValueObject(variable.value))
+
+    const variablesPerObject = variableScopes.reduce((acc, { variable, depth }) => {
         const id = (variable.value as [string])[0]
         if (!acc[id]) acc[id] = []
         acc[id].push({ variable, depth })
         return acc
     }, {} as { [id: string]: { variable: schema.Variable; depth: number }[] })
+
     const deltas = [
         { x: -65, y: -25 },
         { x: -75, y: 0 },
@@ -35,29 +41,27 @@ export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>;
             .slice(-3)
             .reverse()
             .forEach(({ variable, depth }, i) => {
-                const changed = !isSameVariable(variable, previousVariables.current[variable.name]?.[depth])
-                const width = depth === stack.length - 1 ? 2.5 : i < 2 ? 1 : 0.5
-                props.graphData.pushEdge('stack', `${depth}-${variable.name}`, {
+                const changed = !isSameVariable(variable, previousVariables.current[depth]?.[variable.name])
+                props.graphData.pushEdge(node.id, `${depth}-${variable.name}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
                     to: { mode: 'position' },
                     draw: 'line',
-                    color: styles.edge(changed),
-                    width,
+                    color: styles.color(changed),
+                    width: styles.width(i, depth, stack.length),
                     text: variable.name
                 })
             })
     )
 
     React.useEffect(() => {
-        previousVariables.current = variableScopes.reduce((acc, [variable, depth]) => {
-            const name = variable.name
-            if (!acc[name]) acc[name] = {}
-            acc[name][depth] = variable
+        previousVariables.current = variableScopes.reduce((acc, { variable, depth }) => {
+            if (!acc[depth]) acc[depth] = {}
+            acc[depth][variable.name] = variable
             return acc
-        }, {} as { [name: string]: { [depth: number]: schema.Variable } })
+        }, {} as { [depth: number]: { [name: string]: schema.Variable } })
     })
 
-    return <>{stack.length > 0 && <SvgNode id='stack' graphData={props.graphData} />}</>
+    return <>{available && <SvgNode id={node.id} graphData={props.graphData} />}</>
 }
