@@ -24,7 +24,7 @@ const classes = {
 }
 
 const styles = {
-    size: (ratio: number) => `calc(${ratio * 100}% - 1px)`,
+    size: (ratio: number) => `calc(${ratio * 100}% - 2px)`,
     cursor: (layout: 'row' | 'column') => (layout === 'row' ? 'ew-resize' : 'ns-resize')
 }
 
