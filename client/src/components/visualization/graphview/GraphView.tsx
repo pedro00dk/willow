@@ -6,9 +6,9 @@ import { Stack } from './stack/Stack'
 import { SvgView } from './svg/SvgView'
 
 export const GraphView = () => {
+    const update = React.useState({})[1]
     const graphData = React.useRef(new GraphData({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
     const [zoom, setZoom] = React.useState(devicePixelRatio)
-    const update = React.useState({})[1]
     const { preserveLayout, tracer } = useSelection(state => ({
         preserveLayout: state.options.preserveLayout,
         tracer: state.tracer
@@ -29,8 +29,8 @@ export const GraphView = () => {
 
     return (
         <SvgView graphData={graphData.current}>
-            <Stack graphData={graphData.current} update={update} tracer={tracer} />
-            <Heap graphData={graphData.current} update={update} tracer={tracer} />
+            <Stack tracer={tracer} graphData={graphData.current} update={update} />
+            <Heap tracer={tracer} graphData={graphData.current} update={update} />
         </SvgView>
     )
 }

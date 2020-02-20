@@ -12,7 +12,7 @@ const styles = {
         variableDepth === stackDepth - 1 ? 2.5 : variableIndex < 2 ? 1 : 0.5
 }
 
-export const Stack = (props: { graphData: GraphData; update: React.Dispatch<{}>; tracer: DefaultState['tracer'] }) => {
+export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
     const previousVariables = React.useRef<{ [depth: number]: { [name: string]: schema.Variable } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
