@@ -1,31 +1,29 @@
 import React from 'react'
 import { GraphData, ilerp, svgScreenTransformPoint, svgScreenTransformVector } from '../GraphData'
 
+const classes = {
+    container: 'd-flex position-absolute overflow-auto'
+}
+
 export const SvgView = (props: { graphData: GraphData; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
     const viewSize = props.graphData.getViewSize()
-    const box = React.useRef({ x: 0, y: 0, width: viewSize.width * 0.5, height: viewSize.height * 0.5 })
+    const box = React.useRef({ x: 0, y: 0, width: viewSize.width / 2, height: viewSize.height / 2 })
     const ranges = {
         x: { min: 0, max: viewSize.width },
         y: { min: 0, max: viewSize.height },
-        width: { min: viewSize.width * 0.3, max: viewSize.width },
-        height: { min: viewSize.height * 0.3, max: viewSize.height }
+        width: { min: viewSize.width / 4, max: viewSize.width },
+        height: { min: viewSize.height / 4, max: viewSize.height }
     }
 
     React.useLayoutEffect(() => {
         const onResize = (event: Event) => {
-            const parentSize = {
-                width: container$.current.parentElement.clientWidth,
-                height: container$.current.parentElement.clientHeight
-            }
-            const size = {
-                width: container$.current.clientWidth,
-                height: container$.current.clientHeight
-            }
-            if (size.width === parentSize.width && size.height === parentSize.height) return
-            container$.current.style.width = `${parentSize.width - 1}px`
-            container$.current.style.height = `${parentSize.height - 1}px`
+            const element$ = container$.current
+            const parent$ = element$.parentElement
+            if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
+            element$.style.width = `${parent$.clientWidth}px`
+            element$.style.height = `${parent$.clientHeight}px`
         }
 
         onResize(undefined)
@@ -60,6 +58,7 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
     return (
         <svg
             ref={container$}
+            className={classes.container}
             viewBox={Object.values(box.current).join(' ')}
             preserveAspectRatio='xMidYMid meet'
             onMouseDown={event => (click.current = true)}
@@ -73,7 +72,7 @@ export const SvgView = (props: { graphData: GraphData; children?: React.ReactNod
             }}
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
-                const [svgPoint] = svgScreenTransformPoint('toSvg', container$.current, false, screenPoint)
+                const [svgPoint] = svgScreenTransformPoint('toSvg', container$.current, true, screenPoint)
                 scaleBox(svgPoint, event.deltaY < 0 ? 'in' : 'out')
             }}
         >
