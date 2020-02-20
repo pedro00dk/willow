@@ -35,7 +35,7 @@ export const SvgNode = (props: { id: string; graphData: GraphData; children?: Re
             <foreignObject ref={container$} className={classes.container}>
                 {props.children}
             </foreignObject>
-            <SvgEdges id={props.id} graphData={props.graphData} />
+            <SvgEdges id={node.id} graphData={props.graphData} />
         </>
     )
 }

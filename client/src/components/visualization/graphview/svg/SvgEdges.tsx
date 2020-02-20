@@ -45,7 +45,7 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
     return (
         <g ref={container$}>
             {sourceEdges.map(edge => {
-                const pathId = `${edge.id}-${edge.name}`
+                const pathId = `${node.id}-${edge.name}`
                 const markerId = `${pathId}-marker`
                 return (
                     <g key={edge.name}>
