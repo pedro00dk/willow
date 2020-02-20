@@ -53,8 +53,9 @@ export const SplitPane = (props: {
     React.useLayoutEffect(() => {
         if (resizeIsCaptured.get()) return
         resizeIsCaptured.set(true)
+        let eventFired = false
         let eventThrottle: NodeJS.Timeout
-        let eventFired: boolean
+
         const onResize = (event: Event) => {
             eventFired = true
             if (eventThrottle != undefined) return
@@ -65,6 +66,7 @@ export const SplitPane = (props: {
                     eventFired = false
                     return
                 }
+                dispatchEvent(new Event('paneResize'))
                 dispatchEvent(new Event('paneResizeEnd'))
                 clearInterval(eventThrottle)
                 eventThrottle = undefined
@@ -86,7 +88,7 @@ export const SplitPane = (props: {
                     style: { cursor: styles.cursor(orientation) }
                 }}
                 onDragStart={event => dispatchEvent(new Event('resize'))}
-                onDrag={(delta, event) => {
+                onDrag={(event, delta) => {
                     const rect = container$.current.getBoundingClientRect()
                     const change = orientation === 'row' ? delta.x / rect.width : delta.y / rect.height
                     ratio.current = Math.min(Math.max(ratio.current + change, range[0]), range[1])
