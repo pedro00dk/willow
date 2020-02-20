@@ -1,7 +1,6 @@
 /**
  * Store implementation using flow principles for the React Hooks API.
  */
-
 import React from 'react'
 import { reducer as inputReducer } from './input'
 import { reducer as languageReducer } from './language'
@@ -23,27 +22,27 @@ export type SubReducer = (state: any, action: { type?: string; payload?: any; er
  */
 export type SubReducers = { [name: string]: SubReducer }
 
-/*
+/**
  * Combined reducer.
+ * The Reducer applies to the correct SubState piece in State the correct action and returns the updated state.
  * The State is the concatenation in an object of the extended SubReducers name and state.
  * The Action is the union of all extended SubReducers actions plus the empty action.
- * The Reducer applies to the correct SubState piece in State the correct action and returns the updated state.
  */
+export type Reducer<T extends SubReducers> = (state: State<T>, action: Action<T>) => State<T>
 export type State<T extends SubReducers> = { [name in keyof T]: Parameters<T[name]>[0] }
 export type Action<T extends SubReducers> = { [name in keyof T]: Parameters<T[name]>[1] }[keyof T] | {}
-export type Reducer<T extends SubReducers> = (state: State<T>, action: Action<T>) => State<T>
 
 /**
  * Store contains the state and updates it thought reducers and dispatch calls.
  */
-export type GetState<T extends SubReducers> = () => State<T>
-export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>, ignore?: boolean) => Promise<void>
 export type Store<T extends SubReducers> = {
     getState: GetState<T>
     getPreviousState: GetState<T>
     dispatch: Dispatch<T>
     subscribe: (subscription: () => void) => () => void
 }
+export type GetState<T extends SubReducers> = () => State<T>
+export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>, ignore?: boolean) => Promise<void>
 
 /**
  * Asynchronous action for store dispatch.
@@ -66,35 +65,26 @@ export type Hooks<T extends SubReducers> = {
  * Combine an object containing SubReducers in a single reducer.
  * @param reducers object containing SubReducers
  */
-const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> => {
-    const keys = Object.keys(reducers)
-    return (state, action) => {
-        const nextState: Partial<State<T>> = {}
-        for (const key of keys) {
-            nextState[key as keyof State<T>] = reducers[key](state[key], action)
-        }
-        return nextState as State<T>
-    }
-}
+const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> => (state, action) =>
+    Object.fromEntries(Object.entries(reducers).map(([name, r]) => [name, r(state[name], action)])) as State<T>
 
 /**
  * Create a store from the combined reducer and initializes the state.
  * @param reducer a combined reducer
  */
 const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
-    let state = {} as State<T>
-    let previousState = state
+    const state = { current: {} as State<T>, previous: {} as State<T> }
     const subscriptions = [] as (() => void)[]
 
-    const getState = () => state
+    const getState = () => state.current
 
-    const getPreviousState = () => previousState
+    const getPreviousState = () => state.previous
 
-    const dispatch: Store<T>['dispatch'] = (action, ignore) => {
+    const dispatch: Store<T>['dispatch'] = (action, ignore = false) => {
         if (typeof action === 'function') return action(dispatch, getState)
-        previousState = state
-        state = reducer(state, action)
-        !ignore && subscriptions.forEach(listener => listener())
+        state.previous = state.current
+        state.current = reducer(state.current, action)
+        ignore && subscriptions.forEach(listener => listener())
     }
 
     const subscribe = (subscription: () => void) => {
@@ -122,7 +112,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
         const keysB = Object.keys(selectionB)
         return (
             keysA.length === keysB.length &&
-            keysB.reduce((acc, key) => acc && selectionA[key] === selectionB[key], true)
+            keysA.reduce((acc, key) => acc && selectionA[key] === selectionB[key], true)
         )
     }
 
@@ -144,7 +134,6 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
 
             checkSelectionUpdate()
             const unsubscribe = store.subscribe(checkSelectionUpdate)
-
             return () => unsubscribe()
         }, [])
 
@@ -155,6 +144,12 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
 }
 
 /**
+ * Compose the functions to create reducers, store and hooks.
+ * @param reducers object containing SubReducers
+ */
+const reducersToHooks = <T extends SubReducers>(reducers: T) => createHooks(createStore(combineReducers(reducers)))
+
+/**
  * React tree wrapper that provides the hooks context.
  * It creates a store from received reducers and propagates the store hooks through the received react context.
  */
@@ -162,11 +157,7 @@ export const Store = <T extends SubReducers>(props: {
     reducers: T
     context: React.Context<Hooks<T>>
     children?: React.ReactNode
-}) => (
-    <props.context.Provider value={createHooks(createStore(combineReducers(props.reducers)))}>
-        {props.children}
-    </props.context.Provider>
-)
+}) => <props.context.Provider value={reducersToHooks(props.reducers)}>{props.children}</props.context.Provider>
 
 // Default Store containing all reducer files
 
