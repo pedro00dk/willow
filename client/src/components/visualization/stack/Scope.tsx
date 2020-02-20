@@ -14,17 +14,14 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.yellow.lighter : undefined)
+    background: (changed: boolean) => changed && colors.yellow.lighter
 }
 
 export const Scope = (props: { scope: schema.Scope }) => {
     const previousVariables = React.useRef<{ [name: string]: schema.Variable }>({})
 
     React.useEffect(() => {
-        previousVariables.current = props.scope.variables.reduce((acc, variable) => {
-            acc[variable.name] = variable
-            return acc
-        }, {} as { [name: string]: schema.Variable })
+        previousVariables.current = Object.fromEntries(props.scope.variables.map(variable => [variable.name, variable]))
     })
 
     return (
