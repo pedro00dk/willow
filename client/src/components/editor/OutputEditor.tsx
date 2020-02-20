@@ -5,7 +5,7 @@ import { TextEditor } from './TextEditor'
 
 export const OutputEditor = () => {
     const editor = React.useRef<ace.Editor>()
-    const output = React.useRef<string[]>()
+    const output = React.useRef<string[]>([])
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
