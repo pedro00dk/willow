@@ -1,4 +1,3 @@
-import log from 'npmlog'
 import yargs from 'yargs'
 import { Server } from './server'
 
@@ -18,7 +17,8 @@ const main = () => {
     const tracers = [...Array(options.tracer ? options.tracer.length / 2 : 0)]
         .map((_, i) => [options.tracer[i * 2], options.tracer[i * 2 + 1]] as const)
         .reduce((acc, [language, command]) => ({ ...acc, [language]: command }), {} as { [language: string]: string })
-    log.info(main.name, 'cli', { ...options, tracers })
+
+    console.log(main.name, 'cli', { ...options, tracers })
     new Server(tracers, options.steps, options.timeout, options.client, options.port, options.verbose).listen()
 }
 

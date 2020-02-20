@@ -6,8 +6,7 @@
         "@types/express": "4.17.2",
         "@types/jest": "latest",
         "@types/node": "latest",
-        "@types/npmlog": "4.1.2",
-        "@types/yargs": "15.0.0",
+        "@types/yargs": "15.0.3",
         "jest": "latest",
         "json-schema-to-typescript": "latest",
         "prettier": "latest",
@@ -17,7 +16,6 @@
     "dependencies": {
         "cors": "2.8.5",
         "express": "4.17.1",
-        "npmlog": "4.1.2",
         "yargs": "15.1.0"
     },
     "config": {

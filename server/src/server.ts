@@ -1,6 +1,5 @@
 import cors from 'cors'
 import express from 'express'
-import log from 'npmlog'
 import { Tracer } from './tracer'
 
 /**
@@ -43,37 +42,37 @@ export class Server {
 
     /**
      * Set server routes.
-     * 
+     *
      * GET /languages
      * Returns a list of available tracer languages.
-     * 
+     *
      * POST/ trace
      * Receives a trace request, process it and returns the generated result.
      */
     private configureRoutes() {
         this.server.get('/languages', (req, res) => {
-            log.http(Server.name, req.path)
+            console.log(Server.name, req.path)
             res.send(Object.keys(this.tracers))
         })
 
         this.server.post('/trace', async (req, res) => {
-            log.http(Server.name, req.path)
+            console.log(Server.name, req.path)
             const language = req.body['language'] as string
             const trace = {
                 source: req.body['source'] as string,
                 input: req.body['input'] as string,
                 steps: this.steps
             }
-            log.info(Server.name, req.path, language, this.verbose && JSON.stringify(trace))
+            console.log(Server.name, req.path, language, this.verbose && JSON.stringify(trace))
             try {
                 if (!this.tracers[language]) throw new Error('unexpected language')
                 const result = await new Tracer(this.tracers[language]).run(trace, this.timeout)
                 res.send(result)
-                log.info(Server.name, req.path, 'ok', this.verbose && JSON.stringify(result, undefined, 4))
+                console.log(Server.name, req.path, 'ok', this.verbose && JSON.stringify(result, undefined, 4))
             } catch (error) {
                 res.status(400)
                 res.send(error.message)
-                log.info(Server.name, req.path, 'error', error.message)
+                console.log(Server.name, req.path, 'error', error.message)
             }
         })
     }
@@ -82,7 +81,7 @@ export class Server {
      * Start the server.
      */
     listen() {
-        log.info(Server.name, 'listen', { port: this.port })
+        console.log(Server.name, 'listen', this.port)
         this.server.listen(this.port)
     }
 }
