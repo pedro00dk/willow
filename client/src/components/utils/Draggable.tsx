@@ -8,7 +8,7 @@ if (isFirefox) document.addEventListener('dragover', event => (documentPosition 
 export const Draggable = (props: {
     props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
     onDragStart?: (event: React.DragEvent) => void
-    onDrag?: (delta: { x: number; y: number }, event: React.DragEvent) => void
+    onDrag?: (event: React.DragEvent, delta: { x: number; y: number }) => void
     onDragEnd?: (event: React.DragEvent) => void
     children?: React.ReactNode
 }) => {
@@ -34,7 +34,7 @@ export const Draggable = (props: {
                 if (isFirefox && anchor.current.x === 0 && anchor.current.y === 0) return (anchor.current = position)
                 const delta = { x: position.x - anchor.current.x, y: position.y - anchor.current.y }
                 anchor.current = position
-                props.onDrag?.(delta, event)
+                props.onDrag?.(event, delta)
             }}
             onDragEnd={event => (anchor.current = undefined)}
             onMouseDown={event => event.stopPropagation()}
