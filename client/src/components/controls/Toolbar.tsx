@@ -16,8 +16,8 @@ const classes = {
 
 const styles = {
     image: (available: boolean, rotation: number = 0) => ({
-        cursor: available ? 'pointer' : undefined,
-        filter: !available ? 'grayscale(100%)' : undefined,
+        cursor: available && 'pointer',
+        filter: !available && 'grayscale(100%)',
         transform: `rotate(${rotation}deg)`
     })
 }
@@ -28,7 +28,7 @@ export const Toolbar = () => {
     const canTrace = !tracer.fetching
     const canStepBack = tracer.available && tracer.index > 0
     const canStepForward = tracer.available && tracer.index < tracer.steps.length - 1
-    const stepMessage = tracer.available ? `Step ${tracer.index} of ${tracer.steps.length - 1}` : ''
+    const stepMessage = tracer.available && `Step ${tracer.index + 1} of ${tracer.steps.length}`
 
     return (
         <div className={classes.container}>
@@ -53,14 +53,6 @@ export const Toolbar = () => {
                 title='Step forward'
                 onClick={event => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
-            {/* <div className={classes.option}> // TODO enable when implement live programming
-                <span className={classes.optionLabel}>{'Live Programming'}</span>
-                <input
-                    type='checkbox'
-                    checked={options.liveProgramming}
-                    onChange={event => dispatch(optionsActions.setLiveProgramming(event.target.checked))}
-                />
-            </div> */}
             <div className={classes.option}>
                 <span className={classes.optionLabel}>{'Preserve Layout'}</span>
                 <input
