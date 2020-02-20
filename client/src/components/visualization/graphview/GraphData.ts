@@ -38,16 +38,32 @@ export type Node = {
     type: string
     mode: 'own' | 'type'
     shape: string
-    parameters: UnknownParameters
+    parameters: NodeParameters
     layout: ComputedParameters<typeof layoutParameters>
 }
 
 export type NodeType = {
     shape: string
-    parameters: UnknownParameters
+    parameters: NodeParameters
 }
 
 export type NodeEdges = { children: Edge[]; parents: Edge[]; loose: Edge[] }
+
+export type NodeParameters = {
+    [shape: string]: UnknownParameters
+}
+
+export type ShapeParameters = {
+    [name: string]:
+        | { value: boolean; bool: true }
+        | { value: number; range: [number, number] }
+        | { value: string; options: string[] }
+        | { value: string | undefined; members: 'all' | 'values' | 'references' }
+}
+
+export type UnknownParameters = { [name: string]: ShapeParameters[keyof ShapeParameters]['value'] }
+
+export type ComputedParameters<T extends ShapeParameters> = { [name in keyof T]: T[name]['value'] }
 
 export type Edge = Readonly<{
     id: string
@@ -79,17 +95,6 @@ export type Structure = {
     hasCrossEdge: boolean
 }
 
-export type DefaultParameters = {
-    [name: string]:
-        | { value: boolean }
-        | { value: number; range: [number, number] }
-        | { value: string | undefined; options: string[] }
-}
-
-export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
-
-export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
-
 // Default object creation functions for defined types
 
 const createBaseNode = (id: string): Node => ({
@@ -97,12 +102,12 @@ const createBaseNode = (id: string): Node => ({
     render: true,
     positions: [],
     size: { x: 0, y: 0 },
-    depth: 0,
+    depth: undefined,
     type: undefined,
     mode: 'type',
     shape: undefined,
-    parameters: undefined,
-    layout: undefined
+    parameters: {},
+    layout: readParameters(undefined, layoutParameters)
 })
 
 const createBaseNodeType = (): NodeType => ({
@@ -138,13 +143,13 @@ const createBaseStructure = (): Structure => ({
 
 // Helper objects and functions for Parameters and Layout components of Node
 
-export const layoutParameters = {
-    automatic: { value: false },
+export const layoutParameters: ShapeParameters = {
+    automatic: { value: false, bool: true },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    member: { value: undefined as string, options: [] as string[] }
+    member: { value: undefined, members: 'references' }
 }
 
-export const readParameters = <T extends UnknownParameters, U extends DefaultParameters>(parameters: T, defaults: U) =>
+export const readParameters = <T extends UnknownParameters, U extends ShapeParameters>(parameters: T, defaults: U) =>
     Object.fromEntries(
         Object.entries(defaults).map(([name, def]) => [name, parameters ? parameters[name] : def.value])
     ) as ComputedParameters<U>
@@ -287,13 +292,15 @@ export class GraphData {
     }
 
     getNodeParameters(node: Node) {
-        return node.mode === 'own' ? node.parameters : this.getNodeType(node.type).parameters
+        if (node.mode === 'own') return node.parameters[node.shape]
+        const nodeType = this.getNodeType(node.type)
+        return nodeType.parameters[nodeType.shape]
     }
 
     setNodeParameters(node: Node, parameters: UnknownParameters) {
-        return node.mode === 'own'
-            ? (node.parameters = parameters)
-            : (this.getNodeType(node.type).parameters = parameters)
+        if (node.mode === 'own') return (node.parameters[node.shape] = parameters)
+        const nodeType = this.getNodeType(node.type)
+        return (nodeType.parameters[nodeType.shape] = parameters)
     }
 
     getNodeParents(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
