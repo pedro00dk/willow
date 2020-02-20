@@ -8,7 +8,11 @@ const classes = {
 
 export const Stack = () => {
     const container$ = React.useRef<HTMLDivElement>()
-    const { stack } = useSelection(state => ({ stack: state.tracer.steps?.[state.tracer.index].snapshot?.stack }))
+    const { available, stack } = useSelection(state => ({
+        available: state.tracer.available,
+        stack: state.tracer.available && state.tracer.steps[state.tracer.index].snapshot?.stack
+    }))
+
     React.useLayoutEffect(() => {
         const onResize = (event: Event) => {
             const element$ = container$.current
@@ -27,8 +31,8 @@ export const Stack = () => {
 
     return (
         <div ref={container$} className={classes.container}>
-            {!stack && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
-            {stack && stack.map((scope, i) => <Scope key={i} scope={scope} />)}
+            {!available && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
+            {available && stack.map((scope, i) => <Scope key={i} scope={scope} />)}
         </div>
     )
 }
