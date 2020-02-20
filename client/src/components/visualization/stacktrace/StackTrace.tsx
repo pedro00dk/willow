@@ -13,7 +13,7 @@ export const StackTrace = () => {
     const container$ = React.useRef<HTMLDivElement>()
     const { available, steps } = useSelection(state => ({
         available: state.tracer.available,
-        steps: state.tracer.steps
+        steps: state.tracer.available && state.tracer.steps
     }))
 
     const baseScopeSlice = React.useMemo(() => {
