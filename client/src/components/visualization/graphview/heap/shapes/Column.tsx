@@ -4,9 +4,8 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
 import { Base } from './Base'
-import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { Edge, readParameters, UnknownParameters } from '../../GraphData'
 import { getDisplayValue, getMemberName, isSameMember } from '../../SchemaUtils'
-import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
@@ -20,12 +19,12 @@ const styles = {
     background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light)
 }
 
-const defaultParameters = {
-    'show indices': { value: true },
-    'show values': { value: true },
+export const defaultParameters = {
+    'show indices': { value: true, bool: true as const },
+    'show values': { value: true, bool: true as const },
     'column width': { value: 35, range: [5, 100] as [number, number] },
     'column height': { value: 60, range: [5, 200] as [number, number] },
-    'delta mode': { value: 'diff', options: ['diff', 'step'] }
+    'size mode': { value: 'delta', options: ['delta', 'step'] }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
@@ -36,16 +35,16 @@ export const Shape = (props: {
     obj: schema.Obj
     previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
-    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
+    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const parameters = readParameters(props.parameters, defaultParameters)
     const showIndices = parameters['show indices']
     const showValues = parameters['show values']
     const columnWidth = parameters['column width']
     const columnHeight = parameters['column height']
-    const deltaMode = parameters['delta mode']
+    const deltaMode = parameters['size mode']
 
-    const computeDiffRatios = (values: number[]) => {
+    const computeDeltaRatios = (values: number[]) => {
         const min = Math.min(...values)
         const max = Math.max(...values)
         const delta = max - min !== 0 ? max - min : 1
@@ -99,28 +98,13 @@ export const Shape = (props: {
                     : props.obj.members.length === 0
                     ? 'empty'
                     : props.obj.members.some(member => typeof member.value !== 'number' || !isFinite(member.value))
-                    ? 'contains non number'
+                    ? 'not a number'
                     : (() => {
                           const values = props.obj.members.map(member => member.value as number)
-                          const ratios = deltaMode === 'diff' ? computeDiffRatios(values) : computeStepRatios(values)
+                          const ratios = deltaMode === 'delta' ? computeDeltaRatios(values) : computeStepRatios(values)
                           return props.obj.members.map((member, i) => renderColumn(member, ratios[i], i))
                       })()}
             </div>
         </Base>
     )
 }
-
-export const ShapeParameters = (props: {
-    id: string
-    obj: schema.Obj
-    withReset: boolean
-    parameters: UnknownParameters
-    onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
-}) => (
-    <Parameters
-        withReset={props.withReset}
-        parameters={props.parameters}
-        defaults={defaultParameters}
-        onChange={props.onChange}
-    />
-)

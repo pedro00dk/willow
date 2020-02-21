@@ -4,9 +4,8 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
 import { Base } from './Base'
-import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { Edge, readParameters, UnknownParameters } from '../../GraphData'
 import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
-import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex text-nowrap',
@@ -18,28 +17,14 @@ const classes = {
 
 const styles = {
     background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light),
-    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
+    color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
 }
 
-const defaultParameters = {
-    'choose a member': { value: undefined as string, options: [] as string[] },
-    'show key': { value: true },
-    'show references': { value: false },
+export const defaultParameters = {
+    member: { value: undefined as string, members: 'all' as const },
+    'show key': { value: true, bool: true as const },
+    'show references': { value: false, bool: true as const },
     'references position': { value: 'right', options: ['right', 'bottom'] }
-}
-
-const getChosenMember = (parameters: ComputedParameters<typeof defaultParameters>, members: schema.Member[]) => {
-    let chosenMember = parameters['choose a member']
-    let chosenMemberIsSelectable = false
-    let selectableMembers = members
-        .filter(member => !isValueObject(member.key))
-        .map(member => {
-            const memberName = getMemberName(member)
-            chosenMemberIsSelectable = chosenMemberIsSelectable || memberName === chosenMember
-            return memberName
-        })
-    if (chosenMember == undefined || !chosenMemberIsSelectable) chosenMember = selectableMembers[0]
-    return { chosenMember, selectableMembers }
 }
 
 export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
@@ -50,10 +35,11 @@ export const Shape = (props: {
     obj: schema.Obj
     previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
-    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
+    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
+    const members = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
     const parameters = readParameters(props.parameters, defaultParameters)
-    const { chosenMember } = getChosenMember(parameters, props.obj.members)
+    const memberName = parameters.member
     const showKey = parameters['show key']
     const showReferences = parameters['show references']
     const referencesPosition = parameters['references position']
@@ -79,8 +65,12 @@ export const Shape = (props: {
                     <span
                         ref={ref$ => {
                             if (!ref$ || !isObject) return
-                            const targetId = (member.value as [string])[0]
-                            props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
+                            props.onReference({
+                                id: (member.value as [string])[0],
+                                name,
+                                ref$,
+                                edge: { color: styles.color(changed), text: displayKey }
+                            })
                         }}
                         className={classes.value}
                     >
@@ -102,7 +92,12 @@ export const Shape = (props: {
                     const name = getMemberName(refMember)
                     const displayKey = getDisplayValue(refMember.key, props.id)
                     const changed = !isSameMember(refMember, props.previousMembers[name])
-                    props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
+                    props.onReference({
+                        id: targetId,
+                        name,
+                        ref$,
+                        edge: { color: styles.color(changed), text: displayKey }
+                    })
                 })
             }}
         />
@@ -113,35 +108,12 @@ export const Shape = (props: {
             <div className={classes.container}>
                 {!supported.has(props.obj.gType)
                     ? 'incompatible'
-                    : chosenMember == undefined
-                    ? 'empty'
-                    : (() => {
-                          const member = props.obj.members.filter(
-                              member => !isValueObject(member.key) && member.key.toString() === chosenMember
-                          )[0]
-                          return renderField(member)
-                      })()}
+                    : memberName == undefined
+                    ? 'choose'
+                    : !members[memberName]
+                    ? 'not found'
+                    : renderField(members[memberName])}
             </div>
         </Base>
-    )
-}
-
-export const ShapeParameters = (props: {
-    id: string
-    obj: schema.Obj
-    withReset: boolean
-    parameters: UnknownParameters
-    onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
-}) => {
-    const parameters = readParameters(props.parameters, defaultParameters)
-    const { chosenMember, selectableMembers } = getChosenMember(parameters, props.obj.members)
-
-    return (
-        <Parameters
-            withReset={props.withReset}
-            parameters={props.parameters}
-            defaults={{ ...defaultParameters, 'choose a member': { value: chosenMember, options: selectableMembers } }}
-            onChange={props.onChange}
-        />
     )
 }

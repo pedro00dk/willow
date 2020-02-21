@@ -4,9 +4,8 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as schema from '../../../../../schema/schema'
 import { Base } from './Base'
-import { ComputedParameters, Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { Edge, readParameters, UnknownParameters } from '../../GraphData'
 import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
-import { Parameters } from '../Parameters'
 
 const classes = {
     container: 'd-flex flex-column text-nowrap',
@@ -17,11 +16,11 @@ const classes = {
 
 const styles = {
     background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light),
-    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
+    color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
 }
 
-const defaultParameters = {
-    'show keys': { value: true },
+export const defaultParameters = {
+    'show keys': { value: true, bool: true as const },
     'key width': { value: 35, range: [5, 100] as [number, number] },
     'value width': { value: 35, range: [5, 100] as [number, number] }
 }
@@ -34,7 +33,7 @@ export const Shape = (props: {
     obj: schema.Obj
     previousMembers: { [id: string]: schema.Member }
     parameters: UnknownParameters
-    onLink: (link: { id: string; name: string; ref$: HTMLSpanElement } & Partial<Edge>) => void
+    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const parameters = readParameters(props.parameters, defaultParameters)
     const showKeys = parameters['show keys']
@@ -60,8 +59,12 @@ export const Shape = (props: {
                     <span
                         ref={ref$ => {
                             if (!ref$ || !isKeyObject) return
-                            const targetId = (member.key as [string])[0]
-                            props.onLink({ id: targetId, name: `${name}-key`, ref$, color: styles.edge(changed) })
+                            props.onReference({
+                                id: (member.key as [string])[0],
+                                name: `${name}-key`,
+                                ref$,
+                                edge: { color: styles.color(changed) }
+                            })
                         }}
                         className={classes.key}
                         style={{ width: keyWidth }}
@@ -72,8 +75,12 @@ export const Shape = (props: {
                 <span
                     ref={ref$ => {
                         if (!ref$ || !isValObject) return
-                        const targetId = (member.value as [string])[0]
-                        props.onLink({ id: targetId, name, ref$, color: styles.edge(changed), text: displayKey })
+                        props.onReference({
+                            id: (member.value as [string])[0],
+                            name,
+                            ref$,
+                            edge: { color: styles.color(changed), text: displayKey }
+                        })
                     }}
                     className={classes.value}
                     style={{ width: valueWidth }}
@@ -96,18 +103,3 @@ export const Shape = (props: {
         </Base>
     )
 }
-
-export const ShapeParameters = (props: {
-    id: string
-    obj: schema.Obj
-    withReset: boolean
-    parameters: UnknownParameters
-    onChange: (updatedParameters: ComputedParameters<typeof defaultParameters>) => void
-}) => (
-    <Parameters
-        withReset={props.withReset}
-        parameters={props.parameters}
-        defaults={defaultParameters}
-        onChange={props.onChange}
-    />
-)
