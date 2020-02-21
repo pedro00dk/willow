@@ -143,10 +143,10 @@ const createBaseStructure = (): Structure => ({
 
 // Helper objects and functions for Parameters and Layout components of Node
 
-export const layoutParameters: ShapeParameters = {
-    automatic: { value: false, bool: true },
+export const layoutParameters = {
+    automatic: { value: false, bool: true as const },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    member: { value: undefined, members: 'references' }
+    member: { value: undefined as string, members: 'references' as const }
 }
 
 export const readParameters = <T extends UnknownParameters, U extends ShapeParameters>(parameters: T, defaults: U) =>
