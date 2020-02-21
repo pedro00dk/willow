@@ -93,9 +93,8 @@ export const Parameters = <T extends UnknownParameters, U extends ShapeParameter
             {props.withReset && (
                 <Item onClick={args => props.onChange(readParameters(undefined, props.defaults))}>{'reset'}</Item>
             )}
-            {Object.entries(props.defaults).map(([name, def]) => {
-                console.log(name, def, parameters[name])
-                return (def as any).bool != undefined ? (
+            {Object.entries(props.defaults).map(([name, def]) =>
+                (def as any).bool != undefined ? (
                     <FlagParameter
                         key={name}
                         name={name}
@@ -130,7 +129,7 @@ export const Parameters = <T extends UnknownParameters, U extends ShapeParameter
                 ) : (
                     <span>{'parameter type error'}</span>
                 )
-            })}
+            )}
         </>
     )
 }
