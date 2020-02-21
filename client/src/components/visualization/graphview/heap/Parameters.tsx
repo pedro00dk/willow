@@ -1,15 +1,17 @@
 import React from 'react'
 import { Item } from 'react-contexify'
-import { ComputedParameters, DefaultParameters, readParameters, UnknownParameters } from '../GraphData'
+import * as schema from '../../../../schema/schema'
+import { ComputedParameters, readParameters, ShapeParameters, UnknownParameters } from '../GraphData'
+import { isValueObject, getMemberName } from '../SchemaUtils'
 
-const BooleanParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
+const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
         <span>{props.name}</span>
         <input type='checkbox' checked={props.value} onChange={event => props.onChange(event.target.checked)} />
     </Item>
 )
 
-const NumberParameter = (props: {
+const RangeParameter = (props: {
     name: string
     value: number
     range: [number, number]
@@ -27,7 +29,7 @@ const NumberParameter = (props: {
     </Item>
 )
 
-const StringParameter = (props: {
+const EnumParameter = (props: {
     name: string
     value: string
     options: string[]
@@ -36,7 +38,6 @@ const StringParameter = (props: {
     <Item>
         <span>{props.name}</span>
         <select value={props.value} onChange={event => props.onChange(event.target.value)}>
-            {!props.options.includes(props.value) && <option value={undefined}>{'not selected'}</option>}
             {props.options.map(option => (
                 <option key={option} value={option}>
                     {option}
@@ -46,43 +47,90 @@ const StringParameter = (props: {
     </Item>
 )
 
-export const Parameters = <T extends UnknownParameters, U extends DefaultParameters>(props: {
+const MemberParameter = (props: {
+    name: string
+    value: string | undefined
+    members: 'all' | 'values' | 'references'
+    obj: schema.Obj
+    onChange: (value: string) => void
+}) => {
+    const memberNames = props.obj.members
+        .filter(
+            member =>
+                !isValueObject(member.key) &&
+                (props.members === 'all' ||
+                    (props.members === 'values' && !isValueObject(member.value)) ||
+                    (props.members === 'references' && isValueObject(member.value)))
+        )
+        .map(member => getMemberName(member))
+
+    return (
+        <Item>
+            <span>{props.name}</span>
+            <select value={props.value} onChange={event => props.onChange(event.target.value)}>
+                {props.value == undefined && <option value={undefined}>{'not selected'}</option>}
+                {memberNames.map(member => (
+                    <option key={member} value={member}>
+                        {member}
+                    </option>
+                ))}
+            </select>
+        </Item>
+    )
+}
+
+export const Parameters = <T extends UnknownParameters, U extends ShapeParameters>(props: {
     withReset: boolean
     parameters: T
     defaults: U
+    obj: schema.Obj
     onChange: (parameters: ComputedParameters<U>) => void
 }) => {
     const parameters = readParameters(props.parameters, props.defaults)
-    console.log(parameters)
+
     return (
         <>
-            {props.withReset && <Item onClick={args => props.onChange(undefined)}>{'reset'}</Item>}
-            {Object.entries(parameters).map(([name, value]) =>
-                typeof value === 'boolean' ? (
-                    <BooleanParameter
+            {props.withReset && (
+                <Item onClick={args => props.onChange(readParameters(undefined, props.defaults))}>{'reset'}</Item>
+            )}
+            {Object.entries(props.defaults).map(([name, def]) => {
+                console.log(name, def, parameters[name])
+                return (def as any).bool != undefined ? (
+                    <FlagParameter
                         key={name}
                         name={name}
-                        value={value as boolean}
+                        value={parameters[name] as boolean}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
-                ) : typeof value === 'number' ? (
-                    <NumberParameter
+                ) : (def as any).range != undefined ? (
+                    <RangeParameter
                         key={name}
                         name={name}
-                        value={value as number}
-                        range={(props.defaults[name] as any).range}
+                        value={parameters[name] as number}
+                        range={(def as any).range}
+                        onChange={value => props.onChange({ ...parameters, [name]: value })}
+                    />
+                ) : (def as any).options != undefined ? (
+                    <EnumParameter
+                        key={name}
+                        name={name}
+                        value={parameters[name] as string}
+                        options={(def as any).options}
+                        onChange={value => props.onChange({ ...parameters, [name]: value })}
+                    />
+                ) : (def as any).members != undefined ? (
+                    <MemberParameter
+                        key={name}
+                        name={name}
+                        value={parameters[name] as string | undefined}
+                        members={(def as any).members}
+                        obj={props.obj}
                         onChange={value => props.onChange({ ...parameters, [name]: value })}
                     />
                 ) : (
-                    <StringParameter
-                        key={name}
-                        name={name}
-                        value={value as string}
-                        options={(props.defaults[name] as any).options}
-                        onChange={value => props.onChange({ ...parameters, [name]: value })}
-                    />
+                    <span>{'parameter type error'}</span>
                 )
-            )}
+            })}
         </>
     )
 }
