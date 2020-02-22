@@ -146,7 +146,7 @@ const createBaseStructure = (): Structure => ({
 export const layoutParameters = {
     automatic: { value: false, bool: true as const },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    member: { value: undefined as string, members: 'references' as const }
+    member: { value: undefined as string, members: 'all' as const }
 }
 
 export const readParameters = <T extends UnknownParameters, U extends ShapeParameters>(parameters: T, defaults: U) =>
@@ -355,12 +355,6 @@ export class GraphData {
             structure.links[node.id] = { children: {}, parents: {} }
             structure.size++
             structure.depth = Math.max(structure.depth, depth)
-        }
-        if (parent && node.id !== parent.id) {
-            structure.links[parent.id].children[node.id] = node
-            structure.links[node.id].parents[parent.id] = parent
-        }
-        !isMember &&
             Object.values(this.getNodeChildren(node, 1, true)).forEach(child => {
                 if (child.type !== structure.base.type) return
                 this.findStructure(child, node, depth + 1, structure)
@@ -370,6 +364,11 @@ export class GraphData {
                 structure.hasParentEdge = structure.hasParentEdge || (!isSameAsParent && childIsSameAsParent)
                 structure.hasCrossEdge = structure.hasCrossEdge || (!isSameAsParent && !childIsSameAsParent)
             })
+        }
+        if (parent && node.id !== parent.id) {
+            structure.links[parent.id].children[node.id] = node
+            structure.links[node.id].parents[parent.id] = parent
+        }
         return structure
     }
 
@@ -384,9 +383,9 @@ export class GraphData {
     ): [{ [id: string]: { x: number; y: number } }, { x: number; y: number }] {
         if (positions[node.id]) return [positions, depth]
         positions[node.id] = { x: 0, y: 0 }
-
         const childrenEndDepth = Object.values(structure.links[node.id].children).reduce(
             (acc, child) => {
+                if (positions[child.id]) return acc
                 const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
                 const [, childEndDepth] = this.computeStructureLayout(
                     structure,
@@ -401,7 +400,6 @@ export class GraphData {
             },
             { ...depth }
         )
-
         const isLeaf = horizontal ? depth.y === childrenEndDepth.y : depth.x === childrenEndDepth.x
         positions[node.id].x = increment.x * (horizontal || isLeaf ? depth.x : (depth.x + childrenEndDepth.x - 1) / 2)
         positions[node.id].y = increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + childrenEndDepth.y - 1) / 2)
@@ -425,6 +423,7 @@ export class GraphData {
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
         const structure = this.findStructure(node)
+        console.log('structure', structure)
         const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
         const [positions] = this.computeStructureLayout(structure, direction === 'horizontal', increment, normalize)
