@@ -3,8 +3,8 @@ import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import * as schema from '../../../../schema/schema'
 import { Draggable } from '../../../utils/Draggable'
-import { Edge, GraphData, layoutParameters, Node, svgScreenTransformVector } from '../GraphData'
-import { getMemberName } from '../SchemaUtils'
+import { Edge, GraphData, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../GraphData'
+import { getMemberName, isValueObject } from '../SchemaUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
@@ -74,6 +74,23 @@ export const Obj = (props: {
         if (props.graphData.getIndex() === previousIndex.current) return
         previousIndex.current = props.graphData.getIndex()
         previousMembers.current = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
+    })
+
+    React.useEffect(() => {
+        const layout = readParameters(props.node.layout, layoutParameters)
+        const member = previousMembers.current[layout.member]
+        if (!layout.automatic || !member || !isValueObject(member.value)) return
+        const node = props.graphData.getNode(member.value[0])
+        const structure = props.graphData.applyStructureLayout(
+            node,
+            layout.direction as any,
+            undefined,
+            undefined,
+            undefined,
+            'override'
+        )
+        props.graphData.setAnimate(true)
+        Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
     })
 
     return (
