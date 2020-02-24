@@ -1,0 +1,80 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+
+  build:
+    name: Build and deploy docker images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        run: |
+          git clone "https://github.com/${{ github.repository }}"
+          cd ./willow/
+          BRANCH=$(echo ${{ github.ref }} | cut -d / -f 3)
+          git switch ${BRANCH}
+
+      - name: Build docker images
+        run: |
+          cd ./willow/
+          cd ./tracers/java/
+          docker image build --pull --no-cache --tag willow-tracer-java .
+          cd ../python/
+          docker image build --pull --no-cache --tag willow-tracer-python .
+          cd ../../server/
+          docker image build --pull --no-cache --tag willow-server .
+          cd ../client/
+          docker image build --pull --no-cache --tag willow-client .
+          cd ../
+
+      - name: Deploy images to github registry
+        run: |
+          USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
+          docker login --username ${USERNAME} --password ${{ github.token }} docker.pkg.github.com
+          docker image tag willow-tracer-java docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
+          docker image tag willow-tracer-python docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
+          docker image tag willow-server docker.pkg.github.com/${{ github.repository }}/willow-server
+          docker image tag willow-client docker.pkg.github.com/${{ github.repository }}/willow-client
+          docker image ls
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-server
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-client
+
+  # deploy:
+  #   name: Deploy to gcloud
+  #   needs: build
+  #   runs-on: ubuntu-latest
+
+
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@master
+
+#       - name: get-instance
+#         run: |
+#           echo ${GCLOUD_SERVICE_ACCOUNT_KEY} > key.json
+#           du -sh key.json
+#           gcloud auth activate-service-account --key-file=key.json
+#           gcloud config set project ${GCLOUD_PROJECT_NAME}
+#           gcloud config set compute/zone ${GCLOUD_PROJECT_ZONE}
+#           gcloud config list
+#           gcloud compute instances create willow-instance \
+#               --service-account=${GCLOUD_SERVICE_ACCOUNT_NAME} \
+#               --machine-type=${VM_MACHINE_TYPE} \
+#               --image-family=cos-stable --image-project=cos-cloud \
+#               --subnet=default --tags=http-server --boot-disk-size=10GB || true
+#           gcloud compute firewall-rules create default-allow-http \
+#               --direction=INGRESS --priority=1000 --network=default --action=ALLOW \
+#               --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server || true
+
+#       - name: deploy
+#         run: |
+#           gcloud compute ssh willow-instance -- sh -c "$(cat ./.github/deploy.sh)"
