@@ -39,7 +39,10 @@ export type Node = {
     mode: 'own' | 'type'
     shape: string
     parameters: NodeParameters
-    layout: ComputedParameters<typeof layoutParameters>
+    layout: {
+        position: { x: number; y: number }
+        parameters: ComputedParameters<typeof layoutParameters>
+    }
 }
 
 export type NodeType = {
@@ -107,7 +110,10 @@ const createBaseNode = (id: string): Node => ({
     mode: 'type',
     shape: undefined,
     parameters: {},
-    layout: readParameters(undefined, layoutParameters)
+    layout: {
+        position: { x: 0, y: 0 },
+        parameters: readParameters(undefined, layoutParameters)
+    }
 })
 
 const createBaseNodeType = (): NodeType => ({
@@ -416,6 +422,7 @@ export class GraphData {
 
     applyStructureLayout(
         node: Node,
+        position: { x: number; y: number } = undefined,
         direction = 'horizontal' as 'horizontal' | 'vertical',
         incrementRatio = { x: 1.5, y: 1.5 },
         normalize = true,
@@ -427,7 +434,7 @@ export class GraphData {
         const sizeAnchor = node.size
         const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
         const [positions] = this.computeStructureLayout(structure, direction === 'horizontal', increment, normalize)
-        const anchor = this.getNodePosition(node, index)
+        const anchor = position ?? this.getNodePosition(node, index)
         Object.entries(positions).forEach(([id, delta]) =>
             this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, index, mode)
         )

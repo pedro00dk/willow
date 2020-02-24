@@ -70,19 +70,26 @@ export const Obj = (props: {
 
     React.useLayoutEffect(() => props.graphData.callSubscriptions(props.node.id))
 
+    // TODO make better members and previousMembers across shapes
     React.useEffect(() => {
         if (props.graphData.getIndex() === previousIndex.current) return
         previousIndex.current = props.graphData.getIndex()
         previousMembers.current = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
     })
 
+    // TODO implement better strategy to preserve structure root position
     React.useEffect(() => {
-        const layout = readParameters(props.node.layout, layoutParameters)
+        const layout = readParameters(props.node.layout.parameters, layoutParameters)
         const member = previousMembers.current[layout.member]
         if (!layout.automatic || !member || !isValueObject(member.value)) return
         const node = props.graphData.getNode(member.value[0])
+        const baseNode = props.graphData.findStructureBaseNode(node)
+        const position = props.node.layout.position ?? props.graphData.getNodePosition(baseNode)
+        props.node.layout.position = position
+
         const structure = props.graphData.applyStructureLayout(
             node,
+            position,
             layout.direction as any,
             undefined,
             undefined,
@@ -90,6 +97,10 @@ export const Obj = (props: {
             'override'
         )
         props.graphData.setAnimate(true)
+        props.graphData.subscribe(
+            baseNode.id,
+            () => (props.node.layout.position = props.graphData.getNodePosition(baseNode))
+        )
         Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
     })
 
@@ -103,6 +114,7 @@ export const Obj = (props: {
                     const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
                     const structure = props.graphData.applyStructureLayout(
                         props.node,
+                        undefined,
                         direction,
                         undefined,
                         undefined,
@@ -195,10 +207,10 @@ const ObjMenu = (props: {
             <Submenu label='layout'>
                 <Parameters
                     withReset
-                    parameters={props.node.layout}
+                    parameters={props.node.layout.parameters}
                     defaults={layoutParameters}
                     obj={props.obj}
-                    onChange={parameters => ((props.node.layout = parameters), props.update({}))}
+                    onChange={parameters => ((props.node.layout.parameters = parameters), props.update({}))}
                 />
             </Submenu>
         </Menu>
