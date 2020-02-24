@@ -1,5 +1,6 @@
 import React from 'react'
 import { DefaultState } from '../../../../reducers/Store'
+import * as schema from '../../../../schema/schema'
 import { GraphData } from '../GraphData'
 import { isValueObject } from '../SchemaUtils'
 import { SvgNode } from '../svg/SvgNode'
@@ -13,23 +14,34 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphDa
 
     React.useMemo(() => (depths.current = []), [available])
 
-    const computeDepths = (ids: string[], depth = 0, depths: { [id: string]: number } = {}): typeof depths => {
-        if (ids.length === 0) return depths
-        const childrenIds = ids.reduce((acc, id, i) => {
-            if (depths[id] != undefined) return acc
-            depths[id] = depth + i
-            heap[id].members.forEach(member => isValueObject(member.value) && acc.push(member.value[0]))
-            return acc
-        }, [] as string[])
-        return computeDepths(childrenIds, depth + 1000, depths)
+    // TODO write better implementation
+    const computeDepths = (
+        current: { id: string; depth: number }[],
+        depths: { [id: string]: number } = {}
+    ): typeof depths => {
+        if (current.length === 0) return depths
+        current.flatMap(({ id, depth }) => {
+            depths[id] = depth
+            return heap[id].members
+                .filter(member => isValueObject(member.value) && depths[member.value[0]] == undefined)
+                .map((member, i) => ({ id: (member.value as [string])[0], depth: depth + (i + 1) * 1000 }))
+                .map(current => computeDepths([current], depths))
+        })
+        return depths
     }
 
     if (!depths.current[index]) {
-        const ids = stack
-            .flatMap(scope => scope.variables)
-            .filter(variable => isValueObject(variable.value))
-            .map(variable => (variable.value as [string])[0])
-        depths.current[index] = computeDepths(ids)
+        const variableScopeDepths = Object.values(
+            stack
+                .flatMap((scope, i) => scope.variables.map(variable => ({ variable, scopeDepth: i * 1000000 })))
+                .filter(({ variable }) => isValueObject(variable.value))
+                .reduce((acc, { variable, scopeDepth }) => {
+                    const id = (variable.value as [string])[0]
+                    if (!acc[id] || acc[id].depth > scopeDepth) acc[id] = { id, depth: scopeDepth }
+                    return acc
+                }, {} as { [id: string]: { id: string; depth: number } })
+        )
+        depths.current[index] = computeDepths(variableScopeDepths)
     }
 
     return (
