@@ -13,22 +13,22 @@ const styles = {
 }
 
 export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
-    const previousVariables = React.useRef<{ [depth: number]: { [name: string]: schema.Variable } }>({})
+    const previousVariables = React.useRef<{ [scopeDepth: number]: { [name: string]: schema.Variable } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
 
-    const variableScopes = stack
-        .map((scope, i) => ({ scope, depth: i }))
-        .flatMap(({ scope, depth }) => scope.variables.map(variable => ({ variable, depth })))
+    // TODO write better implementation
+    const variableScopeDepths = stack
+        .flatMap((scope, i) => scope.variables.map(variable => ({ variable, scopeDepth: i })))
         .filter(({ variable }) => isValueObject(variable.value))
 
-    const variablesPerObject = variableScopes.reduce((acc, { variable, depth }) => {
+    const referenceVariableDepths = variableScopeDepths.reduce((acc, { variable, scopeDepth }) => {
         const id = (variable.value as [string])[0]
         if (!acc[id]) acc[id] = []
-        acc[id].push({ variable, depth })
+        acc[id].push({ variable, scopeDepth })
         return acc
-    }, {} as { [id: string]: { variable: schema.Variable; depth: number }[] })
+    }, {} as { [id: string]: { variable: schema.Variable; scopeDepth: number }[] })
 
     const deltas = [
         { x: -65, y: -25 },
@@ -36,29 +36,29 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
         { x: -65, y: 25 }
     ]
 
-    Object.entries(variablesPerObject).forEach(([id, variables]) =>
+    Object.entries(referenceVariableDepths).forEach(([id, variables]) =>
         variables
             .slice(-3)
             .reverse()
-            .forEach(({ variable, depth }, i) => {
-                const changed = !isSameVariable(variable, previousVariables.current[depth]?.[variable.name])
-                props.graphData.pushEdge(node.id, `${depth}-${variable.name}`, {
+            .forEach(({ variable, scopeDepth }, i) => {
+                const changed = !isSameVariable(variable, previousVariables.current[scopeDepth]?.[variable.name])
+                props.graphData.pushEdge(node.id, `${scopeDepth}-${variable.name}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
                     to: { mode: 'position' },
                     draw: 'line',
                     color: styles.color(changed),
-                    width: styles.width(i, depth, stack.length),
+                    width: styles.width(i, scopeDepth, stack.length),
                     text: variable.name
                 })
             })
     )
 
     React.useEffect(() => {
-        previousVariables.current = variableScopes.reduce((acc, { variable, depth }) => {
-            if (!acc[depth]) acc[depth] = {}
-            acc[depth][variable.name] = variable
+        previousVariables.current = variableScopeDepths.reduce((acc, { variable, scopeDepth }) => {
+            if (!acc[scopeDepth]) acc[scopeDepth] = {}
+            acc[scopeDepth][variable.name] = variable
             return acc
         }, {} as { [depth: number]: { [name: string]: schema.Variable } })
     })
