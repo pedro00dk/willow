@@ -26,7 +26,7 @@ docker image prune --force
 JAVA_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-java --silent"
 PYTHON_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-python --silent"
 
-docker container run --rm --detach --network host --volume /var/run/docker.sock:/var/run/docker.sock \
+docker container run --rm --detach --net=host --volume /var/run/docker.sock:/var/run/docker.sock \
     docker.pkg.github.com/${REPOSITORY}/willow-server \
     -- \
     --port 8000 \
@@ -34,8 +34,8 @@ docker container run --rm --detach --network host --volume /var/run/docker.sock:
     --tracer java "${JAVA_TRACER_COMMAND}"
 
 # start client static files server
-docker container run --rm --detach --network host \
+sudo docker container run --rm --detach --net=host \
     --env 'PORT=80' \
     --env 'SERVER=http://localhost:8000' \
     --env 'PROXY=yes' \
-    docker.pkg.github.com/${REPOSITORY}/willow-client \
+    docker.pkg.github.com/${REPOSITORY}/willow-client
