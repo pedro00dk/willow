@@ -18,24 +18,26 @@ docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-java
 docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-python
 docker image pull docker.pkg.github.com/${REPOSITORY}/willow-server
 docker image pull docker.pkg.github.com/${REPOSITORY}/willow-client
-
-# clean dangling images
 docker image prune --force
+
+# start services
+docker network create willow-network || true
 
 # start api server
 JAVA_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-java --silent"
 PYTHON_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-python --silent"
 
-docker container run --rm --detach --net=host --volume /var/run/docker.sock:/var/run/docker.sock \
+docker container run --name willow-server \
+    --rm --detach --network willow-network --volume /var/run/docker.sock:/var/run/docker.sock \
     docker.pkg.github.com/${REPOSITORY}/willow-server \
     -- \
     --port 8000 \
-    --tracer python "${PYTHON_TRACER_COMMAND}" \
-    --tracer java "${JAVA_TRACER_COMMAND}"
+    --tracer python "${PYTHON_TRACER_COMMAND}"
+    # --tracer java "${JAVA_TRACER_COMMAND}" \
 
-# start client static files server
-sudo docker container run --rm --detach --net=host \
-    --env 'PORT=80' \
-    --env 'SERVER=http://localhost:8000' \
+sudo docker container run --name willow-client \
+    --rm --detach --network willow-network --publish 80:8000 \
+    --env 'PORT=8000' \
+    --env 'SERVER=http://willow-server:8000' \
     --env 'PROXY=yes' \
     docker.pkg.github.com/${REPOSITORY}/willow-client
