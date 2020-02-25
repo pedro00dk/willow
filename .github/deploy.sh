@@ -1,44 +1,41 @@
 # Deploy script
-# This script requires git, docker and some gnu tools
 
-set -ev
+USERNAME=$1
+TOKEN=$2
+REPOSITORY=$3
+
+set -v
 
 # kill and remove any running containers
 docker container ls --all
 docker container kill $(docker container ls --quiet) || true
 docker container rm $(docker container ls --all --quiet) || true
 
-# clone project
-rm -fr ./willow/ || true
-git clone https://github.com/pedro00dk/willow
-cd ./willow/
 
-# create or update images
-cd ./tracers/java/
-docker image build --pull --no-cache --tag willow-java .
-cd ../python/
-docker image build --pull --no-cache --tag willow-python .
-cd ../../server/
-docker image build --pull --no-cache --tag willow-server .
-cd ../client/
-docker image build --pull --no-cache --tag willow-client .
+# pull github build images
+docker login --username ${USERNAME} --password ${TOKEN} docker.pkg.github.com
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-java
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-python
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-server
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-client
 
 # clean dangling images
 docker image prune --force
 
 # start api server
-docker container run --name willow_server --detach --volume /var/run/docker.sock:/var/run/docker.sock \
-    willow-server \
-    npm run start:base -- \
-    --tracer python 'docker run --rm -i willow-python' # --tracer java 'docker run --rm -i willow-java'
+JAVA_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-java --silent"
+PYTHON_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-python --silent"
 
+docker container run --rm --detach --network host --volume /var/run/docker.sock:/var/run/docker.sock \
+    docker.pkg.github.com/${REPOSITORY}/willow-server \
+    -- \
+    --port 8000 \
+    --tracer python "${PYTHON_TRACER_COMMAND}" \
+    --tracer java "${JAVA_TRACER_COMMAND}"
 
-SERVER_IP=$(docker container inspect willow_server --format {{.NetworkSettings.IPAddress}})
-echo $SERVER_IP
-
-# start client server
-sudo docker container run --name willow_client --detach --publish 80:8000 \
-    --env 'PORT=8000' \
-    --env "SERVER=http://${SERVER_IP}:8000" \
-    --env "PROXY=http://${SERVER_IP}:8000" \
-    willow-client npm run start:proxy
+# start client static files server
+docker container run --rm --detach --network host \
+    --env 'PORT=80' \
+    --env 'SERVER=http://localhost:8000' \
+    --env 'PROXY=yes' \
+    docker.pkg.github.com/${REPOSITORY}/willow-client \
