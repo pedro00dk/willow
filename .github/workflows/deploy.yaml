@@ -69,7 +69,7 @@ jobs:
               ${{ secrets.VM_NAME }} \
               --machine-type ${{ secrets.VM_TYPE }} \
               --metadata startup-script="${STARTUP_SCRIPT}" \
-              --tags https-server \
+              --tags http-server,https-server \
               --image-project cos-cloud --image-family cos-stable \
               --boot-disk-size 10GB \
               || true
