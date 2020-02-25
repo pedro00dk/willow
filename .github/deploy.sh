@@ -1,8 +1,8 @@
 # Deploy script
 
-USERNAME=$1
-TOKEN=$2
-REPOSITORY=$3
+USERNAME=${1}
+TOKEN=${2}
+REPOSITORY=${3}
 
 set -v
 

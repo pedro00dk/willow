@@ -6,7 +6,7 @@ on:
       - deploy
 
 jobs:
-
+  
 #  build:
 #    name: Build and deploy docker images
 #    runs-on: ubuntu-latest
@@ -74,6 +74,19 @@ jobs:
               --boot-disk-size 10GB \
               || true
 
+      - name: Checkout repository
+        run: |
+          git clone "https://github.com/${{ github.repository }}"
+          cd ./willow/
+          BRANCH=$(echo ${{ github.ref }} | cut -d / -f 3)
+          git switch ${BRANCH}
+
       - name: Run deploy script on compute instance
         run: |
-          echo 'TODO'
+          USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
+          cat ./willow/.github/deploy.sh |
+          sed "s/\${1}/${USERNAME}/" |
+          sed "s/\${2}/${{ github.token }}/" |
+          sed "s%\${3}%${{ github.repository }}%" |
+          tee ./deploy_filled.sh
+          gcloud --quiet compute ssh ${{ secrets.VM_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"
