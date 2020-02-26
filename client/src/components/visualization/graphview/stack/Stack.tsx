@@ -13,7 +13,7 @@ const styles = {
 }
 
 export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
-    const previousVariables = React.useRef<{ [scopeDepth: number]: { [name: string]: schema.Variable } }>({})
+    const previousVariables = React.useRef<{ [scope: number]: { [name: string]: schema.Variable } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
@@ -39,19 +39,18 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
         variablesDepths
             .slice(-3)
             .reverse()
-            .forEach(({ variable, depth }, i) => {
-                const changed = !isSameVariable(variable, previousVariables.current[depth]?.[variable.name])
+            .forEach(({ variable, depth }, i) =>
                 props.graphData.pushEdge(node.id, `${depth}-${variable.name}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
                     to: { mode: 'position' },
                     draw: 'line',
-                    color: styles.color(changed),
+                    color: styles.color(!isSameVariable(variable, previousVariables.current[depth]?.[variable.name])),
                     width: styles.width(i, depth, stack.length),
                     text: variable.name
                 })
-            })
+            )
     )
 
     React.useEffect(() => {

@@ -10,8 +10,7 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphDa
     const available = props.tracer.available
     const index = props.tracer.index
     const { stack = [], heap = {} } = (available && props.tracer.steps[index].snapshot) || {}
-
-    React.useMemo(() => (idsDepths.current = []), [available])
+    if (!available) idsDepths.current = []
 
     const computeIdsDepths = (roots: { [id: string]: number }, depths: { [id: string]: number } = {}) => {
         Object.entries(roots)

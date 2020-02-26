@@ -18,7 +18,9 @@ export const Language = () => {
         selected: state.language.languages[state.language.selected]
     }))
 
-    React.useEffect(() => void dispatch(languageActions.fetch()), [])
+    React.useEffect(() => {
+        dispatch(languageActions.fetch())
+    }, [])
 
     return (
         <div className={classes.container} title='Pick a language'>

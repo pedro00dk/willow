@@ -61,12 +61,8 @@ export const SplitPane = (props: {
             if (eventThrottle != undefined) return
             dispatchEvent(new Event('paneResizeStart'))
             eventThrottle = setInterval(() => {
-                if (eventFired) {
-                    dispatchEvent(new Event('paneResize'))
-                    eventFired = false
-                    return
-                }
                 dispatchEvent(new Event('paneResize'))
+                if (eventFired) return (eventFired = false)
                 dispatchEvent(new Event('paneResizeEnd'))
                 clearInterval(eventThrottle)
                 eventThrottle = undefined

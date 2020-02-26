@@ -33,8 +33,8 @@ export const Scope = (props: { scope: schema.Scope }) => {
             </thead>
             <tbody className={classes.column}>
                 {props.scope.variables.map((variable, i) => {
-                    const changed = !isSameVariable(variable, previousVariables.current[variable.name])
                     const displayValue = getDisplayValue(variable.value)
+                    const changed = !isSameVariable(variable, previousVariables.current[variable.name])
                     return (
                         <tr
                             key={i}
