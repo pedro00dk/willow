@@ -138,7 +138,7 @@ class Tracer:
         Hook to advert the debugee program that the builtin open() is not supported.
         """
 
-        raise FileNotFoundError('open() not supported')
+        raise FileNotFoundError('Builtin function open() is not supported. Use input and print functions for IO.')
 
 
 class TracerStopException(Exception):

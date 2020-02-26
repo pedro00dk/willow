@@ -51,9 +51,9 @@ class Inspector:
         classes = set()
         for i, frame in enumerate(frames):
             variables = frame.f_locals
-            snapshot['stack'][i]['variables'] = [
-                {'name': name, 'value': self._inspect_object(snapshot, variables[name], classes, module)}
-                for name, value in variables.items() if not name.startswith('_')
+            snapshot['stack'][i]['members'] = [
+                {'key': key, 'value': self._inspect_object(snapshot, variables[key], classes, module)}
+                for key, value in variables.items() if not key.startswith('_')
             ]
 
         return snapshot
@@ -94,25 +94,25 @@ class Inspector:
         if ordered_id in snapshot['heap']:
             return [ordered_id]
 
-        g_type = 'other'
-        l_type = type(obj).__name__
+        type_ = type(obj).__name__
+        category = 'other'
         members = None
 
         if isinstance(obj, (tuple, list, set)):
-            g_type = 'array' if not isinstance(obj, set) else 'set'
+            category = 'array' if not isinstance(obj, set) else 'set'
             members = [*enumerate(obj)]
         elif isinstance(obj, dict):
-            g_type = 'map'
+            category = 'map'
             members = [*obj.items()]
         elif isinstance(obj, (*classes,)):
-            g_type = 'map'
+            category = 'map'
             members = [(key, value) for key, value in vars(obj).items() if not key.startswith('_')]
 
         if members is not None:  # known object type
             # add object id to the heap before further inspections to avoid stack overflows
             obj = snapshot['heap'][ordered_id] = {}
-            obj['gType'] = g_type
-            obj['lType'] = l_type
+            obj['category'] = category
+            obj['type'] = type_
             obj['members'] = [
                 {
                     'key': self._inspect_object(snapshot, key, classes, module),
