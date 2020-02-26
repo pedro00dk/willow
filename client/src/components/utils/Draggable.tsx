@@ -1,9 +1,18 @@
 import React from 'react'
 
-// Firefox trash does not provide coordinates in drag operations with the exception of ondragover
+// Firefox does not provide coordinates in drag operations with the exception of the document element
 const isFirefox = typeof (globalThis as any).InstallTrigger !== 'undefined'
-let documentPosition = { x: 0, y: 0 }
-if (isFirefox) document.addEventListener('dragover', event => (documentPosition = { x: event.pageX, y: event.pageY }))
+const documentPosition = { x: 0, y: 0 }
+if (isFirefox) {
+    document.addEventListener('dragstart', event => {
+        documentPosition.x = event.pageX
+        documentPosition.y = event.pageY
+    })
+    document.addEventListener('dragover', event => {
+        documentPosition.x = event.pageX
+        documentPosition.y = event.pageY
+    })
+}
 
 export const Draggable = (props: {
     props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
@@ -12,31 +21,27 @@ export const Draggable = (props: {
     onDragEnd?: (event: React.DragEvent) => void
     children?: React.ReactNode
 }) => {
-    const anchor = React.useRef<{ x: number; y: number }>()
-    const ghostImage = React.useMemo(() => {
-        const image = new Image()
-        image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-        return image
-    }, [])
+    const anchor = React.useRef({ x: 0, y: 0 })
 
     return (
         <div
             {...props.props}
             draggable
             onDragStart={event => {
-                anchor.current = !isFirefox ? { x: event.pageX, y: event.pageY } : documentPosition
-                event.dataTransfer.setDragImage(ghostImage, 0, 0)
+                const image = new Image()
+                image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+                event.dataTransfer.setDragImage(image, 0, 0)
+                anchor.current = { x: event.pageX, y: event.pageY }
                 props.onDragStart?.(event)
             }}
             onDrag={event => {
-                const position = !isFirefox ? { x: event.pageX, y: event.pageY } : documentPosition
-                if (!isFirefox && position.x === 0 && position.y === 0) return
-                if (isFirefox && anchor.current.x === 0 && anchor.current.y === 0) return (anchor.current = position)
+                const position = !isFirefox ? { x: event.pageX, y: event.pageY } : { ...documentPosition }
+                if (position.x === 0 && position.y === 0) return
                 const delta = { x: position.x - anchor.current.x, y: position.y - anchor.current.y }
                 anchor.current = position
                 props.onDrag?.(event, delta)
             }}
-            onDragEnd={event => (anchor.current = undefined)}
+            onDragEnd={event => props.onDragEnd?.(event)}
             onMouseDown={event => event.stopPropagation()}
             onMouseUp={event => event.stopPropagation()}
             onMouseEnter={event => event.stopPropagation()}
