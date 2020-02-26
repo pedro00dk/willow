@@ -13,6 +13,18 @@ import java.util.stream.Collectors;
  * Inspect events and produces maps with their state data.
  */
 class Inspector {
+    private long orderedIdCount;
+    private Map<Long, String> orderedIds;
+    private Map<Long, String> previousOrderedIds;
+
+    /**
+     * Initialize the inspector and ordered id generators.
+     */
+    public Inspector() {
+        orderedIdCount = 0;
+        orderedIds = new HashMap<>();
+        previousOrderedIds = new HashMap<>();
+    }
 
     /**
      * Inspect the event to build a map with state data.
@@ -22,6 +34,9 @@ class Inspector {
      * @throws IncompatibleThreadStateException
      */
     JsonObject inspect(LocatableEvent event) throws IncompatibleThreadStateException {
+        previousOrderedIds = orderedIds;
+        orderedIds = new HashMap<>();
+
         var snapshot = new JsonObject();
         snapshot.addProperty("info", !(event instanceof ExceptionEvent) ? "ok" : "warn");
         var frames = new ArrayList<>(event.thread().frames());
@@ -64,18 +79,18 @@ class Inspector {
                     var values = e.getValue();
                     var scope = snapshot.get("stack").getAsJsonArray().get(scopeIndex[0]++).getAsJsonObject();
                     scope.add(
-                            "variables",
+                            "members",
                             localVariables.stream()
                                     .map(localVariable -> {
-                                        var variable = new JsonObject();
-                                        variable.addProperty("name", localVariable.name());
-                                        variable.add("value", inspectValue(snapshot, values.get(localVariable), threadReference));
-                                        return variable;
+                                        var member = new JsonObject();
+                                        member.addProperty("key", localVariable.name());
+                                        member.add("value", inspectValue(snapshot, values.get(localVariable), threadReference));
+                                        return member;
                                     })
                                     .collect(
                                             () -> new JsonArray(localVariables.size()),
                                             JsonArray::add,
-                                            (variable0, variable1) -> {
+                                            (memberA, memberB) -> {
                                                 throw new RuntimeException("parallel stream not allowed");
                                             }
                                     )
@@ -131,20 +146,31 @@ class Inspector {
     private JsonElement inspectObject(JsonObject snapshot, Value jdiValue, ThreadReference threadReference) {
         JsonElement value;
         if (!(jdiValue instanceof ObjectReference)) return null;
-
         var jdiObjRef = (ObjectReference) jdiValue;
-        var id = Long.toString(jdiObjRef.uniqueID());
-        if (snapshot.get("heap").getAsJsonObject().has(id)) {
+        var stringObj = inspectString(jdiObjRef);
+        if (stringObj != null) return stringObj;
+        var boxedObj = inspectBoxed(jdiObjRef);
+        if (boxedObj != null) return boxedObj;
+
+        var id = jdiObjRef.uniqueID();
+        var orderedId = "";
+        if (orderedIds.containsKey(id))
+            orderedId = orderedIds.get(id);
+        else if (previousOrderedIds.containsKey(id)) {
+            orderedIds.put(id, previousOrderedIds.get(id));
+            orderedId = orderedIds.get(id);
+        } else {
+            orderedIds.put(id, Long.toString(orderedIdCount++));
+            orderedId = orderedIds.get(id);
+        }
+
+        if (snapshot.get("heap").getAsJsonObject().has(orderedId)) {
             var idValue = new JsonArray(1);
             idValue.add(id);
             return idValue;
         }
 
-        return (value = inspectString(jdiObjRef)) != null
-                ? value
-                : (value = inspectBoxed(jdiObjRef)) != null
-                ? value
-                : (value = inspectArray(snapshot, jdiObjRef, threadReference)) != null
+        return (value = inspectArray(snapshot, jdiObjRef, threadReference)) != null
                 ? value
                 : (value = inspectCollection(snapshot, jdiObjRef, threadReference)) != null
                 ? value
@@ -174,12 +200,12 @@ class Inspector {
         return null;
     }
 
-    private JsonElement inspectIterable(JsonObject snapshot, ArrayReference jdiArrRef, String id, String type, String languageType, ThreadReference threadReference) {
+    private JsonElement inspectIterable(JsonObject snapshot, ArrayReference jdiArrRef, String id, String type, String category, ThreadReference threadReference) {
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
-        obj.addProperty("gType", type);
-        obj.addProperty("lType", languageType);
+        obj.addProperty("type", type);
+        obj.addProperty("category", category);
         int[] memberIndex = {0};
         obj.add(
                 "members",
@@ -208,9 +234,9 @@ class Inspector {
                 ? inspectIterable(
                 snapshot,
                 (ArrayReference) jdiObjRef,
-                Long.toString(jdiObjRef.uniqueID()),
-                "array",
+                orderedIds.get(jdiObjRef.uniqueID()),
                 jdiObjRef.referenceType().name(),
+                "array",
                 threadReference
         )
                 : null;
@@ -228,13 +254,13 @@ class Inspector {
                             List.of(),
                             ObjectReference.INVOKE_SINGLE_THREADED
                     ),
-                    Long.toString(jdiObjRef.uniqueID()),
+                    orderedIds.get(jdiObjRef.uniqueID()),
+                    jdiObjRef.referenceType().name(),
                     LinkedList.class.isAssignableFrom(jdiObjRefClass)
                             ? "linked"
                             : List.class.isAssignableFrom(jdiObjRefClass)
                             ? "array"
                             : "set",
-                    jdiObjRef.referenceType().name(),
                     threadReference
             )
                     : null;
@@ -261,12 +287,12 @@ class Inspector {
                     List.of(),
                     ObjectReference.INVOKE_SINGLE_THREADED
             );
-            var id = Long.toString(jdiObjRef.uniqueID());
+            var id = orderedIds.get(jdiObjRef.uniqueID());
             var obj = new JsonObject();
             // add id to heap graph (it has to be added before other objects inspections)
             snapshot.get("heap").getAsJsonObject().add(id, obj);
-            obj.addProperty("gType", "map");
-            obj.addProperty("lType", jdiObjRef.referenceType().name());
+            obj.addProperty("type", jdiObjRef.referenceType().name());
+            obj.addProperty("category", "map");
             obj.add(
                     "members",
                     jdiArrRef.getValues().stream()
@@ -318,12 +344,12 @@ class Inspector {
 
         var orderedFields = jdiObjRef.referenceType().allFields();
         var fieldsValues = jdiObjRef.getValues(orderedFields);
-        var id = Long.toString(jdiObjRef.uniqueID());
+        var id = orderedIds.get(jdiObjRef.uniqueID());
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
-        obj.addProperty("gType", "map");
-        obj.addProperty("lType", jdiObjRef.referenceType().name());
+        obj.addProperty("type", jdiObjRef.referenceType().name());
+        obj.addProperty("category", "map");
         obj.add(
                 "members",
                 orderedFields.stream()
