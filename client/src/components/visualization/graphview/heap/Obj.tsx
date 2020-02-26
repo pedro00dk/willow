@@ -35,12 +35,14 @@ export const Obj = (props: {
     references.current = []
     const previousMembers = React.useRef<{ [id: string]: schema.Member }>({})
 
-    const defaultShape = React.useMemo(() => {
-        return Object.entries(modules).reduce(
-            (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.gType) ? name : acc),
-            undefined as string
-        )
-    }, [props.obj.gType])
+    const defaultShape = React.useMemo(
+        () =>
+            Object.entries(modules).reduce(
+                (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.gType) ? name : acc),
+                undefined as string
+            ),
+        [props.obj.gType]
+    )
     const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
     const parameters = props.graphData.getNodeParameters(props.node)
 
@@ -90,11 +92,11 @@ export const Obj = (props: {
             undefined,
             'override'
         )
-        props.graphData.setAnimate(true)
         props.graphData.subscribe(
             baseNode.id,
             () => (props.node.layout.position = props.graphData.getNodePosition(baseNode))
         )
+        props.graphData.setAnimate(true)
         Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
     })
 
@@ -104,8 +106,8 @@ export const Obj = (props: {
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const direction = !event.altKey ? 'horizontal' : 'vertical'
-                    const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
+                    const direction = event.altKey ? 'vertical' : 'horizontal'
+                    const mode = event.ctrlKey ? 'override' : 'available'
                     const structure = props.graphData.applyStructureLayout(
                         props.node,
                         undefined,
@@ -123,7 +125,7 @@ export const Obj = (props: {
                 const svg = container$.current.closest('svg')
                 const [svgDelta] = svgScreenTransformVector('toSvg', svg, false, delta)
                 const depth = event.altKey ? Infinity : 0
-                const mode = !event.ctrlKey ? 'available' : !event.shiftKey ? 'override' : 'all'
+                const mode = event.ctrlKey ? 'override' : 'available'
                 const movedNodes = props.graphData.moveNodePositions(props.node, depth, svgDelta, undefined, mode)
                 props.graphData.setAnimate(false)
                 Object.values(movedNodes).forEach(node => props.graphData.callSubscriptions(node.id))
@@ -152,18 +154,23 @@ const ObjMenu = (props: {
     graphData: GraphData
     update: React.Dispatch<{}>
 }) => {
-    const [defaultShape, supportedShapes] = React.useMemo(() => {
-        return [
+    const defaultShape = React.useMemo(
+        () =>
             Object.entries(modules).reduce(
                 (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.gType) ? name : acc),
                 undefined as string
             ),
+        [props.obj.gType]
+    )
+    const supportedShapes = React.useMemo(
+        () =>
             Object.entries(modules).reduce(
                 (acc, [name, mod]) => (mod.supported.has(props.obj.gType) && acc.push(name), acc),
                 [] as string[]
-            )
-        ]
-    }, [props.obj.gType])
+            ),
+
+        [props.obj.gType]
+    )
     const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
     const parameters = props.graphData.getNodeParameters(props.node)
 
