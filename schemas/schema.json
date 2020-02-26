@@ -44,7 +44,7 @@
             "properties": {
                 "line": { "type": "number", "description": "First line of the scope." },
                 "name": { "type": "string", "description": "The scope name." },
-                "members": { "type": "array", "items": { "$ref": "#/definitions/members" } }
+                "members": { "type": "array", "items": { "$ref": "#/definitions/member" } }
             },
             "additionalProperties": false,
             "required": ["line", "name", "members"]
