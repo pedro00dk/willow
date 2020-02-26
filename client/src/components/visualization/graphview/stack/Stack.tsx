@@ -18,17 +18,16 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
 
-    // TODO write better implementation
-    const variableScopeDepths = stack
-        .flatMap((scope, i) => scope.variables.map(variable => ({ variable, scopeDepth: i })))
+    const variablesDepths = stack
+        .flatMap((scope, i) => scope.variables.map(variable => ({ variable, depth: i })))
         .filter(({ variable }) => isValueObject(variable.value))
 
-    const referenceVariableDepths = variableScopeDepths.reduce((acc, { variable, scopeDepth }) => {
+    const stackIdsVariablesDepths = variablesDepths.reduce((acc, { variable, depth }, i) => {
         const id = (variable.value as [string])[0]
         if (!acc[id]) acc[id] = []
-        acc[id].push({ variable, scopeDepth })
+        acc[id].push({ variable, depth })
         return acc
-    }, {} as { [id: string]: { variable: schema.Variable; scopeDepth: number }[] })
+    }, {} as { [id: string]: { variable: schema.Variable; depth: number }[] })
 
     const deltas = [
         { x: -65, y: -25 },
@@ -36,29 +35,29 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
         { x: -65, y: 25 }
     ]
 
-    Object.entries(referenceVariableDepths).forEach(([id, variables]) =>
-        variables
+    Object.entries(stackIdsVariablesDepths).forEach(([id, variablesDepths]) =>
+        variablesDepths
             .slice(-3)
             .reverse()
-            .forEach(({ variable, scopeDepth }, i) => {
-                const changed = !isSameVariable(variable, previousVariables.current[scopeDepth]?.[variable.name])
-                props.graphData.pushEdge(node.id, `${scopeDepth}-${variable.name}`, {
+            .forEach(({ variable, depth }, i) => {
+                const changed = !isSameVariable(variable, previousVariables.current[depth]?.[variable.name])
+                props.graphData.pushEdge(node.id, `${depth}-${variable.name}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
                     to: { mode: 'position' },
                     draw: 'line',
                     color: styles.color(changed),
-                    width: styles.width(i, scopeDepth, stack.length),
+                    width: styles.width(i, depth, stack.length),
                     text: variable.name
                 })
             })
     )
 
     React.useEffect(() => {
-        previousVariables.current = variableScopeDepths.reduce((acc, { variable, scopeDepth }) => {
-            if (!acc[scopeDepth]) acc[scopeDepth] = {}
-            acc[scopeDepth][variable.name] = variable
+        previousVariables.current = variablesDepths.reduce((acc, { variable, depth }) => {
+            if (!acc[depth]) acc[depth] = {}
+            acc[depth][variable.name] = variable
             return acc
         }, {} as { [depth: number]: { [name: string]: schema.Variable } })
     })
