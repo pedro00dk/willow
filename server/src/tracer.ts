@@ -37,7 +37,7 @@ export class Tracer {
         tracer.stdin.end(JSON.stringify(trace, undefined, 0))
 
         try {
-            await stopPromise // may throw timeout error
+            await stopPromise
         } finally {
             tracer.kill()
         }
