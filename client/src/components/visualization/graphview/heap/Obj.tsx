@@ -33,7 +33,6 @@ export const Obj = (props: {
     const container$ = React.useRef<HTMLDivElement>()
     const references = React.useRef<{ id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }[]>()
     references.current = []
-    const previousIndex = React.useRef(undefined)
     const previousMembers = React.useRef<{ [id: string]: schema.Member }>({})
 
     const defaultShape = React.useMemo(() => {
@@ -70,14 +69,10 @@ export const Obj = (props: {
 
     React.useLayoutEffect(() => props.graphData.callSubscriptions(props.node.id))
 
-    // TODO make better members and previousMembers across shapes
     React.useEffect(() => {
-        if (props.graphData.getIndex() === previousIndex.current) return
-        previousIndex.current = props.graphData.getIndex()
         previousMembers.current = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
     })
 
-    // TODO implement better strategy to preserve structure root position
     React.useEffect(() => {
         const layout = readParameters(props.node.layout.parameters, layoutParameters)
         const member = previousMembers.current[layout.member]
@@ -86,7 +81,6 @@ export const Obj = (props: {
         const baseNode = props.graphData.findStructureBaseNode(node)
         const position = props.node.layout.position ?? props.graphData.getNodePosition(baseNode)
         props.node.layout.position = position
-
         const structure = props.graphData.applyStructureLayout(
             node,
             position,
