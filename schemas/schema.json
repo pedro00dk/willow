@@ -1,19 +1,19 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "description": "Base schema for trace requests (traces) and responses (result)",
+    "description": "Base schema for trace requests (traces) and responses (results).",
     "oneOf": [{ "$ref": "#/definitions/trace" }, { "$ref": "#/definitions/result" }],
     "definitions": {
         "trace": {
-            "description": "Trace is a request that can be read by tracer processes",
+            "description": "Trace is a request containing source code, inputs and maximum amount of steps to execute.",
             "properties": {
-                "source": { "type": "string", "description": "The source code to be executed" },
-                "input": { "type": "string", "description": "Input to be consumed the the program" },
-                "steps": { "type": "number", "description": "Maximum number of program steps" }
+                "source": { "type": "string", "description": "The source code to be executed." },
+                "input": { "type": "string", "description": "Input to be consumed the the program." },
+                "steps": { "type": "number", "description": "Maximum number of program steps." }
             },
             "additionalProperties": false
         },
         "result": {
-            "description": "Result stores a list of all computed steps of a program",
+            "description": "Result stores a list of all computed steps of a program.",
             "properties": {
                 "steps": { "type": "array", "items": { "$ref": "#/definitions/step" } }
             },
@@ -21,18 +21,18 @@
             "required": ["steps"]
         },
         "step": {
-            "description": "Step stores the information of a program in a certain point",
+            "description": "Step stores the information of a program at a certain execution point.",
             "properties": {
                 "snapshot": { "$ref": "#/definitions/snapshot" },
-                "prints": { "type": "string", "description": "The content printed during the step" },
+                "prints": { "type": "string", "description": "The content printed at the step." },
                 "threw": { "$ref": "#/definitions/threw" }
             },
             "additionalProperties": false
         },
         "snapshot": {
-            "description": "Snapshots contains the state of a program in a certain point",
+            "description": "Snapshots contains the state of a program at a certain execution point.",
             "properties": {
-                "info": {"type":"string", "enum": ["ok", "warn", "error"], "description": "Snapshot info" },
+                "info": { "type": "string", "enum": ["ok", "warn", "error"], "description": "State information." },
                 "stack": { "type": "array", "items": { "$ref": "#/definitions/scope" } },
                 "heap": { "type": "object", "additionalProperties": { "$ref": "#/definitions/obj" } }
             },
@@ -40,36 +40,27 @@
             "required": ["info", "stack", "heap"]
         },
         "scope": {
-            "description": "Scope stores basic data and variables that may point to the heap",
+            "description": "Scope stores basic data and variables that may point to the heap.",
             "properties": {
-                "line": { "type": "number", "description": "First line of the scope" },
-                "name": { "type": "string", "description": "The scope name" },
-                "variables": { "type": "array", "items": { "$ref": "#/definitions/variable" } }
+                "line": { "type": "number", "description": "First line of the scope." },
+                "name": { "type": "string", "description": "The scope name." },
+                "members": { "type": "array", "items": { "$ref": "#/definitions/members" } }
             },
             "additionalProperties": false,
-            "required": ["line", "name", "variables"]
+            "required": ["line", "name", "members"]
         },
         "obj": {
-            "description": "Objects in the heap of a program",
+            "description": "Objects in the heap. They must have the same id for different runs of the same program.",
             "properties": {
-                "gType": { "type": "string", "enum": ["array", "linked", "set", "map"], "description": "General type" },
-                "lType": { "type": "string", "description": "Type string in the language" },
+                "type": { "type": "string", "description": "The object type." },
+                "category": { "type": "string", "enum": ["list", "set", "map", "other"], "description": "Category." },
                 "members": { "type": "array", "items": { "$ref": "#/definitions/member" } }
             },
             "additionalProperties": false,
-            "required": ["gType", "lType", "members"]
-        },
-        "variable": {
-            "description": "Variable is a named value from the stack to the heap",
-            "properties": {
-                "name": { "type": "string", "description": "The variable name in the stack" },
-                "value": { "$ref": "#/definitions/value" }
-            },
-            "additionalProperties": false,
-            "required": ["name", "value"]
+            "required": ["type", "category", "members"]
         },
         "member": {
-            "description": "Member is one element of a object of any kind",
+            "description": "Member is a variable of a scope or element of an object.",
             "properties": {
                 "key": { "$ref": "#/definitions/value" },
                 "value": { "$ref": "#/definitions/value" }
@@ -78,12 +69,12 @@
             "required": ["key", "value"]
         },
         "value": {
-            "description": "Value is the representation of any program element",
+            "description": "Value is the representation of any program element.",
             "oneOf": [
-                { "type": "number", "description": "Any number up to +-(2^53 - 1), larger ones must use string" },
-                { "type": "string", "description": "boolean, null, large numbers, types and other flat objects" },
+                { "type": "number", "description": "Any number up to +-(2^53 - 1), larger numbers must use string." },
+                { "type": "string", "description": "boolean, nullable, large numbers, types and other flat objects." },
                 {
-                    "description": "Array containing a reference to objects in the heap",
+                    "description": "Array containing a reference to a object in the heap.",
                     "type": "array",
                     "items": { "type": "string" },
                     "minItems": 1,
@@ -92,9 +83,9 @@
             ]
         },
         "threw": {
-            "description": "Indicates that the program stop before finishing or maybe even starting",
+            "description": "Indicates that the program or the tracer stopped due to some problem.",
             "properties": {
-                "cause": { "type": "string", "description": "Controlled threw not caused by the program" },
+                "cause": { "type": "string", "description": "Forced controlled stop caused by the tracer." },
                 "exception": { "$ref": "#/definitions/exception" }
             },
             "additionalProperties": false,
@@ -102,10 +93,10 @@
             "maxProperties": 1
         },
         "exception": {
-            "description": "Exception is an uncaught error of the program or the tracer itself.",
+            "description": "Uncaught error of the program or the tracer itself.",
             "properties": {
-                "type": { "type": "string", "description": "The string in the language" },
-                "traceback": { "type": "string", "description": "The error stacktrace" }
+                "type": { "type": "string", "description": "The error type." },
+                "traceback": { "type": "string", "description": "The error traceback." }
             },
             "additionalProperties": false,
             "required": ["type", "traceback"]
