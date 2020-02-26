@@ -31,9 +31,9 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphDa
 
     if (!idsDepths.current[index]) {
         const stackIdsDepths = stack.reduceRight((acc, scope, i) => {
-            scope.variables.forEach(variable => {
-                if (!isValueObject(variable.value)) return
-                const id = (variable.value as [string])[0]
+            scope.members.forEach(member => {
+                if (!isValueObject(member.value)) return
+                const id = (member.value as [string])[0]
                 acc[id] = i * 1000000
             })
             return acc
@@ -45,7 +45,7 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphDa
         <>
             {Object.entries(heap).map(([id, obj]) => {
                 const node = props.graphData.getNode(id)
-                node.type = obj.lType
+                node.type = obj.type
                 node.depth = idsDepths.current[index][id]
                 return (
                     <SvgNode key={id} id={id} graphData={props.graphData}>

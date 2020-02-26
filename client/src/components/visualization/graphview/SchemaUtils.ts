@@ -11,12 +11,6 @@ export const isSameMember = (memberA: schema.Member, memberB: schema.Member) => 
     return getMemberName(memberA) === getMemberName(memberB) && isSameValue(memberA.value, memberB.value)
 }
 
-export const isSameVariable = (variableA: schema.Variable, variableB: schema.Variable) => {
-    if ((!variableA && variableB) || (!variableB && variableA)) return false
-    if (!variableA && !variableB) return true
-    return variableA.name === variableB.name && isSameValue(variableA.value, variableB.value)
-}
-
 export const isSameValue = (valueA: schema.Value, valueB: schema.Value) => {
     const aIsObject = isValueObject(valueA)
     const bIsObject = isValueObject(valueB)

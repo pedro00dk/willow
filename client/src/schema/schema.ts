@@ -6,54 +6,54 @@
  */
 
 /**
- * Base schema for trace requests (traces) and responses (result)
+ * Base schema for trace requests (traces) and responses (results).
  */
 export type Schema = Trace | Result
 /**
- * Value is the representation of any program element
+ * Value is the representation of any program element.
  */
 export type Value = number | string | [string]
 
 /**
- * Trace is a request that can be read by tracer processes
+ * Trace is a request containing source code, inputs and maximum amount of steps to execute.
  */
 export interface Trace {
     /**
-     * The source code to be executed
+     * The source code to be executed.
      */
     source?: string
     /**
-     * Input to be consumed the the program
+     * Input to be consumed the the program.
      */
     input?: string
     /**
-     * Maximum number of program steps
+     * Maximum number of program steps.
      */
     steps?: number
 }
 /**
- * Result stores a list of all computed steps of a program
+ * Result stores a list of all computed steps of a program.
  */
 export interface Result {
     steps: Step[]
 }
 /**
- * Step stores the information of a program in a certain point
+ * Step stores the information of a program at a certain execution point.
  */
 export interface Step {
     snapshot?: Snapshot
     /**
-     * The content printed during the step
+     * The content printed at the step.
      */
     prints?: string
     threw?: Threw
 }
 /**
- * Snapshots contains the state of a program in a certain point
+ * Snapshots contains the state of a program at a certain execution point.
  */
 export interface Snapshot {
     /**
-     * Snapshot info
+     * State information.
      */
     info: 'ok' | 'warn' | 'error'
     stack: Scope[]
@@ -62,70 +62,60 @@ export interface Snapshot {
     }
 }
 /**
- * Scope stores basic data and variables that may point to the heap
+ * Scope stores basic data and variables that may point to the heap.
  */
 export interface Scope {
     /**
-     * First line of the scope
+     * First line of the scope.
      */
     line: number
     /**
-     * The scope name
+     * The scope name.
      */
     name: string
-    variables: Variable[]
-}
-/**
- * Variable is a named value from the stack to the heap
- */
-export interface Variable {
-    /**
-     * The variable name in the stack
-     */
-    name: string
-    value: Value
-}
-/**
- * Objects in the heap of a program
- */
-export interface Obj {
-    /**
-     * General type
-     */
-    gType: 'array' | 'linked' | 'set' | 'map'
-    /**
-     * Type string in the language
-     */
-    lType: string
     members: Member[]
 }
 /**
- * Member is one element of a object of any kind
+ * Member is a variable of a scope or element of an object.
  */
 export interface Member {
     key: Value
     value: Value
 }
 /**
- * Indicates that the program stop before finishing or maybe even starting
+ * Objects in the heap. They must have the same id for different runs of the same program.
+ */
+export interface Obj {
+    /**
+     * The object type.
+     */
+    type: string
+    /**
+     * Category.
+     */
+    category: 'list' | 'set' | 'map' | 'other'
+    members: Member[]
+}
+/**
+ * Indicates that the program or the tracer stopped due to some problem.
  */
 export interface Threw {
     /**
-     * Controlled threw not caused by the program
+     * Forced controlled stop caused by the tracer.
      */
     cause?: string
     exception?: Exception
 }
 /**
- * Exception is an uncaught error of the program or the tracer itself.
+ * Uncaught error of the program or the tracer itself.
  */
 export interface Exception {
     /**
-     * The string in the language
+     * The error type.
      */
     type: string
     /**
-     * The error stacktrace
+     * The error traceback.
      */
     traceback: string
 }

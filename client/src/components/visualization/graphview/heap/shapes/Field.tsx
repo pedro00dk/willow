@@ -27,8 +27,8 @@ export const defaultParameters = {
     'references position': { value: 'right', options: ['right', 'bottom'] }
 }
 
-export const defaults: ReadonlySet<schema.Obj['gType']> = new Set()
-export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'map'])
+export const defaults: ReadonlySet<schema.Obj['category']> = new Set()
+export const supported: ReadonlySet<schema.Obj['category']> = new Set(['list', 'map'])
 
 export const Shape = (props: {
     id: string
@@ -104,9 +104,9 @@ export const Shape = (props: {
     )
 
     return (
-        <Base title={props.obj.lType}>
+        <Base title={props.obj.type}>
             <div className={classes.container}>
-                {!supported.has(props.obj.gType)
+                {!supported.has(props.obj.category)
                     ? 'incompatible'
                     : memberName == undefined
                     ? 'choose'

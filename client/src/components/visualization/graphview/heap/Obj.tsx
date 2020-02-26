@@ -38,10 +38,10 @@ export const Obj = (props: {
     const defaultShape = React.useMemo(
         () =>
             Object.entries(modules).reduce(
-                (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.gType) ? name : acc),
+                (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.category) ? name : acc),
                 undefined as string
             ),
-        [props.obj.gType]
+        [props.obj.category]
     )
     const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
     const parameters = props.graphData.getNodeParameters(props.node)
@@ -157,19 +157,18 @@ const ObjMenu = (props: {
     const defaultShape = React.useMemo(
         () =>
             Object.entries(modules).reduce(
-                (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.gType) ? name : acc),
+                (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.category) ? name : acc),
                 undefined as string
             ),
-        [props.obj.gType]
+        [props.obj.category]
     )
     const supportedShapes = React.useMemo(
         () =>
             Object.entries(modules).reduce(
-                (acc, [name, mod]) => (mod.supported.has(props.obj.gType) && acc.push(name), acc),
+                (acc, [name, mod]) => (mod.supported.has(props.obj.category) && acc.push(name), acc),
                 [] as string[]
             ),
-
-        [props.obj.gType]
+        [props.obj.category]
     )
     const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
     const parameters = props.graphData.getNodeParameters(props.node)

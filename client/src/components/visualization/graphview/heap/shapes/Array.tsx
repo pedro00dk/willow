@@ -28,8 +28,8 @@ export const defaultParameters = {
     'wrap indices': { value: false, bool: true as const }
 }
 
-export const defaults: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set'])
-export const supported: ReadonlySet<schema.Obj['gType']> = new Set(['array', 'linked', 'set'])
+export const defaults: ReadonlySet<schema.Obj['category']> = new Set(['list', 'set'])
+export const supported: ReadonlySet<schema.Obj['category']> = new Set(['list', 'set'])
 
 export const Shape = (props: {
     id: string
@@ -96,9 +96,9 @@ export const Shape = (props: {
     }
 
     return (
-        <Base title={props.obj.lType}>
+        <Base title={props.obj.type}>
             <div className={classes.container} style={{ flexDirection: orientation === 'row' ? 'column' : 'row' }}>
-                {!supported.has(props.obj.gType)
+                {!supported.has(props.obj.category)
                     ? 'incompatible'
                     : props.obj.members.length === 0
                     ? 'empty'

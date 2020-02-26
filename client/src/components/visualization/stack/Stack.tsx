@@ -31,7 +31,7 @@ export const Stack = () => {
 
     return (
         <div ref={container$} className={classes.container}>
-            {!available && <Scope scope={{ line: 0, name: 'Stack', variables: [] }} />}
+            {!available && <Scope scope={{ line: 0, name: 'Stack', members: [] }} />}
             {available && stack.map((scope, i) => <Scope key={i} scope={scope} />)}
         </div>
     )

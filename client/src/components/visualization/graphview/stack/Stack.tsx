@@ -3,7 +3,7 @@ import { colors } from '../../../../colors'
 import { DefaultState } from '../../../../reducers/Store'
 import * as schema from '../../../../schema/schema'
 import { GraphData } from '../GraphData'
-import { isValueObject, isSameVariable } from '../SchemaUtils'
+import { isSameMember, isValueObject, getMemberName, getDisplayValue } from '../SchemaUtils'
 import { SvgNode } from '../svg/SvgNode'
 
 const styles = {
@@ -13,21 +13,21 @@ const styles = {
 }
 
 export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
-    const previousVariables = React.useRef<{ [scope: number]: { [name: string]: schema.Variable } }>({})
+    const previousMembers = React.useRef<{ [scope: number]: { [name: string]: schema.Member } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
 
-    const variablesDepths = stack
-        .flatMap((scope, i) => scope.variables.map(variable => ({ variable, depth: i })))
-        .filter(({ variable }) => isValueObject(variable.value))
+    const membersDepths = stack
+        .flatMap((scope, i) => scope.members.map(member => ({ member, depth: i })))
+        .filter(({ member }) => isValueObject(member.value))
 
-    const stackIdsVariablesDepths = variablesDepths.reduce((acc, { variable, depth }, i) => {
-        const id = (variable.value as [string])[0]
+    const stackIdsMembersDepths = membersDepths.reduce((acc, { member, depth }, i) => {
+        const id = (member.value as [string])[0]
         if (!acc[id]) acc[id] = []
-        acc[id].push({ variable, depth })
+        acc[id].push({ member, depth })
         return acc
-    }, {} as { [id: string]: { variable: schema.Variable; depth: number }[] })
+    }, {} as { [id: string]: { member: schema.Member; depth: number }[] })
 
     const deltas = [
         { x: -65, y: -25 },
@@ -35,30 +35,33 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
         { x: -65, y: 25 }
     ]
 
-    Object.entries(stackIdsVariablesDepths).forEach(([id, variablesDepths]) =>
+    Object.entries(stackIdsMembersDepths).forEach(([id, variablesDepths]) =>
         variablesDepths
             .slice(-3)
             .reverse()
-            .forEach(({ variable, depth }, i) =>
-                props.graphData.pushEdge(node.id, `${depth}-${variable.name}`, {
+            .forEach(({ member, depth }, i) => {
+                const memberName = getMemberName(member)
+                const changed = !isSameMember(member, previousMembers.current[depth]?.[memberName])
+                const displayKey = getDisplayValue(member.key)
+                props.graphData.pushEdge(node.id, `${depth}-${memberName}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
                     to: { mode: 'position' },
                     draw: 'line',
-                    color: styles.color(!isSameVariable(variable, previousVariables.current[depth]?.[variable.name])),
+                    color: styles.color(changed),
                     width: styles.width(i, depth, stack.length),
-                    text: variable.name
+                    text: displayKey
                 })
-            )
+            })
     )
 
     React.useEffect(() => {
-        previousVariables.current = variablesDepths.reduce((acc, { variable, depth }) => {
+        previousMembers.current = membersDepths.reduce((acc, { member, depth }) => {
             if (!acc[depth]) acc[depth] = {}
-            acc[depth][variable.name] = variable
+            acc[depth][getMemberName(member)] = member
             return acc
-        }, {} as { [depth: number]: { [name: string]: schema.Variable } })
+        }, {} as { [depth: number]: { [name: string]: schema.Member } })
     })
 
     return <>{available && <SvgNode id={node.id} graphData={props.graphData} />}</>

@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
 import * as schema from '../../../schema/schema'
-import { getDisplayValue, isSameVariable } from '../graphview/SchemaUtils'
+import { getDisplayValue, getMemberName, isSameMember } from '../graphview/SchemaUtils'
 
 const classes = {
     container: 'd-flex flex-column table table-sm table-hover border',
@@ -18,10 +18,10 @@ const styles = {
 }
 
 export const Scope = (props: { scope: schema.Scope }) => {
-    const previousVariables = React.useRef<{ [name: string]: schema.Variable }>({})
+    const previousMembers = React.useRef<{ [name: string]: schema.Member }>({})
 
     React.useEffect(() => {
-        previousVariables.current = Object.fromEntries(props.scope.variables.map(variable => [variable.name, variable]))
+        previousMembers.current = Object.fromEntries(props.scope.members.map(member => [getMemberName(member), member]))
     })
 
     return (
@@ -32,9 +32,10 @@ export const Scope = (props: { scope: schema.Scope }) => {
                 </tr>
             </thead>
             <tbody className={classes.column}>
-                {props.scope.variables.map((variable, i) => {
-                    const displayValue = getDisplayValue(variable.value)
-                    const changed = !isSameVariable(variable, previousVariables.current[variable.name])
+                {props.scope.members.map((member, i) => {
+                    const changed = !isSameMember(member, previousMembers.current[getMemberName(member)])
+                    const displayKey = getDisplayValue(member.key)
+                    const displayValue = getDisplayValue(member.value)
                     return (
                         <tr
                             key={i}
@@ -42,7 +43,7 @@ export const Scope = (props: { scope: schema.Scope }) => {
                             style={{ background: styles.background(changed) }}
                             title={displayValue}
                         >
-                            <td className={classes.cell}>{variable.name}</td>
+                            <td className={classes.cell}>{displayKey}</td>
                             <td className={classes.cell}>{displayValue}</td>
                         </tr>
                     )
