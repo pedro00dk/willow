@@ -1,5 +1,7 @@
 # Willow
 
+![Continuous Deployment](https://github.com/pedro00dk/willow/workflows/Continuous%20Deployment/badge.svg)
+
 Program visualizations for Algorithms and Data Structures.
 
 ### TODO
