@@ -17,9 +17,14 @@ import { Stack } from './visualization/stack/Stack'
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
     header: {
-        nav: 'navbar navbar-light bg-light shadow-sm mb-1',
+        container: 'navbar navbar-light bg-light shadow-sm',
         brand: 'd-flex navbar-brand align-items-center',
-        logo: cn('mr-2', css({ filter: 'invert(1)', width: '2rem' }))
+        logo: cn('mr-2', css({ filter: 'invert(1)', width: '2rem' })),
+        leftMenu: 'navbar-nav flex-row',
+        rightMenu: 'navbar-nav flex-row ml-auto',
+        menuItem: 'nav-item active px-2',
+        menuText: 'navbar-text',
+        itemLink: 'nav-link'
     },
     body: {
         container: 'd-flex flex-column flex-fill',
@@ -38,12 +43,27 @@ export const App = () => (
 )
 
 const Header = () => (
-    <nav className={classes.header.nav}>
+    <header className={classes.header.container}>
         <a className={classes.header.brand} href='#'>
             <img className={classes.header.logo} src={logo} />
-            Willow
+            {'Willow'}
         </a>
-    </nav>
+        <ul className={classes.header.leftMenu}>
+            <li className={classes.header.menuItem}>
+                <a className={classes.header.itemLink} href='#'>
+                    {'How to use'}
+                </a>
+            </li>
+        </ul>
+        <ul className={classes.header.rightMenu}>
+            <span className={classes.header.menuText}>{'User name'}</span>
+            <li className={classes.header.menuItem}>
+                <a className={classes.header.itemLink} href='#'>
+                    {'Login with Google'}
+                </a>
+            </li>
+        </ul>
+    </header>
 )
 
 const Body = () => (
