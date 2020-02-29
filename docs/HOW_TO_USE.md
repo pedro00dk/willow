@@ -2,17 +2,11 @@
 
 Willow is a tool for visualizing simple programs which requires minimal user intervention to create better visualizations of algorithms and data structures.
 
-## TL;DR
-
- TODO
+![](./images/list.gif)
 
 ## Interface
 
-The interface is composed by 7 components as shown below, the components can be resized by dragging the borders if necessary.
-
-![](./images/interface.png)
-
-TODO ? put running example?
+The interface is composed by 7 components as shown below, the components can be resized by dragging the borders if needed.
 
 ### Toolbar
 
@@ -49,26 +43,132 @@ The **output editor** shows the generated output of the program up to the curren
 
 ### Visualization components
 
-The visualization components show a representation of the program state. 
+The visualization components show a representation of the program state.
 It is split into Stack and Heap parts.
 Note that Stack and Heap are common in most of the programming languages memory layout, but may be used or interpreted differently the the languages.
 The user must note that that the components in the visualization are very high level abstractions and do not represent faithfully the elements of the program.
 
 For the sake of the visualization and depending on the language, things that should be represented as objects are not.
 In python for example, everything is an object, even things such as numbers and booleans.
-Because of this, many elements that should appear as objects are represented as *primitive like*|*structure* elements in Willow, usually ordinary and some immutable objects (boolean, numbers, strings, types, etc.).
+Because of this, many elements that should appear as objects are represented as _primitive like_|_structure_ elements in Willow, usually ordinary and some immutable objects (boolean, numbers, strings, types, etc.).
 Willow also hides things such as global and builtin variables not to pollute the visualization.
 
-
+By focusing in any of the visualization components, the user can use left and right keyboard arrows to step forward and backward.
 
 ### Stack
+
 The stack shows the variables of all scopes of the program.
-Variables that are references to an object in the heap are displayed with the value (`::`) and the reference is shown as an edge in the heap with the variable name. Some objects may be represented as strings.
+Variables that are references to an object in the heap are displayed with the value (`::`) and the reference is shown as an edge in the heap with the variable name.
+Some objects may be represented as strings.
+
+When the variable values change from one point of the program to another, they get a yellow highlight.
+
+The **stack trace** shows all functions scopes that were created in the program execution.
+Functions on top call the functions below.
+
+The stack trace also shows the current point of the program by darkening the functions scopes called.
+The scopes can also be used for program navigation.
+By clicking on then, the program step point will jump to the start of the function scope, if the key `ALT` is pressed, it will jump to the end of the function scope.
 
 ![](./images/stack.png)
 
 ### Heap
 
-#### Positioning, auto-layout and animation
+The heap renders most of the objects created during the program execution.
+Heap also highlight objects properties that changed the same way as the stack does.
+Objects are drawn with default shapes depending on their types, the shapes are:
+
+![](./images/shapes.png)
+
+One shape can be used to render objects that are not their default.
+The shapes support:
+
+-   Array: Supports arrays and iterables such as linked lists and sets.
+-   Columns: Only supports numeric arrays (without Infinity and NaN).
+-   Field: Supports all types of objects.
+-   Map: Supports all types of object.
+
+#### Positioning
+
+Objects can be freely moved inside the heap area by dragging them.
+Many objects can be moved at once by pressing `ALT` if they are directly or indirectly referenced by parent object.
+
+![](./images/position.gif)
+
+The effects of the positioning apply for all steps starting from the program step it moved up until a step with a different position applied to the object.
+
+Example:
+
+Given a program with 10 steps, which creates an object X in third step.\
+When the user arrives to the third step, The position of X for the program is:
+
+| 1   | 2   | 3\* | 4   | 5   | 6   | 7   | 8   | 9   | 10  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| U   | U   | A   | U   | U   | U   | U   | U   | U   | U   |
+
+-   A -> default position (0, 0)
+-   U -> not defined
+
+After stepping from the third to the eighth step, the X undefined positions are set to the default position:
+
+| 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8\* | 9   | 10  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| U   | U   | A   | A   | A   | A   | A   | A   | U   | U   |
+
+-   A -> default position (0, 0)
+-   U -> not defined
+
+By moving C, the user sets all positions starting from the current step until the end of the program or a different position:
+
+| 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8\* | 9   | 10  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| U   | U   | A   | A   | A   | A   | A   | B   | B   | B   |
+
+-   A -> default position (0, 0)
+-   B -> Final position after first user move
+-   U -> not defined
+
+Going back to the step 5 the position of X will be set to A again, if the user moves X again, the position is applied the following way:
+
+| 1   | 2   | 3   | 4   | 5\* | 6   | 7   | 8   | 9   | 10  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| U   | U   | A   | A   | C   | C   | C   | B   | B   | B   |
+
+-   A -> default position (0, 0)
+-   B -> Final position after first user move
+-   C -> Final position after second user move
+-   U -> not defined
+
+Note the the only the A positions are overridden because they are the same position before the user starts moving (undefined positions are also overridden), B positions are different and therefore not overridden. The user can force override by pressing `CTRL` while moving the object. In the example:
+
+| 1   | 2   | 3   | 4   | 5\* | 6   | 7   | 8   | 9   | 10  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| U   | U   | A   | A   | D   | D   | D   | D   | D   | D   |
+
+-   A -> default position (0, 0)
+-   B -> Final position after first user move
+-   C -> Final position after second user move
+-   D -> Final position after third user move (`CTRL` pressed)
+-   U -> not defined
+
+#### Automatic Layout
+
+Some simple linked structures such as Linked Lists or Trees can take advantage of the automatic layout feature.
+The automatic layout is triggered by the user by double clicking a Node that belongs a data structure.
+The layout direction is horizontal by default, pressing `ALT` changes to vertical.
+
+![](./images/layout.gif)
+
+Willow detects data structures by looking for a set of objects of the same type that have references among each other, if the structure has a *container object* acting as interface, it is ignored.
+In this set, Willow looks for a base object (something like the root of a tree or the first node of a linked list) using the depth of the object in the heap.
+Based on that, Willow tries to reposition the elements.
+
+User triggered layouts have the same positioning rules, use `CTRL` to enable overriding previous positions.
+
+#### Animation
+
+TODO
 
 #### Context menus
+
+TODO
