@@ -99,7 +99,7 @@ class Inspector:
         members = None
 
         if isinstance(obj, (tuple, list, set)):
-            category = 'array' if not isinstance(obj, set) else 'set'
+            category = 'list' if not isinstance(obj, set) else 'set'
             members = [*enumerate(obj)]
         elif isinstance(obj, dict):
             category = 'map'

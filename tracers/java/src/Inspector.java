@@ -236,7 +236,7 @@ class Inspector {
                 (ArrayReference) jdiObjRef,
                 orderedIds.get(jdiObjRef.uniqueID()),
                 jdiObjRef.referenceType().name(),
-                "array",
+                "list",
                 threadReference
         )
                 : null;
@@ -256,11 +256,7 @@ class Inspector {
                     ),
                     orderedIds.get(jdiObjRef.uniqueID()),
                     jdiObjRef.referenceType().name(),
-                    LinkedList.class.isAssignableFrom(jdiObjRefClass)
-                            ? "linked"
-                            : List.class.isAssignableFrom(jdiObjRefClass)
-                            ? "array"
-                            : "set",
+                    List.class.isAssignableFrom(jdiObjRefClass) ? "list" : "set",
                     threadReference
             )
                     : null;
