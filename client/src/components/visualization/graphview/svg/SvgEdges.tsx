@@ -39,7 +39,8 @@ export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
             })
 
         updateEdges()
-        Object.keys(props.graphData.getNodeChildren(node, 1)).forEach(id => props.graphData.subscribe(id, updateEdges))
+        props.graphData.subscribe(node.id, updateEdges)
+        edges.children.forEach(edge => props.graphData.subscribe(edge.target, updateEdges))
     })
 
     return (

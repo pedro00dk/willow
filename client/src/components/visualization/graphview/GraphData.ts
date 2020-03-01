@@ -89,7 +89,7 @@ export type Edge = Readonly<{
 
 export type Structure = {
     members: { [id: string]: Node }
-    links: { [id: string]: { children: { [id: string]: Node }; parents: { [id: string]: Node } } }
+    links: { [id: string]: { children: Node[]; parents: Node[] } }
     base: Node
     size: number
     depth: number
@@ -309,20 +309,11 @@ export class GraphData {
         return (nodeType.parameters[nodeType.shape] = parameters)
     }
 
-    getNodeParents(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
-        if (depth < 0 || pool[node.id]) return pool
-        if (!skipBase) pool[node.id] = node
-        this.getEdges(node.id).parents.forEach(edge =>
-            this.getNodeParents(this.getNode(edge.id), depth - 1, false, pool)
-        )
-        return pool
-    }
-
-    getNodeChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
+    getNodeRecursiveChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
         if (depth < 0 || pool[node.id]) return pool
         if (!skipBase) pool[node.id] = node
         this.getEdges(node.id).children.forEach(edge =>
-            this.getNodeChildren(this.getNode(edge.target), depth - 1, false, pool)
+            this.getNodeRecursiveChildren(this.getNode(edge.target), depth - 1, false, pool)
         )
         return pool
     }
@@ -334,7 +325,7 @@ export class GraphData {
         index = this.index,
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
-        const children = this.getNodeChildren(node, depth)
+        const children = this.getNodeRecursiveChildren(node, depth)
         Object.values(children).forEach(child => {
             const position = this.getNodePosition(child, index)
             this.setNodePositions(child, { x: position.x + delta.x, y: position.y + delta.y }, index, mode)
@@ -343,10 +334,9 @@ export class GraphData {
     }
 
     findStructureBaseNode(node: Node): Node {
-        const highestParent = Object.values(this.getNodeParents(node, 1, true)).reduce(
-            (acc, parent) => (parent.type === acc.type && parent.depth < acc.depth ? parent : acc),
-            node
-        )
+        const highestParent = this.getEdges(node.id)
+            .parents.map(edge => this.getNode(edge.id))
+            .reduce((acc, parent) => (parent.type === acc.type && parent.depth < acc.depth ? parent : acc), node)
         return highestParent === node ? node : this.findStructureBaseNode(highestParent)
     }
 
@@ -358,22 +348,24 @@ export class GraphData {
         const isMember = !!structure.members[node.id]
         if (!isMember) {
             structure.members[node.id] = node
-            structure.links[node.id] = { children: {}, parents: {} }
+            structure.links[node.id] = { children: [], parents: [] }
             structure.size++
             structure.depth = Math.max(structure.depth, depth)
-            Object.values(this.getNodeChildren(node, 1, true)).forEach(child => {
-                if (child.type !== structure.base.type) return
-                this.findStructure(child, node, depth + 1, structure)
-                const isSameAsParent = node.id === parent?.id
-                const childIsSameAsParent = child.id === parent?.id
-                structure.hasCycleEdge = structure.hasCycleEdge || isSameAsParent
-                structure.hasParentEdge = structure.hasParentEdge || (!isSameAsParent && childIsSameAsParent)
-                structure.hasCrossEdge = structure.hasCrossEdge || (!isSameAsParent && !childIsSameAsParent)
-            })
+            this.getEdges(node.id)
+                .children.map(edge => this.getNode(edge.target))
+                .forEach(child => {
+                    if (child.type !== structure.base.type) return
+                    this.findStructure(child, node, depth + 1, structure)
+                    const isSameAsParent = node.id === parent?.id
+                    const childIsSameAsParent = child.id === parent?.id
+                    structure.hasCycleEdge = structure.hasCycleEdge || isSameAsParent
+                    structure.hasParentEdge = structure.hasParentEdge || (!isSameAsParent && childIsSameAsParent)
+                    structure.hasCrossEdge = structure.hasCrossEdge || (!isSameAsParent && !childIsSameAsParent)
+                })
         }
         if (parent && node.id !== parent.id) {
-            structure.links[parent.id].children[node.id] = node
-            structure.links[node.id].parents[parent.id] = parent
+            structure.links[parent.id].children.push(node)
+            structure.links[node.id].parents.push(parent)
         }
         return structure
     }
@@ -389,7 +381,7 @@ export class GraphData {
     ): [{ [id: string]: { x: number; y: number } }, { x: number; y: number }] {
         if (positions[node.id]) return [positions, depth]
         positions[node.id] = { x: 0, y: 0 }
-        const childrenEndDepth = Object.values(structure.links[node.id].children).reduce(
+        const childrenEndDepth = structure.links[node.id].children.reduce(
             (acc, child) => {
                 if (positions[child.id]) return acc
                 const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
