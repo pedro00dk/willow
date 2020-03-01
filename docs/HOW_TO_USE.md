@@ -159,7 +159,9 @@ The layout direction is horizontal by default, pressing `ALT` changes to vertica
 
 ![](./images/layout.gif)
 
-Willow detects data structures by looking for a set of objects of the same type that have references among each other, if the structure has a *container object* acting as interface, it is ignored.
+![](./images/layout2.gif)
+
+Willow detects data structures by looking for a set of objects of the same type that have references among each other, if the structure has a _container object_ acting as interface, it is ignored.
 In this set, Willow looks for a base object (something like the root of a tree or the first node of a linked list) using the depth of the object in the heap.
 Based on that, Willow tries to reposition the elements.
 
@@ -167,8 +169,24 @@ User triggered layouts have the same positioning rules, use `CTRL` to enable ove
 
 #### Animation
 
-TODO
+The different positions of an object can be used to animate it throughout the program execution.
+The animation will play automatically when the user changes steps.
+
+![](./images/animation.gif)
 
 #### Context menus
 
-TODO
+Every object displayed in the Heap has a context menu.
+The menu allows the user to change the shape of objects or for groups of objects with the same type.
+
+The context menu's first item is a label that indicates if the shape and parameters changes are applied in the object only or in all objects of the same type.
+To change it, click on the label.
+
+-   using own parameters: applies to the object itself only.
+-   using type parameters: applies to all objects of same type (default).
+
+![](./images/shape.gif)
+
+![](./images/parameters.gif)
+
+It also allows automatic triggering layout when the user steps.

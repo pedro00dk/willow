@@ -4,7 +4,7 @@
 
 Program visualizations for Algorithms and Data Structures.
 
-### TODO
+[Check usage instructions here](docs/HOW_TO_USE.md)
 
 Demonstration video: https://www.youtube.com/watch?v=y4KFEZGWVtA
 
