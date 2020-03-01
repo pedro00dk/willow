@@ -52,9 +52,8 @@ const Header = () => (
             <li className={classes.header.menuItem}>
                 <a
                     className={classes.header.itemLink}
-                    href='https://github.com/pedro00dk/willow/blob/master/client/HOW_TO_USE.md'
+                    href='https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
                     target='_blank'
-                    rel='noopener noreferrer'
                 >
                     {'How to use'}
                 </a>
