@@ -7,6 +7,7 @@ import { reducer as languageReducer } from './language'
 import { reducer as optionsReducer } from './options'
 import { reducer as sourceReducer } from './source'
 import { reducer as tracerReducer } from './tracer'
+import { reducer as userReducer } from './user'
 
 /**
  * Piece of a reducer.
@@ -163,7 +164,8 @@ const reducers = {
     language: languageReducer,
     options: optionsReducer,
     source: sourceReducer,
-    tracer: tracerReducer
+    tracer: tracerReducer,
+    user: userReducer
 }
 
 type Reducers = typeof reducers
