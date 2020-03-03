@@ -1,6 +1,6 @@
 import cp from 'child_process'
 import express from 'express'
-import * as schema from './schema/schema'
+import * as schema from '../schema/schema'
 
 /**
  * Create the handlers for spawning tracer processes and executing traces.
