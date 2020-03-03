@@ -2,10 +2,13 @@
     "main": "./src/index.ts",
     "type": "module",
     "devDependencies": {
+        "@types/cookie-session": "2.0.38",
         "@types/cors": "2.8.6",
         "@types/express": "4.17.2",
         "@types/jest": "latest",
         "@types/node": "latest",
+        "@types/passport": "1.0.2",
+        "@types/passport-google-oauth20": "2.0.3",
         "@types/yargs": "15.0.3",
         "jest": "latest",
         "json-schema-to-typescript": "latest",
@@ -14,8 +17,11 @@
         "typescript": "latest"
     },
     "dependencies": {
+        "cookie-session": "1.4.0",
         "cors": "2.8.5",
         "express": "4.17.1",
+        "passport": "0.4.1",
+        "passport-google-oauth20": "2.0.0",
         "yargs": "15.1.0"
     },
     "config": {
