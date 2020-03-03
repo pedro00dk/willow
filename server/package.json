@@ -34,8 +34,8 @@
         "debug": "tsc && node --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/src/index.js",
         "start": "tsc && node --es-module-specifier-resolution node --require source-map-support/register -- ./dist/src/index.js",
         "test": "tsc && jest --testRegex 'dist/test/.*\\.test\\.js' --",
-        "debug:t": "npm run debug -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
-        "start:t": "npm run start -- --tracer java \"$npm_package_config_java_tracer\" --tracer python \"$npm_package_config_python_tracer\"",
+        "debug:t": "npm run debug -- --tracer-command java \"$npm_package_config_java_tracer\" --tracer-command python \"$npm_package_config_python_tracer\"",
+        "start:t": "npm run start -- --tracer-command java \"$npm_package_config_java_tracer\" --tracer-command python \"$npm_package_config_python_tracer\"",
         "test:t": "export TRACER_JAVA=\"$npm_package_config_java_tracer#public class Main{public static void main(String[] a){}}#error+-\" && export TRACER_PYTHON=\"$npm_package_config_python_tracer##error+-\" && npm run test"
     }
 }
