@@ -1,4 +1,4 @@
-import { Tracer } from '../src/tracer'
+import { runTracer } from '../src/routes/tracer'
 
 const tracers = Object.entries(process.env)
     .filter(([key]) => key.startsWith('TRACER_'))
@@ -13,19 +13,19 @@ const tracers = Object.entries(process.env)
 Object.values(tracers).forEach(({ language, command, working, broken }) => {
     describe(`tracer -- ${language}`, () => {
         test('working code', async () => {
-            await expect(new Tracer(command).run(working, 5000)).resolves.toBeDefined()
+            await expect(runTracer(command, working, 5000)).resolves.toBeDefined()
         })
 
         test('broken code', async () => {
-            await expect(new Tracer(command).run(broken, 5000)).resolves.toBeDefined()
+            await expect(runTracer(command, broken, 5000)).resolves.toBeDefined()
         })
 
         test('max steps', async () => {
-            await expect(new Tracer(command).run({ ...working, steps: 0 }, 5000)).resolves.toBeDefined()
+            await expect(runTracer(command, { ...working, steps: 0 }, 5000)).resolves.toBeDefined()
         })
 
         test('elapsed timeout', async () => {
-            await expect(new Tracer(command).run(working, 0)).resolves.toBeDefined()
+            await expect(runTracer(command, working, 0)).resolves.toBeDefined()
         })
     })
 })

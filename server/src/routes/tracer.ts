@@ -55,7 +55,7 @@ export const createHandlers = <T>(
  * @param trace the trace object
  * @param timeout the maximum execution time in milliseconds
  */
-const runTracer = async (command: string, trace: schema.Trace, timeout: number) => {
+export const runTracer = async (command: string, trace: schema.Trace, timeout: number) => {
     const tracer = cp.spawn(command, { shell: true })
 
     const stopPromise = new Promise((resolve, reject) => {
