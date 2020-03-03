@@ -5,19 +5,16 @@ import * as schema from '../schema/schema'
 /**
  * Create the handlers for spawning tracer processes and executing traces.
  *
- * @param tracers dictionary with languages and commands to spawn their tracers
- * @param steps maximum number of steps a tracer is allowed to run
- * @param timeout maximum time in milliseconds a tracer is allowed to run
- * @param signedSteps override steps for signed users
- * @param signedTimeout override timeout for signed users
+ * @param tracers.commands dictionary with languages and commands to spawn their tracers
+ * @param tracers.steps maximum number of steps a tracer is allowed to run
+ * @param tracers.timeout maximum time in milliseconds a tracer is allowed to run
+ * @param signed.steps override steps for signed users
+ * @param signed.timeout override timeout for signed users
  * @param verbose enable verbose output (prints traces and results)
  */
 export const createHandlers = <T>(
-    tracers: { [name: string]: string },
-    steps: number,
-    timeout: number,
-    signedSteps?: number,
-    signedTimeout?: number,
+    tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
+    signed: { steps: number; timeout: number },
     verbose: boolean = false
 ) => {
     const router = express.Router()
@@ -31,13 +28,13 @@ export const createHandlers = <T>(
     router.post('/trace', async (req, res) => {
         const user = req.user as T
         const language = req.body['language'] as string
-        steps = user && signedSteps != undefined ? signedSteps : steps
-        timeout = user && signedTimeout != undefined ? signedTimeout : timeout
+        const steps = user && signed.steps != undefined ? signed.steps : tracers.steps
+        const timeout = user && signed.timeout != undefined ? signed.timeout : tracers.timeout
         const trace = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
         console.log('http', req.path, user, language, steps, timeout, verbose ? trace : '')
         try {
-            if (!tracers[language]) throw new Error(`Language ${language} is not available.`)
-            const result = await runTracer(tracers[language], trace, timeout)
+            if (!tracers.commands[language]) throw new Error(`Language ${language} is not available.`)
+            const result = await runTracer(tracers.commands[language], trace, timeout)
             res.send(result)
             console.log('http', req.path, 'ok', verbose ? result : '')
         } catch (error) {
@@ -46,6 +43,8 @@ export const createHandlers = <T>(
             console.log('http', req.path, 'error', error.message)
         }
     })
+
+    return { handlers: [] as express.Handler[], router }
 }
 
 /**

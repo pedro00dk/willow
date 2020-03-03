@@ -11,20 +11,20 @@ import GoogleOAuth from 'passport-google-oauth20'
  * @param credentials.callbackURL one of the authorized redirect uris enabled in the google oauth credential
  *                                (it can be relative if server_address + router_path + callbackURL matches the one of
  *                                the redirect uris and the /success route provided by this router)
+ * @param cookieKey key for session cookie encryption
+ * @param redirectAddress redirects again from callbackURL to another URL (useful for going to origin '/' or CORS)
  * @param getUser transforms a profile into an user object
  * @param serializeUser transforms an user into its id
  * @param getUser transforms an id back to the user object
- * @param cookieKey key for session cookie encryption
- * @param redirectAddress redirects again from callbackURL to another URL (useful for going to origin '/' or CORS)
  * @template T user type
  */
 export const createHandlers = <T>(
     credentials: { clientID: string; clientSecret: string; callbackURL: string },
+    cookieKey: string,
+    redirectAddress: string,
     getUser: (profile: passport.Profile) => T,
     serializeUser: (user: T) => string,
-    deserializeUser: (id: string) => T,
-    cookieKey: string,
-    redirectAddress: string
+    deserializeUser: (id: string) => T
 ) => {
     const strategy = new GoogleOAuth.Strategy(credentials, (at, rt, profile, done) => done(undefined, getUser(profile)))
     passport.serializeUser<T, string>((user, done) => done(undefined, serializeUser(user)))
