@@ -14,7 +14,7 @@ export const createHandlers = <T>(
     verbose: boolean = false
 ) => {
     const router = express.Router()
-    const tracerLanguages = Object.keys(tracers)
+    const tracerLanguages = Object.keys(tracers.commands)
 
     router.get('/languages', (req, res) => {
         console.log('http', req.path, tracerLanguages)
@@ -29,7 +29,7 @@ export const createHandlers = <T>(
         const trace = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
         console.log('http', req.path, user, language, steps, timeout, verbose ? trace : '')
         try {
-            if (!tracers.commands[language]) throw new Error(`Language ${language} is not available.`)
+            if (!tracers.commands[language]) throw new Error(`Language ${language} is not available`)
             const result = await runTracer(tracers.commands[language], trace, timeout)
             res.send(result)
             console.log('http', req.path, 'ok', verbose ? result : '')
@@ -60,7 +60,7 @@ export const runTracer = async (command: string, trace: schema.Trace, timeout: n
 
     const stopPromise = new Promise((resolve, reject) => {
         tracer.on('close', (code, signal) => resolve())
-        setTimeout(() => reject(new Error(`Trace took longer than ${timeout}ms to execute.`)), timeout)
+        setTimeout(() => reject(new Error(`Trace took longer than ${timeout}ms to execute`)), timeout)
     })
 
     const stdoutBuffers: Buffer[] = []
