@@ -1,87 +1,66 @@
 import cors from 'cors'
 import express from 'express'
-import { Tracer } from './tracer'
+import { createHandlers as createAuthHandlers } from './routes/auth'
+import { createHandlers as createTracerHandlers } from './routes/tracer'
 
 /**
- * Server to expose registered tracers through http.
+ * Creates the server instance and all available handlers and routers, then return the server listen function.
+ *
+ * @param tracers.commands dictionary with languages and commands to spawn their tracers
+ * @param tracers.steps maximum number of steps a tracer is allowed to run
+ * @param tracers.timeout maximum time in milliseconds a tracer is allowed to run
+ * @param signed.steps override steps for signed users
+ * @param signed.timeout override timeout for signed users
+ * @param credentials.clientID google oauth credential client id
+ * @param credentials.clientSecret google oauth credential client secret
+ * @param credentials.callbackURL one of the authorized redirect uris enabled in the google oauth credential
+ *                                (it can be relative if server_address + router_path + callbackURL matches the one of
+ *                                the redirect uris and the /success route provided by this router)
+ * @param cookieKey key for session cookie encryption
+ * @param corsClient client address to allow cors ('*' allow cors for all sites but authentication redirects wrongly)
+ * @param verbose enable verbose output (prints traces and results)
  */
-export class Server {
-    private server: express.Express
-
-    /**
-     * Initializes the server setup its routes.
-     *
-     * @param tracers object with tracer languages as keys and init command as values
-     * @param steps maximum number of steps tracers are allowed to execute
-     * @param timeout maximum time for the tracer to finish its execution
-     * @param clients specific client address for restricted CORS.
-     * @param port port to server
-     * @param verbose print trace and result objects
-     */
-    constructor(
-        private readonly tracers: { [language: string]: string },
-        private readonly steps: number,
-        private readonly timeout: number,
-        readonly clients: string,
-        private readonly port: number,
-        private readonly verbose: boolean
-    ) {
-        this.server = express()
-        this.server.use(express.json())
-        this.server.use(
+export const createServer = (
+    tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
+    signed: { steps: number; timeout: number },
+    credentials: { clientID: string; clientSecret: string; callbackURL: string },
+    cookieKey: string,
+    corsClient: string,
+    verbose: boolean
+) => {
+    const server = express()
+    server.use(express.json())
+    if (corsClient != undefined)
+        server.use(
             cors({
                 origin: (origin, callback) => {
-                    const allow = clients === '*' || clients === origin
+                    const allow = corsClient === '*' || corsClient === origin
                     callback(!allow && new Error('illegal origin (CORS)'), allow)
                 },
                 credentials: true
             })
         )
-        this.configureRoutes()
+
+    const apiRouter = express.Router()
+
+    if (credentials) {
+        const { handlers: authHandlers, router: authRouter } = createAuthHandlers(
+            credentials,
+            cookieKey,
+            corsClient,
+            profile => ({ id: profile.id, name: profile.displayName, email: profile.emails[0].value }),
+            user => JSON.stringify(user),
+            id => JSON.parse(id)
+        )
+        authHandlers.forEach(handler => server.use(handler))
+        apiRouter.use('/auth', authRouter)
     }
 
-    /**
-     * Set server routes.
-     *
-     * GET /languages
-     * Returns a list of available tracer languages.
-     *
-     * POST/ trace
-     * Receives a trace request, process it and returns the generated result.
-     */
-    private configureRoutes() {
-        this.server.get('/languages', (req, res) => {
-            console.log(Server.name, req.path)
-            res.send(Object.keys(this.tracers))
-        })
+    const { handlers: tracerHandlers, router: tracerRouter } = createTracerHandlers(tracers, signed, verbose)
+    tracerHandlers.forEach(handler => server.use(handler))
+    apiRouter.use('/tracer', tracerRouter)
 
-        this.server.post('/trace', async (req, res) => {
-            console.log(Server.name, req.path)
-            const language = req.body['language'] as string
-            const trace = {
-                source: req.body['source'] as string,
-                input: req.body['input'] as string,
-                steps: this.steps
-            }
-            console.log(Server.name, req.path, language, this.verbose && JSON.stringify(trace))
-            try {
-                if (!this.tracers[language]) throw new Error('unexpected language')
-                const result = await new Tracer(this.tracers[language]).run(trace, this.timeout)
-                res.send(result)
-                console.log(Server.name, req.path, 'ok', this.verbose && JSON.stringify(result, undefined, 4))
-            } catch (error) {
-                res.status(400)
-                res.send(error.message)
-                console.log(Server.name, req.path, 'error', error.message)
-            }
-        })
-    }
+    server.use('/api', apiRouter)
 
-    /**
-     * Start the server.
-     */
-    listen() {
-        console.log(Server.name, 'listen', this.port)
-        this.server.listen(this.port)
-    }
+    return server
 }
