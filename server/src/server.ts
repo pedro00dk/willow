@@ -34,8 +34,8 @@ export const createServer = (
         server.use(
             cors({
                 origin: (origin, callback) => {
-                    const allow = corsClient === '*' || corsClient === origin
-                    callback(!allow && new Error('illegal origin (CORS)'), allow)
+                    const allow = corsClient === '*' || corsClient === origin || origin == undefined
+                    callback(!allow && new Error('Illegal CORS origin'), allow)
                 },
                 credentials: true
             })
@@ -47,7 +47,7 @@ export const createServer = (
         const { handlers: authHandlers, router: authRouter } = createAuthHandlers(
             credentials,
             cookieKey,
-            corsClient,
+            corsClient != undefined ? corsClient : '',
             profile => ({ id: profile.id, name: profile.displayName, email: profile.emails[0].value }),
             user => JSON.stringify(user),
             id => JSON.parse(id)
