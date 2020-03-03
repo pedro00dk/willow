@@ -4,21 +4,21 @@
 @contentType = application/json
 
 ###
-GET http://{{host}}/languages
+GET http://{{host}}/api/tracer/languages
 
 ### Fail ###
 ###
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 
 ###
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 
 {
     "language": "python"
 }
 
 ###
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -32,7 +32,7 @@ Content-Type: {{contentType}}
 ### Python ###
 
 ### 
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -41,7 +41,7 @@ Content-Type: {{contentType}}
 }
 
 ### 
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -59,7 +59,7 @@ Content-Type: {{contentType}}
 }
 
 ###
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -69,7 +69,7 @@ Content-Type: {{contentType}}
 }
 
 ### 
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -78,7 +78,7 @@ Content-Type: {{contentType}}
 }
 
 ### 
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
@@ -87,7 +87,7 @@ Content-Type: {{contentType}}
 }
 
 ### 
-POST http://{{host}}/trace
+POST http://{{host}}/api/tracer/trace
 Content-Type: {{contentType}}
 
 {
