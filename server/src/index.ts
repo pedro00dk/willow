@@ -12,13 +12,13 @@ const main = () => {
         .option('tracer-timeout', { default: 8000, description: 'Maximum tracer run time (milliseconds)' })
         .option('signin-steps', { type: 'number', description: 'Override --tracer-steps for signed users' })
         .option('signin-timeout', { type: 'number', description: 'Override --tracer-timeout for signed users' })
-        .option('auth-enable', { default: false, description: 'Enable OAuth authentication routes' })
+        .option('auth-enable', { type: 'boolean', description: 'Enable OAuth authentication routes' })
         .option('auth-google-client-id', { type: 'string', description: 'Google OAuth client id' })
         .option('auth-google-client-secret', { type: 'string', description: 'Google Oauth client secret' })
         .option('auth-google-callback-uri', { type: 'string', description: 'Google Oauth client secret' })
         .option('auth-cookie-key', { default: 'cookie-key', description: 'Key to encrypt authorization cookie' })
         .option('cors-client', { type: 'string', description: 'CORS for client (set exact address to allow auth)' })
-        .option('verbose', { default: false, description: 'Log traces calls and results' })
+        .option('verbose', { type: 'boolean', description: 'Log traces calls and results' })
 
     const options = parser.argv
 
@@ -48,7 +48,7 @@ const main = () => {
     const corsClient = options['cors-client']
     const verbose = options.verbose
 
-    console.log({ tracers, signed, credentials, cookieKey, corsClient, verbose })
+    console.log({tracers, signed, credentials, cookieKey, corsClient, verbose})
     const server = createServer(tracers, signed, credentials, cookieKey, corsClient, verbose)
     console.log('Server running at', port)
     server.listen(port)
