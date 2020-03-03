@@ -4,13 +4,9 @@ import * as schema from '../schema/schema'
 
 /**
  * Create the handlers for spawning tracer processes and executing traces.
- *
- * @param tracers.commands dictionary with languages and commands to spawn their tracers
- * @param tracers.steps maximum number of steps a tracer is allowed to run
- * @param tracers.timeout maximum time in milliseconds a tracer is allowed to run
- * @param signed.steps override steps for signed users
- * @param signed.timeout override timeout for signed users
- * @param verbose enable verbose output (prints traces and results)
+ * Check parameters documentation in server.ts.
+ * 
+ * @template T user type
  */
 export const createHandlers = <T>(
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
