@@ -17,7 +17,7 @@ const main = () => {
         .option('auth-google-client-secret', { type: 'string', description: 'Google Oauth client secret' })
         .option('auth-google-callback-uri', { type: 'string', description: 'Google Oauth client secret' })
         .option('auth-cookie-key', { default: 'cookie-key', description: 'Key to encrypt authorization cookie' })
-        .option('cors-client', { type: 'string', description: 'CORS for client (set exact address to allow auth)' })
+        .option('cors-whitelist', { type: 'string', description: 'Allow CORS clients split by "," ("*" any client)' })
         .option('verbose', { type: 'boolean', description: 'Log traces calls and results' })
 
     const options = parser.argv
@@ -45,11 +45,12 @@ const main = () => {
         callbackURL: options['auth-google-callback-uri']
     }
     const cookieKey = options['auth-cookie-key']
-    const corsClient = options['cors-client']
+    const a = options['cors-whitelist'] ?? ''
+    const corsWhitelist = new Set(options['cors-whitelist'].split(','))
     const verbose = options.verbose
 
-    console.log({tracers, signed, credentials, cookieKey, corsClient, verbose})
-    const server = createServer(tracers, signed, credentials, cookieKey, corsClient, verbose)
+    console.log({ tracers, signed, credentials, cookieKey, corsWhitelist, verbose })
+    const server = createServer(tracers, signed, credentials, cookieKey, corsWhitelist, verbose)
     console.log('Server running at', port)
     server.listen(port)
 }
