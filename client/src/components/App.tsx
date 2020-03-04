@@ -1,9 +1,10 @@
 import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
-import { DefaultStore, useDispatch } from '../reducers/Store'
-import { actions as tracerActions } from '../reducers/tracer'
 import logo from '../../public/logo.svg'
+import { DefaultStore, useDispatch, useSelection } from '../reducers/Store'
+import { actions as tracerActions } from '../reducers/tracer'
+import { actions as userActions } from '../reducers/user'
 import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'
@@ -42,33 +43,46 @@ export const App = () => (
     </DefaultStore>
 )
 
-const Header = () => (
-    <header className={classes.header.container}>
-        <a className={classes.header.brand} href='#'>
-            <img className={classes.header.logo} src={logo} />
-            {'Willow'}
-        </a>
-        <ul className={classes.header.leftMenu}>
-            <li className={classes.header.menuItem}>
-                <a
-                    className={classes.header.itemLink}
-                    href='https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
-                    target='_blank'
-                >
-                    {'How to use'}
-                </a>
-            </li>
-        </ul>
-        <ul className={classes.header.rightMenu}>
-            <span className={classes.header.menuText}>{'User name'}</span>
-            <li className={classes.header.menuItem}>
-                <a className={classes.header.itemLink} href='#'>
-                    {'Login with Google'}
-                </a>
-            </li>
-        </ul>
-    </header>
-)
+const Header = () => {
+    const dispatch = useDispatch()
+    const { user } = useSelection(state => ({ user: state.user }))
+
+    React.useEffect(() => {
+        dispatch(userActions.fetch())
+    }, [])
+
+    return (
+        <header className={classes.header.container}>
+            <a className={classes.header.brand} href='#'>
+                <img className={classes.header.logo} src={logo} />
+                {'Willow'}
+            </a>
+            <ul className={classes.header.leftMenu}>
+                <li className={classes.header.menuItem}>
+                    <a
+                        className={classes.header.itemLink}
+                        href='https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
+                        target='_blank'
+                    >
+                        {'How to use'}
+                    </a>
+                </li>
+            </ul>
+            <ul className={classes.header.rightMenu}>
+                {user.signed && <span className={classes.header.menuText}>{user.email}</span>}
+                <li className={classes.header.menuItem}>
+                    <a
+                        className={classes.header.itemLink}
+                        href='#'
+                        onClick={event => dispatch(!user.signed ? userActions.signin() : userActions.signout())}
+                    >
+                        {!user.signed ? 'Sign in' : 'Sign out'}
+                    </a>
+                </li>
+            </ul>
+        </header>
+    )
+}
 
 const Body = () => (
     <div className={classes.body.container}>
