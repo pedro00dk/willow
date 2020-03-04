@@ -59,6 +59,11 @@ export const createHandlers = <T>(
         res.redirect(req.cookies['address'])
     })
 
+    router.get('/signout', (req, res) => {
+        req.logOut()
+        res.redirect(req.cookies['address'])
+    })
+
     router.get('/user', (req, res) => {
         console.log('http', req.originalUrl, req.user)
         res.send(req.user)
