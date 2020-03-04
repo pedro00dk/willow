@@ -46,7 +46,7 @@ const trace = (): DefaultAsyncAction =>
         try {
             const { language, source, input } = getState()
             const result = (
-                await api.post<schema.Result>('/trace', {
+                await api.post<schema.Result>('/api/tracer/trace', {
                     language: language.languages[language.selected],
                     source: source.join('\n'),
                     input: input.join('\n')
