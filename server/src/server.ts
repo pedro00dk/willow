@@ -17,7 +17,7 @@ import { createHandlers as createTracerHandlers } from './routes/tracer'
  *                                (it can be relative if server_address + router_path + callbackURL matches the one of
  *                                the redirect uris and the /success route provided by this router)
  * @param cookieKey key for session cookie encryption
- * @param corsClient client address to allow cors ('*' allow cors for all sites but authentication redirects wrongly)
+ * @param corsWhitelist set of client addresses to allow cors ('*' allow any address)
  * @param verbose enable verbose output (prints traces and results)
  */
 export const createServer = (
@@ -25,17 +25,17 @@ export const createServer = (
     signed: { steps: number; timeout: number },
     credentials: { clientID: string; clientSecret: string; callbackURL: string },
     cookieKey: string,
-    corsClient: string,
+    corsWhitelist: Set<string>,
     verbose: boolean
 ) => {
     const server = express()
     server.use(express.json())
-    if (corsClient != undefined)
+    if (corsWhitelist != undefined)
         server.use(
             cors({
                 origin: (origin, callback) => {
-                    const allow = corsClient === '*' || corsClient === origin || origin == undefined
-                    callback(!allow && new Error('Illegal CORS origin'), allow)
+                    const allow = origin == undefined || corsWhitelist.has('*') || corsWhitelist.has(origin)
+                    callback(!allow && new Error(`Illegal CORS origin address ${origin}`), allow)
                 },
                 credentials: true
             })
@@ -47,7 +47,6 @@ export const createServer = (
         const { handlers: authHandlers, router: authRouter } = createAuthHandlers(
             credentials,
             cookieKey,
-            corsClient != undefined ? corsClient : '',
             profile => ({ id: profile.id, name: profile.displayName, email: profile.emails[0].value }),
             user => JSON.stringify(user),
             id => JSON.parse(id)
