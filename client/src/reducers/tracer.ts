@@ -29,7 +29,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
         case 'tracer/trace':
             return action.payload
                 ? { ...state, fetching: false, available: true, index: 0, ...action.payload }
-                : action.error
+                : action.error != undefined
                 ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
         case 'tracer/setIndex':
