@@ -22,14 +22,8 @@ export const createHandlers = <T>(
     deserializeUser: (id: string) => T
 ) => {
     const strategy = new GoogleOAuth.Strategy(credentials, (at, rt, profile, done) => done(undefined, getUser(profile)))
-    passport.serializeUser<T, string>((user, done) => {
-        console.log('serialize')
-        done(undefined, serializeUser(user))
-    })
-    passport.deserializeUser<T, string>((id, done) => {
-        console.log('deserialize')
-        done(undefined, deserializeUser(id))
-    })
+    passport.serializeUser<T, string>((user, done) => done(undefined, serializeUser(user)))
+    passport.deserializeUser<T, string>((id, done) => done(undefined, deserializeUser(id)))
 
     passport.use(strategy)
 
@@ -60,8 +54,9 @@ export const createHandlers = <T>(
     })
 
     router.get('/signout', (req, res) => {
+        console.log('http', req.originalUrl, req.user)
         req.logOut()
-        res.redirect(req.cookies['address'])
+        res.redirect(req.headers.referer)
     })
 
     router.get('/user', (req, res) => {
