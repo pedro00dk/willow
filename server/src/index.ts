@@ -45,8 +45,7 @@ const main = () => {
         callbackURL: options['auth-google-callback-uri']
     }
     const cookieKey = options['auth-cookie-key']
-    const a = options['cors-whitelist'] ?? ''
-    const corsWhitelist = new Set(options['cors-whitelist'].split(','))
+    const corsWhitelist = new Set((options['cors-whitelist'] ?? '').split(','))
     const verbose = options.verbose
 
     console.log({ tracers, signed, credentials, cookieKey, corsWhitelist, verbose })
