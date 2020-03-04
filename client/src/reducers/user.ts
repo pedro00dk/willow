@@ -5,7 +5,7 @@ import { DefaultAsyncAction } from './Store'
  */
 type State = {
     fetching: boolean
-    logged: boolean
+    signed: boolean
     email: string
     actions: ({ time: Date } & (
         | { action: 'login' }
@@ -25,7 +25,7 @@ type Action =
 
 const initialState: State = {
     fetching: false,
-    logged: false,
+    signed: false,
     email: undefined,
     actions: []
 }
@@ -37,7 +37,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return state
         case 'user/fetch':
             return action.payload
-                ? { ...state, fetching: false, email: action.payload }
+                ? { ...state, fetching: false, signed: true, email: action.payload }
                 : action.error != undefined
                 ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
@@ -52,7 +52,7 @@ const signin = (): DefaultAsyncAction => async () => {
 }
 
 const signout = (): DefaultAsyncAction => async () => {
-    await api.get('/api/auth/signout')
+    window.location.href = `${apiUrl}/api/auth/signout`
 }
 
 const fetch = (): DefaultAsyncAction => async dispatch => {
@@ -65,4 +65,4 @@ const fetch = (): DefaultAsyncAction => async dispatch => {
     }
 }
 
-export const actions = { signin, fetch }
+export const actions = { signin, signout, fetch }
