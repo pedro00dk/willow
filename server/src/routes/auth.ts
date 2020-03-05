@@ -25,7 +25,7 @@ export const createHandlers = <T>(
     passport.serializeUser<T, string>((user, done) => done(undefined, serializeUser(user)))
     passport.deserializeUser<T, string>((id, done) => done(undefined, deserializeUser(id)))
 
-    passport.use(strategy)
+    passport.use('google', strategy)
 
     const handlers: express.Handler[] = [
         cookieParser(cookieKey, {}),
@@ -41,8 +41,8 @@ export const createHandlers = <T>(
         '/signin',
         (req, res, next) => {
             console.log('http', req.originalUrl, req.headers.referer)
-            // set address cookie before redirect to remember client origin in case of CORS access
-            res.cookie('address', req.headers.referer, { sameSite: 'none' })
+            // set referer address cookie to remember client referer in case of CORS access
+            res.cookie('address', req.headers.referer ?? '/', { sameSite: 'none' })
             next()
         },
         passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -50,6 +50,7 @@ export const createHandlers = <T>(
 
     router.get('/success', passport.authenticate('google'), (req, res) => {
         console.log('http', req.originalUrl, req.cookies['address'])
+        // redirect to referer address set in cookie in /signin route
         res.redirect(req.cookies['address'])
     })
 
