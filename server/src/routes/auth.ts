@@ -17,13 +17,15 @@ import GoogleOAuth from 'passport-google-oauth20'
 export const createHandlers = <T>(
     credentials: { clientID: string; clientSecret: string; callbackURL: string },
     cookieKey: string,
-    getUser: (profile: passport.Profile) => T,
-    serializeUser: (user: T) => string,
-    deserializeUser: (id: string) => T
+    getUser: (profile: passport.Profile) => Promise<T>,
+    serializeUser: (user: T) => Promise<string>,
+    deserializeUser: (id: string) => Promise<T>
 ) => {
-    const strategy = new GoogleOAuth.Strategy(credentials, (at, rt, profile, done) => done(undefined, getUser(profile)))
-    passport.serializeUser<T, string>((user, done) => done(undefined, serializeUser(user)))
-    passport.deserializeUser<T, string>((id, done) => done(undefined, deserializeUser(id)))
+    const strategy = new GoogleOAuth.Strategy(credentials, async (at, rt, profile, done) =>
+        done(undefined, await getUser(profile))
+    )
+    passport.serializeUser<T, string>(async (user, done) => done(undefined, await serializeUser(user)))
+    passport.deserializeUser<T, string>(async (id, done) => done(undefined, await deserializeUser(id)))
 
     passport.use('google', strategy)
 
