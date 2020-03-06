@@ -16,6 +16,7 @@ const main = () => {
         .option('auth-google-client-id', { type: 'string', description: 'Google OAuth client id' })
         .option('auth-google-client-secret', { type: 'string', description: 'Google Oauth client secret' })
         .option('auth-google-callback-uri', { type: 'string', description: 'Google Oauth client secret' })
+        .option('auth-database-connection', { type: 'string', description: 'Connection string to a mongo database' })
         .option('auth-cookie-key', { default: 'cookie-key', description: 'Key to encrypt authorization cookie' })
         .option('cors-whitelist', { type: 'string', description: 'Allow CORS clients split by "," ("*" any client)' })
         .option('verbose', { type: 'boolean', description: 'Log traces calls and results' })
@@ -42,7 +43,8 @@ const main = () => {
     const credentials = options['auth-enable'] && {
         clientID: options['auth-google-client-id'],
         clientSecret: options['auth-google-client-secret'],
-        callbackURL: options['auth-google-callback-uri']
+        callbackURL: options['auth-google-callback-uri'],
+        databaseConnection: options['auth-database-connection']
     }
     const cookieKey = options['auth-cookie-key']
     const corsWhitelist = new Set((options['cors-whitelist'] ?? '').split(','))
