@@ -1,7 +1,7 @@
 import yargs from 'yargs'
 import { createServer } from './server'
 
-const main = () => {
+const main = async () => {
     const parser = yargs
         .usage('Willow API for CLI Tracers')
         .alias('h', 'help')
@@ -51,7 +51,7 @@ const main = () => {
     const verbose = options.verbose
 
     console.log({ tracers, signed, credentials, cookieKey, corsWhitelist, verbose })
-    const server = createServer(tracers, signed, credentials, cookieKey, corsWhitelist, verbose)
+    const server = await createServer(tracers, signed, credentials, cookieKey, corsWhitelist, verbose)
     console.log('Server running at', port)
     server.listen(port)
 }

@@ -1,5 +1,6 @@
 import cors from 'cors'
 import express from 'express'
+import { connectDatabase, getUser } from './database'
 import { createHandlers as createAuthHandlers } from './routes/auth'
 import { createHandlers as createTracerHandlers } from './routes/tracer'
 
@@ -16,14 +17,15 @@ import { createHandlers as createTracerHandlers } from './routes/tracer'
  * @param credentials.callbackURL one of the authorized redirect uris enabled in the google oauth credential
  *                                (it can be relative if server_address + router_path + callbackURL matches the one of
  *                                the redirect uris and the /success route provided by this router)
+ * @param credentials.databaseConnection connection string to a mongo database
  * @param cookieKey key for session cookie encryption
  * @param corsWhitelist set of client addresses to allow cors ('*' allow any address)
  * @param verbose enable verbose output (prints traces and results)
  */
-export const createServer = (
+export const createServer = async (
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
     signed: { steps: number; timeout: number },
-    credentials: { clientID: string; clientSecret: string; callbackURL: string },
+    credentials: { clientID: string; clientSecret: string; callbackURL: string; databaseConnection: string },
     cookieKey: string,
     corsWhitelist: Set<string>,
     verbose: boolean
@@ -44,12 +46,14 @@ export const createServer = (
     const apiRouter = express.Router()
 
     if (credentials) {
+        await connectDatabase(credentials.databaseConnection)
+
         const { handlers: authHandlers, router: authRouter } = createAuthHandlers(
             credentials,
             cookieKey,
-            profile => ({ id: profile.id, name: profile.displayName, email: profile.emails[0].value }),
-            user => JSON.stringify(user),
-            id => JSON.parse(id)
+            async profile => await getUser(profile.id, profile.displayName, profile.emails[0].value),
+            async user => (await getUser(user.id)).id,
+            async id => await getUser(id)
         )
         authHandlers.forEach(handler => server.use(handler))
         apiRouter.use('/auth', authRouter)
