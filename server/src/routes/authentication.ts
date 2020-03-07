@@ -54,7 +54,7 @@ export const createHandlers = <T>(
         passport.authenticate('google', { scope: ['profile', 'email'] })
     )
 
-    router.get('/success', passport.authenticate('google'), (req, res) => {
+    router.get('/callback', passport.authenticate('google'), (req, res) => {
         console.log('http', req.originalUrl, req.cookies['address'])
         // redirect to referer address set in cookie in /signin route
         res.redirect(req.cookies['address'])
