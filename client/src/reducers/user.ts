@@ -48,17 +48,17 @@ export const reducer = (state: State = initialState, action: Action): State => {
 }
 
 const signin = (): DefaultAsyncAction => async () => {
-    window.location.href = `${apiUrl}/api/auth/signin`
+    window.location.href = `${apiUrl}/api/authentication/signin`
 }
 
 const signout = (): DefaultAsyncAction => async () => {
-    window.location.href = `${apiUrl}/api/auth/signout`
+    window.location.href = `${apiUrl}/api/authentication/signout`
 }
 
 const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'user/fetch' })
     try {
-        const user = (await api.get('/api/auth/user')).data as { email: string }
+        const user = (await api.get('/api/authentication/user')).data as { email: string }
         dispatch({ type: 'user/fetch', payload: user.email })
     } catch (error) {
         dispatch({ type: 'user/fetch', error: error?.response?.data ?? error.toString() })
