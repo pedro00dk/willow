@@ -3,7 +3,7 @@ import { createServer } from './server'
 
 const main = async () => {
     const parser = yargs
-        .usage('Willow API for CLI Tracers')
+        .usage('Willow api for cli tracers')
         .alias('h', 'help')
         .hide('version')
         .option('port', { default: 8000, description: 'Set the server port' })
