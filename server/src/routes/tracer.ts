@@ -5,13 +5,13 @@ import * as schema from '../schema/schema'
 /**
  * Create the handlers for spawning tracer processes and executing traces.
  * Check parameters documentation in server.ts.
- * 
+ *
  * @template T user type
  */
 export const createHandlers = <T>(
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
     signed: { steps: number; timeout: number },
-    verbose: boolean = false
+    verbose: boolean
 ) => {
     const router = express.Router()
     const tracerLanguages = Object.keys(tracers.commands)
@@ -24,8 +24,8 @@ export const createHandlers = <T>(
     router.post('/trace', async (req, res) => {
         const user = req.user as T
         const language = req.body['language'] as string
-        const steps = user && signed.steps != undefined ? signed.steps : tracers.steps
-        const timeout = user && signed.timeout != undefined ? signed.timeout : tracers.timeout
+        const steps = user ? signed.steps : tracers.steps
+        const timeout = user ? signed.timeout : tracers.timeout
         const trace = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
         console.log('http', req.path, user, language, steps, timeout, verbose ? trace : '')
         try {
