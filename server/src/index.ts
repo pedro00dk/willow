@@ -10,16 +10,16 @@ const main = async () => {
         .option('tracer-command', { array: true, string: true, nargs: 2, description: 'Tracer <language> <command>' })
         .option('tracer-steps', { default: 1000, description: 'Maximum number of allowed steps of a program' })
         .option('tracer-timeout', { default: 8000, description: 'Maximum tracer run time (milliseconds)' })
-        .option('signin-steps', { type: 'number', description: 'Override --tracer-steps for signed users' })
-        .option('signin-timeout', { type: 'number', description: 'Override --tracer-timeout for signed users' })
-        .option('auth-enable', { type: 'boolean', description: 'Enable OAuth authentication routes' })
-        .option('auth-google-client-id', { type: 'string', description: 'Google OAuth client id' })
-        .option('auth-google-client-secret', { type: 'string', description: 'Google Oauth client secret' })
-        .option('auth-google-callback-uri', { type: 'string', description: 'Google Oauth client secret' })
-        .option('auth-database-connection', { type: 'string', description: 'Connection string to a mongo database' })
-        .option('auth-cookie-key', { default: 'cookie-key', description: 'Key to encrypt authorization cookie' })
-        .option('cors-whitelist', { type: 'string', description: 'Allow CORS clients split by "," ("*" any client)' })
-        .option('verbose', { type: 'boolean', description: 'Log traces calls and results' })
+        .option('signed-steps', { type: 'number', description: 'Override --tracer-steps for signed users' })
+        .option('signed-timeout', { type: 'number', description: 'Override --tracer-timeout for signed users' })
+        .option('authentication-enable', { type: 'boolean', description: 'Enable google oauth routes for user signin' })
+        .option('authentication-client-id', { type: 'string', description: 'Google oauth client id' })
+        .option('authentication-client-secret', { type: 'string', description: 'Google oauth client secret' })
+        .option('database-enable', { type: 'boolean', description: 'Enable user storage (requires authentication)' })
+        .option('database-uri', { type: 'string', description: 'Connection uri to mongo database' })
+        .option('database-name', { default: 'test', description: 'The mongo database name' })
+        .option('cors-whitelist', { default: '*', description: 'Allow cors clients (split by ",", "*" all clients)' })
+        .option('verbose', { type: 'boolean', description: 'Increase log output' })
 
     const options = parser.argv
 
@@ -37,23 +37,24 @@ const main = async () => {
         timeout: options['tracer-timeout']
     }
     const signed = {
-        steps: options['signin-steps'],
-        timeout: options['signin-timeout']
+        steps: options['signed-steps'] ?? tracers.steps,
+        timeout: options['signed-timeout'] ?? tracers.timeout
     }
-    const credentials = options['auth-enable'] && {
-        clientID: options['auth-google-client-id'],
-        clientSecret: options['auth-google-client-secret'],
-        callbackURL: options['auth-google-callback-uri'],
-        databaseConnection: options['auth-database-connection']
+    const authentication = options['authentication-enable'] && {
+        clientId: options['authentication-client-id'],
+        clientSecret: options['authentication-client-secret']
     }
-    const cookieKey = options['auth-cookie-key']
-    const corsWhitelist = new Set((options['cors-whitelist'] ?? '').split(','))
+    const database = options['authentication-enable'] &&
+        options['database-enable'] && {
+            uri: options['database-uri'],
+            name: options['database-name']
+        }
+    const corsWhitelist = new Set(options['cors-whitelist'].split(','))
     const verbose = options.verbose
 
-    console.log({ tracers, signed, credentials, cookieKey, corsWhitelist, verbose })
-    const server = await createServer(tracers, signed, credentials, cookieKey, corsWhitelist, verbose)
-    console.log('Server running at', port)
-    server.listen(port)
+    console.log('cli', 'options', { tracers, signed, authentication, database, corsWhitelist, verbose })
+    const server = await createServer(tracers, signed, authentication, database, corsWhitelist, verbose)
+    server.listen(port, () => console.log('server', `listening at', ${port}`))
 }
 
 main()
