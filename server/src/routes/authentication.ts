@@ -9,20 +9,24 @@ import GoogleOAuth from 'passport-google-oauth20'
  * After signin, a redirect request is sent pointing to the address which the user accessed the signin.
  * Check parameters documentation in server.ts.
  *
+ * @param callbackUri one of the authorized redirect uris enabled in the google oauth credential
+ *                    (it can be relative if server_address + router_path + callbackURL matches the one of the redirect
+ *                    uris and the /callback route provided by this router)
  * @param getUser transforms a profile into an user object
  * @param serializeUser transforms an user into its id
  * @param getUser transforms an id back to the user object
  * @template T user type
  */
 export const createHandlers = <T>(
-    credentials: { clientID: string; clientSecret: string; callbackURL: string },
-    cookieKey: string,
+    authentication: { clientId: string; clientSecret: string },
+    callbackUri: string,
     getUser: (profile: passport.Profile) => Promise<T>,
     serializeUser: (user: T) => Promise<string>,
     deserializeUser: (id: string) => Promise<T>
 ) => {
-    const strategy = new GoogleOAuth.Strategy(credentials, async (at, rt, profile, done) =>
-        done(undefined, await getUser(profile))
+    const strategy = new GoogleOAuth.Strategy(
+        { clientID: authentication.clientId, clientSecret: authentication.clientSecret, callbackURL: callbackUri },
+        async (at, rt, profile, done) => done(undefined, await getUser(profile))
     )
     passport.serializeUser<T, string>(async (user, done) => done(undefined, await serializeUser(user)))
     passport.deserializeUser<T, string>(async (id, done) => done(undefined, await deserializeUser(id)))
@@ -30,9 +34,9 @@ export const createHandlers = <T>(
     passport.use('google', strategy)
 
     const handlers: express.Handler[] = [
-        cookieParser(cookieKey, {}),
+        cookieParser(),
         // set cookieSession secure option to true when https enabled
-        cookieSession({ secret: cookieKey, maxAge: 24 * 60 * 60 * 1000, sameSite: 'none', secure: false }),
+        cookieSession({ signed: false, maxAge: 24 * 60 * 60 * 1000, sameSite: 'none', secure: false }),
         passport.initialize(),
         passport.session()
     ]
