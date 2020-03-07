@@ -9,6 +9,6 @@
         "noImplicitThis": true,
         "outDir": "./dist/",
         "sourceMap": true,
-        "target": "esnext"
+        "target": "es2020"
     }
 }
