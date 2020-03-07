@@ -27,11 +27,11 @@ export const connectDatabaseClient = async (uri: string, name: string) => {
  * Get the user from the database which has the same id. If it does not exist, create a new one and return it.
  * @param user user object
  */
-export const getUser = async (user: User, create = false) => {
+export const getUser = async (user: User | string, create = false) => {
     if (!mongo.client.isConnected()) throw Error('Mongo database is not connected')
     const usersCollection = mongo.db.collection<User>('users')
-    let databaseUser = await usersCollection.findOne({ id: user.id })
-    if (!databaseUser && create) {
+    let databaseUser = await usersCollection.findOne({ id: typeof user === 'object' ? user.id : user })
+    if (!databaseUser && typeof user === 'object' && create) {
         await usersCollection.insertOne(user)
         databaseUser = await usersCollection.findOne({ id: user.id })
     }
