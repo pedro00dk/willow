@@ -3,12 +3,14 @@
 USERNAME=${1}
 TOKEN=${2}
 REPOSITORY=${3}
+AUTHENTICATION_CLIENT_ID=${4}
+AUTHENTICATION_CLIENT_SECRET=${5}
 
 set -v
 
-# kill and remove any running containers
+# stop and remove any running containers
 docker container ls --all
-docker container kill $(docker container ls --quiet) || true
+docker container stop $(docker container ls --quiet) || true
 docker container rm $(docker container ls --all --quiet) || true
 
 
@@ -32,8 +34,14 @@ docker container run --name willow-server \
     docker.pkg.github.com/${REPOSITORY}/willow-server \
     -- \
     --port 8000 \
-    --tracer python "${PYTHON_TRACER_COMMAND}"
-    # --tracer java "${JAVA_TRACER_COMMAND}" \
+    --tracer-command python "${PYTHON_TRACER_COMMAND}" \
+    --tracer-command java "${JAVA_TRACER_COMMAND}" \
+    --tracer-steps 500 \
+    --signed-steps 1000 \
+    --authentication-enable \
+    --authentication-client-id "${AUTHENTICATION_CLIENT_ID}" \
+    --authentication-client-secret "${AUTHENTICATION_CLIENT_SECRET}"
+
 
 sudo docker container run --name willow-client \
     --rm --detach --network willow-network --publish 80:8000 \
