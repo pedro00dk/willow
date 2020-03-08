@@ -29,7 +29,8 @@ docker network create willow-network || true
 JAVA_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-java --silent"
 PYTHON_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-python --silent"
 
-docker container run --name willow-server \
+# The container name ends in .network to fake a public domain address required by google oauth
+docker container run --name willow-server.network \
     --rm --detach --network willow-network --volume /var/run/docker.sock:/var/run/docker.sock \
     docker.pkg.github.com/${REPOSITORY}/willow-server \
     -- \
@@ -46,6 +47,6 @@ docker container run --name willow-server \
 sudo docker container run --name willow-client \
     --rm --detach --network willow-network --publish 80:8000 \
     --env 'PORT=8000' \
-    --env 'SERVER=http://willow-server:8000' \
+    --env 'SERVER=http://willow-server.network:8000' \
     --env 'PROXY=yes' \
     docker.pkg.github.com/${REPOSITORY}/willow-client
