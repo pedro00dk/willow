@@ -7,6 +7,7 @@ AUTHENTICATION_CLIENT_ID=${4}
 AUTHENTICATION_CLIENT_SECRET=${5}
 API_URL=${6}
 CLIENT_URL=${7}
+DATABASE_URL=${8}
 
 set -v
 
@@ -44,6 +45,9 @@ sudo docker container run --name willow-api \
     --authentication-enable \
     --authentication-client-id "${AUTHENTICATION_CLIENT_ID}" \
     --authentication-client-secret "${AUTHENTICATION_CLIENT_SECRET}" \
+    --database-enable \
+    --database-url "${DATABASE_URL}" \
+    --database-name 'willow' \
     --cors-whitelist "${CLIENT_URL}"
 
 sudo docker container run --name willow-client \

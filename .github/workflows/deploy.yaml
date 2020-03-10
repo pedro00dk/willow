@@ -59,13 +59,15 @@ jobs:
           gcloud config set project ${{ secrets.PROJECT }}
           gcloud config set compute/zone ${{ secrets.COMPUTE_ZONE }}
 
-      - name: Create compute instance
+      - name: Create compute instances
         run: |
           if [ ${{ secrets.VM_RESET }} == 'true' ]
           then
               gcloud --quiet compute instances delete ${{ secrets.VM_NAME }} \
               || true
           fi
+
+          # TODO Database instance manually deployed (make it automatic)
 
           gcloud compute firewall-rules create allow-api  \
             --action=ALLOW --direction=INGRESS --rules=tcp:8000 --target-tags=api-server \
@@ -97,5 +99,6 @@ jobs:
           sed "s%\${5}%${{ secrets.AUTHENTICATION_CLIENT_SECRET }}%" |
           sed "s%\${6}%${{ secrets.API_URL }}%" |
           sed "s%\${7}%${{ secrets.CLIENT_URL }}%" |
+          sed "s%\${8}%${{ secrets.DATABASE_URL }}%" |
           tee ./deploy_filled.sh
           gcloud --quiet compute ssh ${{ secrets.VM_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"
