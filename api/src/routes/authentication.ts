@@ -6,12 +6,12 @@ import GoogleOAuth from 'passport-google-oauth20'
 
 /**
  * Create the handlers necessary to enable google oauth authentication and session management.
- * After signin, a redirect request is sent pointing to the address which the user accessed the signin.
+ * After signin, a redirect request is sent pointing to the url which the user accessed the signin.
  * Check parameters documentation in server.ts.
  *
- * @param callbackUri one of the authorized redirect uris enabled in the google oauth credential
- *                    (it can be relative if server_address + router_path + callbackURL matches the one of the redirect
- *                    uris and the /callback route provided by this router)
+ * @param callbackUrl one of the authorized redirect urls enabled in the google oauth credential
+ *                    (it can be relative if api url + router path + callback url matches the one of the redirect
+ *                    urls and the /callback route provided by this router)
  * @param getUser transforms a profile into an user object
  * @param serializeUser transforms an user into its id
  * @param getUser transforms an id back to the user object
@@ -19,13 +19,13 @@ import GoogleOAuth from 'passport-google-oauth20'
  */
 export const createHandlers = <T>(
     authentication: { clientId: string; clientSecret: string },
-    callbackUri: string,
+    callbackUrl: string,
     getUser: (profile: passport.Profile) => Promise<T>,
     serializeUser: (user: T) => Promise<string>,
     deserializeUser: (id: string) => Promise<T>
 ) => {
     const strategy = new GoogleOAuth.Strategy(
-        { clientID: authentication.clientId, clientSecret: authentication.clientSecret, callbackURL: callbackUri },
+        { clientID: authentication.clientId, clientSecret: authentication.clientSecret, callbackURL: callbackUrl },
         async (at, rt, profile, done) => done(undefined, await getUser(profile))
     )
     passport.serializeUser<T, string>(async (user, done) => done(undefined, await serializeUser(user)))
@@ -47,17 +47,17 @@ export const createHandlers = <T>(
         '/signin',
         (req, res, next) => {
             console.log('http', req.originalUrl, req.headers.referer)
-            // set referer address cookie to remember client referer in case of CORS access
-            res.cookie('address', req.headers.referer ?? '/', { sameSite: 'none' })
+            // set referer url cookie to remember client referer in case of CORS access
+            res.cookie('referer', req.headers.referer ?? '/', { sameSite: 'none' })
             next()
         },
         passport.authenticate('google', { scope: ['profile', 'email'] })
     )
 
     router.get('/callback', passport.authenticate('google'), (req, res) => {
-        console.log('http', req.originalUrl, req.cookies['address'])
-        // redirect to referer address set in cookie in /signin route
-        res.redirect(req.cookies['address'])
+        console.log('http', req.originalUrl, req.cookies['referer'])
+        // redirect to referer url set in cookie in /signin route
+        res.redirect(req.cookies['referer'])
     })
 
     router.get('/signout', (req, res) => {

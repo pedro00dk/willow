@@ -18,7 +18,7 @@ import { User } from './user'
  * @param authentication.clientId google oauth client id
  * @param authentication.clientSecret google oauth client secret
  * @param database if set, enable user storage (requires authentication)
- * @param database.uri connection uri to mongo database
+ * @param database.url connection url to mongo database
  * @param database.name the mongo database name
  * @param corsWhitelist allow cors clients ('*' all clients)
  * @param verbose increase log output
@@ -27,27 +27,18 @@ export const createServer = async (
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
     signed: { steps: number; timeout: number },
     authentication: { clientId: string; clientSecret: string },
-    database: { uri: string; name: string },
+    database: { url: string; name: string },
     corsWhitelist: Set<string>,
     verbose: boolean
 ) => {
     const server = express()
     server.use(express.json())
-    // server.use((req, res, next) => {
-    //     const origin = req.headers.origin as string
-    //     if (corsWhitelist.size === 0 || origin == undefined) return next()
-    //     const corsOrigin = corsWhitelist.has(origin) ? origin : corsWhitelist.has('*') ? '*' : ''
-    //     res.setHeader('Control-Access-Allow-Origin', corsOrigin)
-    //     res.setHeader('Control-Access-Allow-Credentials', 'true')
-    //     if (req.method !== 'OPTIONS') return next()
-    //     // preflight request
-    // })
     if (corsWhitelist.size > 0)
         server.use(
             cors({
                 origin: (origin, callback) => {
                     const allow = origin == undefined || corsWhitelist.has('*') || corsWhitelist.has(origin)
-                    callback(!allow && new Error(`Illegal CORS origin address ${origin}`), allow)
+                    callback(!allow && new Error(`Illegal CORS origin ${origin}`), allow)
                 },
                 credentials: true
             })
@@ -55,7 +46,7 @@ export const createServer = async (
 
     const apiRouter = express.Router()
     if (authentication) {
-        if (database) await connectDatabaseClient(database.uri, database.name)
+        if (database) await connectDatabaseClient(database.url, database.name)
 
         const getUserFromProfile = async (profile: Profile) => {
             const user = { id: profile.id, name: profile.displayName, email: profile.emails[0].value }

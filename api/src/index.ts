@@ -16,7 +16,7 @@ const main = async () => {
         .option('authentication-client-id', { type: 'string', description: 'Google oauth client id' })
         .option('authentication-client-secret', { type: 'string', description: 'Google oauth client secret' })
         .option('database-enable', { type: 'boolean', description: 'Enable user storage (requires authentication)' })
-        .option('database-uri', { type: 'string', description: 'Connection uri to mongo database' })
+        .option('database-url', { type: 'string', description: 'Connection url to mongo database' })
         .option('database-name', { default: 'test', description: 'The mongo database name' })
         .option('cors-whitelist', { default: '*', description: 'Allow cors clients (split by ",", "*" all clients)' })
         .option('verbose', { type: 'boolean', description: 'Increase log output' })
@@ -46,7 +46,7 @@ const main = async () => {
     }
     const database = options['authentication-enable'] &&
         options['database-enable'] && {
-            uri: options['database-uri'],
+            url: options['database-url'],
             name: options['database-name']
         }
     const corsWhitelist = new Set(options['cors-whitelist'].split(','))

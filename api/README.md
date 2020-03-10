@@ -1,8 +1,8 @@
-# Tracer Server
+# Willow API
 
 Exposes tracers cli through http api.
-The tracer server expects a set of optional arguments to work properly.
-The `--tracer` option must be set for each available tracer that will be exposed by the server.
+The api expects a set of optional arguments to work properly.
+The `--tracer-command` option must be set for each available tracer that will be exposed by the api.
 This option expects a tuple with the language of the tracer and the shell command to start it.
 
 ```shell
@@ -26,7 +26,7 @@ Options:
   --authentication-client-secret  Google oauth client secret            [string]
   --database-enable               Enable user storage (requires authentication)
                                                                        [boolean]
-  --database-uri                  Connection uri to mongo database      [string]
+  --database-url                  Connection url to mongo database      [string]
   --database-name                 The mongo database name      [default: "test"]
   --cors-whitelist                Allow cors clients (split by ",", "*" all
                                   clients)                        [default: "*"]
@@ -52,13 +52,13 @@ Check tracers README.md files for more info.
 
 To enable user authentication, the `--authentication-enable` flag must be set.
 Then the other authentication options shall be configured with google oauth _clientID_ and _clientSecret_.
-The callback uri must be set in google credentials to `${apiAddress}/api/authentication/callback`.
+The callback uri must be set in google credentials to `${apiUrl}/api/authentication/callback`.
 
 The authentication is saved as a token in the client cookies.
 
 ## Database (mongodb)
 
-To enable database and save usr information locally, the `--database-*` options must be set.
+To enable database and save user information locally, the `--database-*` options must be set.
 The authentication information sent to the client will change if database is enabled or not.
 If database is not enabled, all user information is saved in the client, otherwise, only the key to access it.
 

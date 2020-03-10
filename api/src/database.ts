@@ -13,13 +13,13 @@ const mongo = {
  * Connect to a mongo database.
  * Check parameters documentation in server.ts.
  */
-export const connectDatabaseClient = async (uri: string, name: string) => {
+export const connectDatabaseClient = async (url: string, name: string) => {
     if (mongo.client?.isConnected()) {
         console.log('database', 'closing previous connection')
         await mongo.client.close()
     }
-    console.log('database', `connecting to ${uri}`, `db ${name}`)
-    mongo.client = await mongodb.MongoClient.connect(uri, { useUnifiedTopology: true })
+    console.log('database', `connecting to ${url}`, `db ${name}`)
+    mongo.client = await mongodb.MongoClient.connect(url, { useUnifiedTopology: true })
     mongo.db = mongo.client.db(name)
 }
 
