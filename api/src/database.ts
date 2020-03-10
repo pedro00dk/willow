@@ -1,5 +1,5 @@
 import mongodb from 'mongodb'
-import { User } from './user'
+import { User, Actions } from './user'
 
 /**
  * Mongo client and database.
@@ -25,6 +25,7 @@ export const connectDatabaseClient = async (url: string, name: string) => {
 
 /**
  * Get the user from the database which has the same id. If it does not exist, create a new one and return it.
+ * 
  * @param user user object
  */
 export const getUser = async (user: User | string, create = false) => {
@@ -36,4 +37,19 @@ export const getUser = async (user: User | string, create = false) => {
         databaseUser = await usersCollection.findOne({ id: user.id })
     }
     return databaseUser
+}
+
+/**
+ * Append a new action to the user actions.
+ *
+ * @param user user to append action
+ * @param action an action the user executed
+ */
+export const appendUserAction = async (user: User | string, action: Actions['actions'][0]) => {
+    if (!mongo.client.isConnected()) throw Error('Mongo database is not connected')
+    const actionsCollection = mongo.db.collection<Actions>('actions')
+    let databaseUserActions = await actionsCollection.findOne({ id: typeof user === 'object' ? user.id : user })
+    if (!databaseUserActions)
+        await actionsCollection.insertOne({ id: typeof user === 'object' ? user.id : user, actions: [] })
+    await actionsCollection.updateOne({ id: typeof user === 'object' ? user.id : user }, { $push: { actions: action } })
 }
