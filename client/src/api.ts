@@ -1,14 +1,9 @@
+/**
+ * Save the api uri to make requests.
+ */
 import * as axios from 'axios'
 
 // environment variables captured when building by parcel using dotenv
-const apiServerAddress = process.env['SERVER']
-const bundleServerIsReverseProxy = process.env['PROXY'] ?? false
+const apiUrl = process.env['API']
 
-// uses bundle origin ('') if is bundle server is reverse proxy
-export const apiUrl = bundleServerIsReverseProxy ? '' : apiServerAddress
-
-// enable sending credentials in cross-site access-control requests
-// required if client access the api server directly (another domain)
-const withCredentials = !bundleServerIsReverseProxy
-
-export const api = axios.default.create({ baseURL: apiUrl, withCredentials })
+export const api = axios.default.create({ baseURL: apiUrl, withCredentials: true })

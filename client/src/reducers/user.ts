@@ -1,4 +1,4 @@
-import { api, apiUrl } from '../api'
+import { api } from '../api'
 import { DefaultAsyncAction } from './Store'
 /**
  * User reducer updates the user information and collect user actions.
@@ -48,11 +48,11 @@ export const reducer = (state: State = initialState, action: Action): State => {
 }
 
 const signin = (): DefaultAsyncAction => async () => {
-    window.location.href = `${apiUrl}/api/authentication/signin`
+    window.location.href = `${api.getUri()}/api/authentication/signin`
 }
 
 const signout = (): DefaultAsyncAction => async () => {
-    window.location.href = `${apiUrl}/api/authentication/signout`
+    window.location.href = `${api.getUri()}/api/authentication/signout`
 }
 
 const fetch = (): DefaultAsyncAction => async dispatch => {
