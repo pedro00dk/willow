@@ -1,10 +1,11 @@
 import cors from 'cors'
 import express from 'express'
 import { Profile } from 'passport'
-import { connectDatabaseClient, getUser } from './database'
+import { connectDatabaseClient, getUser, appendUserAction } from './database'
+import { createHandlers as createActionHandlers } from './routes/action'
 import { createHandlers as createAuthenticationHandlers } from './routes/authentication'
 import { createHandlers as createTracerHandlers } from './routes/tracer'
-import { User } from './user'
+import { User, Actions } from './user'
 
 /**
  * Creates the server instance and all available handlers and routers, then return the server.
@@ -65,6 +66,16 @@ export const createServer = async (
         authenticationHandlers.forEach(handler => server.use(handler))
         apiRouter.use('/authentication', authenticationRouter)
     }
+
+    const onAppendAction = (user: User | string, action: Actions['actions'][0]) => {
+        if (!user || !authentication || !database) return
+        appendUserAction(user, action)
+    }
+
+    const { handlers: actionHandlers, router: actionRouter } = createActionHandlers(onAppendAction)
+    actionHandlers.forEach(handler => server.use(handler))
+    apiRouter.use('/action', actionRouter)
+
     const { handlers: tracerHandlers, router: tracerRouter } = createTracerHandlers(tracers, signed, verbose)
     tracerHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/tracer', tracerRouter)
