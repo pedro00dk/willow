@@ -4,6 +4,6 @@
 import axios from 'axios'
 
 // environment variables captured when building by parcel using dotenv
-const apiUrl = process.env['API']
+export const apiUrl = process.env['API']
 
 export const api = axios.create({ baseURL: apiUrl, withCredentials: true })
