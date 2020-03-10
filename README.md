@@ -4,23 +4,25 @@
 
 Program visualizations for Algorithms and Data Structures.
 
-[Check usage instructions here](docs/HOW_TO_USE.md)
-
 Demonstration video: https://www.youtube.com/watch?v=y4KFEZGWVtA
+
+## Usage Instructions
+
+[Check usage instructions here](./docs/HOW_TO_USE.md)
 
 ## Examples:
 
 Trees:
-![](docs/images/tree.gif)
+![](./docs/images/tree.gif)
 
 Sorting:
-![](docs/images/sort.gif)
+![](./docs/images/sort.gif)
 
-## Extra Documentation
+## Modules Documentation
 
 For more information about willow, check the modules documentations:
 
--   [Client](client/README.md)
--   [Server](server/README.md)
--   [Java Tracer](tracers/java/README.md)
--   [Python Tracer](tracers/python/README.md)
+-   [API](./api/README.md)
+-   [Client](./client/README.md)
+-   [Java Tracer](./tracers/java/README.md)
+-   [Python Tracer](./tracers/python/README.md)

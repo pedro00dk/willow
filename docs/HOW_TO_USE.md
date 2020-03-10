@@ -37,7 +37,8 @@ During the execution of the program, it also highlights the next line to be exec
 
 The **input editor** provides a way to parametrize and test the program without having to hardcode the input in the source code.
 The input is sent to the program through the standard input stream.
-If the program consumes all available input, it will not hang waiting for more because a EOF flag is also sent. This may cause the program to throw some kind of EOF error.
+If the program consumes all available input, it will not hang waiting for more because a EOF flag is also sent.
+This may cause the program to throw some kind of EOF error.
 
 The **output editor** shows the generated output of the program up to the current execution point of any errors that might have been thrown.
 
@@ -139,7 +140,8 @@ Going back to the step 5 the position of X will be set to A again, if the user m
 -   C -> Final position after second user move
 -   U -> not defined
 
-Note the the only the A positions are overridden because they are the same position before the user starts moving (undefined positions are also overridden), B positions are different and therefore not overridden. The user can force override by pressing `CTRL` while moving the object. In the example:
+Note the the only the A positions are overridden because they are the same position before the user starts moving (undefined positions are also overridden), B positions are different and therefore not overridden.
+The user can force override by pressing `CTRL` while moving the object. In the example:
 
 | 1   | 2   | 3   | 4   | 5\* | 6   | 7   | 8   | 9   | 10  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
