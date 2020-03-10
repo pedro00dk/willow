@@ -12,13 +12,13 @@ They are respectively `npm run start:dev` and `npm run start`.
 
 ### Options (Environment variables)
 
--   API: Set the http address of the api, this environment variable is required (cross site resource sharing).
+-   API: Set the url of the api, this environment variable is required (cross site resource sharing).
 -   PORT: Set the client bundle server port (default: 1234).
 
 ## Docker
 
 The client bundle server image does not require especial options to build or run.
-However, the api address and port must be set through environment variables (`--env`) when running the container.
+However, the api url must be set through environment variables (`--env`) when running the container.
 Remember to expose ports if your configuration needs it.
 
 ```shell
