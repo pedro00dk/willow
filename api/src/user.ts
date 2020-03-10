@@ -15,6 +15,6 @@ export type Actions = {
     actions: {
         date: Date
         name: string
-        payload: string
+        payload: any
     }[]
 }
