@@ -38,8 +38,8 @@ $ # use --tracer <language> <command> to set tracers
 $ # <command> ex: cd ../tracers/python && make run --silent
 $ npm run start -- --port 80 --tracer python <cmd> --tracer java <cmd>
 
-$ # use the start:t script to automatically register local tracers
-$ npm tun start:t
+$ # use the start:dev script to automatically register local tracers
+$ npm run start:dev
 ```
 
 ## Signed options
