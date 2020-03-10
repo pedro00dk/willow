@@ -36,7 +36,7 @@ Options:
 $ # npm run start does not have any tracer registered by default
 $ # use --tracer <language> <command> to set tracers
 $ # <command> ex: cd ../tracers/python && make run --silent
-$ npm run start -- --port 80 --tracer python <cmd> --tracer java <cmd>
+$ npm run start -- --port 80 --tracer-command python "${PYTHON_COMMAND}" --tracer-command java "${JAVA_COMMAND}"
 
 $ # use the start:dev script to automatically register local tracers
 $ npm run start:dev
@@ -83,7 +83,9 @@ GET /api/authentication/user
 GET /api/tracer/languages
 ```
 
--   Trace the source code. Step counts are not read from the _trace_ JSON, the step counts are only settable through the `--tracer-steps` option, which is then sent to tracers. Note that the content structure is similar to tracer request data, except it has the extra language field, and the step field is removed.
+-   Trace the source code.
+    Step counts are not read from the _trace_ JSON, the step counts are only settable through the `--tracer-steps` option, which is then sent to tracers.
+    Note that the content structure is similar to tracer request data, except it has the extra language field, but not the step field, which is provided by the api.
 
 ```http
 POST /api/tracer/trace
@@ -97,30 +99,45 @@ Content-Type: application/json
 
 ## Docker
 
-The server image does not require especial options to build or run. However, it does not pack any tracer implementation inside it. Remember to expose ports if your configuration needs it.
+The server image does not require especial options to build or run.
+However, it does not pack any tracer implementation inside it.
+Remember to expose ports if your configuration needs it.
 
 ```shell
 $ docker image build --tag willow-server -- ./
 
 $ # docker ENTRYPOINT='npm run start' CMD=''
 $ # ex:
-$ docker container run --rm --interactive --tty -- willow-server -- --help
 $ docker container run --rm --interactive --tty -- willow-server
+$ docker container run --rm --interactive --tty -- willow-server -- --help
+$ docker container run --rm --interactive --tty -- willow-server -- --tracer-command python "${PYTHON_COMMAND}"
 ```
 
 There are three main options to run a server image with tracers.
 
--   Extend the current image by adding the tracers implementations. In this case, the tracers implementations would run inside the server container. The server container would have to provide support to every tracer, which are usually written in different languages.
+-   Extend the current image by adding the tracers implementations.
+    In this case, the tracers implementations would run inside the server container.
+    The server container would have to provide support to every tracer, which are usually written in different languages.
 
--   The server image comes with docker installed, so it could be used as a host for other docker containers. This strategy also requires extending the image to build tracer images inside the server container.
+-   The server image comes with docker installed, so it could be used as a host for other docker containers.
+    This strategy also requires extending the image to build tracer images inside the server container.
 
--   **(recommended)** Mount the docker socket inside the server container. The server container will be able to start containers registered in the host. It allows independent building of the tracers and server, and require only minimal changes in server container run options.
+-   **(recommended)** Mount the docker socket inside the server container.
+    The server container will be able to start containers registered in the host.
+    It allows independent building of the tracers and server, and require only minimal changes in server container run options.
+    The docker script (runs on host but server container access it (and its I/O) through docker host socket)
+
     ```shell
+    $ LANGUAGE='python'
+    $ # --interactive enabled for communication through stdio
+    $ COMMAND='docker run --rm --interactive --tty willow-python-tracer'
+
+    $ # docker ENTRYPOINT='npm run start' CMD=''
     $ docker container run \
         --rm --interactive --tty \
         --volume /var/run/docker.sock:/var/run/docker.sock \ # mount socket
         -- \
-        ${WILLOW_SERVER_IMAGE_NAME} \ # ENTRYPOINT='npm run start'
-        -- \ # skip npm options (script options here)
-        --tracer ${LANGUAGE} ${COMMAND} # docker script (runs on host but server container access it (and its I/O) through docker host socket)
+        willow-server \
+        -- \ # skip npm options
+        --tracer-command "${LANGUAGE}" "${COMMAND}"
     ```
