@@ -6,7 +6,8 @@ on:
       - deploy
 
 jobs:
-
+  #
+  #
   build:
     name: Build and deploy docker images
     runs-on: ubuntu-latest
@@ -21,31 +22,31 @@ jobs:
       - name: Build docker images
         run: |
           cd ./willow/
-          cd ./tracers/java/
+          cd ./api/
+          docker image build --pull --no-cache --tag willow-api .
+          cd ../client/
+          docker image build --pull --no-cache --tag willow-client .
+          cd ../tracers/java/
           docker image build --pull --no-cache --tag willow-tracer-java .
           cd ../python/
           docker image build --pull --no-cache --tag willow-tracer-python .
-          cd ../../server/
-          docker image build --pull --no-cache --tag willow-server .
-          cd ../client/
-          docker image build --pull --no-cache --tag willow-client .
           cd ../
 
       - name: Deploy images to github registry
         run: |
           USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
           docker login --username ${USERNAME} --password ${{ github.token }} docker.pkg.github.com
+          docker image tag willow-api docker.pkg.github.com/${{ github.repository }}/willow-api
+          docker image tag willow-client docker.pkg.github.com/${{ github.repository }}/willow-client
           docker image tag willow-tracer-java docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
           docker image tag willow-tracer-python docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
-          docker image tag willow-server docker.pkg.github.com/${{ github.repository }}/willow-server
-          docker image tag willow-client docker.pkg.github.com/${{ github.repository }}/willow-client
           docker image ls
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-api
+          docker image push docker.pkg.github.com/${{ github.repository }}/willow-client
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-server
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-client
-
-
+  #
+  #
   deploy:
     name: Deploy to google cloud
     needs: build
@@ -62,14 +63,18 @@ jobs:
         run: |
           if [ ${{ secrets.VM_RESET }} == 'true' ]
           then
-              gcloud --quiet compute instances delete ${{ secrets.VM_NAME }} || true
+              gcloud --quiet compute instances delete ${{ secrets.VM_NAME }} \
+              || true
           fi
-          INSTANCE_STARTUP_SCRIPT='echo "startup script"'
+
+          gcloud compute firewall-rules create allow-api  \
+            --action=ALLOW --direction=INGRESS --rules=tcp:8000 --target-tags=api-server \
+            || true
+
           gcloud compute instances create \
               ${{ secrets.VM_NAME }} \
               --machine-type ${{ secrets.VM_TYPE }} \
-              --metadata startup-script="${STARTUP_SCRIPT}" \
-              --tags http-server,https-server \
+              --tags http-server,https-server,api-server \
               --image-project cos-cloud --image-family cos-stable \
               --boot-disk-size 10GB \
               || true
@@ -78,17 +83,19 @@ jobs:
         run: |
           git clone "https://github.com/${{ github.repository }}"
           cd ./willow/
-          BRANCH=$(echo ${{ github.ref }} | cut -d / -f 3)
+          BRANCH=$(echo ${{ github.ref }} | cut -d '/' -f 3)
           git switch ${BRANCH}
 
       - name: Run deploy script on compute instance
         run: |
-          USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
+          USERNAME=$(echo ${{ github.repository }} | cut -d '/' -f 1)
           cat ./willow/.github/deploy.sh |
           sed "s/\${1}/${USERNAME}/" |
           sed "s/\${2}/${{ github.token }}/" |
           sed "s%\${3}%${{ github.repository }}%" |
           sed "s%\${4}%${{ secrets.AUTHENTICATION_CLIENT_ID }}%" |
           sed "s%\${5}%${{ secrets.AUTHENTICATION_CLIENT_SECRET }}%" |
+          sed "s%\${6}%${{ secrets.API_URL }}%" |
+          sed "s%\${7}%${{ secrets.CLIENT_URL }}%" |
           tee ./deploy_filled.sh
           gcloud --quiet compute ssh ${{ secrets.VM_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"

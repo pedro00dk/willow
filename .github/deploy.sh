@@ -5,6 +5,8 @@ TOKEN=${2}
 REPOSITORY=${3}
 AUTHENTICATION_CLIENT_ID=${4}
 AUTHENTICATION_CLIENT_SECRET=${5}
+API_URL=${6}
+CLIENT_URL=${7}
 
 set -v
 
@@ -16,37 +18,36 @@ docker container rm $(docker container ls --all --quiet) || true
 
 # pull github build images
 docker login --username ${USERNAME} --password ${TOKEN} docker.pkg.github.com
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-api
+docker image pull docker.pkg.github.com/${REPOSITORY}/willow-client
 docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-java
 docker image pull docker.pkg.github.com/${REPOSITORY}/willow-tracer-python
-docker image pull docker.pkg.github.com/${REPOSITORY}/willow-server
-docker image pull docker.pkg.github.com/${REPOSITORY}/willow-client
 docker image prune --force
 
-# start services
+# create isolated docker network
 docker network create willow-network || true
 
-# start api server
+# commands for starting the tracers in containers
 JAVA_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-java --silent"
 PYTHON_TRACER_COMMAND="docker run --rm -i docker.pkg.github.com/${REPOSITORY}/willow-tracer-python --silent"
 
-# The container name ends in .network to fake a public domain address required by google oauth
-docker container run --name willow-server.network \
-    --rm --detach --network willow-network --volume /var/run/docker.sock:/var/run/docker.sock \
-    docker.pkg.github.com/${REPOSITORY}/willow-server \
+# start api server
+sudo docker container run --name willow-api \
+    --rm --detach --network willow-network --publish 443:8000 \
+    --volume /var/run/docker.sock:/var/run/docker.sock \
+    docker.pkg.github.com/${REPOSITORY}/willow-api \
     -- \
     --port 8000 \
-    --tracer-command python "${PYTHON_TRACER_COMMAND}" \
-    --tracer-command java "${JAVA_TRACER_COMMAND}" \
+    --tracer-command python "${PYTHON_TRACER_COMMAND}" \ # --tracer-command java "${JAVA_TRACER_COMMAND}" \
     --tracer-steps 500 \
     --signed-steps 1000 \
     --authentication-enable \
     --authentication-client-id "${AUTHENTICATION_CLIENT_ID}" \
-    --authentication-client-secret "${AUTHENTICATION_CLIENT_SECRET}"
-
+    --authentication-client-secret "${AUTHENTICATION_CLIENT_SECRET}" \
+    --cors-whitelist "${CLIENT_URL}"
 
 sudo docker container run --name willow-client \
     --rm --detach --network willow-network --publish 80:8000 \
+    --env "API=${API_URL}" \
     --env 'PORT=8000' \
-    --env 'SERVER=http://willow-server.network:8000' \
-    --env 'PROXY=yes' \
     docker.pkg.github.com/${REPOSITORY}/willow-client
