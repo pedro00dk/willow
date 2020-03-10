@@ -45,6 +45,11 @@ export const createServer = async (
             })
         )
 
+    const onAppendAction = (user: User | string, action: Actions['actions'][0]) => {
+        if (!user || !authentication || !database) return
+        appendUserAction(user, action)
+    }
+
     const apiRouter = express.Router()
     if (authentication) {
         if (database) await connectDatabaseClient(database.url, database.name)
@@ -61,22 +66,23 @@ export const createServer = async (
             '/api/authentication/callback',
             getUserFromProfile,
             serializeUser,
-            deserializeUser
+            deserializeUser,
+            onAppendAction
         )
         authenticationHandlers.forEach(handler => server.use(handler))
         apiRouter.use('/authentication', authenticationRouter)
-    }
-
-    const onAppendAction = (user: User | string, action: Actions['actions'][0]) => {
-        if (!user || !authentication || !database) return
-        appendUserAction(user, action)
     }
 
     const { handlers: actionHandlers, router: actionRouter } = createActionHandlers(onAppendAction)
     actionHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/action', actionRouter)
 
-    const { handlers: tracerHandlers, router: tracerRouter } = createTracerHandlers(tracers, signed, verbose)
+    const { handlers: tracerHandlers, router: tracerRouter } = createTracerHandlers(
+        tracers,
+        signed,
+        onAppendAction,
+        verbose
+    )
     tracerHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/tracer', tracerRouter)
     server.use('/api', apiRouter)

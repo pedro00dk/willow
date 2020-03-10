@@ -1,16 +1,18 @@
 import cp from 'child_process'
 import express from 'express'
 import * as schema from '../schema/schema'
+import { Actions } from '../user'
 
 /**
  * Create the handlers for spawning tracer processes and executing traces.
- * Check parameters documentation in server.ts.
+ * Check parameters documentation in server.ts and action.ts.
  *
  * @template T user type
  */
 export const createHandlers = <T>(
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
     signed: { steps: number; timeout: number },
+    onAppendAction: (User: T, action: Actions['actions'][0]) => void,
     verbose: boolean
 ) => {
     const router = express.Router()
@@ -31,9 +33,11 @@ export const createHandlers = <T>(
         try {
             if (!tracers.commands[language]) throw new Error(`Language ${language} is not available`)
             const result = await runTracer(tracers.commands[language], trace, timeout)
+            onAppendAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
             res.send(result)
             console.log('http', req.path, 'ok', verbose ? result : '')
         } catch (error) {
+            onAppendAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
             res.status(400)
             res.send(error.message)
             console.log('http', req.path, 'error', error.message)

@@ -3,6 +3,7 @@ import cookieSession from 'cookie-session'
 import express from 'express'
 import passport from 'passport'
 import GoogleOAuth from 'passport-google-oauth20'
+import { Actions } from '../user'
 
 /**
  * Create the handlers necessary to enable google oauth authentication and session management.
@@ -22,7 +23,8 @@ export const createHandlers = <T>(
     callbackUrl: string,
     getUser: (profile: passport.Profile) => Promise<T>,
     serializeUser: (user: T) => Promise<string>,
-    deserializeUser: (id: string) => Promise<T>
+    deserializeUser: (id: string) => Promise<T>,
+    onAppendAction: (User: T, action: Actions['actions'][0]) => void
 ) => {
     const strategy = new GoogleOAuth.Strategy(
         { clientID: authentication.clientId, clientSecret: authentication.clientSecret, callbackURL: callbackUrl },
@@ -55,13 +57,17 @@ export const createHandlers = <T>(
     )
 
     router.get('/callback', passport.authenticate('google'), (req, res) => {
+        const user = req.user as T
         console.log('http', req.originalUrl, req.cookies['referer'])
+        onAppendAction(user, { date: new Date(), name: 'signin', payload: undefined })
         // redirect to referer url set in cookie in /signin route
         res.redirect(req.cookies['referer'])
     })
-
+    
     router.get('/signout', (req, res) => {
+        const user = req.user as T
         console.log('http', req.originalUrl, req.user)
+        onAppendAction(user, { date: new Date(), name: 'signout', payload: undefined })
         req.logOut()
         res.redirect(req.headers.referer)
     })
