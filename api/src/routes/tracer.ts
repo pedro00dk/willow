@@ -1,18 +1,16 @@
 import cp from 'child_process'
 import express from 'express'
 import * as schema from '../schema/schema'
-import { Actions } from '../user'
+import { Action, User } from '../user'
 
 /**
  * Create the handlers for spawning tracer processes and executing traces.
  * Check parameters documentation in server.ts and action.ts.
- *
- * @template T user type
  */
-export const createHandlers = <T>(
+export const createHandlers = (
     tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
     signed: { steps: number; timeout: number },
-    onAppendAction: (User: T, action: Actions['actions'][0]) => void,
+    onUserAction: (user: User, action: Action) => void,
     verbose: boolean
 ) => {
     const router = express.Router()
@@ -24,7 +22,7 @@ export const createHandlers = <T>(
     })
 
     router.post('/trace', async (req, res) => {
-        const user = req.user as T
+        const user = req.user as User
         const language = req.body['language'] as string
         const steps = user ? signed.steps : tracers.steps
         const timeout = user ? signed.timeout : tracers.timeout
@@ -33,11 +31,11 @@ export const createHandlers = <T>(
         try {
             if (!tracers.commands[language]) throw new Error(`Language ${language} is not available`)
             const result = await runTracer(tracers.commands[language], trace, timeout)
-            onAppendAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
+            onUserAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
             res.send(result)
             console.log('http', req.path, 'ok', verbose ? result : '')
         } catch (error) {
-            onAppendAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
+            onUserAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
             res.status(400)
             res.send(error.message)
             console.log('http', req.path, 'error', error.message)

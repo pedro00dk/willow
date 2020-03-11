@@ -3,7 +3,7 @@ import cookieSession from 'cookie-session'
 import express from 'express'
 import passport from 'passport'
 import GoogleOAuth from 'passport-google-oauth20'
-import { Actions } from '../user'
+import { Action, User } from '../user'
 
 /**
  * Create the handlers necessary to enable google oauth authentication and session management.
@@ -16,22 +16,21 @@ import { Actions } from '../user'
  * @param getUser transforms a profile into an user object
  * @param serializeUser transforms an user into its id
  * @param getUser transforms an id back to the user object
- * @template T user type
  */
-export const createHandlers = <T>(
+export const createHandlers = (
     authentication: { clientId: string; clientSecret: string },
     callbackUrl: string,
-    getUser: (profile: passport.Profile) => Promise<T>,
-    serializeUser: (user: T) => Promise<string>,
-    deserializeUser: (id: string) => Promise<T>,
-    onAppendAction: (User: T, action: Actions['actions'][0]) => void
+    getUser: (profile: passport.Profile) => Promise<User>,
+    serializeUser: (user: User) => Promise<string>,
+    deserializeUser: (id: string) => Promise<User>,
+    onUserAction: (User: User, action: Action) => void
 ) => {
     const strategy = new GoogleOAuth.Strategy(
         { clientID: authentication.clientId, clientSecret: authentication.clientSecret, callbackURL: callbackUrl },
-        async (at, rt, profile, done) => done(undefined, await getUser(profile))
+        async (accessToken, refreshToken, profile, done) => done(undefined, await getUser(profile))
     )
-    passport.serializeUser<T, string>(async (user, done) => done(undefined, await serializeUser(user)))
-    passport.deserializeUser<T, string>(async (id, done) => done(undefined, await deserializeUser(id)))
+    passport.serializeUser<User, string>(async (user, done) => done(undefined, await serializeUser(user)))
+    passport.deserializeUser<User, string>(async (id, done) => done(undefined, await deserializeUser(id)))
 
     passport.use('google', strategy)
 
@@ -57,19 +56,19 @@ export const createHandlers = <T>(
     )
 
     router.get('/callback', passport.authenticate('google'), (req, res) => {
-        const user = req.user as T
+        const user = req.user as User
         console.log('http', req.originalUrl, req.cookies['referer'])
-        onAppendAction(user, { date: new Date(), name: 'signin', payload: undefined })
+        onUserAction(user, { date: new Date(), name: 'signin', payload: undefined })
         // redirect to referer url set in cookie in /signin route
         res.redirect(req.cookies['referer'])
     })
-    
+
     router.get('/signout', (req, res) => {
-        const user = req.user as T
+        const user = req.user as User
         console.log('http', req.originalUrl, req.user)
-        onAppendAction(user, { date: new Date(), name: 'signout', payload: undefined })
+        onUserAction(user, { date: new Date(), name: 'signout', payload: undefined })
         req.logOut()
-        res.redirect(req.headers.referer)
+        res.redirect(req.headers.referer ?? '/')
     })
 
     router.get('/user', (req, res) => {
