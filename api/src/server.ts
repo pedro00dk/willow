@@ -1,11 +1,11 @@
 import cors from 'cors'
 import express from 'express'
 import { Profile } from 'passport'
-import { connectDatabaseClient, getUser, appendUserAction } from './database'
-import { createHandlers as createActionHandlers } from './routes/action'
+import { connect, findUser, pushUserAction, insertUser } from './database'
+import { handlers as createActionHandlers } from './routes/action'
 import { createHandlers as createAuthenticationHandlers } from './routes/authentication'
 import { createHandlers as createTracerHandlers } from './routes/tracer'
-import { User, Actions } from './user'
+import { User, Actions, Action } from './user'
 
 /**
  * Creates the server instance and all available handlers and routers, then return the server.
@@ -45,46 +45,49 @@ export const createServer = async (
             })
         )
 
-    const onAppendAction = (user: User | string, action: Actions['actions'][0]) => {
-        if (!user || !authentication || !database) return
-        appendUserAction(user, action)
+    const apiRouter = express.Router()
+    server.use('/api', apiRouter)
+
+    if (database) await connect(database.url, database.name)
+
+    const getUserFromProfile = async (profile: Profile) => {
+        const user = { id: profile.id, name: profile.displayName, email: profile.emails[0].value }
+        return database ? (await findUser(user.id)) ?? (await insertUser(user)) : user
     }
 
-    const apiRouter = express.Router()
+    const serializeUser = async (user: User) => (database ? user.id : JSON.stringify(user))
+
+    const deserializeUser = async (id: string) => (database ? await findUser(id) : JSON.parse(id))
+
+    const onUserAction = (user: User, action: Action) => {
+        if (!user || !action || !database) return
+        return pushUserAction(user.id, action)
+    }
+
     if (authentication) {
-        if (database) await connectDatabaseClient(database.url, database.name)
-
-        const getUserFromProfile = async (profile: Profile) => {
-            const user = { id: profile.id, name: profile.displayName, email: profile.emails[0].value }
-            return database ? await getUser(user, true) : user
-        }
-        const serializeUser = async (user: User) => (database ? (await getUser(user)).id : JSON.stringify(user))
-        const deserializeUser = async (id: string) => (database ? await getUser(id) : JSON.parse(id))
-
         const { handlers: authenticationHandlers, router: authenticationRouter } = createAuthenticationHandlers(
             authentication,
             '/api/authentication/callback',
             getUserFromProfile,
             serializeUser,
             deserializeUser,
-            onAppendAction
+            onUserAction
         )
         authenticationHandlers.forEach(handler => server.use(handler))
         apiRouter.use('/authentication', authenticationRouter)
     }
 
-    const { handlers: actionHandlers, router: actionRouter } = createActionHandlers(onAppendAction)
+    const { handlers: actionHandlers, router: actionRouter } = createActionHandlers(onUserAction)
     actionHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/action', actionRouter)
 
     const { handlers: tracerHandlers, router: tracerRouter } = createTracerHandlers(
         tracers,
         signed,
-        onAppendAction,
+        onUserAction,
         verbose
     )
     tracerHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/tracer', tracerRouter)
-    server.use('/api', apiRouter)
     return server
 }
