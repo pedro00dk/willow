@@ -1,5 +1,5 @@
 import mongodb from 'mongodb'
-import { User, Actions } from './user'
+import { Action, Actions, User } from './user'
 
 /**
  * Mongo client and database.
@@ -10,46 +10,56 @@ const mongo = {
 }
 
 /**
- * Connect to a mongo database.
- * Check parameters documentation in server.ts.
+ * Connect to a mongo database and create the collections and indices.
+ *
+ * @param url connection url to mongo database
+ * @param name the mongo database name
  */
-export const connectDatabaseClient = async (url: string, name: string) => {
-    if (mongo.client?.isConnected()) {
-        console.log('database', 'closing previous connection')
-        await mongo.client.close()
-    }
-    console.log('database', `connecting to ${url}`, `db ${name}`)
+export const connect = async (url: string, name: string) => {
+    console.log('database', 'url', url, 'db', name)
+    if (mongo.client?.isConnected()) return console.log('database', 'already connected')
     mongo.client = await mongodb.MongoClient.connect(url, { useUnifiedTopology: true })
     mongo.db = mongo.client.db(name)
-}
-
-/**
- * Get the user from the database which has the same id. If it does not exist, create a new one and return it.
- * 
- * @param user user object
- */
-export const getUser = async (user: User | string, create = false) => {
-    if (!mongo.client.isConnected()) throw Error('Mongo database is not connected')
     const usersCollection = mongo.db.collection<User>('users')
-    let databaseUser = await usersCollection.findOne({ id: typeof user === 'object' ? user.id : user })
-    if (!databaseUser && typeof user === 'object' && create) {
-        await usersCollection.insertOne(user)
-        databaseUser = await usersCollection.findOne({ id: user.id })
-    }
-    return databaseUser
+    const actionsCollection = mongo.db.collection<Actions>('actions')
+    usersCollection.createIndex({ id: 1 }, { unique: true })
+    actionsCollection.createIndex({ id: 1 }, { unique: true })
 }
 
 /**
- * Append a new action to the user actions.
+ * Insert a new user and an empty action set for it into the database.
  *
- * @param user user to append action
- * @param action an action the user executed
+ * @param user the user object
+ * @returns if it was inserted (otherwise the user already exists)
  */
-export const appendUserAction = async (user: User | string, action: Actions['actions'][0]) => {
-    if (!mongo.client.isConnected()) throw Error('Mongo database is not connected')
+export const insertUser = async (user: User) => {
+    const usersCollection = mongo.db.collection<User>('users')
     const actionsCollection = mongo.db.collection<Actions>('actions')
-    let databaseUserActions = await actionsCollection.findOne({ id: typeof user === 'object' ? user.id : user })
-    if (!databaseUserActions)
-        await actionsCollection.insertOne({ id: typeof user === 'object' ? user.id : user, actions: [] })
-    await actionsCollection.updateOne({ id: typeof user === 'object' ? user.id : user }, { $push: { actions: action } })
+    const userResult = await usersCollection.insertOne(user)
+    await actionsCollection.insertOne({ id: user.id, actions: [] })
+    return userResult.insertedCount !== 0
+}
+
+/**
+ * Get the user from the database which has the same id.
+ *
+ * @param user the user id
+ * @returns the user or undefined if not found
+ */
+export const findUser = async (id: string) => {
+    const usersCollection = mongo.db.collection<User>('users')
+    return await usersCollection.findOne({ id })
+}
+
+/**
+ * Push a new action to the user actions.
+ *
+ * @param id the user id
+ * @param action an action the user executed
+ * @returns return if the action was pushed
+ */
+export const pushUserAction = async (id: string, action: Action) => {
+    const actionsCollection = mongo.db.collection<Actions>('actions')
+    const result = await actionsCollection.updateOne({ id }, { $push: { actions: action } })
+    return result.modifiedCount !== 0
 }
