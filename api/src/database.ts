@@ -30,14 +30,14 @@ export const connect = async (url: string, name: string) => {
  * Insert a new user and an empty action set for it into the database.
  *
  * @param user the user object
- * @returns if it was inserted (otherwise the user already exists)
+ * @returns the user from the database
  */
 export const insertUser = async (user: User) => {
     const usersCollection = mongo.db.collection<User>('users')
     const actionsCollection = mongo.db.collection<Actions>('actions')
-    const userResult = await usersCollection.insertOne(user)
+    await usersCollection.insertOne(user)
     await actionsCollection.insertOne({ id: user.id, actions: [] })
-    return userResult.insertedCount !== 0
+    return await findUser(user.id)
 }
 
 /**
