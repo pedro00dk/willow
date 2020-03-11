@@ -12,25 +12,17 @@ jobs:
     name: Build and deploy docker images
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        run: |
-          git clone "https://github.com/${{ github.repository }}"
-          cd ./willow/
-          BRANCH=$(echo ${{ github.ref }} | cut -d / -f 3)
-          git switch ${BRANCH}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: deploy
 
       - name: Build docker images
         run: |
-          cd ./willow/
-          cd ./api/
-          docker image build --pull --no-cache --tag willow-api .
-          cd ../client/
-          docker image build --pull --no-cache --tag willow-client .
-          cd ../tracers/java/
-          docker image build --pull --no-cache --tag willow-tracer-java .
-          cd ../python/
-          docker image build --pull --no-cache --tag willow-tracer-python .
-          cd ../
+          docker image build --pull --no-cache --tag willow-api -- ./api/
+          docker image build --pull --no-cache --tag willow-client -- ./client/
+          docker image build --pull --no-cache --tag willow-tracer-java -- ./tracers/java/
+          docker image build --pull --no-cache --tag willow-tracer-python -- ./tracers/python/
 
       - name: Deploy images to github registry
         run: |
@@ -52,53 +44,76 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Login into gcloud
-        run: |
-          echo ${{ secrets.SERVICE_ACCOUNT_KEY }} | base64 --decode > ./key.json
-          gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }} --key-file ./key.json
-          gcloud config set project ${{ secrets.PROJECT }}
-          gcloud config set compute/zone ${{ secrets.COMPUTE_ZONE }}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: deploy
 
-      - name: Create compute instances
+      - name: Setup gcloud
         run: |
-          if [ ${{ secrets.VM_RESET }} == 'true' ]
-          then
-              gcloud --quiet compute instances delete ${{ secrets.VM_NAME }} \
+          echo ${{ secrets.GCLOUD_SETUP_SERVICE_ACCOUNT_KEY }} | base64 --decode > ./key.json
+          gcloud auth activate-service-account ${{ secrets.GCLOUD_SETUP_SERVICE_ACCOUNT_EMAIL }} --key-file ./key.json
+          gcloud config set project ${{ secrets.GCLOUD_SETUP_PROJECT }}
+          gcloud config set compute/zone ${{ secrets.GCLOUD_SETUP_COMPUTE_ZONE }}
+
+      - name: Configure firewall rules
+        run: |
+          gcloud compute firewall-rules create allow-api \
+              --action=ALLOW --direction=INGRESS --rules=tcp:8000 --target-tags=api-server \
               || true
+
+      - name: Configure database compute instance
+        run: |
+          if [ ${{ secrets.GCLOUD_DATABASE_INSTANCE_RESET }} == 'true' ] # reset the instance wipes all user data
+          then
+              gcloud --quiet compute instances delete ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
+                  || true
           fi
+          gcloud compute instances create-with-container \
+              ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
+              --machine-type ${{ secrets.GCLOUD_DATABASE_INSTANCE_TYPE }} \
+              --image-project cos-cloud --image-family cos-stable \
+              --boot-disk-type pd-ssd --boot-disk-size ${{ secrets.GCLOUD_DATABASE_INSTANCE_CAPACITY }} \
+              --container-image=mongo:latest --container-restart-policy=always \
+              --container-mount-host-path mount-path=/data/db/,host-path=/home/mongo/db,mode=rw \
+              --container-command mongod --container-arg="--dbpath" --container-arg /data/db/ \
+              || true
 
-          # TODO Database instance manually deployed (make it automatic)
-
-          gcloud compute firewall-rules create allow-api  \
-            --action=ALLOW --direction=INGRESS --rules=tcp:8000 --target-tags=api-server \
-            || true
-
+      - name: Configure server compute instance
+        run: |
+          if [ ${{ secrets.GCLOUD_SERVER_INSTANCE_RESET }} == 'true' ]
+          then
+              gcloud --quiet compute instances delete ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} \
+                  || true
+          fi
           gcloud compute instances create \
-              ${{ secrets.VM_NAME }} \
-              --machine-type ${{ secrets.VM_TYPE }} \
+              ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} \
+              --machine-type ${{ secrets.GCLOUD_SERVER_INSTANCE_TYPE }} \
               --tags http-server,https-server,api-server \
               --image-project cos-cloud --image-family cos-stable \
               --boot-disk-size 10GB \
               || true
 
-      - name: Checkout repository
-        run: |
-          git clone "https://github.com/${{ github.repository }}"
-          cd ./willow/
-          BRANCH=$(echo ${{ github.ref }} | cut -d '/' -f 3)
-          git switch ${BRANCH}
-
-      - name: Run deploy script on compute instance
+      - name: Run deploy script on server compute instance
         run: |
           USERNAME=$(echo ${{ github.repository }} | cut -d '/' -f 1)
-          cat ./willow/.github/deploy.sh |
+          INTERNAL_DATABASE_IP=$(
+              gcloud compute instances describe ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
+                  --format 'get(networkInterfaces[0].networkIP)'
+          )
+          EXTERNAL_DATABASE_IP=$(
+              gcloud compute instances describe ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
+                  --format 'get(networkInterfaces[0].accessConfigs[0].natIP)'
+          )
+          DATABASE_URL="mongodb://${INTERNAL_DATABASE_IP}:27017"
+          cat ./.github/deploy.sh |
           sed "s/\${1}/${USERNAME}/" |
           sed "s/\${2}/${{ github.token }}/" |
           sed "s%\${3}%${{ github.repository }}%" |
-          sed "s%\${4}%${{ secrets.AUTHENTICATION_CLIENT_ID }}%" |
-          sed "s%\${5}%${{ secrets.AUTHENTICATION_CLIENT_SECRET }}%" |
+          sed "s%\${4}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_ID }}%" |
+          sed "s%\${5}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_SECRET }}%" |
           sed "s%\${6}%${{ secrets.API_URL }}%" |
           sed "s%\${7}%${{ secrets.CLIENT_URL }}%" |
-          sed "s%\${8}%${{ secrets.DATABASE_URL }}%" |
+          sed "s%\${8}%${DATABASE_URL}%" |
           tee ./deploy_filled.sh
-          gcloud --quiet compute ssh ${{ secrets.VM_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"
+          gcloud --quiet compute ssh ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"
