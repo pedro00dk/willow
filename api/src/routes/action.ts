@@ -14,7 +14,7 @@ export const handlers = (onUserAction: (user: User, action: Action) => void) => 
             date: new Date(req.body.date as string),
             payload: req.body.payload
         }
-        console.log('http', req.path, user, action.date, action.name)
+        console.log('http', req.originalUrl)
         onUserAction(user, action)
         res.send()
     })

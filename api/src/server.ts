@@ -61,6 +61,7 @@ export const createServer = async (
 
     const onUserAction = (user: User, action: Action) => {
         if (!user || !action || !database) return
+        console.log('action', user, action.name, action.date)
         return pushUserAction(user.id, action)
     }
 
