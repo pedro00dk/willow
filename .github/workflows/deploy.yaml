@@ -76,7 +76,7 @@ jobs:
               --boot-disk-type pd-ssd --boot-disk-size ${{ secrets.GCLOUD_DATABASE_INSTANCE_CAPACITY }} \
               --container-image mongo:latest --container-restart-policy always \
               --container-mount-host-path mount-path=/data/db/,host-path=/home/mongo/db,mode=rw \
-              --container-command mongod --container-arg='--dbpath=/data/db/' --container-arg='--port=80' \
+              --container-arg='mongod' --container-arg='--dbpath=/data/db/' \
               || true
 
       - name: Configure server compute instance
@@ -105,7 +105,7 @@ jobs:
               gcloud compute instances describe ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
                   --format 'get(networkInterfaces[0].accessConfigs[0].natIP)'
           )
-          DATABASE_URL="mongodb://${INTERNAL_DATABASE_IP}:80"
+          DATABASE_URL="mongodb://${INTERNAL_DATABASE_IP}:27017"
           cat ./.github/deploy.sh |
           sed "s/\${1}/${USERNAME}/" |
           sed "s/\${2}/${{ github.token }}/" |
