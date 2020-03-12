@@ -47,8 +47,7 @@ sudo docker container run --name willow-api \
     --authentication-client-secret "${AUTHENTICATION_CLIENT_SECRET}" \
     --database-enable \
     --database-url "${DATABASE_URL}" \
-    --database-name 'willow' \
-    --cors-whitelist "${CLIENT_URL}"
+    --database-name 'willow'
 
 sudo docker container run --name willow-client \
     --rm --detach --network willow-network --publish 80:8000 \
