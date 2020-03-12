@@ -18,7 +18,7 @@ const main = async () => {
         .option('database-enable', { type: 'boolean', description: 'Enable user storage (requires authentication)' })
         .option('database-url', { type: 'string', description: 'Connection url to mongo database' })
         .option('database-name', { default: 'test', description: 'The mongo database name' })
-        .option('cors-whitelist', { default: '*', description: 'Allow cors clients (split by ",", "*" all clients)' })
+        .option('cors-whitelist', { default: '*', description: 'Allow cors clients suffixes ("," split) ("*" any)' })
         .option('verbose', { type: 'boolean', description: 'Increase log output' })
 
     const options = parser.argv
@@ -49,7 +49,7 @@ const main = async () => {
             url: options['database-url'],
             name: options['database-name']
         }
-    const corsWhitelist = new Set(options['cors-whitelist'].split(','))
+    const corsWhitelist = options['cors-whitelist'].split(',')
     const verbose = options.verbose
 
     console.log('cli', 'options', { tracers, signed, authentication, database, corsWhitelist, verbose })

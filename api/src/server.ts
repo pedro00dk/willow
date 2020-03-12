@@ -21,7 +21,7 @@ import { User, Actions, Action } from './user'
  * @param database if set, enable user storage (requires authentication)
  * @param database.url connection url to mongo database
  * @param database.name the mongo database name
- * @param corsWhitelist allow cors clients ('*' all clients)
+ * @param corsWhitelist allow cors clients suffixes ("," split) ("*" any)
  * @param verbose increase log output
  */
 export const createServer = async (
@@ -29,16 +29,18 @@ export const createServer = async (
     signed: { steps: number; timeout: number },
     authentication: { clientId: string; clientSecret: string },
     database: { url: string; name: string },
-    corsWhitelist: Set<string>,
+    corsWhitelist: string[],
     verbose: boolean
 ) => {
     const server = express()
     server.use(express.json())
-    if (corsWhitelist.size > 0)
+    if (corsWhitelist.length > 0)
         server.use(
             cors({
                 origin: (origin, callback) => {
-                    const allow = origin == undefined || corsWhitelist.has('*') || corsWhitelist.has(origin)
+                    const allow =
+                        origin == undefined ||
+                        corsWhitelist.reduce((acc, suffix) => acc || suffix === '*' || origin.endsWith(suffix), false)
                     callback(!allow && new Error(`Illegal CORS origin ${origin}`), allow)
                 },
                 credentials: true

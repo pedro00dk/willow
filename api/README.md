@@ -28,7 +28,8 @@ Options:
                                                                        [boolean]
   --database-url                  Connection url to mongo database      [string]
   --database-name                 The mongo database name      [default: "test"]
-  --cors-whitelist                Allow cors clients (split by ",", "*" all
+  --cors-whitelist                Allow cors clients suffixes ("," split) ("*"
+                                  any)
                                   clients)                        [default: "*"]
   --verbose                       Increase log output                  [boolean]
   -h, --help                      Show help                            [boolean]
