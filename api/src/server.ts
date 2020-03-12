@@ -48,7 +48,6 @@ export const createServer = async (
         )
 
     const apiRouter = express.Router()
-    server.use('/api', apiRouter)
 
     if (database) await connect(database.url, database.name)
 
@@ -92,5 +91,8 @@ export const createServer = async (
     )
     tracerHandlers.forEach(handler => server.use(handler))
     apiRouter.use('/tracer', tracerRouter)
+
+    server.use('/api', apiRouter)
+
     return server
 }

@@ -25,7 +25,7 @@ const main = async () => {
 
     const port = options.port
     const commands: { [language: string]: string } = Object.fromEntries(
-        options['tracer-command'].reduce((acc, languageOrCommand, i) => {
+        (options['tracer-command'] ?? []).reduce((acc, languageOrCommand, i) => {
             if (i % 2 === 0) acc.push([languageOrCommand, undefined])
             else acc[acc.length - 1][1] = languageOrCommand
             return acc
