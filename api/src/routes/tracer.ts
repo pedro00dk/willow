@@ -1,20 +1,14 @@
 import cp from 'child_process'
 import express from 'express'
 import * as schema from '../schema/schema'
-import { Action, User } from '../user'
+import { Action, User, Config } from '../data'
 
 /**
  * Create the handlers for spawning tracer processes and executing traces.
- * Check parameters documentation in server.ts and action.ts.
  */
-export const createHandlers = (
-    tracers: { commands: { [language: string]: string }; steps: number; timeout: number },
-    signed: { steps: number; timeout: number },
-    onUserAction: (user: User, action: Action) => void,
-    verbose: boolean
-) => {
+export const router = (config: Config, onAction: (user: User, action: Action) => void) => {
     const router = express.Router()
-    const tracerLanguages = Object.keys(tracers.commands)
+    const tracerLanguages = Object.keys(config.tracers)
 
     router.get('/languages', (req, res) => {
         console.log('http', req.path, tracerLanguages)
@@ -24,25 +18,24 @@ export const createHandlers = (
     router.post('/trace', async (req, res) => {
         const user = req.user as User
         const language = req.body['language'] as string
-        const steps = user ? signed.steps : tracers.steps
-        const timeout = user ? signed.timeout : tracers.timeout
+        const steps = user ? config.authSteps : config.steps
+        const timeout = user ? config.authTimeout : config.timeout
         const trace = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
-        console.log('http', req.path, user, language, steps, timeout, verbose ? trace : '')
+        console.log('http', req.path, user, language, steps, timeout)
         try {
-            if (!tracers.commands[language]) throw new Error(`Language ${language} is not available`)
-            const result = await runTracer(tracers.commands[language], trace, timeout)
-            onUserAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
-            res.send(result)
-            console.log('http', req.path, 'ok', verbose ? result : '')
+            if (!config.tracers[language]) throw new Error(`Language ${language} is not available`)
+            const result = await runTracer(config.tracers[language], trace, timeout)
+            onAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
+            res.status(200).send(result)
+            console.log('http', req.path, 'ok')
         } catch (error) {
-            onUserAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
-            res.status(400)
-            res.send(error.message)
+            onAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
+            res.status(400).send(error.message)
             console.log('http', req.path, 'error', error.message)
         }
     })
 
-    return { handlers: [] as express.Handler[], router }
+    return router
 }
 
 /**

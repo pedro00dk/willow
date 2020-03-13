@@ -1,23 +1,18 @@
 import express from 'express'
-import { Action, User } from '../user'
+import { Action, User } from '../data'
 
 /**
  * Create the handlers for reading action requests.
  */
-export const handlers = (onUserAction: (user: User, action: Action) => void) => {
+export const router = (onAction: (user: User, action: Action) => void) => {
     const router = express.Router()
-
-    router.post('/append', async (req, res) => {
-        const user = req.user as User
-        const action = {
-            name: req.body.name as string,
-            date: new Date(req.body.date as string),
-            payload: req.body.payload
-        }
+    router.post('/', async (req, res) => {
         console.log('http', req.originalUrl)
-        onUserAction(user, action)
-        res.send()
+        const user = req.user as User
+        const body = req.body
+        const action = { name: body.name as string, date: new Date(body.date as string), payload: body.payload }
+        onAction(user, action)
+        res.status(204).send()
     })
-
-    return { handlers: [] as express.Handler[], router }
+    return router
 }
