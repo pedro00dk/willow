@@ -3,11 +3,28 @@ import cookieSession from 'cookie-session'
 import cors from 'cors'
 import express from 'express'
 import passport from 'passport'
-import { Action, Config, User } from './data'
-import * as db from './db'
+import { connect } from './data/db'
 import { router as actionRouter } from './routes/action'
 import { router as authRouter } from './routes/auth'
+import { router as exampleRouter } from './routes/example'
+import { router as programRouter } from './routes/program'
 import { router as tracerRouter } from './routes/tracer'
+
+/**
+ * Server configuration.
+ */
+export type Config = {
+    tracers: { [language: string]: string }
+    steps: number
+    timeout: number
+    authSteps: number
+    authTimeout: number
+    auth: { clientID: string; clientSecret: string }
+    db: { url: string; name: string }
+    cors: string[]
+    port: number
+    verbose: boolean
+}
 
 /**
  * Server to initialize express handlers and routes.
@@ -36,66 +53,17 @@ export class Server {
         this.server.use(passport.session())
     }
 
-    private async getUserFromProfile(profile: passport.Profile) {
-        const profileUser = { id: profile.id, name: profile.displayName, email: profile.emails[0].value, admin: false }
-        try {
-            return this.config.db
-                ? (await db.findUser(profileUser.id)) ?? (await db.insertUser(profileUser))
-                : profileUser
-        } catch (error) {
-            console.log(error)
-            return undefined
-        }
-    }
-
-    private async serializeUser(user: User) {
-        return this.config.db ? user.id : JSON.stringify(user)
-    }
-
-    private async deserializeUser(id: string) {
-        try {
-            return this.config.db ? await db.findUser(id) : (JSON.parse(id) as User)
-        } catch (error) {
-            console.log(error)
-            return undefined
-        }
-    }
-
-    private async insertAction(user: User, action: Action) {
-        if (!user || !action || !this.config.db) return
-        console.log('action', user, action.name, action.date)
-        try {
-            db.insertAction(user.id, action)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    private connectDb() {
-        return db.connect(this.config)
-    }
-
-    private createRoutes() {
-        const apiRouter = express.Router()
-        apiRouter.use('/action', actionRouter(this.insertAction.bind(this)))
-        apiRouter.use(
-            '/auth',
-            authRouter(
-                this.config,
-                '/api/auth/callback',
-                this.getUserFromProfile.bind(this),
-                this.serializeUser.bind(this),
-                this.deserializeUser.bind(this),
-                this.insertAction.bind(this)
-            )
-        )
-        apiRouter.use('/tracer', tracerRouter(this.config, this.insertAction.bind(this)))
-        this.server.use('/api', apiRouter)
-    }
-
     async start() {
-        await this.connectDb()
-        this.createRoutes()
-        this.server.listen(this.config.port, () => console.log('server', 'started at port', this.config.port))
+        if (this.config.db) await connect(this.config)
+        const apiRouter = express.Router()
+        if (this.config.auth) {
+            apiRouter.use('/action', actionRouter())
+            apiRouter.use('/auth', authRouter(this.config, '/api/auth/callback'))
+            apiRouter.use('/program', programRouter())
+        }
+        apiRouter.use('/example', exampleRouter())
+        apiRouter.use('/tracer', tracerRouter(this.config))
+        this.server.use('/api', apiRouter)
+        this.server.listen(this.config.port, () => console.log('server', 'listening at port', this.config.port))
     }
 }

@@ -1,20 +1,4 @@
-import * as schema from './schema/schema'
-
-/**
- * Server configuration.
- */
-export type Config = {
-    tracers: { [language: string]: string }
-    steps: number
-    timeout: number
-    authSteps: number
-    authTimeout: number
-    auth: { clientID: string; clientSecret: string }
-    db: { url: string; name: string }
-    cors: string[]
-    port: number
-    verbose: boolean
-}
+import * as schema from '../schema/schema'
 
 /**
  * User entity.
@@ -58,8 +42,6 @@ export type Program = {
     name: string
     language: string
     trace: Pick<schema.Trace, 'source' | 'input'>
-    result: schema.Result
-    graphData: any
 }
 
 /**

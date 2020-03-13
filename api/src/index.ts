@@ -1,6 +1,5 @@
 import yargs from 'yargs'
-import { Config } from './data'
-import { Server } from './server'
+import { Config, Server } from './server'
 
 const main = async () => {
     const parser = yargs

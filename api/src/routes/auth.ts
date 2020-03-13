@@ -1,30 +1,33 @@
 import express from 'express'
 import passport from 'passport'
 import GoogleOAuth from 'passport-google-oauth20'
-import { Action, Config, User } from '../data'
+import { User } from '../data/model'
+import { Config } from '../server'
+import { db } from '../data/db'
+import { appendAction } from './action'
 
-/**
- * Create the handlers necessary to enable google oauth authentication and session management.
- * After signin, a redirect request is sent pointing to the url which the user accessed the signin.
- */
-export const router = (
-    config: Config,
-    callbackUrl: string,
-    getUserFromProfile: (profile: passport.Profile) => Promise<User>,
-    serializeUser: (user: User) => Promise<string>,
-    deserializeUser: (id: string) => Promise<User>,
-    onAction: (User: User, action: Action) => void
-) => {
+export const router = (config: Config, callbackUrl: string) => {
     const strategy = new GoogleOAuth.Strategy(
         { clientID: config.auth.clientID, clientSecret: config.auth.clientSecret, callbackURL: callbackUrl },
-        async (accessToken, refreshToken, profile, done) => done(undefined, await getUserFromProfile(profile))
+        async (accessToken, refreshToken, profile, done) => {
+            const profileUser = { id: profile.id, name: profile.displayName, email: profile.emails[0].value }
+            await db?.users.updateOne(
+                { id: profileUser.id },
+                { $set: { ...profileUser }, $setOnInsert: { admin: false } },
+                { upsert: true }
+            )
+            const user = await db?.users.findOne({ id: profileUser.id })
+            done(undefined, user ?? profileUser)
+        }
     )
-    passport.serializeUser<User, string>(async (user, done) => done(undefined, await serializeUser(user)))
-    passport.deserializeUser<User, string>(async (id, done) => done(undefined, await deserializeUser(id)))
+    passport.serializeUser<User, string>(async (user, done) => done(undefined, db ? user.id : JSON.stringify(user)))
+    passport.deserializeUser<User, string>(async (id, done) =>
+        done(undefined, (await db?.users.findOne({ id })) ?? JSON.parse(id))
+    )
+
     passport.use('google', strategy)
 
     const router = express.Router()
-
     router.get(
         '/signin',
         (req, res, next) => {
@@ -35,17 +38,17 @@ export const router = (
         passport.authenticate('google', { scope: ['profile', 'email'] })
     )
 
-    router.get('/callback', passport.authenticate('google'), (req, res) => {
+    router.get('/callback', passport.authenticate('google'), async (req, res) => {
         const user = req.user as User
         console.log('http', req.originalUrl, req.cookies['referer'])
-        onAction(user, { date: new Date(), name: 'signin', payload: undefined })
+        await appendAction(user.id, { name: 'signin', date: new Date(), payload: undefined })
         res.redirect(req.cookies['referer'])
     })
 
-    router.get('/signout', (req, res) => {
+    router.get('/signout', async (req, res) => {
         const user = req.user as User
         console.log('http', req.originalUrl, req.user)
-        onAction(user, { date: new Date(), name: 'signout', payload: undefined })
+        await appendAction(user.id, { name: 'signout', date: new Date(), payload: undefined })
         req.logOut()
         res.redirect(req.headers.referer ?? '/')
     })

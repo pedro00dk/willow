@@ -1,18 +1,17 @@
 import cp from 'child_process'
 import express from 'express'
+import { User } from '../data/model'
 import * as schema from '../schema/schema'
-import { Action, User, Config } from '../data'
+import { Config } from '../server'
+import { appendAction } from './action'
 
-/**
- * Create the handlers for spawning tracer processes and executing traces.
- */
-export const router = (config: Config, onAction: (user: User, action: Action) => void) => {
+export const router = (config: Config) => {
     const router = express.Router()
-    const tracerLanguages = Object.keys(config.tracers)
+    const languages = Object.keys(config.tracers)
 
     router.get('/languages', (req, res) => {
-        console.log('http', req.path, tracerLanguages)
-        res.send(tracerLanguages)
+        console.log('http', req.path, languages)
+        res.send(languages)
     })
 
     router.post('/trace', async (req, res) => {
@@ -25,11 +24,18 @@ export const router = (config: Config, onAction: (user: User, action: Action) =>
         try {
             if (!config.tracers[language]) throw new Error(`Language ${language} is not available`)
             const result = await runTracer(config.tracers[language], trace, timeout)
-            onAction(user, { date: new Date(), name: 'trace', payload: { trace, result } })
-            res.status(200).send(result)
+            const steps = result.steps.length
+            const threw = {
+                compile: result.steps.length === 1 && result.steps[0].threw,
+                runtime: result.steps.length > 1 && result.steps[result.steps.length - 1].threw
+            }
+            const action = { name: 'trace', date: new Date(), payload: { language, trace, steps, threw } }
+            if (user) await appendAction(user.id, action)
+            res.send(result)
             console.log('http', req.path, 'ok')
         } catch (error) {
-            onAction(user, { date: new Date(), name: 'trace fail', payload: { trace, error: error.message } })
+            const action = { name: 'trace', date: new Date(), payload: { language, trace, error: error.message } }
+            if (user) await appendAction(user.id, action)
             res.status(400).send(error.message)
             console.log('http', req.path, 'error', error.message)
         }
