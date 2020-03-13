@@ -35,7 +35,7 @@
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
         "debug": "tsc && node --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/index.js",
         "start": "tsc && node --es-module-specifier-resolution node --require source-map-support/register -- ./dist/index.js",
-        "debug:dev": "npm run debug -- --tracer-command java \"$npm_package_config_java_tracer\" --tracer-command python \"$npm_package_config_python_tracer\"",
-        "start:dev": "npm run start -- --tracer-command java \"$npm_package_config_java_tracer\" --tracer-command python \"$npm_package_config_python_tracer\""
+        "debug:dev": "npm run debug -- --tracer java \"${npm_package_config_java_tracer}\" --tracer python \"${npm_package_config_python_tracer}\"",
+        "start:dev": "npm run start -- --tracer java \"${npm_package_config_java_tracer}\" --tracer python \"${npm_package_config_python_tracer}\""
     }
 }
