@@ -77,19 +77,19 @@ export class Server {
 
     private createRoutes() {
         const apiRouter = express.Router()
-        apiRouter.use('/action', actionRouter(this.insertAction))
+        apiRouter.use('/action', actionRouter(this.insertAction.bind(this)))
         apiRouter.use(
             '/auth',
             authRouter(
                 this.config,
                 '/api/auth/callback',
-                this.getUserFromProfile,
-                this.serializeUser,
-                this.deserializeUser,
-                this.insertAction
+                this.getUserFromProfile.bind(this),
+                this.serializeUser.bind(this),
+                this.deserializeUser.bind(this),
+                this.insertAction.bind(this)
             )
         )
-        apiRouter.use('/tracer', tracerRouter(this.config, this.insertAction))
+        apiRouter.use('/tracer', tracerRouter(this.config, this.insertAction.bind(this)))
         this.server.use('/api', apiRouter)
     }
 
