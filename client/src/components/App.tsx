@@ -14,6 +14,7 @@ import { SplitPane } from './utils/SplitPane'
 import { StackTrace } from './visualization/stacktrace/StackTrace'
 import { GraphView } from './visualization/graphview/GraphView'
 import { Stack } from './visualization/stack/Stack'
+import { Header } from './Header'
 
 const classes = {
     container: 'd-flex flex-column vw-100 vh-100',
@@ -42,47 +43,6 @@ export const App = () => (
         </div>
     </DefaultStore>
 )
-
-const Header = () => {
-    const dispatch = useDispatch()
-    const { user } = useSelection(state => ({ user: state.user }))
-
-    React.useEffect(() => {
-        dispatch(userActions.fetch())
-    }, [])
-
-    return (
-        <header className={classes.header.container}>
-            <a className={classes.header.brand} href='#'>
-                <img className={classes.header.logo} src={logo} />
-                {'Willow'}
-            </a>
-            <ul className={classes.header.leftMenu}>
-                <li className={classes.header.menuItem}>
-                    <a
-                        className={classes.header.itemLink}
-                        href='https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
-                        target='_blank'
-                    >
-                        {'How to use'}
-                    </a>
-                </li>
-            </ul>
-            <ul className={classes.header.rightMenu}>
-                {user.signed && <span className={classes.header.menuText}>{user.email}</span>}
-                <li className={classes.header.menuItem}>
-                    <a
-                        className={classes.header.itemLink}
-                        href='#'
-                        onClick={event => dispatch(!user.signed ? userActions.signin() : userActions.signout())}
-                    >
-                        {!user.signed ? 'Sign in' : 'Sign out'}
-                    </a>
-                </li>
-            </ul>
-        </header>
-    )
-}
 
 const Body = () => (
     <div className={classes.body.container}>
