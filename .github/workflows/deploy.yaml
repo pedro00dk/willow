@@ -113,7 +113,6 @@ jobs:
           sed "s%\${4}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_ID }}%" |
           sed "s%\${5}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_SECRET }}%" |
           sed "s%\${6}%${{ secrets.API_URL }}%" |
-          sed "s%\${7}%${{ secrets.CLIENT_URL }}%" |
-          sed "s%\${8}%${DATABASE_URL}%" |
+          sed "s%\${7}%${DATABASE_URL}%" |
           tee ./deploy_filled.sh
           gcloud --quiet compute ssh ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} -- "sh -c $(cat ./deploy_filled.sh)"
