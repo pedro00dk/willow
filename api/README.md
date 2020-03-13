@@ -52,7 +52,7 @@ The `--auth-steps` `--auth-timeout` options allow the specification of alternati
 To enable database and save user information locally, the `--db` and `--db-*` options must be set.
 The authentication information sent to the client will change if database is enabled or not.
 If database is not enabled, all user information is saved in the client, otherwise, only the key to access it.
-Enabling the database allows the server to store user actions for collecting metrics.
+Enabling the database allows the server to store user actions for collecting metrics, programs the user may save and source examples.
 
 ## Routes
 
@@ -73,6 +73,22 @@ GET /api/auth/signin
 GET /api/auth/callback
 GET /api/auth/signout
 GET /api/auth/user
+```
+
+### Example
+
+```http
+GET /api/example/
+POST /api/example/insert
+```
+
+
+### Program
+
+```http
+GET /api/program/
+POST /api/program/insert
+POST /api/program/delete
 ```
 
 ### Tracer
