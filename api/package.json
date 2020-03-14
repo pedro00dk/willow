@@ -11,7 +11,6 @@
         "@types/passport": "1.0.2",
         "@types/passport-google-oauth20": "2.0.3",
         "@types/yargs": "15.0.4",
-        "json-schema-to-typescript": "latest",
         "prettier": "latest",
         "source-map-support": "latest",
         "typescript": "latest"
@@ -31,8 +30,8 @@
         "python-tracer": "cd ../tracers/python/ && make run --silent"
     },
     "scripts": {
+        "types": "mkdir --parents ./src/types && cp ../types/* ./src/types",
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
-        "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
         "debug": "tsc && node --es-module-specifier-resolution node --require source-map-support/register --nolazy --inspect-brk -- ./dist/index.js",
         "start": "tsc && node --es-module-specifier-resolution node --require source-map-support/register -- ./dist/index.js",
         "debug:dev": "npm run debug -- --tracer java \"${npm_package_config_java_tracer}\" --tracer python \"${npm_package_config_python_tracer}\"",

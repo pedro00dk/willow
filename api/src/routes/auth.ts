@@ -1,9 +1,9 @@
 import express from 'express'
 import passport from 'passport'
 import GoogleOAuth from 'passport-google-oauth20'
-import { User } from '../data/model'
+import { db } from '../db'
 import { Config } from '../server'
-import { db } from '../data/db'
+import { User } from '../types/model'
 import { appendAction } from './action'
 
 export const router = (config: Config, callbackUrl: string) => {

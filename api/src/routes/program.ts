@@ -1,6 +1,6 @@
 import express from 'express'
-import { db } from '../data/db'
-import { Program, User } from '../data/model'
+import { db } from '../db'
+import { Program, User } from '../types/model'
 
 export const router = () => {
     const router = express.Router()

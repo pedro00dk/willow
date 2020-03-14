@@ -1,6 +1,6 @@
 import express from 'express'
-import { db } from '../data/db'
-import { Action, User } from '../data/model'
+import { db } from '../db'
+import { Action, User } from '../types/model'
 
 type RequestAction = Pick<Action, 'name' | 'payload'> & { date: string }
 

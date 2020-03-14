@@ -1,6 +1,6 @@
 import mongodb from 'mongodb'
-import { Action, Actions, Example, Program, Programs, User } from './model'
-import { Config } from '../server'
+import { Config } from './server'
+import { Actions, Example, Programs, User } from './types/model'
 
 export const mongo = {
     connected: false,

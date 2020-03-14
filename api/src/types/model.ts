@@ -1,4 +1,4 @@
-import * as schema from '../schema/schema'
+import * as tracer from './tracer'
 
 /**
  * User entity.
@@ -41,7 +41,7 @@ export type Programs = {
 export type Program = {
     name: string
     language: string
-    trace: Pick<schema.Trace, 'source' | 'input'>
+    request: Pick<tracer.Request, 'source' | 'input'>
 }
 
 /**
@@ -50,5 +50,5 @@ export type Program = {
 export type Example = {
     name: string
     language: string
-    trace: Pick<schema.Trace, 'source' | 'input'>
+    request: Pick<tracer.Request, 'source' | 'input'>
 }

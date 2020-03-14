@@ -1,8 +1,8 @@
 import cp from 'child_process'
 import express from 'express'
-import { User } from '../data/model'
-import * as schema from '../schema/schema'
 import { Config } from '../server'
+import { User } from '../types/model'
+import * as tracer from '../types/tracer'
 import { appendAction } from './action'
 
 export const router = (config: Config) => {
@@ -19,22 +19,22 @@ export const router = (config: Config) => {
         const language = req.body['language'] as string
         const steps = user ? config.authSteps : config.steps
         const timeout = user ? config.authTimeout : config.timeout
-        const trace = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
+        const request = { source: req.body['source'] as string, input: req.body['input'] as string, steps }
         console.log('http', req.path, user, language, steps, timeout)
         try {
             if (!config.tracers[language]) throw new Error(`Language ${language} is not available`)
-            const result = await runTracer(config.tracers[language], trace, timeout)
+            const result = await runTracer(config.tracers[language], request, timeout)
             const steps = result.steps.length
-            const threw = {
-                compile: result.steps.length === 1 && result.steps[0].threw,
-                runtime: result.steps.length > 1 && result.steps[result.steps.length - 1].threw
+            const error = {
+                compile: result.steps.length === 1 && result.steps[0].error,
+                runtime: result.steps.length > 1 && result.steps[result.steps.length - 1].error
             }
-            const action = { name: 'trace', date: new Date(), payload: { language, trace, steps, threw } }
+            const action = { name: 'trace', date: new Date(), payload: { language, request, steps, error } }
             if (user) await appendAction(user.id, action)
             res.send(result)
             console.log('http', req.path, 'ok')
         } catch (error) {
-            const action = { name: 'trace', date: new Date(), payload: { language, trace, error: error.message } }
+            const action = { name: 'trace', date: new Date(), payload: { language, request, error: error.message } }
             if (user) await appendAction(user.id, action)
             res.status(400).send(error.message)
             console.log('http', req.path, 'error', error.message)
@@ -53,10 +53,10 @@ export const router = (config: Config) => {
  *
  * @param command any shell command that accepts the trace request as a JSON serialized string through standard input
  *                stream, outputs the result to the standard output stream and errors to the standard error stream
- * @param trace the trace object
+ * @param request the tracer request
  * @param timeout the maximum execution time in milliseconds
  */
-export const runTracer = async (command: string, trace: schema.Trace, timeout: number) => {
+export const runTracer = async (command: string, request: tracer.Request, timeout: number) => {
     const tracer = cp.spawn(command, { shell: true })
 
     const stopPromise = new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ export const runTracer = async (command: string, trace: schema.Trace, timeout: n
     const stderrBuffers: Buffer[] = []
     tracer.stdout.on('data', chunk => stdoutBuffers.push(chunk))
     tracer.stderr.on('data', chunk => stderrBuffers.push(chunk))
-    tracer.stdin.end(JSON.stringify(trace, undefined, 0))
+    tracer.stdin.end(JSON.stringify(request, undefined, 0))
 
     try {
         await stopPromise
@@ -76,5 +76,5 @@ export const runTracer = async (command: string, trace: schema.Trace, timeout: n
         tracer.kill()
     }
     if (stderrBuffers.length > 0) throw new Error(Buffer.concat(stderrBuffers).toString('utf-8'))
-    return JSON.parse(Buffer.concat(stdoutBuffers).toString('utf-8')) as schema.Result
+    return JSON.parse(Buffer.concat(stdoutBuffers).toString('utf-8')) as tracer.Response
 }
