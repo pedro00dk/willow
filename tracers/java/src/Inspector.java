@@ -204,6 +204,7 @@ class Inspector {
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
+        obj.addProperty("id", id);
         obj.addProperty("type", type);
         obj.addProperty("category", category);
         int[] memberIndex = {0};
@@ -287,6 +288,7 @@ class Inspector {
             var obj = new JsonObject();
             // add id to heap graph (it has to be added before other objects inspections)
             snapshot.get("heap").getAsJsonObject().add(id, obj);
+            obj.addProperty("id", id);
             obj.addProperty("type", jdiObjRef.referenceType().name());
             obj.addProperty("category", "map");
             obj.add(
@@ -344,6 +346,7 @@ class Inspector {
         var obj = new JsonObject();
         // add id to heap graph (it has to be added before other objects inspections)
         snapshot.get("heap").getAsJsonObject().add(id, obj);
+        obj.addProperty("id", id);
         obj.addProperty("type", jdiObjRef.referenceType().name());
         obj.addProperty("category", "map");
         obj.add(

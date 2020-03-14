@@ -11,29 +11,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Traces a java file and analyses its state after each instruction.
+ * Traces a java requests.
  */
 public class Tracer {
     private String source;
     private String input;
     private int steps;
     private Inspector inspector;
-    private JsonObject result;
+    private JsonObject response;
     private int currentStep;
     private List<String> printCache;
 
     /**
-     * Create the tracer with the trace object, which contains the source to be inspected, its input and the maximum of
-     * steps to be evaluated.
+     * Create the tracer with the request, which contains the program source, input and steps to run.
      *
-     * @param trace source, input and steps, the two firsts are String and the later int.
+     * @param request request
      */
-    public Tracer(JsonObject trace) {
-        this.source = trace.get("source").getAsString();
-        this.input = trace.get("input").getAsString();
-        this.steps = trace.get("steps").getAsInt();
+    public Tracer(JsonObject request) {
+        this.source = request.get("source").getAsString();
+        this.input = request.get("input").getAsString();
+        this.steps = request.get("steps").getAsInt();
         inspector = new Inspector();
-        result = null;
+        response = null;
         currentStep = 0;
         printCache = new ArrayList<>();
     }
@@ -47,11 +46,11 @@ public class Tracer {
      * run(), trace() and the Executor might also raise unexpected exceptions, that will the be captured and returned
      * the same way as exceptions from the debugee program, being easily distinguishable by their tracebacks.
      *
-     * @return the result
+     * @return the tracer response
      */
     JsonObject run() {
-        result = new JsonObject();
-        result.add("steps", new JsonArray());
+        response = new JsonObject();
+        response.add("steps", new JsonArray());
         try {
             new Executor().execute(source, this::trace, this::inputHook, this::printHook, this::lockHook);
         } catch (Executor.ApplicationExternalException | TracerStopException e) {
@@ -60,20 +59,20 @@ public class Tracer {
             var step = new JsonObject();
             step.add("threw", threw);
             step.addProperty("prints", String.join("", printCache));
-            result.get("steps").getAsJsonArray().add(step);
-            return result;
+            response.get("steps").getAsJsonArray().add(step);
+            return response;
         } catch (PrintedException e) {
             var exception = new JsonObject();
             exception.addProperty("type", e.type);
             exception.addProperty("traceback", e.traceback);
-            var threw = new JsonObject();
-            threw.add("exception", exception);
+            var error = new JsonObject();
+            error.add("exception", exception);
             var step = new JsonObject();
-            step.add("threw", threw);
-            step.addProperty("prints", String.join("", printCache));
-            result.get("steps").getAsJsonArray().add(step);
+            step.add("error", error);
+            step.addProperty("print", String.join("", printCache));
+            response.get("steps").getAsJsonArray().add(step);
         } catch (Exception e) {
-            var threw = new JsonObject();
+            var error = new JsonObject();
             var tracebackWriter = new StringWriter();
             e.printStackTrace(new PrintWriter(tracebackWriter, true));
             var traceback = Arrays
@@ -83,13 +82,13 @@ public class Tracer {
             var exception = new JsonObject();
             exception.addProperty("type", e.getClass().getName());
             exception.addProperty("traceback", traceback);
-            threw.add("exception", exception);
+            error.add("exception", exception);
             var step = new JsonObject();
-            step.add("threw", threw);
-            step.addProperty("prints", String.join("", printCache));
-            result.get("steps").getAsJsonArray().add(step);
+            step.add("error", error);
+            step.addProperty("print", String.join("", printCache));
+            response.get("steps").getAsJsonArray().add(step);
         }
-        return result;
+        return response;
     }
 
     /**
@@ -116,16 +115,15 @@ public class Tracer {
             this.printCache.clear();
             throw new PrintedException(exceptionTraceback);
         }
-
         if (!(event instanceof LocatableEvent) || !((LocatableEvent) event).thread().name().equals("main")) return;
-
-        if (++this.currentStep > this.steps) throw new TracerStopException("reached maximum step: " + this.steps);
+        if (this.currentStep++ >= this.steps)
+            throw new TracerStopException("Program too long, maximum steps allowed: " + this.steps);
 
         var snapshot = inspector.inspect((LocatableEvent) event);
         var step = new JsonObject();
         step.add("snapshot", snapshot);
-        step.addProperty("prints", String.join("", printCache));
-        result.get("steps").getAsJsonArray().add(step);
+        step.addProperty("print", String.join("", printCache));
+        response.get("steps").getAsJsonArray().add(step);
         this.printCache.clear();
     }
 

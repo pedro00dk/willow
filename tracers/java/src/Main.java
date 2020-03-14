@@ -37,27 +37,27 @@ public class Main {
         }
 
         var scan = new Scanner(System.in);
-        var traceData = new Gson().fromJson(scan.nextLine(), JsonObject.class);
+        var rawRequest = new Gson().fromJson(scan.nextLine(), JsonObject.class);
         scan.close();
-        var sourceJson = traceData.get("source");
-        var inputJson = traceData.get("input");
-        var stepsJson = traceData.get("steps");
-        var trace = new JsonObject();
-        trace.addProperty(
+        var rawSource = rawRequest.get("source");
+        var rawInput = rawRequest.get("input");
+        var rawSteps = rawRequest.get("steps");
+        var request = new JsonObject();
+        request.addProperty(
                 "source",
-                !options.getBoolean("test") && sourceJson != null ? sourceJson.getAsString()
+                !options.getBoolean("test") && rawSource != null ? rawSource.getAsString()
                         : options.getBoolean("test") ? Files.readString(Path.of("./res/Main.java"))
                         : ""
         );
-        trace.addProperty("input", inputJson != null ? inputJson.getAsString() : "");
-        trace.addProperty("steps", stepsJson != null ? stepsJson.getAsNumber().intValue() : Integer.MAX_VALUE);
+        request.addProperty("input", rawInput != null ? rawInput.getAsString() : "");
+        request.addProperty("steps", rawSteps != null ? rawSteps.getAsNumber().intValue() : Integer.MAX_VALUE);
 
-        var result = new Tracer(trace).run();
+        var response = new Tracer(request).run();
 
         System.out.println(
                 options.getBoolean("pretty")
-                        ? new GsonBuilder().setPrettyPrinting().create().toJson(result)
-                        : result.toString()
+                        ? new GsonBuilder().setPrettyPrinting().create().toJson(response)
+                        : response.toString()
         );
     }
 }
