@@ -75,6 +75,7 @@ class Tracer:
         However these frames are ignored when _filename is checked, tracing only frames of the debugee program.
         _trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising
         a TraceStopException to stop exec().
+        This trace implementation skips the first call event of a program.
         - frame: `frame`: frame where the state data will be extracted from
         - event: `str`: frame event type, one of: call, line, exception or return
         - args: `any[]`: list of arguments only populated in exception events, not used in the inspection
@@ -83,6 +84,7 @@ class Tracer:
             return self._trace
         if self._exec_frame is None:
             self._exec_frame = frame.f_back
+            return self._trace
         if self._current_step >= self._steps:
             raise TracerStopException(f'Program too long, maximum steps allowed: {self._steps}')
 
