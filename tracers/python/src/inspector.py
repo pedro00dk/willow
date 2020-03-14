@@ -4,7 +4,7 @@ import types
 
 class Inspector:
     """
-    Inspect frames and produces dictionaries with their state data.
+    Inspect frames and produces snapshots with the state.
     """
 
     def __init__(self):
@@ -18,23 +18,20 @@ class Inspector:
     # types that can be converted to a JSON string
     STRING_LIKE_TYPES = (bool, complex, str, type(None))
 
-    # types that can be converted to a JSON number (with javascript's restriction of 2^53 - 1)
+    # types that can be converted to a JSON number (within javascript's restriction of +-2^53 - 1)
     NUMBER_LIKE_TYPES = (int, float)
 
     def inspect(self, frame: types.FrameType, event: str, exec_frame: types.FrameType):
         """
-        Inspect the frame and its event to build a dictionary with state data.
-
-        > frame: `frame`: frame where the state data will be extracted from
-        > exec_frame: `frame`: frame of the exec() call, it is used to know which frame is the base frame
-
-        > return `dict`: the processed frame data
+        Inspect the frame and its event to build a snapshot with state.
+        - frame: `frame`: frame where the state data will be extracted from
+        - exec_frame: `frame`: frame of the exec() call, it is used to know which frame is the base frame
+        - return `dict`: the snapshot
         """
         self.previous_ordered_ids = self.ordered_ids
         self.ordered_ids = {}
 
         snapshot = {'info': 'ok' if event != 'exception' else 'warn'}
-
         current_frame = frame
         frames = []
         while current_frame != exec_frame and current_frame is not None:
@@ -60,24 +57,21 @@ class Inspector:
 
     def _inspect_object(self, snapshot: dict, obj, classes: set, module: str):
         """
-        Recursively inspect objects of the heap.
+        Recursively inspect objects in the heap.
         String and Number like objects are transformed in str or int.
         Complex objects are transformed in dictionaries that contain information of their type and members and added to
         the snapshot, then their references are returned as a list.
-
-        > snapshot: `dict`: snapshot to be filled with heap information
-        > obj: `*any`: object to be processed
-        > classes: `set<str>`: set of user defined classes, which is used to known which objects shall be analyzed
-        > module: main module name, used to only save classes that where declared in it
-
-        > return `int | float | str | [str]`: the transformed value
+        - snapshot: `dict`: snapshot to be filled with heap information
+        - obj: `*any`: object to be processed
+        - classes: `set<str>`: set of user defined classes, which is used to known which objects shall be analyzed
+        - module: main module name, used to only save classes that where declared in it
+        - return `int | float | str | [str]`: the transformed value
         """
-
         if isinstance(obj, Inspector.STRING_LIKE_TYPES):
             return str(obj)
-        if isinstance(obj, Inspector.NUMBER_LIKE_TYPES):
+        elif isinstance(obj, Inspector.NUMBER_LIKE_TYPES):
             return obj if abs(obj) < 2 ** 53 else str(obj)
-        if isinstance(obj, type):
+        elif isinstance(obj, type):
             if obj.__module__ == module:
                 classes.add(obj)
             return str(obj)
@@ -111,6 +105,7 @@ class Inspector:
         if members is not None:  # known object type
             # add object id to the heap before further inspections to avoid stack overflows
             obj = snapshot['heap'][ordered_id] = {}
+            obj['id'] = ordered_id
             obj['category'] = category
             obj['type'] = type_
             obj['members'] = [

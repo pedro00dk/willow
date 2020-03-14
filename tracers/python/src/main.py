@@ -10,22 +10,22 @@ def main():
     parser.add_argument('--pretty', default=False, action='store_true', help='Pretty print output')
     parser.add_argument('--test', default=False, action='store_true', help='Run the test source')
     options = parser.parse_args()
-
-    raw_trace = json.loads(input())
-    trace = {
+    
+    raw_request = json.loads(input())
+    request = {
         'source':
-        raw_trace['source'] if not options.test and raw_trace.get('source') is not None else
+        raw_request['source'] if not options.test and raw_request.get('source') is not None else
         pathlib.Path('./res/main.py').read_text(encoding='utf8') if options.test else
         '',
-        'input': raw_trace['input'] if raw_trace.get('input') is not None else '',
-        'steps': raw_trace['steps'] if raw_trace.get('steps') is not None else 2 ** 31 - 1
+        'input': raw_request['input'] if raw_request.get('input') is not None else '',
+        'steps': raw_request['steps'] if raw_request.get('steps') is not None else 2 ** 31 - 1
     }
-
-    result = tracer.Tracer(trace).run()
-
+    
+    response = tracer.Tracer(request).run()
+    
     print(
         json.dumps(
-            result,
+            response,
             check_circular=False,
             indent=4 if options.pretty else None,
             separators=None if options.pretty else (',', ':')
