@@ -2,9 +2,10 @@
 
 A tool to inspect python code.
 This tool analyses the execution of a script at each step.
-Snapshots of the stack and heap, and errors generated during execution are composed in a record of the program states, this result records is then returned.
+Snapshots of the stack and heap, and errors generated during execution are composed in a record of the program states, the record is then returned.
 
-The Makefile can be used to start the tracer command line interface. The arguments are passed in to the python script through the ARGS variable.
+The Makefile can be used to start the tracer command line interface.
+The arguments are passed in to the python script through the ARGS variable.
 
 ```shell
 $ make run ARGS='--help'
@@ -23,9 +24,10 @@ $ # use the --silent flag to disable echoing command recipes
 $ make run --silent ARGS='--pretty --test'
 ```
 
-The program data to be traced must be provided through the tracer standard input stream. The tracer result is print to the standard output stream.
+The request must be provided through the tracer standard input stream.
+The tracer response is printed to the standard output stream.
 
-The input must be in the json format with the following properties:
+The request must be in the json format with the following properties:
 
 ```json
 {
@@ -37,7 +39,7 @@ The input must be in the json format with the following properties:
 
 ## Docker
 
-This tracer image does not require especial options to build or run. Attention must be payed when passing arguments to the docker container.
+This tracer image does not require especial options to build or run.
 
 ```shell
 $ docker image build --tag willow-tracer-python -- ./
