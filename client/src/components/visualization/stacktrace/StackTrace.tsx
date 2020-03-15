@@ -1,13 +1,13 @@
 import React from 'react'
 import { useSelection } from '../../../reducers/Store'
-import * as schema from '../../../schema/schema'
+import * as tracer from '../../../types/tracer'
 import { ScopeTrace } from './ScopeTrace'
 
 const classes = {
     container: 'd-flex position-absolute overflow-auto'
 }
 
-export type ScopeSlice = { name: string; range: [number, number]; nodes: schema.Scope[]; children: schema.Scope[][] }
+export type ScopeSlice = { name: string; range: [number, number]; nodes: tracer.Scope[]; children: tracer.Scope[][] }
 
 export const StackTrace = () => {
     const container$ = React.useRef<HTMLDivElement>()
@@ -19,7 +19,7 @@ export const StackTrace = () => {
     const baseScopeSlice = React.useMemo(() => {
         if (!available) return
         const children = steps.map(
-            step => step.snapshot?.stack ?? [{ name: step.threw.cause ?? step.threw.exception.type } as schema.Scope]
+            step => step.snapshot?.stack ?? [{ name: step.error.exception?.type ?? step.error.cause } as tracer.Scope]
         )
         return { name: undefined, range: [0, steps.length - 1], nodes: [], children } as ScopeSlice
     }, [available, steps])

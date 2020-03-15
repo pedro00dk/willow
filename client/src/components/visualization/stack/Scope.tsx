@@ -2,7 +2,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
-import * as schema from '../../../schema/schema'
+import * as tracer from '../../../types/tracer'
 import { getDisplayValue, getMemberName, isSameMember } from '../graphview/SchemaUtils'
 
 const classes = {
@@ -17,8 +17,8 @@ const styles = {
     background: (changed: boolean) => changed && colors.yellow.lighter
 }
 
-export const Scope = (props: { scope: schema.Scope }) => {
-    const previousMembers = React.useRef<{ [name: string]: schema.Member }>({})
+export const Scope = (props: { scope: tracer.Scope }) => {
+    const previousMembers = React.useRef<{ [name: string]: tracer.Member }>({})
 
     React.useEffect(() => {
         previousMembers.current = Object.fromEntries(props.scope.members.map(member => [getMemberName(member), member]))
