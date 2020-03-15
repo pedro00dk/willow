@@ -1,5 +1,7 @@
 import * as tracer from './tracer'
 
+// User related models.
+
 /**
  * User entity.
  */
@@ -44,6 +46,8 @@ export type Program = {
     request: Pick<tracer.Request, 'source' | 'input'>
 }
 
+// Example related models.
+
 /**
  * Example program that can be fetched by the user.
  */
@@ -51,4 +55,15 @@ export type Example = {
     name: string
     language: string
     request: Pick<tracer.Request, 'source' | 'input'>
+}
+
+// Tracer related models
+
+/**
+ * Requests from a client, it contains the source language but not steps, since it is managed by the api.
+ */
+export type ClientRequest = {
+    language: string
+    source: tracer.Request['source']
+    input: tracer.Request['input']
 }
