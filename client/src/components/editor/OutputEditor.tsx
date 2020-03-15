@@ -22,7 +22,6 @@ export const OutputEditor = () => {
             acc.push(`${previousContent}${prints}${error}`)
             return acc
         }, [] as string[])
-        console.log(output.current)
     })
 
     useSelection(async state => {
