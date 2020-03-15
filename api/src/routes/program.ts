@@ -9,7 +9,7 @@ export const router = () => {
         console.log('http', req.originalUrl)
         const user = req.user as User
         if (!user) return res.status(401).send()
-        const programs = (await db?.programs.findOne({ id: user.id })).programs ?? []
+        const programs = (await db?.programs.findOne({ id: user.id }))?.programs ?? []
         res.send(programs)
     })
 
