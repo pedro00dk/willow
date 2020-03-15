@@ -54,10 +54,10 @@ public class Tracer {
         try {
             new Executor().execute(source, this::trace, this::inputHook, this::printHook, this::lockHook);
         } catch (Executor.ApplicationExternalException | TracerStopException e) {
-            var threw = new JsonObject();
-            threw.addProperty("cause", e.getMessage());
+            var error = new JsonObject();
+            error.addProperty("cause", e.getMessage());
             var step = new JsonObject();
-            step.add("threw", threw);
+            step.add("error", error);
             step.addProperty("prints", String.join("", printCache));
             response.get("steps").getAsJsonArray().add(step);
             return response;
