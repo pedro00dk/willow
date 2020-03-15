@@ -43,8 +43,8 @@ export const SourceEditor = () => {
     })
 
     useSelection(async (state, previousState) => {
-        const step = state.tracer.steps[state.tracer.index]
-        const previousStep = previousState.tracer?.steps[previousState.tracer.index]
+        const step = state.tracer.steps?.[state.tracer.index]
+        const previousStep = previousState.tracer?.steps?.[previousState.tracer.index]
         if (!editor.current || !state.tracer.available || step === previousStep) return
         Object.values(editor.current.session.getMarkers(false) as { [id: number]: EditorMarker })
             .filter(marker => marker.id > 2)
