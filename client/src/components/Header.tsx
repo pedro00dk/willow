@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import logo from '../../public/logo.svg'
@@ -9,7 +8,7 @@ const classes = {
     container: 'navbar navbar-light bg-light shadow-sm',
     brand: {
         container: 'd-flex navbar-brand align-items-center',
-        logo: cn('mr-2', css({ filter: 'invert(1)', width: '2rem' }))
+        logo: `mr-2 ${css({ filter: 'invert(1)', width: '2rem' })}`
     },
     menu: {
         left: 'navbar-nav flex-row',
@@ -54,15 +53,21 @@ const Help = () => {
 }
 
 const User = () => {
+    const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
-    return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.signed ? user.email : ''}</span>
+    console.log(user)
+    React.useEffect(() => {
+        dispatch(userActions.fetch()).then(() => dispatch(userActions.fetchPrograms()))
+    }, [])
+
+    return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.user?.email ?? ''}</span>
 }
 
 const SignInOut = () => {
     const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
-    const action = user.signed ? userActions.signout() : userActions.signin()
-    const label = `Sign ${user.signed ? 'out' : 'in'}`
+    const action = user.user ? userActions.signout() : userActions.signin()
+    const label = `Sign ${user.user ? 'out' : 'in'}`
     return (
         <a className={classes.menu.link} href='#' onClick={() => dispatch(action)}>
             {label}

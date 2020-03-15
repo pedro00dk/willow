@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import logo from '../../public/logo.svg'
@@ -21,7 +20,7 @@ const classes = {
     header: {
         container: 'navbar navbar-light bg-light shadow-sm',
         brand: 'd-flex navbar-brand align-items-center',
-        logo: cn('mr-2', css({ filter: 'invert(1)', width: '2rem' })),
+        logo: `mr-2 ${css({ filter: 'invert(1)', width: '2rem' })}`,
         leftMenu: 'navbar-nav flex-row',
         rightMenu: 'navbar-nav flex-row ml-auto',
         menuItem: 'nav-item active px-2',
