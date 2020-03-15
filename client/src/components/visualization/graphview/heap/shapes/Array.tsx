@@ -2,10 +2,10 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
-import * as schema from '../../../../../schema/schema'
+import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
 import { Edge, readParameters, UnknownParameters } from '../../GraphData'
-import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
+import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex text-nowrap',
@@ -28,13 +28,13 @@ export const defaultParameters = {
     'wrap indices': { value: false, bool: true as const }
 }
 
-export const defaults: ReadonlySet<schema.Obj['category']> = new Set(['list', 'set'])
-export const supported: ReadonlySet<schema.Obj['category']> = new Set(['list', 'set'])
+export const defaults: ReadonlySet<tracer.Obj['category']> = new Set(['list', 'set'])
+export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list', 'set'])
 
 export const Shape = (props: {
     id: string
-    obj: schema.Obj
-    previousMembers: { [id: string]: schema.Member }
+    obj: tracer.Obj
+    previousMembers: { [id: string]: tracer.Member }
     parameters: UnknownParameters
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
@@ -50,15 +50,15 @@ export const Shape = (props: {
         const chunk = acc[chunkIndex] ?? (acc[chunkIndex] = [])
         chunk.push(member)
         return acc
-    }, [] as schema.Member[][])
+    }, [] as tracer.Member[][])
 
-    const renderChunk = (chunk: schema.Member[], chunkIndex: number) => (
+    const renderChunk = (chunk: tracer.Member[], chunkIndex: number) => (
         <div key={chunkIndex} className={classes.chunk} style={{ flexDirection: orientation }}>
             {chunk.map((member, i) => renderCell(member, i))}
         </div>
     )
 
-    const renderCell = (member: schema.Member, cellIndex: number) => {
+    const renderCell = (member: tracer.Member, cellIndex: number) => {
         const name = getMemberName(member)
         const displayIndex = (wrapIndices ? cellIndex : (member.key as number)).toString()
         const displayValue = getDisplayValue(member.value, props.id)

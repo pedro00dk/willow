@@ -1,10 +1,10 @@
 import React from 'react'
 import { colors } from '../../../../colors'
 import { DefaultState } from '../../../../reducers/Store'
-import * as schema from '../../../../schema/schema'
+import * as tracer from '../../../../types/tracer'
 import { GraphData } from '../GraphData'
-import { isSameMember, isValueObject, getMemberName, getDisplayValue } from '../SchemaUtils'
 import { SvgNode } from '../svg/SvgNode'
+import { isSameMember, isValueObject, getMemberName, getDisplayValue } from '../TracerUtils'
 
 const styles = {
     color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark),
@@ -13,7 +13,7 @@ const styles = {
 }
 
 export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
-    const previousMembers = React.useRef<{ [scope: number]: { [name: string]: schema.Member } }>({})
+    const previousMembers = React.useRef<{ [scope: number]: { [name: string]: tracer.Member } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
@@ -27,7 +27,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
         if (!acc[id]) acc[id] = []
         acc[id].push({ member, depth })
         return acc
-    }, {} as { [id: string]: { member: schema.Member; depth: number }[] })
+    }, {} as { [id: string]: { member: tracer.Member; depth: number }[] })
 
     const deltas = [
         { x: -65, y: -25 },
@@ -61,7 +61,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphD
             if (!acc[depth]) acc[depth] = {}
             acc[depth][getMemberName(member)] = member
             return acc
-        }, {} as { [depth: number]: { [name: string]: schema.Member } })
+        }, {} as { [depth: number]: { [name: string]: tracer.Member } })
     })
 
     return <>{available && <SvgNode id={node.id} graphData={props.graphData} />}</>

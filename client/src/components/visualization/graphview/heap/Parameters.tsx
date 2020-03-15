@@ -1,8 +1,8 @@
 import React from 'react'
 import { Item } from 'react-contexify'
-import * as schema from '../../../../schema/schema'
+import * as tracer from '../../../../types/tracer'
 import { ComputedParameters, readParameters, ShapeParameters, UnknownParameters } from '../GraphData'
-import { isValueObject, getMemberName } from '../SchemaUtils'
+import { isValueObject, getMemberName } from '../TracerUtils'
 
 const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
@@ -51,7 +51,7 @@ const MemberParameter = (props: {
     name: string
     value: string | undefined
     members: 'all' | 'values' | 'references'
-    obj: schema.Obj
+    obj: tracer.Obj
     onChange: (value: string) => void
 }) => {
     const memberNames = props.obj.members
@@ -83,7 +83,7 @@ export const Parameters = <T extends UnknownParameters, U extends ShapeParameter
     withReset: boolean
     parameters: T
     defaults: U
-    obj: schema.Obj
+    obj: tracer.Obj
     onChange: (parameters: ComputedParameters<U>) => void
 }) => {
     const parameters = readParameters(props.parameters, props.defaults)

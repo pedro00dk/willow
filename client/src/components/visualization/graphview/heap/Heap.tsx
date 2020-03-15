@@ -1,8 +1,8 @@
 import React from 'react'
 import { DefaultState } from '../../../../reducers/Store'
 import { GraphData } from '../GraphData'
-import { isValueObject } from '../SchemaUtils'
 import { SvgNode } from '../svg/SvgNode'
+import { isValueObject } from '../TracerUtils'
 import { Obj } from './Obj'
 
 export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {

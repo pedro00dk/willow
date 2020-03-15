@@ -2,10 +2,10 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
-import * as schema from '../../../../../schema/schema'
+import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
 import { Edge, readParameters, UnknownParameters } from '../../GraphData'
-import { getDisplayValue, getMemberName, isSameMember } from '../../SchemaUtils'
+import { getDisplayValue, getMemberName, isSameMember } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
@@ -27,13 +27,13 @@ export const defaultParameters = {
     'size mode': { value: 'delta', options: ['delta', 'step'] }
 }
 
-export const defaults: ReadonlySet<schema.Obj['category']> = new Set()
-export const supported: ReadonlySet<schema.Obj['category']> = new Set(['list'])
+export const defaults: ReadonlySet<tracer.Obj['category']> = new Set()
+export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list'])
 
 export const Shape = (props: {
     id: string
-    obj: schema.Obj
-    previousMembers: { [id: string]: schema.Member }
+    obj: tracer.Obj
+    previousMembers: { [id: string]: tracer.Member }
     parameters: UnknownParameters
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
@@ -70,7 +70,7 @@ export const Shape = (props: {
         return ratioIndices.map(([value, i]) => value)
     }
 
-    const renderColumn = (member: schema.Member, ratio: number, columnIndex: number) => {
+    const renderColumn = (member: tracer.Member, ratio: number, columnIndex: number) => {
         const name = getMemberName(member)
         const displayIndex = (member.key as number).toString()
         const displayValue = getDisplayValue(member.value, props.id)

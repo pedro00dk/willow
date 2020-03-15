@@ -1,10 +1,10 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
-import * as schema from '../../../../schema/schema'
+import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
 import { Edge, GraphData, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../GraphData'
-import { getMemberName, isValueObject } from '../SchemaUtils'
+import { getMemberName, isValueObject } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
@@ -25,7 +25,7 @@ const modules = {
 
 export const Obj = (props: {
     id: string
-    obj: schema.Obj
+    obj: tracer.Obj
     node: Node
     graphData: GraphData
     update: React.Dispatch<{}>
@@ -33,7 +33,7 @@ export const Obj = (props: {
     const container$ = React.useRef<HTMLDivElement>()
     const references = React.useRef<{ id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }[]>()
     references.current = []
-    const previousMembers = React.useRef<{ [id: string]: schema.Member }>({})
+    const previousMembers = React.useRef<{ [id: string]: tracer.Member }>({})
 
     const defaultShape = React.useMemo(
         () =>
@@ -149,7 +149,7 @@ export const Obj = (props: {
 
 const ObjMenu = (props: {
     id: string
-    obj: schema.Obj
+    obj: tracer.Obj
     node: Node
     graphData: GraphData
     update: React.Dispatch<{}>

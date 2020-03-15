@@ -2,10 +2,10 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
-import * as schema from '../../../../../schema/schema'
+import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
 import { Edge, readParameters, UnknownParameters } from '../../GraphData'
-import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../SchemaUtils'
+import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex text-nowrap',
@@ -27,13 +27,13 @@ export const defaultParameters = {
     'references position': { value: 'right', options: ['right', 'bottom'] }
 }
 
-export const defaults: ReadonlySet<schema.Obj['category']> = new Set()
-export const supported: ReadonlySet<schema.Obj['category']> = new Set(['list', 'map'])
+export const defaults: ReadonlySet<tracer.Obj['category']> = new Set()
+export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list', 'map'])
 
 export const Shape = (props: {
     id: string
-    obj: schema.Obj
-    previousMembers: { [id: string]: schema.Member }
+    obj: tracer.Obj
+    previousMembers: { [id: string]: tracer.Member }
     parameters: UnknownParameters
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
@@ -44,7 +44,7 @@ export const Shape = (props: {
     const showReferences = parameters['show references']
     const referencesPosition = parameters['references position']
 
-    const renderField = (member: schema.Member) => {
+    const renderField = (member: tracer.Member) => {
         const name = getMemberName(member)
         const displayKey = getDisplayValue(member.key, props.id)
         const displayValue = getDisplayValue(member.value, props.id)
@@ -82,7 +82,7 @@ export const Shape = (props: {
         )
     }
 
-    const renderReferences = (member: schema.Member) => (
+    const renderReferences = (member: tracer.Member) => (
         <span
             ref={ref$ => {
                 if (!ref$) return

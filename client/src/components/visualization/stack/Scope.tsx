@@ -3,7 +3,7 @@ import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
 import * as tracer from '../../../types/tracer'
-import { getDisplayValue, getMemberName, isSameMember } from '../graphview/SchemaUtils'
+import { getDisplayValue, getMemberName, isSameMember } from '../graphview/TracerUtils'
 
 const classes = {
     container: 'd-flex flex-column table table-sm table-hover border',
