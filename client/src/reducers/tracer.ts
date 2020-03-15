@@ -47,7 +47,7 @@ const trace = (): DefaultAsyncAction =>
     async (dispatch, getState) => {
         dispatch({ type: 'tracer/trace' })
         try {
-            const { language, source, input } = getState()
+            const { language, source, input, options } = getState()
             const request: ClientRequest = {
                 language: language.languages[language.selected],
                 source: source.content.join('\n'),
@@ -55,6 +55,7 @@ const trace = (): DefaultAsyncAction =>
             }
             const response = (await api.post<tracer.Response>('/api/tracer/trace', request)).data
             dispatch({ type: 'tracer/trace', payload: response })
+            if (!options.enableVisualization) dispatch(setIndex(Infinity))
         } catch (error) {
             dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
         }
