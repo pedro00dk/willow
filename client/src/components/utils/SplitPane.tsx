@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { Draggable } from './Draggable'
@@ -7,17 +6,15 @@ const classes = {
     container: 'd-flex w-100 h-100',
     pane: 'd-flex',
     dragger: {
-        base: cn(
-            'd-flex',
-            css({
-                background: 'padding-box lightgray',
-                boxSizing: 'border-box',
-                border: '0px solid transparent',
-                transition: 'all 0.2s ease',
-                zIndex: 10,
-                ':hover': { background: 'darkgray', border: '4px solid lightgray' }
-            })
-        ),
+        base: css({
+            display: 'flex',
+            background: 'padding-box lightgray',
+            boxSizing: 'border-box',
+            border: '0px solid transparent',
+            transition: 'all 0.2s ease',
+            zIndex: 10,
+            ':hover': { background: 'darkgray', border: '4px solid lightgray' }
+        }),
         row: css({ width: '10px', borderLeftWidth: 4, borderRightWidth: 4, marginLeft: -4, marginRight: -4 }),
         column: css({ height: '10px', borderTopWidth: 4, borderBottomWidth: 4, marginTop: -4, marginBottom: -4 })
     }
@@ -80,7 +77,7 @@ export const SplitPane = (props: {
             </div>
             <Draggable
                 props={{
-                    className: cn(classes.dragger.base, classes.dragger[orientation]),
+                    className: `${classes.dragger.base} ${classes.dragger[orientation]}`,
                     style: { cursor: styles.cursor(orientation) }
                 }}
                 onDragStart={event => dispatchEvent(new Event('resize'))}

@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
@@ -9,8 +8,8 @@ const classes = {
     container: 'd-flex flex-column table table-sm table-hover border',
     column: 'd-flex flex-column',
     row: 'd-flex',
-    headerCell: cn('text-truncate w-100', css({ fontSize: '1rem' })),
-    cell: cn('text-truncate w-50', css({ fontSize: '1rem' }))
+    headerCell: `text-truncate w-100 ${css({ fontSize: '1rem' })}`,
+    cell: `text-truncate w-50 ${css({ fontSize: '1rem' })}`
 }
 
 const styles = {

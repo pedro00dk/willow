@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
@@ -9,9 +8,9 @@ import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../
 
 const classes = {
     container: 'd-flex flex-column text-nowrap',
-    element: cn('d-flex px-1', css({ border: `0.5px solid ${colors.gray.dark}` })),
-    key: cn('text-truncate mr-1', css({ borderRight: `0.5px solid ${colors.gray.light}`, fontSize: '0.75rem' })),
-    value: cn('text-center text-truncate', css({ fontSize: '0.75rem' }))
+    element: `d-flex px-1 ${css({ border: `0.5px solid ${colors.gray.dark}` })}`,
+    key: `text-truncate mr-1 ${css({ borderRight: `0.5px solid ${colors.gray.light}`, fontSize: '0.75rem' })}`,
+    value: `text-center text-truncate ${css({ fontSize: '0.75rem' })}`
 }
 
 const styles = {

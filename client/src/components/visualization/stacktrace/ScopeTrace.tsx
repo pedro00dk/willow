@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
@@ -8,16 +7,13 @@ import { ScopeSlice } from './StackTrace'
 
 const classes = {
     container: 'd-flex flex-column w-100',
-    scope: cn(
-        'text-truncate w-100',
-        css({
-            backgroundClip: 'content-box !important',
-            border: '1px solid transparent',
-            cursor: 'default',
-            fontSize: '1rem',
-            ':hover': { borderColor: colors.gray.dark }
-        })
-    ),
+    scope: `text-truncate w-100' ${css({
+        backgroundClip: 'content-box !important',
+        border: '1px solid transparent',
+        cursor: 'default',
+        fontSize: '1rem',
+        ':hover': { borderColor: colors.gray.dark }
+    })}`,
     children: 'd-flex',
     child: 'd-flex'
 }

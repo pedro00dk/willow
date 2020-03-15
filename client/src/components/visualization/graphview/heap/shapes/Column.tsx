@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
@@ -9,9 +8,9 @@ import { getDisplayValue, getMemberName, isSameMember } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
-    element: cn('d-flex flex-column px-1', css({ border: `0.5px solid ${colors.gray.dark}` })),
-    index: cn('text-truncate mr-1', css({ fontSize: '0.5rem' })),
-    value: cn('text-center text-truncate', css({ fontSize: '0.75rem' })),
+    element: `d-flex flex-column px-1 ${css({ border: `0.5px solid ${colors.gray.dark}` })}`,
+    index: `text-truncate mr-1 ${css({ fontSize: '0.5rem' })}`,
+    value: `text-center text-truncate  ${css({ fontSize: '0.75rem' })}`,
     column: css({ borderBottom: `1px solid ${colors.gray.dark}` })
 }
 

@@ -1,5 +1,4 @@
 import ace from 'brace'
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../colors'
@@ -17,9 +16,9 @@ import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    ok: cn('position-absolute', css({ background: colors.blue.light })),
-    warn: cn('position-absolute', css({ background: colors.yellow.light })),
-    error: cn('position-absolute', css({ background: colors.red.light }))
+    ok: `position-absolute ${css({ background: colors.blue.light })}`,
+    warn: `position-absolute ${css({ background: colors.yellow.light })}`,
+    error: `position-absolute ${css({ background: colors.red.light })}`
 }
 
 const supportedLanguages = new Set(['java', 'python'])
