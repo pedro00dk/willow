@@ -24,7 +24,7 @@ const initialState: State = {
     available: false,
     index: 0,
     response: undefined,
-    steps: []
+    steps: undefined
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {

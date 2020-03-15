@@ -14,20 +14,20 @@ export const OutputEditor = () => {
     useSelection(async (state, previousState) => {
         const tracer = state.tracer
         const previousTracer = previousState.tracer
-        if (!tracer.available || tracer.steps === previousTracer?.steps) return
+        if (!tracer.available || tracer.response === previousTracer?.response) return
         output.current = tracer.steps.reduce((acc, step) => {
             const previousContent = acc[acc.length - 1] ?? ''
             const prints = step.print ?? ''
-            const error = step.error?.exception.traceback ?? step.error?.cause ?? ''
+            const error = step.error?.exception?.traceback ?? step.error?.cause ?? ''
             acc.push(`${previousContent}${prints}${error}`)
             return acc
         }, [] as string[])
+        console.log(output.current)
     })
 
-    useSelection(async (state, previousState) => {
+    useSelection(async state => {
         const tracer = state.tracer
-        const previousTracer = previousState.tracer
-        if (!editor.current || !tracer.available || tracer.index === previousTracer?.index) return
+        if (!editor.current || !tracer.available) return
         editor.current.session.doc.setValue(output.current[state.tracer.index])
         editor.current.scrollToLine(editor.current.session.getLength(), true, true, undefined)
     })
