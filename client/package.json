@@ -6,7 +6,6 @@
         "@types/react": "16.9.23",
         "@types/react-dom": "16.9.5",
         "http-server": "latest",
-        "json-schema-to-typescript": "latest",
         "parcel-bundler": "latest",
         "prettier": "latest",
         "typescript": "latest"
@@ -22,6 +21,7 @@
         "react-dom": "16.13.0"
     },
     "scripts": {
+        "types": "mkdir --parents ./src/types && cp ../types/* ./src/types",
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "schema": "mkdir -p ./src/schema && json2ts -i ../schemas/schema.json -o ./src/schema/schema.ts",
         "build": "parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
