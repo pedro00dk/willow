@@ -17,9 +17,9 @@ export const OutputEditor = () => {
         if (!tracer.available || tracer.steps === previousTracer?.steps) return
         output.current = tracer.steps.reduce((acc, step) => {
             const previousContent = acc[acc.length - 1] ?? ''
-            const prints = step.prints ?? ''
-            const threw = step.threw?.cause ?? step.threw?.exception.traceback ?? ''
-            acc.push(`${previousContent}${prints}${threw}`)
+            const prints = step.print ?? ''
+            const error = step.error?.exception.traceback ?? step.error?.cause ?? ''
+            acc.push(`${previousContent}${prints}${error}`)
             return acc
         }, [] as string[])
     })

@@ -1,16 +1,15 @@
 import ace from 'brace'
 import React from 'react'
-import { actions as inputActions } from '../../reducers/input'
-import { useDispatch, useSelection } from '../../reducers/Store'
+import { useSelection } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 export const InputEditor = () => {
     const editor = React.useRef<ace.Editor>()
-    const dispatch = useDispatch()
+    const { input } = useSelection(state => ({ input: state.input }))
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
-        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines()), true))
+        editor.current.on('change', () => (input.content = editor.current.session.doc.getAllLines()))
     }, [editor.current])
 
     useSelection(async state => {

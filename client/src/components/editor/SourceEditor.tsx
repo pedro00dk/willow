@@ -3,8 +3,7 @@ import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../colors'
-import { actions as sourceActions } from '../../reducers/source'
-import { useDispatch, useSelection } from '../../reducers/Store'
+import { useSelection } from '../../reducers/Store'
 import { EditorMarker, Range, TextEditor } from './TextEditor'
 
 import 'brace/ext/language_tools'
@@ -27,13 +26,13 @@ const supportedLanguages = new Set(['java', 'python'])
 
 export const SourceEditor = () => {
     const editor = React.useRef<ace.Editor>()
-    const dispatch = useDispatch()
+    const { source } = useSelection(state => ({ source: state.source }))
 
     React.useLayoutEffect(() => {
         editor.current.setTheme('ace/theme/chrome')
         const options = { enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true }
         editor.current.setOptions(options)
-        editor.current.on('change', () => dispatch(sourceActions.set(editor.current.session.doc.getAllLines()), true))
+        editor.current.on('change', () => (source.content = editor.current.session.doc.getAllLines()))
     }, [editor.current])
 
     useSelection(async (state, previousState) => {
