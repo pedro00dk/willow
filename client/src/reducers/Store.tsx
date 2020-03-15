@@ -85,6 +85,7 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
         if (typeof action === 'function') return action(dispatch, getState)
         state.previous = state.current
         state.current = reducer(state.current, action)
+        subscriptions.forEach(subscription => subscription())
     }
 
     const subscribe = (subscription: () => void) => {
