@@ -55,7 +55,7 @@ const Help = () => {
 const User = () => {
     const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
-    console.log(user)
+
     React.useEffect(() => {
         dispatch(userActions.fetch()).then(() => dispatch(userActions.fetchPrograms()))
     }, [])
