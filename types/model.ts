@@ -30,6 +30,11 @@ export type Action = {
 }
 
 /**
+ * Action with a string date.
+ */
+export type RequestAction = Pick<Action, 'name' | 'payload'> & { date: string }
+
+/**
  * List of programs saved by a user.
  */
 export type Programs = {

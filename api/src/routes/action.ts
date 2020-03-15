@@ -1,8 +1,6 @@
 import express from 'express'
 import { db } from '../db'
-import { Action, User } from '../types/model'
-
-type RequestAction = Pick<Action, 'name' | 'payload'> & { date: string }
+import { Action, RequestAction, User } from '../types/model'
 
 export const router = () => {
     const router = express.Router()
