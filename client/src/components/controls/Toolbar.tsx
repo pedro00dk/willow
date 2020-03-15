@@ -53,6 +53,14 @@ export const Toolbar = () => {
                 onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
             <div className={classes.option}>
+                <span className={classes.optionLabel}>{'Enable visualization'}</span>
+                <input
+                    type='checkbox'
+                    checked={options.preserveLayout}
+                    onChange={event => dispatch(optionsActions.setEnableVisualization(event.target.checked))}
+                />
+            </div>
+            <div className={classes.option}>
                 <span className={classes.optionLabel}>{'Preserve Layout'}</span>
                 <input
                     type='checkbox'
