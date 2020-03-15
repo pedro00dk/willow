@@ -32,7 +32,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
 }
 
 const setEnableVisualization = (enableVisualization: boolean): Action => ({
-    type: 'options/setPreserveLayout',
+    type: 'options/setEnableVisualization',
     payload: enableVisualization
 })
 

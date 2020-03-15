@@ -56,7 +56,7 @@ export const Toolbar = () => {
                 <span className={classes.optionLabel}>{'Enable visualization'}</span>
                 <input
                     type='checkbox'
-                    checked={options.preserveLayout}
+                    checked={options.enableVisualization}
                     onChange={event => dispatch(optionsActions.setEnableVisualization(event.target.checked))}
                 />
             </div>
