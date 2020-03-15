@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import playImage from '../../../public/buttons/play.png'
@@ -9,7 +8,7 @@ import { actions as tracerActions } from '../../reducers/tracer'
 
 const classes = {
     container: 'd-flex align-items-center',
-    image: cn('mx-3', css({ width: '1.5rem' })),
+    image: `mx-3 ${css({ width: '1.5rem' })}`,
     option: 'mx-3',
     optionLabel: 'mr-2'
 }
@@ -37,21 +36,21 @@ export const Toolbar = () => {
                 style={styles.image(canTrace)}
                 src={playImage}
                 title='Start tracing'
-                onClick={event => canTrace && dispatch(tracerActions.trace())}
+                onClick={() => canTrace && dispatch(tracerActions.trace())}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepBack, 90)}
                 src={stepImage}
                 title='Step backward'
-                onClick={event => canStepBack && dispatch(tracerActions.stepIndex('backward', 'into'))}
+                onClick={() => canStepBack && dispatch(tracerActions.stepIndex('backward', 'into'))}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepForward, 270)}
                 src={stepImage}
                 title='Step forward'
-                onClick={event => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
+                onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
             />
             <div className={classes.option}>
                 <span className={classes.optionLabel}>{'Preserve Layout'}</span>

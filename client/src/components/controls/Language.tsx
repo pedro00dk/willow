@@ -1,4 +1,3 @@
-import cn from 'classnames'
 import { css } from 'emotion'
 import React from 'react'
 import { actions as languageActions } from '../../reducers/language'
@@ -8,7 +7,7 @@ const classes = {
     container: 'input-group w-auto',
     group: 'input-group-prepend',
     label: 'input-group-text',
-    select: cn('custom-select', css({ flex: '0 1 auto !important', width: '6rem !important' }))
+    select: `custom-select ${css({ flex: '0 1 auto !important', width: '6rem !important' })}`
 }
 
 export const Language = () => {
