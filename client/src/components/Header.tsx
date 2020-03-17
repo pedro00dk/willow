@@ -57,10 +57,13 @@ const User = () => {
     const { user } = useSelection(state => ({ user: state.user }))
 
     React.useEffect(() => {
-        dispatch(userActions.fetch()).then(() => dispatch(userActions.fetchPrograms()))
+        ;(async () => {
+            await dispatch(userActions.fetch())
+            await dispatch(userActions.fetchPrograms())
+        })()
     }, [])
 
-    return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.user?.email ?? ''}</span>
+    return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.user?.email}</span>
 }
 
 const SignInOut = () => {
