@@ -9,6 +9,7 @@ export const InputEditor = () => {
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
+        editor.current.session.doc.setValue(input.content.join('\n'))
         editor.current.on('change', () => (input.content = editor.current.session.doc.getAllLines()))
     }, [editor.current])
 
