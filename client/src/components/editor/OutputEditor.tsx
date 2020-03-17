@@ -14,7 +14,11 @@ export const OutputEditor = () => {
     useSelection(async (state, previousState) => {
         const tracer = state.tracer
         const previousTracer = previousState.tracer
-        if (!tracer.available || tracer.response === previousTracer?.response) return
+        if (
+            !tracer.available ||
+            (tracer.response === previousTracer?.response && output.current.length === tracer.steps.length)
+        )
+            return
         output.current = tracer.steps.reduce((acc, step) => {
             const previousContent = acc[acc.length - 1] ?? ''
             const prints = step.print ?? ''
