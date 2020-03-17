@@ -15,7 +15,7 @@ type State = {
 type Action =
     | { type: 'user/signin' }
     | { type: 'user/signout' }
-    | { type: 'user/fetch'; payload?: User; error?: string }
+    | { type: 'user/fetch'; payload?: { user: User }; error?: string }
     | { type: 'user/fetchPrograms'; payload?: Program[]; error?: string }
     | { type: 'user/sendAction'; error?: string }
 
@@ -33,7 +33,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return state
         case 'user/fetch':
             return action.payload
-                ? { ...initialState, fetching: false, user: action.payload }
+                ? { ...initialState, fetching: false, user: action.payload.user }
                 : action.error != undefined
                 ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
@@ -61,7 +61,7 @@ const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'user/fetch' })
     try {
         const user = (await api.get<User>('/api/auth/user')).data
-        dispatch({ type: 'user/fetch', payload: user })
+        dispatch({ type: 'user/fetch', payload: { user } })
     } catch (error) {
         dispatch({ type: 'user/fetch', error: error?.response?.data ?? error.toString() })
     }
