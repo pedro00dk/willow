@@ -1,5 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelection } from '../reducers/Store'
+import { actions as actionActions } from '../reducers/action'
 import { actions as tracerActions } from '../reducers/tracer/tracer'
 import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
@@ -74,12 +75,9 @@ const Visualization = () => {
             className={classes.visualization}
             onKeyDown={event => {
                 if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-                dispatch(
-                    tracerActions.stepIndex(
-                        event.key === 'ArrowLeft' ? 'backward' : 'forward',
-                        !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'
-                    )
-                )
+                const direction = event.key === 'ArrowLeft' ? 'backward' : 'forward'
+                dispatch(tracerActions.stepIndex(direction, !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'))
+                dispatch(actionActions.send({ name: `step ${direction}`, payload: 'keyboard' }))
             }}
             tabIndex={0}
         >

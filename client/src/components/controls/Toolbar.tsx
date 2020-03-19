@@ -2,6 +2,7 @@ import { css } from 'emotion'
 import React from 'react'
 import playImage from '../../../public/buttons/play.png'
 import stepImage from '../../../public/buttons/stepInto.png'
+import { actions as actionActions } from '../../reducers/action'
 import { actions as optionsActions } from '../../reducers/options'
 import { useDispatch, useSelection } from '../../reducers/Store'
 import { actions as tracerActions } from '../../reducers/tracer/tracer'
@@ -36,28 +37,42 @@ export const Toolbar = () => {
                 style={styles.image(canTrace)}
                 src={playImage}
                 title='Start tracing'
-                onClick={() => canTrace && dispatch(tracerActions.trace())}
+                onClick={() => {
+                    if (!canTrace) return
+                    dispatch(tracerActions.trace())
+                }}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepBack, 90)}
                 src={stepImage}
                 title='Step backward'
-                onClick={() => canStepBack && dispatch(tracerActions.stepIndex('backward', 'into'))}
+                onClick={() => {
+                    if (!canStepBack) return
+                    dispatch(tracerActions.stepIndex('backward', 'into'))
+                    dispatch(actionActions.send({ name: 'step backward', payload: 'toolbar' }))
+                }}
             />
             <img
                 className={classes.image}
                 style={styles.image(canStepForward, 270)}
                 src={stepImage}
                 title='Step forward'
-                onClick={() => canStepForward && dispatch(tracerActions.stepIndex('forward', 'into'))}
+                onClick={() => {
+                    if (!canStepForward) return
+                    dispatch(tracerActions.stepIndex('forward', 'into'))
+                    dispatch(actionActions.send({ name: 'step forward', payload: 'toolbar' }))
+                }}
             />
             <div className={classes.option}>
                 <span className={classes.optionLabel}>{'Enable visualization'}</span>
                 <input
                     type='checkbox'
                     checked={options.enableVisualization}
-                    onChange={event => dispatch(optionsActions.setEnableVisualization(event.target.checked))}
+                    onChange={event => {
+                        dispatch(optionsActions.setEnableVisualization(event.target.checked))
+                        dispatch(actionActions.send({ name: 'enable visualization', payload: event.target.checked }))
+                    }}
                 />
             </div>
             <div className={classes.option}>
@@ -65,7 +80,10 @@ export const Toolbar = () => {
                 <input
                     type='checkbox'
                     checked={options.preserveLayout}
-                    onChange={event => dispatch(optionsActions.setPreserveLayout(event.target.checked))}
+                    onChange={event => {
+                        dispatch(optionsActions.setPreserveLayout(event.target.checked))
+                        dispatch(actionActions.send({ name: 'preserve layout', payload: event.target.checked }))
+                    }}
                 />
             </div>
             <span className={classes.option}>{stepMessage}</span>

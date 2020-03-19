@@ -2,6 +2,7 @@ import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
 import { useDispatch, useSelection } from '../../../reducers/Store'
+import { actions as actionActions } from '../../../reducers/action'
 import { actions as tracerActions } from '../../../reducers/tracer/tracer'
 import { ScopeSlice } from './StackTrace'
 
@@ -76,7 +77,10 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
                     className={classes.scope}
                     style={{ background: styles.background(selected, error) }}
                     title={props.scopeSlice.name}
-                    onClick={event => dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))}
+                    onClick={event => {
+                        dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))
+                        dispatch(actionActions.send({ name: 'step jump', payload: 'stack trace' }))
+                    }}
                 >
                     {displayMode === 'all' ? props.scopeSlice.name : '\u200b'}
                 </div>
