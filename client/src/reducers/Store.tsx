@@ -7,6 +7,7 @@ import { reducer as languageReducer } from './language'
 import { reducer as optionsReducer } from './options'
 import { reducer as sourceReducer } from './source'
 import { reducer as tracerReducer } from './tracer'
+import { reducer as outputReducer } from './tracer/output'
 import { reducer as userReducer } from './user'
 
 /**
@@ -163,6 +164,7 @@ const reducers = {
     input: inputReducer,
     language: languageReducer,
     options: optionsReducer,
+    output: outputReducer,
     source: sourceReducer,
     tracer: tracerReducer,
     user: userReducer
