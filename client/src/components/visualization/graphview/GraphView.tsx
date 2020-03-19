@@ -5,7 +5,7 @@ import { Heap } from './heap/Heap'
 import { Stack } from './stack/Stack'
 import { SvgView } from './svg/SvgView'
 
-const graphContext = React.createContext(new Graph({ width: 1200, height: 1000 }, { x: 20, y: 20 }))
+const graphContext = React.createContext(new Graph({ width: 1200, height: 1000 }, { right: 20, bottom: 20 }))
 
 export const GraphView = () => {
     const update = React.useState({})[1]

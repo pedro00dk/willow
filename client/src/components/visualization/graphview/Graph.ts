@@ -162,7 +162,27 @@ export const readParameters = <T extends UnknownParameters, U extends ShapeParam
 
 // GraphData computes all manipulations in the Graph visualization
 
+class View {
+    constructor(
+        public size: { width: number; height: number } = { width: Infinity, height: Infinity },
+        public padding: { right: number; bottom: number } = { right: 0, bottom: 0 },
+        public box: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 0, height: 0 }
+    ) {}
+
+    getCenter() {
+        return { x: this.box.x + this.box.width / 2, y: this.box.y + this.box.height / 2 }
+    }
+
+    padPoint(point: { x: number; y: number }) {
+        return {
+            x: Math.min(Math.max(point.x, 0), this.size.width - this.padding.right),
+            y: Math.min(Math.max(point.y, 0), this.size.height - this.padding.bottom)
+        }
+    }
+}
+
 export class Graph {
+    view: View = new View()
     private index: number = 0
     private size: number = 0
     private animate: boolean = true
@@ -171,7 +191,10 @@ export class Graph {
     private types: { [type: string]: NodeType } = {}
     private edges: { [id: string]: NodeEdges } = {}
 
-    constructor(private viewSize: { width: number; height: number }, private viewPadding: { x: number; y: number }) {}
+    constructor(viewSize: { width: number; height: number }, viewPadding: { right: number; bottom: number }) {
+        this.view.size = viewSize
+        this.view.padding = viewPadding
+    }
 
     getIndex() {
         return this.index
@@ -195,14 +218,6 @@ export class Graph {
 
     setAnimate(animate: boolean) {
         return (this.animate = animate)
-    }
-
-    getViewSize() {
-        return this.viewSize
-    }
-
-    getViewPadding() {
-        return this.viewPadding
     }
 
     subscribe(id: string, callback: () => void) {
@@ -262,10 +277,7 @@ export class Graph {
         index = this.index,
         mode: 'all' | 'index' | 'override' | 'available' = 'available'
     ) {
-        const paddedPosition = {
-            x: Math.min(Math.max(position.x, 0), this.viewSize.width - this.viewPadding.x),
-            y: Math.min(Math.max(position.y, 0), this.viewSize.height - this.viewPadding.y)
-        }
+        const paddedPosition = this.view.padPoint(position)
         switch (mode) {
             case 'all':
                 for (let i = 0; i < this.getSize(); i++) node.positions[i] = paddedPosition
