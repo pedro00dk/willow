@@ -7,9 +7,9 @@ import { OutputEditor } from './editor/OutputEditor'
 import { SourceEditor } from './editor/SourceEditor'
 import { Frame } from './utils/Frame'
 import { SplitPane } from './utils/SplitPane'
-import { StackTrace } from './visualization/stacktrace/StackTrace'
 import { GraphView } from './visualization/graphview/GraphView'
 import { Stack } from './visualization/stack/Stack'
+import { StackTrace } from './visualization/stacktrace/StackTrace'
 
 const classes = {
     container: 'd-flex flex-column flex-fill',
