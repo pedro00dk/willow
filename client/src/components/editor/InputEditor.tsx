@@ -1,5 +1,6 @@
 import ace from 'brace'
 import React from 'react'
+import { actions as inputActions } from '../../reducers/input'
 import { useDispatch, useSelection } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
@@ -11,7 +12,7 @@ export const InputEditor = () => {
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
         editor.current.session.doc.setValue(input.join('\n'))
-        editor.current.on('change', () => dispatch(editor.current.session.doc.getAllLines(), false))
+        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines()), false))
     }, [editor.current])
 
     useSelection(async state => {
