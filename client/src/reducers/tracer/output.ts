@@ -14,8 +14,7 @@ export const reducer = (state: State = initialState, action: Action): State =>
 
 const compute = (): DefaultAsyncAction => async (dispatch, getState) => {
     const tracer = getState().tracer
-    if (!tracer.available) return dispatch({ type: 'output/compute', payload: [] })
-    const output = tracer.steps.reduce<string[]>((acc, step) => {
+    const output = (tracer.steps ?? []).reduce<string[]>((acc, step) => {
         const previousContent = acc[acc.length - 1] ?? ''
         const error = step.error?.exception?.traceback ?? step.error?.cause ?? ''
         const print = step.print ?? ''

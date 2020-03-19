@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { ClientRequest } from '../../types/model'
 import * as tracer from '../../types/tracer'
 import { DefaultAsyncAction } from '../Store'
+import { actions as outputActions } from './output'
 
 type State = {
     fetching: boolean
@@ -17,6 +18,7 @@ type State = {
 
 type Action =
     | { type: 'tracer/trace'; payload?: tracer.Response; error?: string }
+    | { type: 'tracer/available' }
     | { type: 'tracer/setIndex'; payload: number }
 
 const initialState: State = {
@@ -31,10 +33,12 @@ export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
         case 'tracer/trace':
             return action.payload
-                ? { ...initialState, available: true, response: action.payload, steps: action.payload.steps }
+                ? { ...initialState, response: action.payload, steps: action.payload.steps }
                 : action.error != undefined
                 ? { ...initialState, error: action.error }
                 : { ...initialState, fetching: true }
+        case 'tracer/available':
+            return { ...state, available: true }
         case 'tracer/setIndex':
             return { ...state, index: action.payload }
         default:
@@ -51,10 +55,12 @@ const trace = (): DefaultAsyncAction =>
             const request: ClientRequest = {
                 language: language.languages[language.selected],
                 source: source.content.join('\n'),
-                input: input.content.join('\n')
+                input: input.join('\n')
             }
             const response = (await api.post<tracer.Response>('/api/tracer/trace', request)).data
             dispatch({ type: 'tracer/trace', payload: response })
+            dispatch(outputActions.compute())
+            dispatch({ type: 'tracer/available' })
             if (!options.enableVisualization) dispatch(setIndex(Infinity))
         } catch (error) {
             dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
