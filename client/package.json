@@ -1,7 +1,6 @@
 {
     "main": "./public/index.html",
     "devDependencies": {
-        "@types/node": "latest",
         "@types/react": "16.9.23",
         "@types/react-dom": "16.9.5",
         "http-server": "latest",
