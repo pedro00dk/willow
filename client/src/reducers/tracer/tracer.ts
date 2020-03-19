@@ -54,7 +54,7 @@ const trace = (): DefaultAsyncAction =>
             const { language, source, input, options } = getState()
             const request: ClientRequest = {
                 language: language.languages[language.selected],
-                source: source.content.join('\n'),
+                source: source.join('\n'),
                 input: input.join('\n')
             }
             const response = (await api.post<tracer.Response>('/api/tracer/trace', request)).data
