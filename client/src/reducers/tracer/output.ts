@@ -5,12 +5,12 @@ import { DefaultAsyncAction } from '../Store'
 
 type State = string[]
 
-type Action = { type: 'output/compute'; payload: string[] }
+type Action = { type: 'tracer/output/compute'; payload: string[] }
 
 const initialState: State = []
 
 export const reducer = (state: State = initialState, action: Action): State =>
-    action.type === 'output/compute' ? action.payload : state
+    action.type === 'tracer/output/compute' ? action.payload : state
 
 const compute = (): DefaultAsyncAction => async (dispatch, getState) => {
     const tracer = getState().tracer
@@ -21,7 +21,7 @@ const compute = (): DefaultAsyncAction => async (dispatch, getState) => {
         acc.push(`${previousContent}${error}${print}`)
         return acc
     }, [])
-    dispatch({ type: 'output/compute', payload: output })
+    dispatch({ type: 'tracer/output/compute', payload: output })
 }
 
 export const actions = { compute }
