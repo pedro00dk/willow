@@ -43,7 +43,7 @@ export type Store<T extends SubReducers> = {
     subscribe: (subscription: () => void) => () => void
 }
 export type GetState<T extends SubReducers> = () => State<T>
-export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>) => Promise<void>
+export type Dispatch<T extends SubReducers> = (action: Action<T> | AsyncAction<T>, call?: boolean) => Promise<void>
 
 /**
  * Asynchronous action for store dispatch.
@@ -81,11 +81,11 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
 
     const getPreviousState = () => state.previous
 
-    const dispatch: Store<T>['dispatch'] = action => {
+    const dispatch: Store<T>['dispatch'] = (action, call = true) => {
         if (typeof action === 'function') return action(dispatch, getState)
         state.previous = state.current
         state.current = reducer(state.current, action)
-        subscriptions.forEach(subscription => subscription())
+        if (call) subscriptions.forEach(subscription => subscription())
     }
 
     const subscribe = (subscription: () => void) => {
