@@ -7,7 +7,7 @@ const classes = {
     container: 'd-flex position-absolute overflow-auto'
 }
 
-export type ScopeSlice = { name: string; range: [number, number]; nodes: tracer.Scope[]; children: tracer.Scope[][] }
+export type ScopeSlice = { name: string; range: [number, number]; scopes: tracer.Scope[]; children: tracer.Scope[][] }
 
 export const StackTrace = () => {
     const container$ = React.useRef<HTMLDivElement>()
@@ -16,16 +16,18 @@ export const StackTrace = () => {
         steps: state.tracer.available && state.tracer.steps
     }))
 
-    const baseScopeSlice = React.useMemo(() => {
+    const rootScopeSlice = React.useMemo(() => {
         if (!available) return
-        const children = steps.map(
-            step => step.snapshot?.stack ?? [{ name: step.error.exception?.type ?? step.error.cause } as tracer.Scope]
-        )
-        return { name: undefined, range: [0, steps.length - 1], nodes: [], children } as ScopeSlice
+        const children = steps.map(step => {
+            if (step.snapshot) return step.snapshot.stack
+            const error = step.error.exception?.type ?? step.error.cause
+            return [{ name: error, line: -1, members: [] }]
+        })
+        return { name: '', range: [0, steps.length - 1], scopes: [], children } as ScopeSlice
     }, [available, steps])
 
     React.useLayoutEffect(() => {
-        const onResize = (event: Event) => {
+        const onResize = () => {
             const element$ = container$.current
             const parent$ = element$.parentElement
             if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
@@ -33,14 +35,14 @@ export const StackTrace = () => {
             element$.style.height = `${parent$.clientHeight}px`
         }
 
-        onResize(undefined)
+        onResize()
         addEventListener('paneResize', onResize)
         return () => removeEventListener('paneResize', onResize)
     }, [container$.current])
 
     return (
         <div ref={container$} className={classes.container}>
-            {available && <ScopeTrace scopeSlice={baseScopeSlice} />}
+            {available && <ScopeTrace scopeSlice={rootScopeSlice} />}
         </div>
     )
 }

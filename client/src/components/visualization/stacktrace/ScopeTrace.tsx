@@ -34,7 +34,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
         state => state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
     )
     const scopeSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
-    const threw = props.scopeSlice.nodes[props.scopeSlice.nodes.length - 1]?.line == undefined
+    const error = props.scopeSlice.scopes[props.scopeSlice.scopes.length - 1]?.line === -1
 
     const childrenScopeSlices = React.useMemo(() => {
         return props.scopeSlice.children.reduce((acc, childStackSlice, i) => {
@@ -47,34 +47,34 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
                 scopeSlice.range[1] + 1 < props.scopeSlice.range[0] + i
             ) {
                 const range: [number, number] = [props.scopeSlice.range[0] + i, props.scopeSlice.range[0] + i]
-                scopeSlice = { name: firstScope.name, range, nodes: [], children: [] }
+                scopeSlice = { name: firstScope.name, range, scopes: [], children: [] }
                 acc.push(scopeSlice)
             }
             scopeSlice.range[1] = props.scopeSlice.range[0] + i
-            scopeSlice.nodes.push(firstScope)
+            scopeSlice.scopes.push(firstScope)
             scopeSlice.children.push(remainingScopes)
             return acc
         }, [] as ScopeSlice[])
     }, [props.scopeSlice])
 
     React.useLayoutEffect(() => {
-        const onResize = (event: Event) => {
+        const onResize = () => {
             const width = container$.current.clientWidth
             const newDisplayMode = width >= 40 ? 'all' : width >= 5 ? 'dim' : 'hide'
             if (displayMode !== newDisplayMode) setDisplayMode(newDisplayMode)
         }
 
-        onResize(undefined)
+        onResize()
         addEventListener('paneResizeEnd', onResize)
         return () => removeEventListener('paneResizeEnd', onResize)
     }, [displayMode])
 
     return (
         <div ref={container$} className={classes.container}>
-            {props.scopeSlice.name != undefined && displayMode !== 'hide' && (
+            {props.scopeSlice.scopes.length !== 0 && displayMode !== 'hide' && (
                 <div
                     className={classes.scope}
-                    style={{ background: styles.background(selected, threw) }}
+                    style={{ background: styles.background(selected, error) }}
                     title={props.scopeSlice.name}
                     onClick={event => dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))}
                 >

@@ -14,7 +14,7 @@ export const Stack = () => {
     }))
 
     React.useLayoutEffect(() => {
-        const onResize = (event: Event) => {
+        const onResize = () => {
             const element$ = container$.current
             const parent$ = element$.parentElement
             if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
@@ -22,7 +22,7 @@ export const Stack = () => {
             element$.style.height = `${parent$.clientHeight}px`
         }
 
-        onResize(undefined)
+        onResize()
         addEventListener('paneResize', onResize)
         return () => removeEventListener('paneResize', onResize)
     }, [container$.current])
