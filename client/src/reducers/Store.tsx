@@ -6,8 +6,8 @@ import { reducer as inputReducer } from './input'
 import { reducer as languageReducer } from './language'
 import { reducer as optionsReducer } from './options'
 import { reducer as sourceReducer } from './source'
-import { reducer as tracerReducer } from './tracer'
 import { reducer as outputReducer } from './tracer/output'
+import { reducer as tracerReducer } from './tracer/tracer'
 import { reducer as userReducer } from './user'
 
 /**

@@ -4,7 +4,7 @@ import playImage from '../../../public/buttons/play.png'
 import stepImage from '../../../public/buttons/stepInto.png'
 import { actions as optionsActions } from '../../reducers/options'
 import { useDispatch, useSelection } from '../../reducers/Store'
-import { actions as tracerActions } from '../../reducers/tracer'
+import { actions as tracerActions } from '../../reducers/tracer/tracer'
 
 const classes = {
     container: 'd-flex align-items-center',

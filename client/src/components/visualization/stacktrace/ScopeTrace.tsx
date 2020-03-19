@@ -2,7 +2,7 @@ import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
 import { useDispatch, useSelection } from '../../../reducers/Store'
-import { actions as tracerActions } from '../../../reducers/tracer'
+import { actions as tracerActions } from '../../../reducers/tracer/tracer'
 import { ScopeSlice } from './StackTrace'
 
 const classes = {

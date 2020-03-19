@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelection } from '../reducers/Store'
-import { actions as tracerActions } from '../reducers/tracer'
+import { actions as tracerActions } from '../reducers/tracer/tracer'
 import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'

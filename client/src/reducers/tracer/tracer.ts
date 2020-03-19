@@ -1,10 +1,10 @@
 /**
  * Tracer reducer updates the state that stores the result of a tracing process and keep track of the tracing index.
  */
-import { api } from '../api'
-import { ClientRequest } from '../types/model'
-import * as tracer from '../types/tracer'
-import { DefaultAsyncAction } from './Store'
+import { api } from '../../api'
+import { ClientRequest } from '../../types/model'
+import * as tracer from '../../types/tracer'
+import { DefaultAsyncAction } from '../Store'
 
 type State = {
     fetching: boolean
