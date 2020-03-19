@@ -1,15 +1,14 @@
 /**
  * Input reducer updates the piece of state that stores program inputs written by the user.
- * This reducer state allows mutation of its contents, due to the fact that input is not observed in components.
  */
-type State = { content: string[] }
+type State = string[]
 
 type Action = { type: 'input/set'; payload: string[] }
 
-const initialState: State = { content: [] }
+const initialState: State = []
 
 export const reducer = (state: State = initialState, action: Action): State =>
-    action.type === 'input/set' ? { content: action.payload } : state
+    action.type === 'input/set' ? action.payload : state
 
 const set = (input: string[]): Action => ({ type: 'input/set', payload: input })
 
