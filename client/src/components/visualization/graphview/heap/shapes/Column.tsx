@@ -3,7 +3,7 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
-import { Edge, readParameters, UnknownParameters } from '../../GraphData'
+import { Edge, readParameters, UnknownParameters } from '../../Graph'
 import { getDisplayValue, getMemberName, isSameMember } from '../../TracerUtils'
 
 const classes = {

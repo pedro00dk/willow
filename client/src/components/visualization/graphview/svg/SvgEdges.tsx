@@ -1,7 +1,7 @@
 import React from 'react'
-import { Edge, GraphData } from '../GraphData'
+import { Edge, Graph } from '../Graph'
 
-export const SvgEdges = (props: { id: string; graphData: GraphData }) => {
+export const SvgEdges = (props: { id: string; graphData: Graph }) => {
     const container$ = React.useRef<SVGGElement>()
     const [sourceEdges, setSourceEdges] = React.useState<Edge[]>([])
     const node = props.graphData.getNode(props.id)

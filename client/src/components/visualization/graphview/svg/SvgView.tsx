@@ -1,14 +1,14 @@
 import React from 'react'
-import { GraphData, ilerp, svgScreenTransformPoint, svgScreenTransformVector } from '../GraphData'
+import { Graph, ilerp, svgScreenTransformPoint, svgScreenTransformVector } from '../Graph'
 
 const classes = {
     container: 'd-flex position-absolute overflow-auto'
 }
 
-export const SvgView = (props: { graphData: GraphData; children?: React.ReactNode }) => {
+export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => {
     const container$ = React.useRef<SVGSVGElement>()
     const click = React.useRef(false)
-    const viewSize = props.graphData.getViewSize()
+    const viewSize = props.graph.getViewSize()
     const box = React.useRef({ x: 0, y: 0, width: viewSize.width / 2, height: viewSize.height / 2 })
     const ranges = {
         x: { min: 0, max: viewSize.width },

@@ -162,7 +162,7 @@ export const readParameters = <T extends UnknownParameters, U extends ShapeParam
 
 // GraphData computes all manipulations in the Graph visualization
 
-export class GraphData {
+export class Graph {
     private index: number = 0
     private size: number = 0
     private animate: boolean = true

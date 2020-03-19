@@ -3,7 +3,7 @@ import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
-import { Edge, GraphData, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../GraphData'
+import { Edge, Graph, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../Graph'
 import { getMemberName, isValueObject } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
@@ -27,7 +27,7 @@ export const Obj = (props: {
     id: string
     obj: tracer.Obj
     node: Node
-    graphData: GraphData
+    graphData: Graph
     update: React.Dispatch<{}>
 }) => {
     const container$ = React.useRef<HTMLDivElement>()
@@ -151,7 +151,7 @@ const ObjMenu = (props: {
     id: string
     obj: tracer.Obj
     node: Node
-    graphData: GraphData
+    graphData: Graph
     update: React.Dispatch<{}>
 }) => {
     const defaultShape = React.useMemo(

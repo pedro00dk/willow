@@ -1,7 +1,7 @@
 import React from 'react'
 import { Item } from 'react-contexify'
 import * as tracer from '../../../../types/tracer'
-import { ComputedParameters, readParameters, ShapeParameters, UnknownParameters } from '../GraphData'
+import { ComputedParameters, readParameters, ShapeParameters, UnknownParameters } from '../Graph'
 import { isValueObject, getMemberName } from '../TracerUtils'
 
 const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (

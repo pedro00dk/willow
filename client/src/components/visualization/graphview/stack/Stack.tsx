@@ -2,7 +2,7 @@ import React from 'react'
 import { colors } from '../../../../colors'
 import { DefaultState } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
-import { GraphData } from '../GraphData'
+import { Graph } from '../Graph'
 import { SvgNode } from '../svg/SvgNode'
 import { isSameMember, isValueObject, getMemberName, getDisplayValue } from '../TracerUtils'
 
@@ -12,7 +12,7 @@ const styles = {
         variableDepth === stackDepth - 1 ? 2.5 : variableIndex < 2 ? 1 : 0.5
 }
 
-export const Stack = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
+export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
     const previousMembers = React.useRef<{ [scope: number]: { [name: string]: tracer.Member } }>({})
     const available = props.tracer.available
     const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []

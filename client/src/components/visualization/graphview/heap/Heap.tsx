@@ -1,11 +1,11 @@
 import React from 'react'
 import { DefaultState } from '../../../../reducers/Store'
-import { GraphData } from '../GraphData'
+import { Graph } from '../Graph'
 import { SvgNode } from '../svg/SvgNode'
 import { isValueObject } from '../TracerUtils'
 import { Obj } from './Obj'
 
-export const Heap = (props: { tracer: DefaultState['tracer']; graphData: GraphData; update: React.Dispatch<{}> }) => {
+export const Heap = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
     const idsDepths = React.useRef<{ [id: string]: number }[]>([])
     const available = props.tracer.available
     const index = props.tracer.index
