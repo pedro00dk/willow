@@ -4,14 +4,12 @@ import React from 'react'
 const isFirefox = typeof (globalThis as any).InstallTrigger !== 'undefined'
 const documentPosition = { x: 0, y: 0 }
 if (isFirefox) {
-    document.addEventListener('dragstart', event => {
+    const updateDocumentPosition = (event: DragEvent) => {
         documentPosition.x = event.pageX
         documentPosition.y = event.pageY
-    })
-    document.addEventListener('dragover', event => {
-        documentPosition.x = event.pageX
-        documentPosition.y = event.pageY
-    })
+    }
+    document.addEventListener('dragstart', updateDocumentPosition)
+    document.addEventListener('dragover', updateDocumentPosition)
 }
 
 export const Draggable = (props: {
