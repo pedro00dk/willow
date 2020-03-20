@@ -4,7 +4,7 @@ import GoogleOAuth from 'passport-google-oauth20'
 import { db } from '../db'
 import { Config } from '../server'
 import { User } from '../types/model'
-import { appendAction } from './action'
+import { appendActions } from './action'
 
 export const router = (config: Config, callbackUrl: string) => {
     const strategy = new GoogleOAuth.Strategy(
@@ -41,14 +41,14 @@ export const router = (config: Config, callbackUrl: string) => {
     router.get('/callback', passport.authenticate('google'), async (req, res) => {
         const user = req.user as User
         console.log('http', req.originalUrl, req.cookies['referer'])
-        await appendAction(user.id, { name: 'signin', date: new Date(), payload: undefined })
+        await appendActions(user.id, [{ name: 'signin', date: new Date(), payload: undefined }])
         res.redirect(req.cookies['referer'])
     })
 
     router.get('/signout', async (req, res) => {
         const user = req.user as User
         console.log('http', req.originalUrl, req.user)
-        await appendAction(user.id, { name: 'signout', date: new Date(), payload: undefined })
+        await appendActions(user.id, [{ name: 'signout', date: new Date(), payload: undefined }])
         req.logOut()
         res.redirect(req.headers.referer ?? '/')
     })

@@ -3,7 +3,7 @@ import express from 'express'
 import { Config } from '../server'
 import { User, ClientRequest } from '../types/model'
 import * as tracer from '../types/tracer'
-import { appendAction } from './action'
+import { appendActions } from './action'
 
 export const router = (config: Config) => {
     const router = express.Router()
@@ -30,12 +30,12 @@ export const router = (config: Config) => {
                 runtime: response.steps.length > 1 && response.steps[response.steps.length - 1].error
             }
             const action = { name: 'trace', date: new Date(), payload: { language, request, steps, error } }
-            if (user) await appendAction(user.id, action)
+            if (user) await appendActions(user.id, [action])
             res.send(response)
             console.log('http', req.path, 'ok')
         } catch (error) {
             const action = { name: 'trace', date: new Date(), payload: { language, request, error: error.message } }
-            if (user) await appendAction(user.id, action)
+            if (user) await appendActions(user.id, [action])
             res.status(400).send(error.message)
             console.log('http', req.path, 'error', error.message)
         }
