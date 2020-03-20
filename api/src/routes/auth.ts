@@ -1,7 +1,7 @@
 import express from 'express'
 import passport from 'passport'
 import GoogleOAuth from 'passport-google-oauth20'
-import { db } from '../db'
+import { db } from '../database'
 import { Config } from '../server'
 import { User } from '../types/model'
 import { appendActions } from './action'

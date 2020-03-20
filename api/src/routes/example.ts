@@ -1,5 +1,5 @@
 import express from 'express'
-import { db } from '../db'
+import { db } from '../database'
 import { Example, User } from '../types/model'
 
 export const router = () => {
