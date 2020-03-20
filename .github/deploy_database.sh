@@ -1,3 +1,5 @@
+#
+
 DATABASE_USER=${1}
 DATABASE_PASSWORD=${2}
 DATABASE_DIRECTORY=${3}
@@ -10,12 +12,13 @@ docker stop mongo-database || true
 docker rm mongo-database || true
 docker pull mongo
 
-mkdir --parents "${DATABASE_DIRECTORY}"
 echo "
 db = db.getSiblingDB('admin')
 db.createUser({ user: '${DATABASE_USER}', pwd: '${DATABASE_PASSWORD}', roles: ['root'] })
-" |
-sudo tee "${DATABASE_DIRECTORY}/createDatabaseAdmin.js"
+" > ./createDatabaseAdmin.js
+
+sudo mkdir --parents "${DATABASE_DIRECTORY}"
+sudo cp ./createDatabaseAdmin.js "${DATABASE_DIRECTORY}/createDatabaseAdmin.js"
 
 docker container run \
     --name mongo-noauth \
@@ -26,7 +29,7 @@ docker container run \
 sleep 5
 
 docker container exec \
-    --interactive --tty \
+    --interactive \
     mongo-noauth \
     mongo /data/db/createDatabaseAdmin.js
 
