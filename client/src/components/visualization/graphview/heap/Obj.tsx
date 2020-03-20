@@ -1,6 +1,8 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
+import { actions as actionActions } from '../../../../reducers/action'
+import { useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
 import { Edge, Graph, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../Graph'
@@ -34,6 +36,7 @@ export const Obj = (props: {
     const references = React.useRef<{ id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }[]>()
     references.current = []
     const previousMembers = React.useRef<{ [id: string]: tracer.Member }>({})
+    const dispatch = useDispatch()
 
     const defaultShape = React.useMemo(
         () =>
@@ -98,6 +101,7 @@ export const Obj = (props: {
         )
         props.graphData.setAnimate(true)
         Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
+        dispatch(actionActions.append({ name: 'auto layout', payload: 'automatic' }))
     })
 
     return (
@@ -119,6 +123,7 @@ export const Obj = (props: {
                     )
                     props.graphData.setAnimate(true)
                     Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
+                    dispatch(actionActions.append({ name: 'auto layout', payload: 'manual' }))
                 }
             }}
             onDrag={(event, delta) => {
@@ -147,13 +152,7 @@ export const Obj = (props: {
     )
 }
 
-const ObjMenu = (props: {
-    id: string
-    obj: tracer.Obj
-    node: Node
-    graphData: Graph
-    update: React.Dispatch<{}>
-}) => {
+const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graphData: Graph; update: React.Dispatch<{}> }) => {
     const defaultShape = React.useMemo(
         () =>
             Object.entries(modules).reduce(
