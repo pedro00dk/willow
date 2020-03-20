@@ -5,9 +5,10 @@ DATABASE_PORT=${4}
 
 set -v
 
-docker pull mongo
+docker container ls --all
 docker stop mongo-database || true
 docker rm mongo-database || true
+docker pull mongo
 
 mkdir --parents "${DATABASE_DIRECTORY}"
 echo "
