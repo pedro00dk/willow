@@ -41,7 +41,7 @@ sudo docker container run \
     --auth-client-id "${AUTH_CLIENT_ID}" \
     --auth-client-secret "${AUTH_CLIENT_SECRET}" \
     --db \
-    --db-url "${DATABASE_URL}" \
+    --db-url "${DB_URL}" \
     --db-name 'willow' \
     --port 8000
 
