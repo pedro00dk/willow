@@ -50,7 +50,7 @@ export const Toolbar = () => {
                 onClick={() => {
                     if (!canStepBack) return
                     dispatch(tracerActions.stepIndex('backward', 'into'))
-                    dispatch(actionActions.send({ name: 'step backward', payload: 'toolbar' }))
+                    dispatch(actionActions.append({ name: 'step backward', payload: 'toolbar' }))
                 }}
             />
             <img
@@ -61,7 +61,7 @@ export const Toolbar = () => {
                 onClick={() => {
                     if (!canStepForward) return
                     dispatch(tracerActions.stepIndex('forward', 'into'))
-                    dispatch(actionActions.send({ name: 'step forward', payload: 'toolbar' }))
+                    dispatch(actionActions.append({ name: 'step forward', payload: 'toolbar' }))
                 }}
             />
             <div className={classes.option}>
@@ -71,7 +71,7 @@ export const Toolbar = () => {
                     checked={options.enableVisualization}
                     onChange={event => {
                         dispatch(optionsActions.setEnableVisualization(event.target.checked))
-                        dispatch(actionActions.send({ name: 'enable visualization', payload: event.target.checked }))
+                        dispatch(actionActions.append({ name: 'enable visualization', payload: event.target.checked }))
                     }}
                 />
             </div>
@@ -82,7 +82,7 @@ export const Toolbar = () => {
                     checked={options.preserveLayout}
                     onChange={event => {
                         dispatch(optionsActions.setPreserveLayout(event.target.checked))
-                        dispatch(actionActions.send({ name: 'preserve layout', payload: event.target.checked }))
+                        dispatch(actionActions.append({ name: 'preserve layout', payload: event.target.checked }))
                     }}
                 />
             </div>

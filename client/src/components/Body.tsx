@@ -77,7 +77,7 @@ const Visualization = () => {
                 if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
                 const direction = event.key === 'ArrowLeft' ? 'backward' : 'forward'
                 dispatch(tracerActions.stepIndex(direction, !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'))
-                dispatch(actionActions.send({ name: `step ${direction}`, payload: 'keyboard' }))
+                dispatch(actionActions.append({ name: `step ${direction}`, payload: 'keyboard' }))
             }}
             tabIndex={0}
         >

@@ -79,7 +79,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
                     title={props.scopeSlice.name}
                     onClick={event => {
                         dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))
-                        dispatch(actionActions.send({ name: 'step jump', payload: 'stack trace' }))
+                        dispatch(actionActions.append({ name: 'step jump', payload: 'stack trace' }))
                     }}
                 >
                     {displayMode === 'all' ? props.scopeSlice.name : '\u200b'}
