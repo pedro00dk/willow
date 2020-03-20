@@ -9,7 +9,7 @@ import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../
 const classes = {
     container: 'd-flex text-nowrap',
     chunk: 'd-flex',
-    element: `d-flex px-1' ${css({ border: `0.5px solid ${colors.gray.dark}` })}`,
+    element: `d-flex px-1 ${css({ border: `0.5px solid ${colors.gray.dark}` })}`,
     index: `text-truncate mr-1 ${css({ fontSize: '0.5rem' })}`,
     value: `text-center text-truncate ${css({ fontSize: '0.75rem' })}`
 }
