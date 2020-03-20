@@ -111,7 +111,7 @@ const createBaseNode = (id: string): Node => ({
     shape: undefined,
     parameters: {},
     layout: {
-        position: { x: 0, y: 0 },
+        position: undefined,
         parameters: readParameters(undefined, layoutParameters)
     }
 })
