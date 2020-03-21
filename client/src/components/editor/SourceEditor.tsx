@@ -48,13 +48,13 @@ export const SourceEditor = () => {
 
     useSelection(async state => {
         if (!editor.current || !state.tracer.available) return
-        Object.values(editor.current.session.getMarkers(false) as { [id: number]: EditorMarker })
-            .filter(marker => marker.id > 2)
-            .forEach(marker => editor.current.session.removeMarker(marker.id))
         const snapshot = state.tracer.steps[state.tracer.index].snapshot
         const line = snapshot?.stack[snapshot.stack.length - 1].line
         const info = snapshot?.info
         if (!snapshot || (highlight.current.line === line && highlight.current.info === info)) return
+        Object.values(editor.current.session.getMarkers(false) as { [id: number]: EditorMarker })
+            .filter(marker => marker.id > 2)
+            .forEach(marker => editor.current.session.removeMarker(marker.id))
         highlight.current.line = line
         highlight.current.info = info
         editor.current.session.addMarker(new Range(line, 0, line, 1), classes[info], 'fullLine', false)
