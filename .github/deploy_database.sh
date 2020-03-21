@@ -1,4 +1,4 @@
-#
+# Deploy database script
 
 DATABASE_USER=${1}
 DATABASE_PASSWORD=${2}

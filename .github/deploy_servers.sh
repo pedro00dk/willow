@@ -1,3 +1,5 @@
+# Deploy servers script
+
 USERNAME=${1}
 TOKEN=${2}
 REPOSITORY=${3}
