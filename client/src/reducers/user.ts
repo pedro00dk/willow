@@ -49,11 +49,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return action.payload
                 ? { ...state, actions: { cache: state.actions.cache, sending: [] } }
                 : action.error
-                ? {
-                      ...state,
-                      actions: { cache: [...state.actions.sending, ...state.actions.cache], sending: [] },
-                      initialized: false
-                  }
+                ? { ...state, actions: { cache: [...state.actions.sending, ...state.actions.cache], sending: [] } }
                 : { ...state, actions: { cache: [], sending: state.actions.cache }, initialized: true }
         default:
             return state
@@ -92,9 +88,10 @@ const sendAction = (): DefaultAsyncAction => async (dispatch, getState) => {
     if (initialized) return
     dispatch({ type: 'user/actionInit', payload: true })
     setInterval(async () => {
+        const cache = getState().user.actions.cache
+        if (cache.length === 0) return
         dispatch({ type: 'user/actionSend' }, false)
         const sending = getState().user.actions.sending
-        if (sending.length === 0) return
         try {
             await api.post('/api/action', sending)
             dispatch({ type: 'user/actionSend', payload: {} }, false)
