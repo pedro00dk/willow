@@ -71,7 +71,8 @@ const signout = (): DefaultAsyncAction => async () => {
 const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'user/fetch' })
     try {
-        const user = (await api.get<User>('/api/auth/user')).data
+        let user = (await api.get<User>('/api/auth/user')).data
+        user = typeof user === 'object' ? user : undefined
         const programs = user ? (await api.get<Program[]>('/api/program')).data : []
         dispatch({ type: 'user/fetch', payload: { user, programs } })
     } catch (error) {

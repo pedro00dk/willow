@@ -74,7 +74,7 @@ const SignInOut = () => {
     const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
     const action = user.user ? actions.user.signout() : actions.user.signin()
-    const label = user.user ? 'Sign in' : 'Sign out'
+    const label = user.user ? 'Sign out' : 'Sign in'
 
     return (
         <a className={classes.menu.link} href='#' onClick={() => dispatch(action)}>
