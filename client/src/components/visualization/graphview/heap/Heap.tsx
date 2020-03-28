@@ -8,7 +8,7 @@ import { Obj } from './Obj'
 export const Heap = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
     const idsDepths = React.useRef<{ [id: string]: number }[]>([])
     const available = props.tracer.available
-    const index = props.tracer.index
+    const index = props.graphData.getIndex()
     const { stack = [], heap = {} } = (available && props.tracer.steps[index].snapshot) || {}
     if (!available) idsDepths.current = []
 

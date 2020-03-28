@@ -15,7 +15,7 @@ const styles = {
 export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
     const previousMembers = React.useRef<{ [scope: number]: { [name: string]: tracer.Member } }>({})
     const available = props.tracer.available
-    const stack = (available && props.tracer.steps[props.tracer.index].snapshot?.stack) || []
+    const stack = (available && props.tracer.steps[props.graphData.getIndex()].snapshot?.stack) || []
     const node = props.graphData.getNode('stack')
 
     const membersDepths = stack

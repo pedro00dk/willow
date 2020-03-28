@@ -1,8 +1,7 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
-import { actions as actionActions } from '../../../../reducers/action'
-import { useDispatch } from '../../../../reducers/Store'
+import { actions, useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
 import { Edge, Graph, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../Graph'
@@ -101,7 +100,7 @@ export const Obj = (props: {
         )
         props.graphData.setAnimate(true)
         Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
-        dispatch(actionActions.append({ name: 'auto layout', payload: 'automatic' }))
+        // dispatch(actionActions.append({ name: 'auto layout', payload: 'automatic' }))
     })
 
     return (
@@ -123,7 +122,7 @@ export const Obj = (props: {
                     )
                     props.graphData.setAnimate(true)
                     Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
-                    dispatch(actionActions.append({ name: 'auto layout', payload: 'manual' }))
+                    // dispatch(actionActions.append({ name: 'auto layout', payload: 'manual' }))
                 }
             }}
             onDrag={(event, delta) => {
