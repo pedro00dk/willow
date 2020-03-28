@@ -2,7 +2,7 @@
  * Store implementation using flow principles for the React Hooks API.
  */
 import React from 'react'
-import { actions as errorActions, reducer as errorReducer } from './input'
+import { actions as errorActions, reducer as errorReducer } from './error'
 import { actions as inputActions, reducer as inputReducer } from './input'
 import { actions as languageActions, reducer as languageReducer } from './language'
 import { actions as optionsActions, reducer as optionsReducer } from './options'
@@ -81,11 +81,11 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
     let state = {} as State<T>
     const subscriptions = [] as (() => void)[]
 
-    const getState = () => state.current
+    const getState = () => state
 
     const dispatch: Store<T>['dispatch'] = (action, call = true) => {
         if (typeof action === 'function') return action((a, c) => dispatch(a, call && c), getState)
-        state = reducer(state.current, action)
+        state = reducer(state, action)
         if (call) subscriptions.forEach(subscription => subscription())
     }
 
