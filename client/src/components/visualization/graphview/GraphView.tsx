@@ -11,13 +11,14 @@ export const GraphView = () => {
     const update = React.useState({})[1]
     const graph = React.useContext(graphContext)
     const [zoom, setZoom] = React.useState(devicePixelRatio)
-    const { preserveLayout, tracer } = useSelection(state => ({
+    const { preserveLayout, index, tracer } = useSelection(state => ({
         preserveLayout: state.options.preserveLayout,
+        index: state.index,
         tracer: state.tracer
     }))
     if (!tracer.available && !preserveLayout) graph.clearNodes()
     graph.setSize(tracer.available ? tracer.steps.length : 0)
-    graph.setIndex(tracer.available ? tracer.index : 0)
+    graph.setIndex(tracer.available ? index : 0)
     graph.setAnimate(true)
     graph.clearSubscriptions()
     graph.clearEdges()
