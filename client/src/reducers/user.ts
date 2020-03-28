@@ -83,7 +83,7 @@ const action = (action: Pick<RequestAction, 'name' | 'payload'>): DefaultAsyncAc
     const user = getState().user.user
     if (!user) return
     dispatch(sendAction())
-    dispatch({ type: 'action/append', payload: { ...action, date: new Date().toJSON() } })
+    dispatch({ type: 'user/action', payload: { ...action, date: new Date().toJSON() } })
 }
 
 const sendAction = (): DefaultAsyncAction => async (dispatch, getState) => {
