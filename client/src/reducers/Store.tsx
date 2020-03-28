@@ -41,7 +41,6 @@ export type Action<T extends SubReducers> = { [name in keyof T]: Parameters<T[na
  */
 export type Store<T extends SubReducers> = {
     getState: GetState<T>
-    getPreviousState: GetState<T>
     dispatch: Dispatch<T>
     subscribe: (subscription: () => void) => () => void
 }
@@ -62,7 +61,7 @@ export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getStat
  */
 export type Hooks<T extends SubReducers> = {
     useDispatch: () => Dispatch<T>
-    useSelection: <U>(query: (state: State<T>, previousState?: State<T>) => U) => U
+    useSelection: <U>(query: (state: State<T>) => U) => U
 }
 
 /**
@@ -77,17 +76,14 @@ const combineReducers = <T extends SubReducers>(reducers: T): Reducer<T> => (sta
  * @param reducer a combined reducer
  */
 const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
-    const state = { current: {} as State<T>, previous: {} as State<T> }
+    let state = {} as State<T>
     const subscriptions = [] as (() => void)[]
 
     const getState = () => state.current
 
-    const getPreviousState = () => state.previous
-
     const dispatch: Store<T>['dispatch'] = (action, call = true) => {
         if (typeof action === 'function') return action(dispatch, getState)
-        state.previous = state.current
-        state.current = reducer(state.current, action)
+        state = reducer(state.current, action)
         if (call) subscriptions.forEach(subscription => subscription())
     }
 
@@ -100,7 +96,7 @@ const createStore = <T extends SubReducers>(reducer: Reducer<T>): Store<T> => {
     }
 
     dispatch({})
-    return { getState, getPreviousState, dispatch, subscribe }
+    return { getState, dispatch, subscribe }
 }
 
 /**
@@ -120,17 +116,17 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
 
     const useDispatch = () => store.dispatch
 
-    const useSelection = <U extends any>(query: (state: State<T>, previousState?: State<T>) => U) => {
+    const useSelection = <U extends any>(query: (state: State<T>) => U) => {
         const memoQuery = React.useCallback(query, [])
-        const [selection, setSelection] = React.useState(() => memoQuery(store.getState(), store.getPreviousState()))
+        const [selection, setSelection] = React.useState(() => memoQuery(store.getState()))
         const selectionRef = React.useRef(selection)
 
         React.useEffect(() => {
             const checkSelectionUpdate = () => {
-                const updatedSelection = memoQuery(store.getState(), store.getPreviousState())
+                const updatedSelection = memoQuery(store.getState())
                 const isPromise = typeof updatedSelection.then === 'function'
                 const equals = isPromise || areSelectionsEqual(selectionRef.current, updatedSelection)
-                !isPromise && !equals && setSelection((selectionRef.current = updatedSelection))
+                if (!isPromise && !equals) setSelection((selectionRef.current = updatedSelection))
             }
 
             checkSelectionUpdate()
@@ -181,7 +177,7 @@ export type DefaultAsyncAction = AsyncAction<Reducers>
 const context = React.createContext<Hooks<Reducers>>(undefined)
 
 export const useDispatch = () => React.useContext(context).useDispatch()
-export const useSelection = <U extends any>(query: (state: State<Reducers>, previousState?: State<Reducers>) => U) =>
+export const useSelection = <U extends any>(query: (state: State<Reducers>) => U) =>
     React.useContext(context).useSelection(query)
 
 export const DefaultStore = (props: { children?: React.ReactNode }) => Store({ reducers, context, ...props })
