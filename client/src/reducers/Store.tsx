@@ -2,15 +2,15 @@
  * Store implementation using flow principles for the React Hooks API.
  */
 import React from 'react'
-import { reducer as actionReducer } from './action'
-import { reducer as debugReducer } from './debug'
-import { reducer as inputReducer } from './input'
-import { reducer as languageReducer } from './language'
-import { reducer as optionsReducer } from './options'
-import { reducer as sourceReducer } from './source'
-import { reducer as outputReducer } from './tracer/output'
-import { reducer as tracerReducer } from './tracer/tracer'
-import { reducer as userReducer } from './user'
+import { actions as actionActions, reducer as actionReducer } from './action'
+import { actions as inputActions, reducer as inputReducer } from './input'
+import { actions as languageActions, reducer as languageReducer } from './language'
+import { actions as optionsActions, reducer as optionsReducer } from './options'
+import { actions as sourceActions, reducer as sourceReducer } from './source'
+import { actions as indexActions, reducer as indexReducer } from './tracer/index'
+import { actions as outputActions, reducer as outputReducer } from './tracer/output'
+import { actions as tracerActions, reducer as tracerReducer } from './tracer/tracer'
+import { actions as userActions, reducer as userReducer } from './user'
 
 /**
  * Piece of a reducer.
@@ -156,11 +156,23 @@ export const Store = <T extends SubReducers>(props: {
     children?: React.ReactNode
 }) => <props.context.Provider value={reducersToHooks(props.reducers)}>{props.children}</props.context.Provider>
 
-// Default Store containing all reducer files
+// Default Store containing all reducers
 
-const reducers = {
+export const actions = {
+    action: actionActions,
+    index: indexActions,
+    input: inputActions,
+    language: languageActions,
+    options: optionsActions,
+    output: outputActions,
+    source: sourceActions,
+    tracer: tracerActions,
+    user: userActions
+}
+
+export const reducers = {
     action: actionReducer,
-    debug: debugReducer,
+    index: indexReducer,
     input: inputReducer,
     language: languageReducer,
     options: optionsReducer,
