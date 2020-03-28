@@ -18,22 +18,34 @@ const classes = {
     }
 }
 
-export const Header = () => (
-    <header className={classes.container}>
-        <Brand />
-        <ul className={classes.menu.left}>
-            <li className={classes.menu.item}>
-                <Help />
-            </li>
-        </ul>
-        <ul className={classes.menu.right}>
-            <User />
-            <li className={classes.menu.item}>
-                <SignInOut />
-            </li>
-        </ul>
-    </header>
-)
+export const Header = () => {
+    const dispatch = useDispatch()
+
+    React.useEffect(() => {
+        ;(async () => {
+            await dispatch(actions.user.fetch())
+            await dispatch(actions.language.fetch())
+            await dispatch(actions.storage.storage())
+        })()
+    })
+
+    return (
+        <header className={classes.container}>
+            <Brand />
+            <ul className={classes.menu.left}>
+                <li className={classes.menu.item}>
+                    <Help />
+                </li>
+            </ul>
+            <ul className={classes.menu.right}>
+                <User />
+                <li className={classes.menu.item}>
+                    <SignInOut />
+                </li>
+            </ul>
+        </header>
+    )
+}
 
 const Brand = () => (
     <a className={classes.brand.container} href='#'>
