@@ -61,6 +61,7 @@ export type AsyncAction<T extends SubReducers> = (dispatch: Dispatch<T>, getStat
  * useSelection allows the user to query pieces of the state and update the components of the pieces change.
  */
 export type Hooks<T extends SubReducers> = {
+    useGetState: () => GetState<T>
     useDispatch: () => Dispatch<T>
     useSelection: <U>(query: (state: State<T>) => U) => U
 }
@@ -115,6 +116,8 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
         return equalsKeyLength && keysA.reduce((acc, key) => acc && selectionA[key] === selectionB[key], true)
     }
 
+    const useGetState = () => store.getState
+
     const useDispatch = () => store.dispatch
 
     const useSelection = <U extends any>(query: (state: State<T>) => U) => {
@@ -138,7 +141,7 @@ const createHooks = <T extends SubReducers>(store: Store<T>): Hooks<T> => {
         return selection
     }
 
-    return { useDispatch, useSelection }
+    return { useGetState, useDispatch, useSelection }
 }
 
 /**
@@ -191,6 +194,7 @@ export type DefaultAsyncAction = AsyncAction<Reducers>
 
 const context = React.createContext<Hooks<Reducers>>(undefined)
 
+export const useGetState = () => React.useContext(context).useGetState()
 export const useDispatch = () => React.useContext(context).useDispatch()
 export const useSelection = <U extends any>(query: (state: State<Reducers>) => U) =>
     React.useContext(context).useSelection(query)
