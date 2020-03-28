@@ -1,8 +1,7 @@
 import { css } from 'emotion'
 import React from 'react'
 import logo from '../../public/logo.svg'
-import { useDispatch, useSelection } from '../reducers/Store'
-import { actions as userActions } from '../reducers/user'
+import { actions, useDispatch, useSelection } from '../reducers/Store'
 
 const classes = {
     container: 'navbar navbar-light bg-light shadow-sm',
@@ -45,6 +44,7 @@ const Brand = () => (
 
 const Help = () => {
     const helpUrl = 'https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
+
     return (
         <a className={classes.menu.link} href={helpUrl} target='_blank'>
             {'How to use'}
@@ -53,15 +53,7 @@ const Help = () => {
 }
 
 const User = () => {
-    const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
-
-    React.useEffect(() => {
-        ;(async () => {
-            await dispatch(userActions.fetch())
-            await dispatch(userActions.fetchPrograms())
-        })()
-    }, [])
 
     return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.user?.email}</span>
 }
@@ -69,8 +61,9 @@ const User = () => {
 const SignInOut = () => {
     const dispatch = useDispatch()
     const { user } = useSelection(state => ({ user: state.user }))
-    const action = user.user ? userActions.signout() : userActions.signin()
-    const label = `Sign ${user.user ? 'out' : 'in'}`
+    const action = user.user ? actions.user.signout() : actions.user.signin()
+    const label = user.user ? 'Sign in' : 'Sign out'
+
     return (
         <a className={classes.menu.link} href='#' onClick={() => dispatch(action)}>
             {label}

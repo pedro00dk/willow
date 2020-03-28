@@ -1,7 +1,5 @@
 import React from 'react'
-import { useDispatch, useSelection } from '../reducers/Store'
-import { actions as actionActions } from '../reducers/action'
-import { actions as tracerActions } from '../reducers/tracer/tracer'
+import { actions, useDispatch, useGetState, useSelection } from '../reducers/Store'
 import { Controls } from './controls/Controls'
 import { InputEditor } from './editor/InputEditor'
 import { OutputEditor } from './editor/OutputEditor'
@@ -69,15 +67,19 @@ export const Body = () => {
 
 const Visualization = () => {
     const dispatch = useDispatch()
+    const getState = useGetState()
 
     return (
         <div
             className={classes.visualization}
             onKeyDown={event => {
-                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-                const direction = event.key === 'ArrowLeft' ? 'backward' : 'forward'
-                dispatch(tracerActions.stepIndex(direction, !event.ctrlKey ? 'into' : !event.altKey ? 'over' : 'out'))
-                dispatch(actionActions.append({ name: `step ${direction}`, payload: 'keyboard' }))
+                const available = getState().tracer.available
+                if (available && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+                const directionChar = event.key === 'ArrowLeft' ? '<-' : '->'
+                dispatch(actions.index.step(directionChar, !event.ctrlKey ? 'v' : !event.altKey ? '-' : '^'))
+                const step = event.key === 'ArrowLeft' ? 'step backward' : 'step forward'
+                const index = getState().index
+                dispatch(actions.user.action({ name: step, payload: { index, using: 'keyboard' } }), false)
             }}
             tabIndex={0}
         >
