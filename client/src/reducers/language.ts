@@ -8,7 +8,6 @@ type State = {
     fetching: boolean
     languages: string[]
     selected: number
-    error?: string
 }
 
 type Action =
@@ -27,7 +26,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return action.payload
                 ? { ...initialState, languages: action.payload, selected: 0 }
                 : action.error != undefined
-                ? { ...initialState, error: action.error }
+                ? { ...initialState }
                 : { ...initialState, fetching: true }
         case 'language/select':
             return { ...state, selected: action.payload }

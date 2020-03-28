@@ -15,7 +15,7 @@ type Action =
 const initialState: State = {
     enableVisualization: true,
     preserveLayout: true,
-    liveProgramming: true // TODO Implement
+    liveProgramming: true
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
