@@ -2,7 +2,6 @@
  * Store implementation using flow principles for the React Hooks API.
  */
 import React from 'react'
-import { actions as actionActions, reducer as actionReducer } from './action'
 import { actions as inputActions, reducer as inputReducer } from './input'
 import { actions as languageActions, reducer as languageReducer } from './language'
 import { actions as optionsActions, reducer as optionsReducer } from './options'
@@ -159,7 +158,6 @@ export const Store = <T extends SubReducers>(props: {
 // Default Store containing all reducers
 
 export const actions = {
-    action: actionActions,
     index: indexActions,
     input: inputActions,
     language: languageActions,
@@ -171,7 +169,6 @@ export const actions = {
 }
 
 export const reducers = {
-    action: actionReducer,
     index: indexReducer,
     input: inputReducer,
     language: languageReducer,

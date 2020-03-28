@@ -25,7 +25,7 @@ export const reducer = (state: State = initialState, action: Action): State => {
         case 'language/fetch':
             return action.payload
                 ? { ...initialState, languages: action.payload, selected: 0 }
-                : action.error != undefined
+                : action.error
                 ? { ...initialState }
                 : { ...initialState, fetching: true }
         case 'language/select':
