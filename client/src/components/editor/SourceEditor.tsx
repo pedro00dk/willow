@@ -34,7 +34,7 @@ export const SourceEditor = () => {
         editor.current.setTheme('ace/theme/chrome')
         const options = { enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true }
         editor.current.setOptions(options)
-        const onChange = () => dispatch(actions.input.set(editor.current.session.doc.getAllLines()), false)
+        const onChange = () => dispatch(actions.source.set(editor.current.session.doc.getAllLines()), false)
         editor.current.addEventListener('change', onChange)
         return () => editor.current.removeEventListener('change', onchange)
     }, [editor.current])
