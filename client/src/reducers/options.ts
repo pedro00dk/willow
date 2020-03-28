@@ -8,6 +8,7 @@ type State = {
 }
 
 type Action =
+    | { type: 'options/set'; payload: State }
     | { type: 'options/setEnableVisualization'; payload: boolean }
     | { type: 'options/setPreserveLayout'; payload: boolean }
     | { type: 'options/setLiveProgramming'; payload: boolean }
@@ -20,6 +21,8 @@ const initialState: State = {
 
 export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
+        case 'options/set':
+            return action.payload
         case 'options/setEnableVisualization':
             return { ...state, enableVisualization: action.payload }
         case 'options/setPreserveLayout':
@@ -30,6 +33,8 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return state
     }
 }
+
+const set = (options: Partial<State>): Action => ({ type: 'options/set', payload: { ...initialState, ...options } })
 
 const setEnableVisualization = (enableVisualization: boolean): Action => ({
     type: 'options/setEnableVisualization',
@@ -46,4 +51,4 @@ const setLiveProgramming = (liveProgramming: boolean): Action => ({
     payload: liveProgramming
 })
 
-export const actions = { setEnableVisualization, setPreserveLayout, setLiveProgramming }
+export const actions = { set, setEnableVisualization, setPreserveLayout, setLiveProgramming }
