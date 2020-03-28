@@ -1,28 +1,31 @@
 import { api, apiUrl } from '../api'
-import { Action as UserAction, Program, User } from '../types/model'
+import { RequestAction, Program, User } from '../types/model'
 import { DefaultAsyncAction } from './Store'
+
 /**
  * User reducer updates the user information and collect user actions.
  */
 type State = {
     fetching: boolean
-    fetchingPrograms: boolean
     user: User
+    actions: { cache: RequestAction[]; sending: RequestAction[] }
+    initialized: boolean
     programs: Program[]
-    error?: string
 }
 
 type Action =
     | { type: 'user/signin' }
     | { type: 'user/signout' }
-    | { type: 'user/fetch'; payload?: { user: User }; error?: string }
-    | { type: 'user/fetchPrograms'; payload?: Program[]; error?: string }
-    | { type: 'user/sendAction'; error?: string }
+    | { type: 'user/fetch'; payload?: { user: User; programs: Program[] }; error?: string }
+    | { type: 'user/action'; payload: RequestAction }
+    | { type: 'user/actionInit'; payload: boolean }
+    | { type: 'user/actionSend'; payload: {}; error?: string }
 
 const initialState: State = {
     fetching: false,
-    fetchingPrograms: false,
     user: undefined,
+    actions: { cache: [], sending: [] },
+    initialized: false,
     programs: []
 }
 
@@ -33,17 +36,25 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return state
         case 'user/fetch':
             return action.payload
-                ? { ...initialState, fetching: false, user: action.payload.user }
-                : action.error != undefined
-                ? { ...initialState, error: action.error }
+                ? { ...initialState, fetching: false, ...action.payload }
+                : action.error
+                ? { ...initialState }
                 : { ...initialState, fetching: true }
-        case 'user/fetchPrograms':
+        case 'user/action':
+            state.actions.cache.push(action.payload)
+            return { ...state }
+        case 'user/actionInit':
+            return { ...state, initialized: action.payload }
+        case 'user/actionSend':
             return action.payload
-                ? { ...state, fetchingPrograms: false, programs: action.payload }
-                : action.error != undefined
-                ? { ...state, fetchingPrograms: false, programs: [], error: action.error }
-                : { ...state, fetchingPrograms: true, programs: [] }
-        case 'user/sendAction':
+                ? { ...state, actions: { cache: state.actions.cache, sending: [] } }
+                : action.error
+                ? {
+                      ...state,
+                      actions: { cache: [...state.actions.sending, ...state.actions.cache], sending: [] },
+                      initialized: false
+                  }
+                : { ...state, actions: { cache: [], sending: state.actions.cache }, initialized: true }
         default:
             return state
     }
@@ -61,30 +72,36 @@ const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'user/fetch' })
     try {
         const user = (await api.get<User>('/api/auth/user')).data
-        dispatch({ type: 'user/fetch', payload: { user } })
+        const programs = user ? (await api.get<Program[]>('/api/program')).data : []
+        dispatch({ type: 'user/fetch', payload: { user, programs } })
     } catch (error) {
         dispatch({ type: 'user/fetch', error: error?.response?.data ?? error.toString() })
     }
 }
 
-const fetchPrograms = (): DefaultAsyncAction => async dispatch => {
-    dispatch({ type: 'user/fetchPrograms' })
-    try {
-        const programs = (await api.get<User>('/api/program')).data
-        dispatch({ type: 'user/fetchPrograms', payload: programs })
-    } catch (error) {
-        dispatch({ type: 'user/fetchPrograms', error: error?.response?.data ?? error.toString() })
-    }
+const action = (action: Pick<RequestAction, 'name' | 'payload'>): DefaultAsyncAction => async (dispatch, getState) => {
+    const user = getState().user.user
+    if (!user) return
+    dispatch(sendAction())
+    dispatch({ type: 'action/append', payload: { ...action, date: new Date().toJSON() } })
 }
 
-const sendAction = (action: UserAction): DefaultAsyncAction => async dispatch => {
-    dispatch({ type: 'user/sendAction' })
-    try {
-        await api.post('/api/action', action)
-        dispatch({ type: 'user/sendAction' })
-    } catch (error) {
-        dispatch({ type: 'user/sendAction', error: error?.response?.data ?? error.toString() })
-    }
+const sendAction = (): DefaultAsyncAction => async (dispatch, getState) => {
+    const initialized = getState().user.initialized
+    if (initialized) return
+    dispatch({ type: 'user/actionInit', payload: true })
+    setInterval(async () => {
+        dispatch({ type: 'user/actionSend' }, false)
+        const sending = getState().user.actions.sending
+        if (sending.length === 0) return
+        try {
+            await api.post('/api/action', sending)
+            dispatch({ type: 'user/actionSend', payload: {} }, false)
+        } catch (error) {
+            dispatch({ type: 'user/actionSend', error: error?.response?.data ?? error.toString() })
+            dispatch({ type: 'user/actionInit', payload: false }, false)
+        }
+    }, 5000)
 }
 
-export const actions = { signin, signout, fetch, fetchPrograms, sendAction }
+export const actions = { signin, signout, fetch, action }
