@@ -9,7 +9,7 @@ const classes = {
 
 export const Options = () => {
     const dispatch = useDispatch()
-    const { enableVisualization, preserveLayout } = useSelection(state => ({ ...state.options }))
+    const { enableVisualization, preserveLayout } = useSelection(state => state.options)
 
     return (
         <div className={classes.container}>
