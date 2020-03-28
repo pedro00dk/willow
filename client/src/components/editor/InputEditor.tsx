@@ -1,7 +1,6 @@
 import ace from 'brace'
 import React from 'react'
-import { actions as inputActions } from '../../reducers/input'
-import { useDispatch, useSelection } from '../../reducers/Store'
+import { actions, useDispatch, useSelection } from '../../reducers/Store'
 import { TextEditor } from './TextEditor'
 
 export const InputEditor = () => {
@@ -11,9 +10,14 @@ export const InputEditor = () => {
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
-        editor.current.session.doc.setValue(input.join('\n'))
-        editor.current.on('change', () => dispatch(inputActions.set(editor.current.session.doc.getAllLines()), false))
-    }, [editor.current])
+        const onChange = () => dispatch(actions.input.set(editor.current.session.doc.getAllLines()), false)
+        editor.current.addEventListener('change', onChange)
+        return () => editor.current.removeEventListener('change', onchange)
+    }, [])
+
+    React.useLayoutEffect(() => {
+        editor.current.session.doc.setValue(input.content.join('\n'))
+    }, [input])
 
     useSelection(async state => {
         state.tracer.fetching !== editor.current?.getReadOnly() && editor.current?.setReadOnly(state.tracer.fetching)

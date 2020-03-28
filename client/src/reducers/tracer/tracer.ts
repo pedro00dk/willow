@@ -51,8 +51,8 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
         const { language, source, input, options } = getState()
         const request: ClientRequest = {
             language: language.languages[language.selected],
-            source: source.join('\n'),
-            input: input.join('\n')
+            source: source.content.join('\n'),
+            input: input.content.join('\n')
         }
         const onProgress = (progressEvent: any) => console.log(progressEvent)
         const response = (
@@ -63,7 +63,7 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
         ).data
         dispatch({ type: 'tracer/trace', payload: response }, false)
         dispatch({ type: 'tracer/available' }, false)
-        await dispatch(storeActions.index.setIndex(options.enableVisualization ? 0 : Infinity), false)
+        await dispatch(storeActions.index.set(options.enableVisualization ? 0 : Infinity), false)
         await dispatch(storeActions.output.compute(), false)
         dispatch({ type: 'tracer/available' })
     } catch (error) {
