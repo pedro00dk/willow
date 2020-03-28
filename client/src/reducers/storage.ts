@@ -24,10 +24,10 @@ const storage = (): DefaultAsyncAction => async (dispatch, getState) => {
 }
 
 const retrieve = (): DefaultAsyncAction => async dispatch => {
-    dispatch(storeActions.input.set((sessionStorage.getItem('input') ?? '').split('\n')), false)
-    dispatch(storeActions.source.set((sessionStorage.getItem('source') ?? '').split('\n')), false)
-    dispatch(storeActions.language.select(parseInt(sessionStorage.getItem('language')) || 0), false)
-    const rawOptions = JSON.parse(sessionStorage.getItem('options'))
+    dispatch(storeActions.input.set((localStorage.getItem('input') ?? '').split('\n')), false)
+    dispatch(storeActions.source.set((localStorage.getItem('source') ?? '').split('\n')), false)
+    dispatch(storeActions.language.select(parseInt(localStorage.getItem('language')) || 0), false)
+    const rawOptions = localStorage.getItem('options')
     dispatch(storeActions.options.set(rawOptions ? JSON.parse(rawOptions) : {}))
 }
 
@@ -35,7 +35,7 @@ const persist = (): DefaultAsyncAction => async (dispatch, getState) => {
     const initialized = getState().storage.initialized
     if (initialized) return
     dispatch({ type: 'storage/init' })
-    setInterval(async () => {
+    setInterval(() => {
         const { input, source, language, options } = getState()
         localStorage.setItem('input', input.join('\n'))
         localStorage.setItem('source', source.join('\n'))
