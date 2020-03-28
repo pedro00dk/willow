@@ -1,9 +1,7 @@
 import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
-import { useDispatch, useSelection } from '../../../reducers/Store'
-import { actions as actionActions } from '../../../reducers/action'
-import { actions as tracerActions } from '../../../reducers/tracer/tracer'
+import { actions, useDispatch, useSelection } from '../../../reducers/Store'
 import { ScopeSlice } from './StackTrace'
 
 const classes = {
@@ -32,7 +30,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
     const [displayMode, setDisplayMode] = React.useState<'all' | 'dim' | 'hide'>('all')
     const dispatch = useDispatch()
     const selected = useSelection(
-        state => state.tracer.index >= props.scopeSlice.range[0] && state.tracer.index <= props.scopeSlice.range[1]
+        state => state.index >= props.scopeSlice.range[0] && state.index <= props.scopeSlice.range[1]
     )
     const scopeSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
     const error = props.scopeSlice.scopes[props.scopeSlice.scopes.length - 1]?.line === -1
@@ -78,8 +76,9 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
                     style={{ background: styles.background(selected, error) }}
                     title={props.scopeSlice.name}
                     onClick={event => {
-                        dispatch(tracerActions.setIndex(props.scopeSlice.range[!event.altKey ? 0 : 1]))
-                        dispatch(actionActions.append({ name: 'step jump', payload: 'stack trace' }))
+                        const index = props.scopeSlice.range[!event.altKey ? 0 : 1]
+                        dispatch(actions.index.set(index))
+                        dispatch(actions.user.action({ name: 'step', payload: { index, using: 'stack trace' } }), false)
                     }}
                 >
                     {displayMode === 'all' ? props.scopeSlice.name : '\u200b'}

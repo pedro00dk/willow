@@ -10,7 +10,7 @@ export const Stack = () => {
     const container$ = React.useRef<HTMLDivElement>()
     const { available, stack = [] } = useSelection(state => ({
         available: state.tracer.available,
-        stack: state.tracer.available && state.tracer.steps[state.tracer.index].snapshot?.stack
+        stack: state.tracer.available && state.tracer.steps[state.index].snapshot?.stack
     }))
 
     React.useLayoutEffect(() => {
