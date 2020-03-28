@@ -1,7 +1,6 @@
 import { css } from 'emotion'
 import React from 'react'
-import { actions as languageActions } from '../../reducers/language'
-import { useDispatch, useSelection } from '../../reducers/Store'
+import { actions, useDispatch, useSelection } from '../../reducers/Store'
 
 const classes = {
     container: 'input-group w-auto',
@@ -25,7 +24,7 @@ export const Language = () => {
             <select
                 className={classes.select}
                 defaultValue={selected}
-                onChange={event => dispatch(languageActions.select(event.target.selectedIndex))}
+                onChange={event => dispatch(actions.language.select(event.target.selectedIndex))}
             >
                 {languages.map(language => (
                     <option key={language}>{language}</option>
