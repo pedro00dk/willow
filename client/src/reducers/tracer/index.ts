@@ -13,17 +13,17 @@ const initialState: State = 0
 export const reducer = (state: State = initialState, action: Action): State =>
     action.type === 'tracer/index/set' ? action.payload : state
 
-const setIndex = (index: number): DefaultAsyncAction => async (dispatch, getState) => {
+const set = (index: number): DefaultAsyncAction => async (dispatch, getState) => {
     const tracer = getState().tracer
     if (!tracer.available) index = 0
     else index = Math.min(Math.max(index, 0), tracer.steps.length - 1)
     dispatch({ type: 'tracer/index/set', payload: index })
 }
 
-const stepIndex = (direction: '->' | '<-', type: 'v' | '-' | '^'): DefaultAsyncAction => async (dispatch, getState) => {
+const step = (direction: '->' | '<-', type: 'v' | '-' | '^'): DefaultAsyncAction => async (dispatch, getState) => {
     const currentIndex = getState().index
     const tracer = getState().tracer
-    if (!tracer.available) return dispatch(setIndex(0))
+    if (!tracer.available) return dispatch(set(0))
     const currentSnapshot = tracer.steps[currentIndex].snapshot
 
     const directionFilter = (index: number) => (direction === '->' ? index > currentIndex : index < currentIndex)
@@ -43,4 +43,4 @@ const stepIndex = (direction: '->' | '<-', type: 'v' | '-' | '^'): DefaultAsyncA
     dispatch({ type: 'tracer/index/set', payload: index })
 }
 
-export const actions = { setIndex, stepIndex }
+export const actions = { set, step }
