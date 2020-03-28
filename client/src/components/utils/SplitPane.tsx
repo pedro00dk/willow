@@ -50,10 +50,8 @@ export const SplitPane = (props: {
     React.useLayoutEffect(() => {
         if (resizeIsCaptured.get()) return
         resizeIsCaptured.set(true)
-
         let eventFired = false
         let eventThrottling = false
-
         const onResize = () => {
             eventFired = true
             if (eventThrottling) return
@@ -67,7 +65,6 @@ export const SplitPane = (props: {
                 clearInterval(handler)
             }, 50)
         }
-
         addEventListener('resize', onResize)
         return () => removeEventListener('resize', onResize)
     }, [])

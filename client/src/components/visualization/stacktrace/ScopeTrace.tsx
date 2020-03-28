@@ -62,7 +62,6 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
             const newDisplayMode = width >= 40 ? 'all' : width >= 5 ? 'dim' : 'hide'
             if (displayMode !== newDisplayMode) setDisplayMode(newDisplayMode)
         }
-
         onResize()
         addEventListener('paneResizeEnd', onResize)
         return () => removeEventListener('paneResizeEnd', onResize)

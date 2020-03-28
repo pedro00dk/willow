@@ -21,7 +21,6 @@ export const Stack = () => {
             element$.style.width = `${parent$.clientWidth}px`
             element$.style.height = `${parent$.clientHeight}px`
         }
-
         onResize()
         addEventListener('paneResize', onResize)
         return () => removeEventListener('paneResize', onResize)
