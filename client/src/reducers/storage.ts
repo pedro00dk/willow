@@ -34,7 +34,7 @@ const retrieve = (): DefaultAsyncAction => async dispatch => {
 const persist = (): DefaultAsyncAction => async (dispatch, getState) => {
     const initialized = getState().storage.initialized
     if (initialized) return
-    dispatch({ type: 'storage/init' })
+    dispatch({ type: 'storage/init' }, false)
     setInterval(() => {
         const { input, source, language, options } = getState()
         localStorage.setItem('input', input.join('\n'))
