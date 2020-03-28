@@ -5,28 +5,22 @@ import { api } from '../../api'
 import { ClientRequest } from '../../types/model'
 import * as tracer from '../../types/tracer'
 import { DefaultAsyncAction } from '../Store'
-import { actions as outputActions } from './output'
+import { actions as storeActions } from '../Store'
 
 type State = {
     fetching: boolean
-    available: boolean
-    index: number
     response: tracer.Response
     steps: tracer.Step[]
-    error?: string
+    available: boolean
 }
 
-type Action =
-    | { type: 'tracer/trace'; payload?: tracer.Response; error?: string }
-    | { type: 'tracer/available' }
-    | { type: 'tracer/setIndex'; payload: number }
+type Action = { type: 'tracer/trace'; payload?: tracer.Response; error?: string } | { type: 'tracer/available' }
 
 const initialState: State = {
     fetching: false,
-    available: false,
-    index: 0,
     response: undefined,
-    steps: undefined
+    steps: undefined,
+    available: false
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
@@ -34,72 +28,34 @@ export const reducer = (state: State = initialState, action: Action): State => {
         case 'tracer/trace':
             return action.payload
                 ? { ...initialState, response: action.payload, steps: action.payload.steps }
-                : action.error != undefined
-                ? { ...initialState, error: action.error }
+                : action.error
+                ? { ...initialState }
                 : { ...initialState, fetching: true }
         case 'tracer/available':
             return { ...state, available: true }
-        case 'tracer/setIndex':
-            return { ...state, index: action.payload }
         default:
             return state
     }
 }
 
-const trace = (): DefaultAsyncAction =>
-    //
-    async (dispatch, getState) => {
-        dispatch({ type: 'tracer/trace' })
-        try {
-            const { language, source, input, options } = getState()
-            const request: ClientRequest = {
-                language: language.languages[language.selected],
-                source: source.join('\n'),
-                input: input.join('\n')
-            }
-            const response = (await api.post<tracer.Response>('/api/tracer/trace', request)).data
-            dispatch({ type: 'tracer/trace', payload: response })
-            dispatch(outputActions.compute())
-            dispatch({ type: 'tracer/available' })
-            if (!options.enableVisualization) dispatch(setIndex(Infinity))
-        } catch (error) {
-            dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
+const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
+    dispatch({ type: 'tracer/trace' })
+    try {
+        const { language, source, input, options } = getState()
+        const request: ClientRequest = {
+            language: language.languages[language.selected],
+            source: source.join('\n'),
+            input: input.join('\n')
         }
+        const response = (await api.post<tracer.Response>('/api/tracer/trace', request)).data
+        dispatch({ type: 'tracer/trace', payload: response }, false)
+        dispatch({ type: 'tracer/available' }, false)
+        dispatch(storeActions.index.setIndex(options.enableVisualization ? 0 : Infinity), false)
+        dispatch(storeActions.output.compute(), false)
+        dispatch({ type: 'tracer/available' })
+    } catch (error) {
+        dispatch({ type: 'tracer/trace', error: error.response ? error.response.data : error.toString() })
     }
+}
 
-const setIndex = (index: number): DefaultAsyncAction =>
-    //
-    async (dispatch, getState) => {
-        const tracer = getState().tracer
-        if (!tracer.steps) return
-        dispatch({ type: 'tracer/setIndex', payload: Math.min(Math.max(index, 0), tracer.steps.length - 1) })
-    }
-
-const stepIndex = (direction: 'forward' | 'backward', type: 'into' | 'over' | 'out'): DefaultAsyncAction =>
-    //
-    async (dispatch, getState) => {
-        const tracer = getState().tracer
-        if (!tracer.available) return
-        const snapshot = tracer.steps[tracer.index].snapshot
-
-        const directionFilter = (index: number) =>
-            direction === 'forward' ? index > tracer.index : index < tracer.index
-
-        const typeFilter = (step: tracer.Step) =>
-            !snapshot || !step.snapshot || type === 'into'
-                ? true
-                : type === 'over'
-                ? step.snapshot.stack.length <= snapshot.stack.length
-                : type === 'out'
-                ? step.snapshot.stack.length < snapshot.stack.length
-                : false
-
-        const indices = tracer.steps
-            .map((step, i) => ({ step, i }))
-            .filter(({ step, i }) => directionFilter(i) && typeFilter(step))
-            .map(({ i }) => i)
-        const index = indices[direction === 'forward' ? 0 : indices.length - 1] ?? tracer.index
-        return dispatch({ type: 'tracer/setIndex', payload: index })
-    }
-
-export const actions = { trace, setIndex, stepIndex }
+export const actions = { trace }
