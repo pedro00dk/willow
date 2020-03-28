@@ -7,6 +7,7 @@ import { actions as inputActions, reducer as inputReducer } from './input'
 import { actions as languageActions, reducer as languageReducer } from './language'
 import { actions as optionsActions, reducer as optionsReducer } from './options'
 import { actions as sourceActions, reducer as sourceReducer } from './source'
+import { actions as storageActions, reducer as storageReducer } from './storage'
 import { actions as indexActions, reducer as indexReducer } from './tracer/index'
 import { actions as outputActions, reducer as outputReducer } from './tracer/output'
 import { actions as tracerActions, reducer as tracerReducer } from './tracer/tracer'
@@ -166,6 +167,7 @@ export const actions = {
     options: optionsActions,
     output: outputActions,
     source: sourceActions,
+    storage: storageActions,
     tracer: tracerActions,
     user: userActions
 }
@@ -178,6 +180,7 @@ export const reducers = {
     options: optionsReducer,
     output: outputReducer,
     source: sourceReducer,
+    storage: storageReducer,
     tracer: tracerReducer,
     user: userReducer
 }
