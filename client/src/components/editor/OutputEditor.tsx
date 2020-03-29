@@ -8,6 +8,7 @@ export const OutputEditor = () => {
 
     React.useLayoutEffect(() => {
         editor.current.renderer.setShowGutter(false)
+        editor.current.setReadOnly(true)
     }, [editor.current])
 
     useSelection(async state => {

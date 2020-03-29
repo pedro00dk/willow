@@ -13,7 +13,7 @@ export const InputEditor = () => {
         const onChange = () => dispatch(actions.input.set(editor.current.session.doc.getAllLines()), false)
         editor.current.addEventListener('change', onChange)
         return () => editor.current.removeEventListener('change', onchange)
-    }, [])
+    }, [editor.current])
 
     React.useLayoutEffect(() => {
         editor.current.session.doc.setValue(input.content.join('\n'))
