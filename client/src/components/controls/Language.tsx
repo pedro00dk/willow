@@ -5,7 +5,7 @@ import { actions, useDispatch, useSelection } from '../../reducers/Store'
 const classes = {
     container: 'input-group w-auto',
     group: 'input-group-prepend',
-    label: `input-group-text justify-content-center ${css({ width: '6.5rem' })}`,
+    label: `input-group-text justify-content-center ${css({ cursor: 'default', width: '6.5rem' })}`,
     select: `custom-select ${css({ flex: '0 1 auto !important', width: '6rem !important' })}`,
     spinner: 'spinner-border spinner-border-sm text-secondary'
 }
