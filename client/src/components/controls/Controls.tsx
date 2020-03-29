@@ -5,14 +5,16 @@ import { Tracer } from './Tracer'
 
 const classes = {
     container: 'd-flex shadow-sm p-2 mb-1',
-    spacer: 'mx-2'
+    splitter: 'mx-2',
+    spacer: 'mx-auto'
 }
 
 export const Controls = () => (
     <div className={classes.container}>
         <Language />
-        <span className={classes.spacer} />
+        <span className={classes.splitter} />
         <Tracer />
+        <span className={classes.spacer} />
         <Options />
     </div>
 )
