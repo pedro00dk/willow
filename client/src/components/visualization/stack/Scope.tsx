@@ -17,11 +17,13 @@ const styles = {
 }
 
 export const Scope = (props: { scope: tracer.Scope }) => {
+    const previousScope = React.useRef<typeof props['scope']>()
     const previousMembers = React.useRef<{ [name: string]: tracer.Member }>({})
-
-    React.useEffect(() => {
-        previousMembers.current = Object.fromEntries(props.scope.members.map(member => [getMemberName(member), member]))
-    })
+    if (props.scope !== previousScope.current) {
+        const membersEntries = previousScope.current?.members.map(member => [getMemberName(member), member]) ?? []
+        previousMembers.current = Object.fromEntries(membersEntries)
+    }
+    previousScope.current = props.scope
 
     return (
         <table className={classes.container}>
