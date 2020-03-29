@@ -27,7 +27,7 @@ export const Tracer = () => {
     const canStepForward = tracer.available && index < tracer.steps.length - 1
     const phase = tracer.status.phase === 'upload' ? 'requesting' : 'fetching'
     const percent = Math.round(tracer.status.progress * 100)
-    const status = `${phase} ${Math.round(percent * 100)}%`
+    const status = `${phase} ${percent}%`
     const step = tracer.available && `Step ${index + 1} of ${tracer.steps.length}`
 
     return (
