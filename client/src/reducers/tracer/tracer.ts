@@ -67,7 +67,7 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
         ).data
         dispatch({ type: 'tracer/trace', payload: response }, false)
         dispatch({ type: 'tracer/available' }, false)
-        await dispatch(storeActions.index.set(options.enableVisualization ? 0 : Infinity), false)
+        await dispatch(storeActions.index.set(options.visualization ? 0 : Infinity), false)
         await dispatch(storeActions.output.compute(), false)
         dispatch({ type: 'tracer/available' })
     } catch (error) {

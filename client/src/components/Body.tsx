@@ -17,8 +17,8 @@ const classes = {
 }
 
 export const Body = () => {
-    const enableVisualization = useSelection(state => state.options.enableVisualization)
-    if (enableVisualization)
+    const visualization = useSelection(state => state.options.visualization)
+    if (visualization)
         return (
             <div className={classes.container}>
                 <Controls />

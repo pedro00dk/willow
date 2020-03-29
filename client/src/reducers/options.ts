@@ -2,19 +2,19 @@
  * Input reducer updates some tracing and visualization options.
  */
 type State = {
-    enableVisualization: boolean
+    visualization: boolean
     preserveLayout: boolean
     liveProgramming: boolean
 }
 
 type Action =
     | { type: 'options/set'; payload: State }
-    | { type: 'options/setEnableVisualization'; payload: boolean }
+    | { type: 'options/setVisualization'; payload: boolean }
     | { type: 'options/setPreserveLayout'; payload: boolean }
     | { type: 'options/setLiveProgramming'; payload: boolean }
 
 const initialState: State = {
-    enableVisualization: true,
+    visualization: true,
     preserveLayout: true,
     liveProgramming: true
 }
@@ -23,8 +23,8 @@ export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
         case 'options/set':
             return action.payload
-        case 'options/setEnableVisualization':
-            return { ...state, enableVisualization: action.payload }
+        case 'options/setVisualization':
+            return { ...state, visualization: action.payload }
         case 'options/setPreserveLayout':
             return { ...state, preserveLayout: action.payload }
         case 'options/setLiveProgramming':
@@ -36,8 +36,8 @@ export const reducer = (state: State = initialState, action: Action): State => {
 
 const set = (options: Partial<State>): Action => ({ type: 'options/set', payload: { ...initialState, ...options } })
 
-const setEnableVisualization = (enableVisualization: boolean): Action => ({
-    type: 'options/setEnableVisualization',
+const setVisualization = (enableVisualization: boolean): Action => ({
+    type: 'options/setVisualization',
     payload: enableVisualization
 })
 
@@ -51,4 +51,4 @@ const setLiveProgramming = (liveProgramming: boolean): Action => ({
     payload: liveProgramming
 })
 
-export const actions = { set, setEnableVisualization, setPreserveLayout, setLiveProgramming }
+export const actions = { set, setVisualization, setPreserveLayout, setLiveProgramming }
