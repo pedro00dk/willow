@@ -4,7 +4,7 @@ import { useSelection } from '../../reducers/Store'
 import { colors } from '../../colors'
 
 const classes = {
-    container: `position-fixed ${css({ left: '50%', top: '2%' })}`,
+    container: `position-fixed ${css({ left: '50%', top: '2%', zIndex: 10 })}`,
     snackbar: `text-center rounded p-1 ${css({
         marginLeft: '-150px',
         width: '300px',
@@ -23,6 +23,7 @@ export const Error = () => {
         const next = error[index.current]
         if (!next) return
         index.current++
+        console.log(next.error)
         snackbar$.current.textContent = next.error
         snackbar$.current.style.visibility = 'visible'
         snackbar$.current.style.opacity = '1'
