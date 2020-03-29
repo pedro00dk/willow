@@ -1,4 +1,5 @@
 import React from 'react'
+import { Error } from './Error'
 import { Language } from './Language'
 import { Options } from './Options'
 import { Tracer } from './Tracer'
@@ -10,11 +11,14 @@ const classes = {
 }
 
 export const Controls = () => (
-    <div className={classes.container}>
-        <Language />
-        <span className={classes.splitter} />
-        <Tracer />
-        <span className={classes.spacer} />
-        <Options />
-    </div>
+    <>
+        <div className={classes.container}>
+            <Language />
+            <span className={classes.splitter} />
+            <Tracer />
+            <span className={classes.spacer} />
+            <Options />
+        </div>
+        <Error />
+    </>
 )
