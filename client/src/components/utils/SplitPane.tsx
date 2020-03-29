@@ -31,6 +31,33 @@ const createSharedState = <T extends any>(initialValue: T) => {
     return { get, set }
 }
 
+const throttleEvent = (
+    interval: number,
+    eventName: string,
+    throttledEventName: string,
+    throttledEventNameStart?: string,
+    throttledEventNameEnd?: string
+) => {
+    let fired = false
+    let throttling = false
+    const onEvent = () => {
+        fired = true
+        if (throttling) return
+        throttling = true
+        dispatchEvent(new Event(throttledEventNameStart ?? throttledEventName))
+        const handler = setInterval(() => {
+            dispatchEvent(new Event(throttledEventName))
+            if (fired) return (fired = false)
+            dispatchEvent(new Event(throttledEventNameEnd ?? throttledEventName))
+            throttling = false
+            clearInterval(handler)
+        }, interval)
+    }
+    addEventListener(eventName, onEvent)
+}
+
+throttleEvent(50, 'resize', 'paneResize', 'paneResizeStart', 'paneResizeEnd')
+
 const resizeIsCapturedContext = React.createContext(createSharedState(false))
 
 export const SplitPane = (props: {
@@ -46,28 +73,6 @@ export const SplitPane = (props: {
     const resizeIsCaptured = React.useContext(resizeIsCapturedContext)
     const ratio = React.useRef(Math.min(Math.max(initialRatio, range[0]), range[1]))
     const freeDimension = orientation === 'row' ? 'width' : 'height'
-
-    React.useLayoutEffect(() => {
-        if (resizeIsCaptured.get()) return
-        resizeIsCaptured.set(true)
-        let eventFired = false
-        let eventThrottling = false
-        const onResize = () => {
-            eventFired = true
-            if (eventThrottling) return
-            eventThrottling = true
-            dispatchEvent(new Event('paneResizeStart'))
-            const handler = setInterval(() => {
-                dispatchEvent(new Event('paneResize'))
-                if (eventFired) return (eventFired = false)
-                dispatchEvent(new Event('paneResizeEnd'))
-                eventThrottling = false
-                clearInterval(handler)
-            }, 50)
-        }
-        addEventListener('resize', onResize)
-        return () => removeEventListener('resize', onResize)
-    }, [])
 
     return (
         <div ref={container$} className={classes.container} style={{ flexDirection: orientation }}>
