@@ -58,18 +58,15 @@ export const router = (config: Config) => {
  */
 export const trace = async (command: string, request: tracer.Request, timeout: number) => {
     const tracer = cp.spawn(command, { shell: true })
-
     const stopPromise = new Promise((resolve, reject) => {
         tracer.on('close', (code, signal) => resolve())
         setTimeout(() => reject(new Error(`Trace took longer than ${timeout}ms to execute`)), timeout)
     })
-
     const stdoutBuffers: Buffer[] = []
     const stderrBuffers: Buffer[] = []
     tracer.stdout.on('data', chunk => stdoutBuffers.push(chunk))
     tracer.stderr.on('data', chunk => stderrBuffers.push(chunk))
     tracer.stdin.end(JSON.stringify(request, undefined, 0))
-
     try {
         await stopPromise
     } finally {

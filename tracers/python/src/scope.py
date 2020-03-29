@@ -2,7 +2,7 @@ import sys
 import types
 
 
-def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modules: set, full_halt_modules = False):
+def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modules: set, full_halt_modules=False):
     """
     Produce globals scope objects with controlled restrictions that can be used by exec().
     - allowed_builtins: `set<str>`: builtins to allow in the scope, empty set removes all, `None` removes nothing
@@ -13,14 +13,14 @@ def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modul
     """
     builtins = globals()['__builtins__']
     builtins = builtins.copy() if isinstance(builtins, dict) else vars(builtins).copy()
-    
+
     if allowed_builtins is not None:
         builtins = {name: obj for name, obj in builtins.items() if name in allowed_builtins}
     if override_builtins is not None:
         builtins = {**builtins, **override_builtins}
     if full_halt_modules and allowed_modules is not None:
         sys.modules = {name: mod for name, mod in sys.modules.items() if name in allowed_modules}
-    
+
     import_ = builtins['__import__']
 
     def halt_import(module, globals_, locals_, fromlist, level):
@@ -30,5 +30,5 @@ def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modul
 
     if import_ is not None:
         builtins['__import__'] = halt_import
-    
+
     return {'__name__': '__main__', '__builtins__': builtins}

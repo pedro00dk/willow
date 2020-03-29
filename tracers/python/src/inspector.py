@@ -84,7 +84,7 @@ class Inspector:
         else:
             ordered_id = self.ordered_ids[id_] = self.ordered_id_count
             self.ordered_id_count += 1
-        
+
         if ordered_id in snapshot['heap']:
             return [ordered_id]
 

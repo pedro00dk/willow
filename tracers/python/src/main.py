@@ -10,7 +10,7 @@ def main():
     parser.add_argument('--pretty', default=False, action='store_true', help='Pretty print output')
     parser.add_argument('--test', default=False, action='store_true', help='Run the test source')
     options = parser.parse_args()
-    
+
     raw_request = json.loads(input())
     request = {
         'source':
@@ -20,9 +20,9 @@ def main():
         'input': raw_request['input'] if raw_request.get('input') is not None else '',
         'steps': raw_request['steps'] if raw_request.get('steps') is not None else 2 ** 31 - 1
     }
-    
+
     response = tracer.Tracer(request).run()
-    
+
     print(
         json.dumps(
             response,
