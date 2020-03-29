@@ -15,7 +15,8 @@ const classes = {
         item: 'nav-item active px-2',
         text: 'navbar-text',
         link: 'nav-link'
-    }
+    },
+    spinner: 'spinner-border spinner-border-sm text-secondary'
 }
 
 export const Header = () => {
@@ -23,8 +24,7 @@ export const Header = () => {
 
     React.useEffect(() => {
         ;(async () => {
-            await dispatch(actions.user.fetch())
-            await dispatch(actions.language.fetch())
+            await Promise.all([dispatch(actions.user.fetch()), dispatch(actions.language.fetch())])
             await dispatch(actions.storage.storage())
         })()
     })
@@ -38,7 +38,9 @@ export const Header = () => {
                 </li>
             </ul>
             <ul className={classes.menu.right}>
-                <User />
+                <li className={classes.menu.item}>
+                    <User />
+                </li>
                 <li className={classes.menu.item}>
                     <SignInOut />
                 </li>
@@ -67,7 +69,11 @@ const Help = () => {
 const User = () => {
     const { user } = useSelection(state => ({ user: state.user }))
 
-    return <span className={classes.menu.text}>{user.fetching ? 'loading...' : user.user?.email}</span>
+    return (
+        <span className={classes.menu.text}>
+            <span className={user.fetching ? classes.spinner : ''}>{user.user?.email}</span>
+        </span>
+    )
 }
 
 const SignInOut = () => {
