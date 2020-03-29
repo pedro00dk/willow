@@ -16,7 +16,7 @@ export const Language = () => {
     const selected = language.languages[language.selected]
 
     return (
-        <div className={classes.container} title='Pick a language'>
+        <div className={classes.container} title='Choose a language'>
             <div className={classes.group}>
                 <span className={classes.label}>
                     <span className={language.fetching ? classes.spinner : ''}>{language.fetching || 'Language'}</span>

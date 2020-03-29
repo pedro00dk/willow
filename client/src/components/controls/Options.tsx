@@ -3,32 +3,38 @@ import { actions, useDispatch, useSelection } from '../../reducers/Store'
 
 const classes = {
     container: 'd-flex align-items-center',
-    option: 'mx-3',
-    optionLabel: 'mr-2'
+    option: 'custom-control custom-switch mx-3',
+    optionInput: 'custom-control-input',
+    optionLabel: 'custom-control-label'
 }
 
 export const Options = () => {
     const dispatch = useDispatch()
-    const { enableVisualization, preserveLayout } = useSelection(state => state.options)
+    const { visualization, preserveLayout } = useSelection(state => state.options)
 
     return (
         <div className={classes.container}>
-            <div className={classes.option}>
-                <span className={classes.optionLabel}>{'Enable visualization'}</span>
+            <div className={classes.option} title='Toggle visualization view'>
                 <input
+                    className={classes.optionInput}
                     type='checkbox'
-                    checked={enableVisualization}
+                    id='visualization'
+                    checked={visualization}
                     onChange={event => {
                         const enable = event.target.checked
-                        dispatch(actions.options.setEnableVisualization(enable))
-                        dispatch(actions.user.action({ name: 'enable visualization', payload: enable }), false)
+                        dispatch(actions.options.setVisualization(enable))
+                        dispatch(actions.user.action({ name: 'visualization', payload: enable }), false)
                     }}
                 />
+                <label className={classes.optionLabel} htmlFor='visualization'>
+                    {'Visualization'}
+                </label>
             </div>
-            <div className={classes.option}>
-                <span className={classes.optionLabel}>{'Preserve Layout'}</span>
+            <div className={classes.option} title='Save the graph layout for the next trace'>
                 <input
+                    className={classes.optionInput}
                     type='checkbox'
+                    id='preserveLayout'
                     checked={preserveLayout}
                     onChange={event => {
                         const enable = event.target.checked
@@ -36,6 +42,9 @@ export const Options = () => {
                         dispatch(actions.user.action({ name: 'preserve layout', payload: enable }), false)
                     }}
                 />
+                <label className={classes.optionLabel} htmlFor='preserveLayout'>
+                    {'Preserve Layout'}
+                </label>
             </div>
         </div>
     )
