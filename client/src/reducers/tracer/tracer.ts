@@ -9,7 +9,7 @@ import { actions as storeActions } from '../Store'
 
 type State = {
     fetching: boolean
-    status: { mode: 'download' | 'upload'; progress: number }
+    status: { phase: 'download' | 'upload'; progress: number }
     response: tracer.Response
     steps: tracer.Step[]
     available: boolean
@@ -22,7 +22,7 @@ type Action =
 
 const initialState: State = {
     fetching: false,
-    status: { mode: 'upload', progress: 0 },
+    status: { phase: 'upload', progress: 0 },
     response: undefined,
     steps: undefined,
     available: false
@@ -54,7 +54,11 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
             source: source.content.join('\n'),
             input: input.content.join('\n')
         }
-        const onProgress = (progressEvent: any) => console.log(progressEvent)
+        const onProgress = (event: ProgressEvent) => {
+            const phase = event.target instanceof XMLHttpRequestUpload ? 'upload' : 'download'
+            const progress = event.loaded / event.total
+            dispatch({ type: 'tracer/status', payload: { phase, progress } })
+        }
         const response = (
             await api.post<tracer.Response>('/api/tracer/trace', request, {
                 onUploadProgress: onProgress,

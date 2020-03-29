@@ -7,7 +7,8 @@ import { actions, useDispatch, useSelection } from '../../reducers/Store'
 const classes = {
     container: 'd-flex align-items-center',
     image: `mx-3 ${css({ width: '1.5rem' })}`,
-    steps: 'mx-3',
+    label: 'mx-3',
+    spinner: 'spinner-border text-secondary'
 }
 
 const styles = {
@@ -24,7 +25,10 @@ export const Tracer = () => {
     const canTrace = !tracer.fetching
     const canStepBack = tracer.available && index > 0
     const canStepForward = tracer.available && index < tracer.steps.length - 1
-    const stepMessage = tracer.available && `Step ${index + 1} of ${tracer.steps.length}`
+    const phase = tracer.status.phase === 'upload' ? 'requesting' : 'fetching'
+    const percent = Math.round(tracer.status.progress * 100)
+    const status = `${phase} ${Math.round(percent * 100)}%`
+    const step = tracer.available && `Step ${index + 1} of ${tracer.steps.length}`
 
     return (
         <div className={classes.container}>
@@ -48,7 +52,7 @@ export const Tracer = () => {
                     dispatch(actions.index.step('<-', 'v'))
                     dispatch(actions.user.action({ name: 'step backward', payload: { index, using: 'toolbar' } }))
                 }}
-                />
+            />
             <img
                 className={classes.image}
                 style={styles.image(canStepForward, 270)}
@@ -60,7 +64,13 @@ export const Tracer = () => {
                     dispatch(actions.user.action({ name: 'step forward', payload: { index, using: 'toolbar' } }))
                 }}
             />
-            <span className={classes.steps}>{stepMessage}</span>
+            {tracer.fetching && (
+                <>
+                    <div className={classes.spinner} role='status' />
+                    <span className={classes.label}>{status}</span>
+                </>
+            )}
+            {tracer.available && <span className={classes.label}>{step}</span>}
         </div>
     )
 }
