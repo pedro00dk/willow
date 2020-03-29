@@ -13,7 +13,7 @@ const classes = {
         left: 'navbar-nav flex-row',
         right: 'navbar-nav flex-row ml-auto',
         item: 'nav-item active px-2',
-        text: 'navbar-text',
+        text: `navbar-text ${css({cursor: 'default'})}`,
         link: 'nav-link'
     },
     spinner: 'spinner-border spinner-border-sm text-secondary'
@@ -71,7 +71,9 @@ const User = () => {
 
     return (
         <span className={classes.menu.text}>
-            <span className={user.fetching ? classes.spinner : ''}>{user.user?.email}</span>
+            <span className={user.fetching ? classes.spinner : ''}>
+                {!user.fetching && (user.user?.email ?? 'Sign in to execute bigger programs')}
+            </span>
         </span>
     )
 }
