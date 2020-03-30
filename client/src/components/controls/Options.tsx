@@ -43,7 +43,7 @@ export const Options = () => {
                     }}
                 />
                 <label className={classes.optionLabel} htmlFor='preserveLayout'>
-                    {'Preserve Layout'}
+                    {'Preserve layout'}
                 </label>
             </div>
         </div>
