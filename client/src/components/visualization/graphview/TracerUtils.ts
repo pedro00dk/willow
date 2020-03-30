@@ -1,15 +1,11 @@
 import * as tracer from '../../../types/tracer'
 
-export const getMemberName = (member: tracer.Member) =>
-    typeof member.key !== 'object' ? member.key.toString() : `[${member.key[0].toString()}]`
-
 export const isValueObject = (value: tracer.Value): value is [string] => typeof value === 'object'
 
-export const isSameMember = (memberA: tracer.Member, memberB: tracer.Member) => {
-    if ((!memberA && memberB) || (!memberB && memberA)) return false
-    if (!memberA && !memberB) return true
-    return getMemberName(memberA) === getMemberName(memberB) && isSameValue(memberA.value, memberB.value)
-}
+export const getValueString = (value: tracer.Value) => (isValueObject(value) ? value[0] : value.toString())
+
+export const getDisplayValue = (value: tracer.Value, containerId?: string) =>
+    isValueObject(value) ? (value[0] === containerId ? ':#:' : '::') : value.toString()
 
 export const isSameValue = (valueA: tracer.Value, valueB: tracer.Value) => {
     const aIsObject = isValueObject(valueA)
@@ -20,5 +16,11 @@ export const isSameValue = (valueA: tracer.Value, valueB: tracer.Value) => {
     )
 }
 
-export const getDisplayValue = (value: tracer.Value, containerId?: string) =>
-    isValueObject(value) ? (value[0] === containerId ? ':#:' : '::') : value.toString()
+export const getMemberName = (member: tracer.Member) =>
+    typeof member.key !== 'object' ? member.key.toString() : `[${member.key[0].toString()}]`
+
+export const isSameMember = (memberA: tracer.Member, memberB: tracer.Member) => {
+    if ((!memberA && memberB) || (!memberB && memberA)) return false
+    if (!memberA && !memberB) return true
+    return getMemberName(memberA) === getMemberName(memberB) && isSameValue(memberA.value, memberB.value)
+}

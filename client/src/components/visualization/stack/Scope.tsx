@@ -19,10 +19,10 @@ const styles = {
 export const Scope = (props: { scope: tracer.Scope }) => {
     const previousScope = React.useRef<tracer.Scope>()
     const previousMembers = React.useRef<{ [name: string]: tracer.Member }>({})
-    if (props.scope !== previousScope.current) {
-        const membersEntries = previousScope.current?.members.map(member => [getMemberName(member), member]) ?? []
-        previousMembers.current = Object.fromEntries(membersEntries)
-    }
+    if (props.scope !== previousScope.current)
+        previousMembers.current = Object.fromEntries(
+            previousScope.current?.members.map(member => [getMemberName(member), member]) ?? []
+        )
     previousScope.current = props.scope
 
     return (

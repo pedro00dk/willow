@@ -5,10 +5,10 @@ import { SvgNode } from '../svg/SvgNode'
 import { isValueObject } from '../TracerUtils'
 import { Obj } from './Obj'
 
-export const Heap = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
+export const Heap = (props: { tracer: DefaultState['tracer']; graph: Graph; update: React.Dispatch<{}> }) => {
     const idsDepths = React.useRef<{ [id: string]: number }[]>([])
     const available = props.tracer.available
-    const index = props.graphData.getIndex()
+    const index = props.graph.getIndex()
     const { stack = [], heap = {} } = (available && props.tracer.steps[index].snapshot) || {}
     if (!available) idsDepths.current = []
 
@@ -44,12 +44,12 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graphData: Graph; 
     return (
         <>
             {Object.entries(heap).map(([id, obj]) => {
-                const node = props.graphData.getNode(id)
+                const node = props.graph.getNode(id)
                 node.type = obj.type
                 node.depth = idsDepths.current[index][id]
                 return (
-                    <SvgNode key={id} id={id} graph={props.graphData}>
-                        <Obj id={id} obj={obj} node={node} graphData={props.graphData} update={props.update} />
+                    <SvgNode key={id} id={id} graph={props.graph}>
+                        <Obj id={id} obj={obj} node={node} graphData={props.graph} update={props.update} />
                     </SvgNode>
                 )
             })}

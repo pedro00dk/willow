@@ -4,7 +4,7 @@ import { DefaultState } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Graph } from '../Graph'
 import { SvgNode } from '../svg/SvgNode'
-import { isSameMember, isValueObject, getMemberName, getDisplayValue } from '../TracerUtils'
+import { isSameMember, isValueObject, getMemberName, getDisplayValue, getValueString } from '../TracerUtils'
 
 const styles = {
     color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark),
@@ -12,22 +12,21 @@ const styles = {
         variableDepth === stackDepth - 1 ? 2.5 : variableIndex < 2 ? 1 : 0.5
 }
 
-export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph; update: React.Dispatch<{}> }) => {
+export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; update: React.Dispatch<{}> }) => {
+    const previousStack = React.useRef<tracer.Scope[]>()
     const previousMembers = React.useRef<{ [scope: number]: { [name: string]: tracer.Member } }>({})
-    const available = props.tracer.available
-    const stack = (available && props.tracer.steps[props.graphData.getIndex()].snapshot?.stack) || []
-    const node = props.graphData.getNode('stack')
-
-    const membersDepths = stack
-        .flatMap((scope, i) => scope.members.map(member => ({ member, depth: i })))
+    const stack = props.tracer.steps[props.graph.getIndex()].snapshot?.stack || []
+    const scopesDepths = stack.map((scope, i) => ({ scope, depth: i }))
+    const membersDepths = scopesDepths
+        .flatMap(({ scope, depth }) => scope.members.map(member => ({ member, depth })))
         .filter(({ member }) => isValueObject(member.value))
-
-    const stackIdsMembersDepths = membersDepths.reduce((acc, { member, depth }, i) => {
-        const id = (member.value as [string])[0]
-        if (!acc[id]) acc[id] = []
-        acc[id].push({ member, depth })
-        return acc
-    }, {} as { [id: string]: { member: tracer.Member; depth: number }[] })
+    if (stack !== previousStack.current)
+        previousMembers.current = membersDepths.reduce((acc, { member, depth }) => {
+            if (!acc[depth]) acc[depth] = {}
+            acc[depth][getMemberName(member)] = member
+            return acc
+        }, {} as { [depth: number]: { [name: string]: tracer.Member } })
+    previousStack.current = stack
 
     const deltas = [
         { x: -65, y: -25 },
@@ -35,7 +34,15 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph;
         { x: -65, y: 25 }
     ]
 
-    Object.entries(stackIdsMembersDepths).forEach(([id, variablesDepths]) =>
+    const idMembers = membersDepths.reduce((acc, { member, depth }, i) => {
+        const id = getValueString(member.key)
+        if (!acc[id]) acc[id] = []
+        acc[id].push({ member, depth })
+        return acc
+    }, {} as { [id: string]: { member: tracer.Member; depth: number }[] })
+
+    const node = props.graph.getNode('stack')
+    Object.entries(idMembers).forEach(([id, variablesDepths]) =>
         variablesDepths
             .slice(-3)
             .reverse()
@@ -43,7 +50,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph;
                 const memberName = getMemberName(member)
                 const changed = !isSameMember(member, previousMembers.current[depth]?.[memberName])
                 const displayKey = getDisplayValue(member.key)
-                props.graphData.pushEdge(node.id, `${depth}-${memberName}`, {
+                props.graph.pushEdge(node.id, `${depth}-${memberName}`, {
                     self: true,
                     target: id,
                     from: { targetDelta: deltas[i] },
@@ -56,13 +63,5 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph;
             })
     )
 
-    React.useEffect(() => {
-        previousMembers.current = membersDepths.reduce((acc, { member, depth }) => {
-            if (!acc[depth]) acc[depth] = {}
-            acc[depth][getMemberName(member)] = member
-            return acc
-        }, {} as { [depth: number]: { [name: string]: tracer.Member } })
-    })
-
-    return <>{available && <SvgNode id={node.id} graph={props.graphData} />}</>
+    return <SvgNode id={node.id} graph={props.graph} />
 }
