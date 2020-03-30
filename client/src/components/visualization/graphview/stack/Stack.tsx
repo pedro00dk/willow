@@ -64,5 +64,5 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graphData: Graph;
         }, {} as { [depth: number]: { [name: string]: tracer.Member } })
     })
 
-    return <>{available && <SvgNode id={node.id} graphData={props.graphData} />}</>
+    return <>{available && <SvgNode id={node.id} graph={props.graphData} />}</>
 }
