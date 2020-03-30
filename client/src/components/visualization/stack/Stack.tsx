@@ -3,7 +3,9 @@ import { useSelection } from '../../../reducers/Store'
 import { Scope } from './Scope'
 
 const classes = {
-    container: 'd-flex flex-column position-absolute overflow-auto'
+    container: 'd-flex flex-column position-absolute overflow-auto',
+    unavailable: 'text-center h4 m-auto'
+
 }
 
 export const Stack = () => {
@@ -30,8 +32,13 @@ export const Stack = () => {
 
     return (
         <div ref={container$} className={classes.container}>
-            {!available && <Scope scope={{ line: 0, name: 'Stack', members: [] }} />}
-            {available && stack.map((scope, i) => <Scope key={i} scope={scope} />)}
+            {!available ? (
+                <Scope scope={{ line: 0, name: 'Stack', members: [] }} />
+            ) : stack.length > 0 ? (
+                stack.map((scope, i) => <Scope key={i} scope={scope} />)
+            ) : (
+                <span className={classes.unavailable}>{'Stack unavailable'}</span>
+            )}
         </div>
     )
 }
