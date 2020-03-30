@@ -74,8 +74,13 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
                     className={classes.scope}
                     style={{ background: styles.background(selected, error) }}
                     title={props.scopeSlice.name}
-                    onClick={event => {
-                        const index = props.scopeSlice.range[!event.altKey ? 0 : 1]
+                    onClick={() => {
+                        const index = props.scopeSlice.range[0]
+                        dispatch(actions.index.set(index))
+                        dispatch(actions.user.action({ name: 'step', payload: { index, using: 'stack trace' } }), false)
+                    }}
+                    onDoubleClick={() => {
+                        const index = props.scopeSlice.range[1]
                         dispatch(actions.index.set(index))
                         dispatch(actions.user.action({ name: 'step', payload: { index, using: 'stack trace' } }), false)
                     }}
