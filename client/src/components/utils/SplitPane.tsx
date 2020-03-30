@@ -25,12 +25,6 @@ const styles = {
     cursor: (layout: 'row' | 'column') => (layout === 'row' ? 'ew-resize' : 'ns-resize')
 }
 
-const createSharedState = <T extends any>(initialValue: T) => {
-    const get = () => initialValue
-    const set = (value: T) => (initialValue = value)
-    return { get, set }
-}
-
 const throttleEvent = (
     interval: number,
     eventName: string,
