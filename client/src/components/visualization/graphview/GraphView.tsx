@@ -31,8 +31,12 @@ export const GraphView = () => {
 
     return (
         <SvgView graph={graph}>
-            <Stack tracer={tracer} graphData={graph} update={update} />
-            <Heap tracer={tracer} graphData={graph} update={update} />
+            {tracer.available && (
+                <>
+                    <Stack tracer={tracer} graph={graph} update={update} />
+                    <Heap tracer={tracer} graph={graph} update={update} />
+                </>
+            )}
         </SvgView>
     )
 }
