@@ -4,7 +4,7 @@ import { useSelection } from '../../reducers/Store'
 import { colors } from '../../colors'
 
 const classes = {
-    container: `position-fixed ${css({ left: '50%', top: '2%', zIndex: 10 })}`,
+    container: `position-fixed ${css({ left: '50%', top: '2%', zIndex: 20 })}`,
     snackbar: `text-center rounded p-1 ${css({
         marginLeft: '-150px',
         width: '300px',

@@ -12,7 +12,7 @@ const classes = {
             boxSizing: 'border-box',
             border: '0px solid transparent',
             transition: 'all 0.2s ease',
-            zIndex: 5,
+            zIndex: 10,
             ':hover': { background: 'darkgray', border: '4px solid lightgray' }
         }),
         row: css({ width: '10px', borderLeftWidth: 4, borderRightWidth: 4, marginLeft: -4, marginRight: -4 }),
