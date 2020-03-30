@@ -12,6 +12,7 @@ export const OutputEditor = () => {
     }, [editor.current])
 
     useSelection(async state => {
+        await undefined
         const tracer = state.tracer
         if (!editor.current || !tracer.available) return
         editor.current.session.doc.setValue(state.output[state.index])

@@ -44,6 +44,7 @@ export const SourceEditor = () => {
     }, [source])
 
     useSelection(async state => {
+        await undefined
         const selectedLanguage = state.language.languages[state.language.selected]
         if (!editor.current || language.current === selectedLanguage) return
         language.current = supportedLanguages.has(selectedLanguage) ? selectedLanguage : 'text'
@@ -51,14 +52,15 @@ export const SourceEditor = () => {
     })
 
     useSelection(async state => {
+        await undefined
         if (!editor.current || !state.tracer.available) return
         const snapshot = state.tracer.steps[state.index].snapshot
         const line = snapshot?.stack[snapshot.stack.length - 1].line
         const info = snapshot?.info
-        if (!snapshot || (highlight.current.line === line && highlight.current.info === info)) return
         Object.values(editor.current.session.getMarkers(false) as { [id: number]: EditorMarker })
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.current.session.removeMarker(marker.id))
+        if (!snapshot) return
         highlight.current.line = line
         highlight.current.info = info
         editor.current.session.addMarker(new Range(line, 0, line, 1), classes[info], 'fullLine', false)
