@@ -13,7 +13,7 @@ const classes = {
         left: 'navbar-nav flex-row',
         right: 'navbar-nav flex-row ml-auto',
         item: 'nav-item active px-2',
-        text: `navbar-text ${css({cursor: 'default'})}`,
+        text: `navbar-text ${css({ cursor: 'default' })}`,
         link: 'nav-link'
     },
     spinner: 'spinner-border spinner-border-sm text-secondary'

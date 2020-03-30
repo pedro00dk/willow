@@ -58,8 +58,6 @@ const throttleEvent = (
 
 throttleEvent(50, 'resize', 'paneResize', 'paneResizeStart', 'paneResizeEnd')
 
-const resizeIsCapturedContext = React.createContext(createSharedState(false))
-
 export const SplitPane = (props: {
     orientation?: 'row' | 'column'
     ratio?: number
@@ -70,7 +68,6 @@ export const SplitPane = (props: {
     const container$ = React.useRef<HTMLDivElement>()
     const firstPane$ = React.useRef<HTMLDivElement>()
     const secondPane$ = React.useRef<HTMLDivElement>()
-    const resizeIsCaptured = React.useContext(resizeIsCapturedContext)
     const ratio = React.useRef(Math.min(Math.max(initialRatio, range[0]), range[1]))
     const freeDimension = orientation === 'row' ? 'width' : 'height'
 
