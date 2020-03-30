@@ -1,4 +1,5 @@
 import React from 'react'
+import { colors } from '../../../../colors'
 import { Graph, ilerp, svgScreenTransformPoint, svgScreenTransformVector } from '../Graph'
 
 const classes = {
@@ -19,15 +20,14 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
     }
 
     React.useLayoutEffect(() => {
-        const onResize = (event: Event) => {
+        const onResize = () => {
             const element$ = container$.current
             const parent$ = element$.parentElement
             if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
             element$.style.width = `${parent$.clientWidth}px`
             element$.style.height = `${parent$.clientHeight}px`
         }
-
-        onResize(undefined)
+        onResize()
         globalThis.addEventListener('paneResize', onResize)
         return () => globalThis.removeEventListener('paneResize', onResize)
     }, [container$.current])
@@ -64,9 +64,9 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
             className={classes.container}
             viewBox={Object.values(box.current).join(' ')}
             preserveAspectRatio='xMidYMid meet'
-            onMouseDown={event => (click.current = true)}
-            onMouseUp={event => (click.current = false)}
-            onMouseLeave={event => (click.current = false)}
+            onMouseDown={() => (click.current = true)}
+            onMouseUp={() => (click.current = false)}
+            onMouseLeave={() => (click.current = false)}
             onMouseMove={event => {
                 if (!click.current) return
                 const screenDelta = { x: event.movementX, y: event.movementY }
@@ -79,15 +79,20 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
                 scaleBox(svgPoint, event.deltaY < 0 ? 'in' : 'out')
             }}
         >
-            <g fill='none' stroke='gray' strokeWidth={2} opacity={0.2}>
-                <rect width={viewSize.width} height={viewSize.height} />
+            <title>{'Drag and scroll to pawn and zoom'}</title>
+            <g opacity={0.4}>
+                <rect fill={colors.gray.main} x={-10000} y={-10000} width={20000} height={20000} />
+                <rect fill='white' {...viewSize} />
                 <rect
+                    fill='none'
+                    stroke={colors.gray.main}
                     x={viewSize.width / 4}
                     y={viewSize.height / 4}
                     width={viewSize.width / 2}
                     height={viewSize.height / 2}
                 />
             </g>
+
             {props.children}
         </svg>
     )

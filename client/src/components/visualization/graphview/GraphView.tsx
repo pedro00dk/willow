@@ -25,7 +25,6 @@ export const GraphView = () => {
 
     React.useLayoutEffect(() => {
         const onResize = () => zoom !== devicePixelRatio && setZoom(devicePixelRatio)
-
         addEventListener('paneResize', onResize)
         return () => removeEventListener('paneResize', onResize)
     }, [zoom])
