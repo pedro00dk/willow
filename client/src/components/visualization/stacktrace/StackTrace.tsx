@@ -18,11 +18,9 @@ export const StackTrace = () => {
 
     const rootScopeSlice = React.useMemo(() => {
         if (!available) return
-        const children = steps.map(step => {
-            if (step.snapshot) return step.snapshot.stack
-            const error = step.error.exception?.type ?? step.error.cause
-            return [{ name: error, line: -1, members: [] }]
-        })
+        const children = steps.map(
+            step => step.snapshot?.stack ?? [{ name: step.error.exception?.type ?? step.error.cause, members: [] }]
+        )
         return { name: '', range: [0, steps.length - 1], scopes: [], children } as ScopeSlice
     }, [available, steps])
 

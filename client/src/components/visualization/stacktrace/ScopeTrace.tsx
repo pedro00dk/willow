@@ -19,7 +19,7 @@ const classes = {
 
 const styles = {
     background: (selected: boolean, threw: boolean) =>
-        selected ? (threw ? colors.red.light : colors.blue.light) : threw ? colors.red.lighter : colors.blue.lighter,
+        selected ? (threw ? colors.red.dark : colors.blue.main) : threw ? colors.red.main : colors.blue.lighter,
     childWidth: (childSize: number, parentSize: number) => `${(childSize / parentSize) * 100}%`,
     childMargin: (childStart: number, previousChildEnd: number, parentSize: number) =>
         `${((childStart - previousChildEnd) / parentSize) * 100}%`
@@ -33,7 +33,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
         state => state.index >= props.scopeSlice.range[0] && state.index <= props.scopeSlice.range[1]
     )
     const scopeSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
-    const error = props.scopeSlice.scopes[props.scopeSlice.scopes.length - 1]?.line === -1
+    const error = props.scopeSlice.scopes[props.scopeSlice.scopes.length - 1]?.line === undefined
 
     const childrenScopeSlices = React.useMemo(() => {
         return props.scopeSlice.children.reduce((acc, childStackSlice, i) => {
