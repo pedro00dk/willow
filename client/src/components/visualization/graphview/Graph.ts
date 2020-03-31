@@ -4,33 +4,12 @@ export const lerp = (from: number, to: number, gradient: number) => from * (1 - 
 
 export const ilerp = (value: number, from: number, to: number) => (value - from) / (to - from)
 
-export const svgScreenTransformPoint = (
-    direction: 'toSvg' | 'toScreen',
-    svgElement: SVGGraphicsElement,
-    zoom: boolean,
-    ...points: { x: number; y: number }[]
-) => {
-    const toScreenTransformMatrix = svgElement.getScreenCTM()
-    let matrix = direction === 'toSvg' ? toScreenTransformMatrix.inverse() : toScreenTransformMatrix
-    if (zoom) matrix = matrix.scale(1 / globalThis.devicePixelRatio, 1 / globalThis.devicePixelRatio)
-    return points.map(point => new DOMPoint(point.x, point.y).matrixTransform(matrix) as { x: number; y: number })
-}
-
-export const svgScreenTransformVector = (
-    direction: 'toSvg' | 'toScreen',
-    svgElement: SVGGraphicsElement,
-    zoom: boolean,
-    ...vectors: { x: number; y: number }[]
-) => {
-    const [root, ...shiftedVectors] = svgScreenTransformPoint(direction, svgElement, zoom, { x: 0, y: 0 }, ...vectors)
-    shiftedVectors.forEach(vector => ((vector.x -= root.x), (vector.y -= root.y)))
-    return shiftedVectors
-}
-
 class View {
     size = { width: Infinity, height: Infinity }
     padding = { left: 0, top: 0, right: 0, bottom: 0 }
     box = { x: 0, y: 0, width: 0, height: 0 }
+    screenCtm = new DOMMatrix()
+    inverseScreenCtm = new DOMMatrix()
 
     center() {
         return { x: this.size.width, y: this.size.height }
@@ -45,6 +24,21 @@ class View {
             x: Math.min(Math.max(position.x, this.padding.left), this.size.width - this.padding.right),
             y: Math.min(Math.max(position.y, this.padding.top), this.size.height - this.padding.bottom)
         }
+    }
+
+    transformPoint(direction: 'toSvg' | 'toScreen', zoom: boolean, ...points: { x: number; y: number }[]) {
+        let matrix = direction === 'toSvg' ? this.inverseScreenCtm : this.screenCtm
+        if (zoom) matrix = matrix.scale(1 / globalThis.devicePixelRatio, 1 / globalThis.devicePixelRatio)
+        return points.map(point => new DOMPoint(point.x, point.y).matrixTransform(matrix) as { x: number; y: number })
+    }
+
+    transformVector(direction: 'toSvg' | 'toScreen', zoom: boolean, ...vectors: { x: number; y: number }[]) {
+        const [root, ...shiftedVectors] = this.transformPoint(direction, zoom, { x: 0, y: 0 }, ...vectors)
+        shiftedVectors.forEach(vector => {
+            vector.x -= root.x
+            vector.y -= root.y
+        })
+        return shiftedVectors
     }
 }
 
@@ -74,8 +68,8 @@ export class Node {
     positions = [] as { x: number; y: number }[]
     size = { width: 0, height: 0 }
     mode = 'type' as 'self' | 'type'
-    shape = ''
-    layout = { position: { x: 0, y: 0 } }
+    shape = undefined as string
+    layout = { position: undefined as { x: number; y: number } }
     parameters = new Parameters()
 
     constructor(graph: Graph, id: string, partial?: Partial<Node>) {
@@ -153,6 +147,10 @@ export class Node {
             .children.forEach(edge => this.graph.getNode(edge.target).getChildren(depth - 1, true, filter, pool))
         return pool
     }
+
+    findStructure() {
+        return new Structure(this.graph, this)
+    }
 }
 
 export class Edge {
@@ -179,13 +177,14 @@ export class Edge {
         const { delta, source } = this.from
         const selfPosition = this.graph.getNode(this.id).getPosition(index)
         const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
+        console.log({delta, source, selfPosition, targetPosition})
         if (source === 'origin') return delta
         else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
         else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
     }
 
     private computeTo(index = this.graph.index, from = this.computeFrom(index)) {
-        const { delta, source } = this.from
+        const { delta, source } = this.to
         const selfPosition = this.graph.getNode(this.id).getPosition(index)
         const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
         const targetSize = this.target && this.graph.getNode(this.target).size
@@ -226,8 +225,7 @@ export type DefaultParameters = {
         | { value: boolean; bool: true }
         | { value: number; range: [number, number] }
         | { value: string; options: string[] }
-        | { value: string | undefined; members: 'all' | 'values' | 'references' }
-        | { value: string | undefined; data: 'all' | 'values' | 'references' }
+        | { value: string | undefined; members: 'all' | 'values' | 'references'; self: boolean }
 }
 
 export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
@@ -249,10 +247,12 @@ export class Parameters {
     }
 }
 
-export const layoutParameters = {
-    automatic: { value: false, bool: true as const },
+export const defaultLayoutParameters = {
+    enable: { value: false, bool: true as const },
+    member: { value: undefined as string, members: 'all' as const, self: true },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    member: { value: undefined as string, members: 'all' as const }
+    'breadth increment': { value: 1.5, range: [1, 3] as [number, number] },
+    'depth increment': { value: 1.5, range: [1, 3] as [number, number] }
 }
 
 export class Structure {
@@ -418,7 +418,7 @@ export class Graph {
     }
 
     getType(type: string) {
-        return this.types[type] ?? (this.types[type] = { shape: '', parameters: new Parameters() })
+        return this.types[type] ?? (this.types[type] = { shape: undefined, parameters: new Parameters() })
     }
 
     clearTypes() {
