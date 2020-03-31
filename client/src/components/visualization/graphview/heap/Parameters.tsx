@@ -1,7 +1,7 @@
 import React from 'react'
 import { Item } from 'react-contexify'
 import * as tracer from '../../../../types/tracer'
-import { UnknownParameters } from '../Graph'
+import { DefaultParameters, UnknownParameters } from '../Graph'
 import { isValueObject, getMemberName } from '../TracerUtils'
 
 const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
@@ -82,12 +82,13 @@ const MemberParameter = (props: {
 export const Parameters = (props: {
     resetMessage: string
     parameters: UnknownParameters
+    defaults: DefaultParameters
     obj: tracer.Obj
     onChange: (parameters: UnknownParameters) => void
 }) => (
     <>
         <Item onClick={() => props.onChange({})}>{props.resetMessage}</Item>
-        {Object.entries(props.parameters).map(([name, def]) =>
+        {Object.entries(props.defaults).map(([name, def]) =>
             (def as any).bool ? (
                 <FlagParameter
                     key={name}

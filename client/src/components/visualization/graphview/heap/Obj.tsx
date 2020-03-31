@@ -207,6 +207,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                 <Parameters
                     resetMessage='Click to reset parameters'
                     parameters={parameters}
+                    defaults={shapes[shape].defaultParameters}
                     obj={props.obj}
                     onChange={parameters => {
                         props.node.getParameters().set(props.node.getShape(), parameters)
@@ -219,6 +220,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                 <Parameters
                     resetMessage='Click to reset layout parameters'
                     parameters={props.node.parameters.get('layout', defaultLayoutParameters)}
+                    defaults={defaultLayoutParameters}
                     obj={props.obj}
                     onChange={parameters => {
                         props.node.parameters.set('layout', parameters)
