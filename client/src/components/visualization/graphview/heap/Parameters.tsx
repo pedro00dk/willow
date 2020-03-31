@@ -1,7 +1,7 @@
 import React from 'react'
 import { Item } from 'react-contexify'
 import * as tracer from '../../../../types/tracer'
-import { ComputedParameters, readParameters, ShapeParameters, UnknownParameters } from '../Graph'
+import { ComputedParameters, DefaultParameters, UnknownParameters } from '../Graph'
 import { isValueObject, getMemberName } from '../TracerUtils'
 
 const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
@@ -79,57 +79,50 @@ const MemberParameter = (props: {
     )
 }
 
-export const Parameters = <T extends UnknownParameters, U extends ShapeParameters>(props: {
+export const Parameters = (props: {
     withReset: boolean
-    parameters: T
-    defaults: U
+    parameters: UnknownParameters
     obj: tracer.Obj
-    onChange: (parameters: ComputedParameters<U>) => void
-}) => {
-    const parameters = readParameters(props.parameters, props.defaults)
-
-    return (
-        <>
-            {props.withReset && (
-                <Item onClick={args => props.onChange(readParameters(undefined, props.defaults))}>{'reset'}</Item>
-            )}
-            {Object.entries(props.defaults).map(([name, def]) =>
-                (def as any).bool != undefined ? (
-                    <FlagParameter
-                        key={name}
-                        name={name}
-                        value={parameters[name] as boolean}
-                        onChange={value => props.onChange({ ...parameters, [name]: value })}
-                    />
-                ) : (def as any).range != undefined ? (
-                    <RangeParameter
-                        key={name}
-                        name={name}
-                        value={parameters[name] as number}
-                        range={(def as any).range}
-                        onChange={value => props.onChange({ ...parameters, [name]: value })}
-                    />
-                ) : (def as any).options != undefined ? (
-                    <EnumParameter
-                        key={name}
-                        name={name}
-                        value={parameters[name] as string}
-                        options={(def as any).options}
-                        onChange={value => props.onChange({ ...parameters, [name]: value })}
-                    />
-                ) : (def as any).members != undefined ? (
-                    <MemberParameter
-                        key={name}
-                        name={name}
-                        value={parameters[name] as string | undefined}
-                        members={(def as any).members}
-                        obj={props.obj}
-                        onChange={value => props.onChange({ ...parameters, [name]: value })}
-                    />
-                ) : (
-                    <span>{'parameter type error'}</span>
-                )
-            )}
-        </>
-    )
-}
+    onChange: (parameters: UnknownParameters) => void
+}) => (
+    <>
+        {props.withReset && <Item onClick={() => props.onChange({})}>{'reset'}</Item>}
+        {Object.entries(props.parameters).map(([name, def]) =>
+            (def as any).bool ? (
+                <FlagParameter
+                    key={name}
+                    name={name}
+                    value={props.parameters[name] as boolean}
+                    onChange={value => props.onChange({ ...props.parameters, [name]: value })}
+                />
+            ) : (def as any).range ? (
+                <RangeParameter
+                    key={name}
+                    name={name}
+                    value={props.parameters[name] as number}
+                    range={(def as any).range}
+                    onChange={value => props.onChange({ ...props.parameters, [name]: value })}
+                />
+            ) : (def as any).options ? (
+                <EnumParameter
+                    key={name}
+                    name={name}
+                    value={props.parameters[name] as string}
+                    options={(def as any).options}
+                    onChange={value => props.onChange({ ...props.parameters, [name]: value })}
+                />
+            ) : (def as any).members != undefined ? (
+                <MemberParameter
+                    key={name}
+                    name={name}
+                    value={props.parameters[name] as string | undefined}
+                    members={(def as any).members}
+                    obj={props.obj}
+                    onChange={value => props.onChange({ ...props.parameters, [name]: value })}
+                />
+            ) : (
+                <span>{'parameter type error'}</span>
+            )
+        )}
+    </>
+)
