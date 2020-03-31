@@ -222,7 +222,7 @@ export class Edge {
 export type DefaultParameters = {
     [name: string]:
         | { value: boolean; bool: true }
-        | { value: number; range: [number, number] }
+        | { value: number; range: [number, number]; tick: number }
         | { value: string; options: string[] }
         | { value: string | undefined; members: 'all' | 'values' | 'references'; self: boolean }
 }
@@ -250,8 +250,8 @@ export const defaultLayoutParameters = {
     enabled: { value: false, bool: true as const },
     target: { value: undefined as string, members: 'all' as const, self: true },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    'breadth increment': { value: 1.5, range: [1, 3] as [number, number] },
-    'depth increment': { value: 1.5, range: [1, 3] as [number, number] }
+    'breadth increment': { value: 1.5, range: [1, 3] as [number, number], tick: 0.1 },
+    'depth increment': { value: 1.5, range: [1, 3] as [number, number], tick: 0.1 }
 }
 
 export class Structure {

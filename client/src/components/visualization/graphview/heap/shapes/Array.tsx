@@ -21,7 +21,7 @@ const styles = {
 
 export const defaultParameters = {
     'show indices': { value: true, bool: true as const },
-    'cell width': { value: 35, range: [5, 100] as [number, number] },
+    'cell width': { value: 35, range: [5, 100] as [number, number], tick: 5 },
     orientation: { value: 'horizontal', options: ['horizontal', 'vertical'] },
     'wrap array': { value: 'disabled', options: ['disabled', ...[...Array(21).keys()].map(i => (i + 1).toString())] },
     'wrap indices': { value: false, bool: true as const }

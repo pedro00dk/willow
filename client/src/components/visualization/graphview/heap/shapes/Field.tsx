@@ -23,7 +23,7 @@ export const defaultParameters = {
     member: { value: undefined as string, members: 'all' as const, self: false },
     'show key': { value: true, bool: true as const },
     'show references': { value: false, bool: true as const },
-    'references position': { value: 'right', options: ['right', 'bottom'] }
+    'reference position': { value: 'bottom', options: ['right', 'bottom'] }
 }
 
 export const defaults: ReadonlySet<tracer.Obj['category']> = new Set()
@@ -40,7 +40,7 @@ export const Shape = (props: {
     const memberName = props.parameters.member
     const showKey = props.parameters['show key']
     const showReferences = props.parameters['show references']
-    const referencesPosition = props.parameters['references position']
+    const referencePosition = props.parameters['reference position']
 
     const renderField = (member: tracer.Member) => {
         const name = getMemberName(member)
@@ -52,7 +52,7 @@ export const Shape = (props: {
         return (
             <div
                 className={classes.elements}
-                style={{ flexDirection: referencesPosition === 'right' ? 'row' : 'column' }}
+                style={{ flexDirection: referencePosition === 'right' ? 'row' : 'column' }}
             >
                 <div
                     className={classes.element}

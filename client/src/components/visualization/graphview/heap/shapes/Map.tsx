@@ -20,8 +20,8 @@ const styles = {
 
 export const defaultParameters = {
     'show keys': { value: true, bool: true as const },
-    'key width': { value: 35, range: [5, 100] as [number, number] },
-    'value width': { value: 35, range: [5, 100] as [number, number] }
+    'key width': { value: 35, range: [5, 100] as [number, number], tick: 5 },
+    'value width': { value: 35, range: [5, 100] as [number, number], tick: 5 }
 }
 
 export const defaults: ReadonlySet<tracer.Obj['category']> = new Set(['map'])

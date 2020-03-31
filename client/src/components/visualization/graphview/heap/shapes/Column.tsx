@@ -21,9 +21,9 @@ const styles = {
 export const defaultParameters = {
     'show indices': { value: true, bool: true as const },
     'show values': { value: true, bool: true as const },
-    'column width': { value: 35, range: [5, 100] as [number, number] },
-    'column height': { value: 60, range: [5, 200] as [number, number] },
-    'size mode': { value: 'delta', options: ['delta', 'step'] }
+    'column width': { value: 35, range: [5, 100] as [number, number], tick: 5 },
+    'column height': { value: 60, range: [5, 200] as [number, number], tick: 5 },
+    'column diff': { value: 'delta', options: ['delta', 'step'] }
 }
 
 export const defaults: ReadonlySet<tracer.Obj['category']> = new Set()
@@ -40,7 +40,7 @@ export const Shape = (props: {
     const showValues = props.parameters['show values']
     const columnWidth = props.parameters['column width']
     const columnHeight = props.parameters['column height']
-    const deltaMode = props.parameters['size mode']
+    const columnDiff = props.parameters['column diff']
 
     const computeDeltaRatios = (values: number[]) => {
         const min = Math.min(...values)
@@ -99,7 +99,7 @@ export const Shape = (props: {
                     ? 'not a number'
                     : (() => {
                           const values = props.obj.members.map(member => member.value as number)
-                          const ratios = deltaMode === 'delta' ? computeDeltaRatios(values) : computeStepRatios(values)
+                          const ratios = columnDiff === 'delta' ? computeDeltaRatios(values) : computeStepRatios(values)
                           return props.obj.members.map((member, i) => renderColumn(member, ratios[i], i))
                       })()}
             </div>
