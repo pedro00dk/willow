@@ -17,16 +17,16 @@ export const SvgNode = (props: { id: string; graph: Graph; children?: React.Reac
 
     React.useLayoutEffect(() => {
         const updateNode = () => {
-            const position = props.graph.getNodePosition(node)
+            const position = node.getPosition()
             const newNode = container$.current.getAttribute('x') == undefined
-            container$.current.style.transition = styles.animate(!newNode && props.graph.getAnimate())
+            container$.current.style.transition = styles.animate(!newNode && props.graph.animate)
             container$.current.setAttribute('x', position.x.toString())
             container$.current.setAttribute('y', position.y.toString())
-            container$.current.setAttribute('width', node.size.x.toString())
-            container$.current.setAttribute('height', node.size.y.toString())
+            container$.current.setAttribute('width', node.size.width.toString())
+            container$.current.setAttribute('height', node.size.height.toString())
         }
         updateNode()
-        props.graph.subscribe(props.id, updateNode)
+        props.graph.subscriptions.subscribe(props.id, updateNode)
     })
 
     return (

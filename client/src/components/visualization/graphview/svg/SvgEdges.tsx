@@ -21,22 +21,22 @@ export const SvgEdges = (props: { id: string; graph: Graph }) => {
                 const polyline = marker.firstElementChild as SVGPolylineElement
                 const animate = path.firstElementChild as SVGAnimateElement
                 const textPath = text.firstElementChild as SVGTextPathElement
-                const data = props.graph.computeEdgePathData(edge)
+                const data = edge.computePath()
                 const previousData = animate.getAttribute('to')
                 const newEdge = previousData == undefined
                 path.setAttribute('stroke', edge.color)
                 path.setAttribute('stroke-width', edge.width.toString())
                 polyline.setAttribute('stroke', edge.color)
                 polyline.setAttribute('stroke-width', edge.width.toString())
-                animate.setAttribute('dur', !newEdge && props.graph.getAnimate() ? '0.4s' : '0.001s')
+                animate.setAttribute('dur', !newEdge && props.graph.animate ? '0.4s' : '0.001s')
                 animate.setAttribute('from', previousData)
                 animate.setAttribute('to', data)
                 textPath.textContent = edge.text
                 ;(animate as any).beginElement()
             })
         updateEdges()
-        props.graph.subscribe(node.id, updateEdges)
-        edges.children.forEach(edge => props.graph.subscribe(edge.target, updateEdges))
+        props.graph.subscriptions.subscribe(node.id, updateEdges)
+        edges.children.forEach(edge => props.graph.subscriptions.subscribe(edge.target, updateEdges))
     })
 
     return (
