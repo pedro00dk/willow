@@ -279,17 +279,13 @@ export class Structure {
 
     private findBase(node: Node) {
         const parents = node.getParents(Infinity, true, (parent: Node) => parent.type === node.type)
-        this.base = Object.values(parents).reduce((acc, parent) => (parent.depth > acc.depth ? parent : acc), node)
+        this.base = Object.values(parents).reduce((acc, parent) => (parent.depth < acc.depth ? parent : acc), node)
     }
 
     private expand(node = this.base, ancestors = [] as Node[], depth = 0) {
         const newMember = !this.members[node.id]
         const parent = ancestors[ancestors.length - 1]
         const grandParent = ancestors[ancestors.length - 2]
-        if (parent) {
-            this.links[parent.id].children.push(node)
-            this.links[node.id].parents.push(parent)
-        }
         if (node.id === parent?.id) this.cycleEdges++
         else if (node.id === grandParent?.id) this.parentEdges++
         else if (!newMember) this.crossEdges++
@@ -302,8 +298,12 @@ export class Structure {
         this.graph
             .getEdges(node.id)
             .children.map(edge => this.graph.getNode(edge.target))
-            .forEach(child => child.type !== this.base.type && this.expand(child, ancestors, depth + 1))
+            .forEach(child => child.type === this.base.type && this.expand(child, ancestors, depth + 1))
         ancestors.pop()
+        if (parent) {
+            this.links[parent.id].children.push(node)
+            this.links[node.id].parents.push(parent)
+        }
     }
 
     private analyze() {
