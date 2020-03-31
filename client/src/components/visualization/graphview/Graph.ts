@@ -27,8 +27,6 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-// GraphData computes all manipulations in the Graph visualization
-
 class View {
     size = { width: Infinity, height: Infinity }
     padding = { left: 0, top: 0, right: 0, bottom: 0 }
@@ -76,14 +74,9 @@ export class Node {
     positions = [] as { x: number; y: number }[]
     size = { width: 0, height: 0 }
     mode = 'type' as 'self' | 'type'
-    shapes = new Shapes()
-    layout: {
-        position: { x: number; y: number }
-        parameters: ComputedParameters<typeof layoutParameters>
-    } = {
-        position: undefined,
-        parameters: readParameters(undefined, layoutParameters)
-    }
+    shape = ''
+    layout = { position: { x: 0, y: 0 } }
+    parameters = new Parameters()
 
     constructor(graph: Graph, id: string, partial?: Partial<Node>) {
         Object.assign(this, partial)
@@ -131,26 +124,16 @@ export class Node {
 
     getShape() {
         if (this.mode === 'self') return this.shape
-        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
-        return typeData.shape
+        return this.graph.getType(this.type).shape
     }
 
     setShape(shape: string) {
         if (this.mode === 'self') return (this.shape = shape)
-        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
-        return (typeData.shape = shape)
+        return (this.graph.getType(this.type).shape = shape)
     }
 
     getParameters() {
-        if (this.mode === 'self') return this.parameters[this.shape] ?? {}
-        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
-        return typeData.parameters[this.shape]
-    }
-
-    setParameters(parameters: UnknownParameters) {
-        if (this.mode === 'self') return (this.parameters[this.shape] = parameters)
-        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
-        return (typeData.parameters[typeData.shape] = parameters)
+        return this.mode === 'self' ? this.parameters : this.graph.getType(this.type).parameters
     }
 
     getParents(depth = 0, includeBase = true, filter = (parent: Node) => true, pool: { [id: string]: Node } = {}) {
@@ -192,19 +175,19 @@ export class Edge {
         this.name = name
     }
 
-    private computeFrom() {
+    private computeFrom(index = this.graph.index) {
         const { delta, source } = this.from
-        const selfPosition = this.graph.getNode(this.id).getPosition()
-        const targetPosition = this.target && this.graph.getNode(this.target).getPosition()
+        const selfPosition = this.graph.getNode(this.id).getPosition(index)
+        const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
         if (source === 'origin') return delta
         else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
         else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
     }
 
-    private computeTo(from = this.computeFrom()) {
+    private computeTo(index = this.graph.index, from = this.computeFrom(index)) {
         const { delta, source } = this.from
-        const selfPosition = this.graph.getNode(this.id).getPosition()
-        const targetPosition = this.target && this.graph.getNode(this.target).getPosition()
+        const selfPosition = this.graph.getNode(this.id).getPosition(index)
+        const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
         const targetSize = this.target && this.graph.getNode(this.target).size
         if (source === 'origin') return delta
         else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
@@ -216,7 +199,12 @@ export class Edge {
             }
     }
 
-    private computeCurvature(ratio: number, from = this.computeFrom(), endPoint = this.computeTo(from)) {
+    private computeCurvature(
+        index = this.graph.index,
+        ratio: number,
+        from = this.computeFrom(index),
+        endPoint = this.computeTo(index, from)
+    ) {
         const center = { x: lerp(from.x, endPoint.x, 0.5), y: lerp(from.y, endPoint.y, 0.5) }
         if (this.draw === 'line') return center
         const parallelVector = { x: endPoint.x - from.x, y: endPoint.y - from.y }
@@ -225,52 +213,45 @@ export class Edge {
         return curvature
     }
 
-    computePath() {
-        const from = this.computeFrom()
-        const to = this.computeTo(from)
-        const curvature = this.computeCurvature(0.1, from, to)
+    computePath(index = this.graph.index) {
+        const from = this.computeFrom(index)
+        const to = this.computeTo(index, from)
+        const curvature = this.computeCurvature(index, 0.1, from, to)
         return `M ${from.x},${from.y} Q ${curvature.x},${curvature.y} ${to.x},${to.y}`
     }
 }
 
-export type ShapeParameters = {
+export type DefaultParameters = {
     [name: string]:
         | { value: boolean; bool: true }
         | { value: number; range: [number, number] }
         | { value: string; options: string[] }
         | { value: string | undefined; members: 'all' | 'values' | 'references' }
+        | { value: string | undefined; data: 'all' | 'values' | 'references' }
 }
 
-export type UnknownParameters = { [name: string]: ShapeParameters[keyof ShapeParameters]['value'] }
+export type UnknownParameters = { [name: string]: DefaultParameters[keyof DefaultParameters]['value'] }
 
-export type ComputedParameters<T extends ShapeParameters> = { [name in keyof T]: T[name]['value'] }
+export type ComputedParameters<T extends DefaultParameters> = { [name in keyof T]: T[name]['value'] }
 
-export class Shapes {
-    private shape = ''
-    private parameters = { [this.shape]: {} } as { [shape: string]: UnknownParameters }
+export class Parameters {
+    private parameters = {} as { [selector: string]: UnknownParameters }
 
-    get<T extends ShapeParameters>(defaultParameters: T) {
-        return [this.shape, this.resolveParameters(defaultParameters)]
+    get<T extends DefaultParameters>(selector: string, defaultParameters: T) {
+        return this.resolve(this.parameters[selector], defaultParameters)
     }
 
-    setShape(shape: string) {
-        this.shape = shape
-        if (!this.parameters[shape]) this.parameters = {}
+    set(selector: string, parameters: UnknownParameters) {
+        this.parameters[selector] = parameters
     }
 
-    setParameters(parameters: UnknownParameters) {
-        this.parameters[this.shape] = parameters
-    }
-
-    private resolveParameters<T extends ShapeParameters>(defaultParameters: T) {
-        const parameters = this.parameters[this.shape]
+    private resolve<T extends DefaultParameters>(currentParameters: UnknownParameters, defaultParameters: T) {
+        const parameters = currentParameters ?? {}
         return Object.fromEntries(
-            Object.entries(defaultParameters).map(([name, def]) => [name, parameters ? parameters[name] : def.value])
+            Object.entries(defaultParameters).map(([name, def]) => [name, parameters[name] ?? def.value])
         ) as ComputedParameters<T>
     }
 }
-
-// Helper objects and functions for Parameters and Layout components of Node
 
 export const layoutParameters = {
     automatic: { value: false, bool: true as const },
@@ -419,7 +400,7 @@ export class Graph {
     view: View = new View()
     subscriptions = new Subscriptions()
     nodes: { [id: string]: Node } = {}
-    types: { [type: string]: { shape: string; parameters: { [shape: string]: UnknownParameters } } } = {}
+    types: { [type: string]: { shape: string; parameters: Parameters } } = {}
     edges: { [id: string]: { children: Edge[]; parents: Edge[]; loose: Edge[] } } = {}
 
     constructor(size: View['size'], padding: View['padding']) {
@@ -438,6 +419,14 @@ export class Graph {
 
     clearNodeRenders() {
         Object.values(this.nodes).forEach(node => (node.render = true))
+    }
+
+    getType(type: string) {
+        return this.types[type] ?? (this.types[type] = { shape: '', parameters: new Parameters() })
+    }
+
+    clearTypes() {
+        this.types = {}
     }
 
     getEdges(id: string) {
