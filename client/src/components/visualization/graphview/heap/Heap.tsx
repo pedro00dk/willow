@@ -45,6 +45,7 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graph: Graph; upda
                 const node = props.graph.getNode(id)
                 node.type = obj.type
                 node.depth = idsDepths.current[index][id]
+                if (node.positions.length === 0) node.centralize(0.5, 'all')
                 return (
                     <SvgNode key={id} id={id} graph={props.graph}>
                         <Obj id={id} obj={obj} node={node} graph={props.graph} update={props.update} />
