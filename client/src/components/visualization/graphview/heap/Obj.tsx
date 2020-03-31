@@ -1,11 +1,10 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
-import { actions, useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
-import { Edge, Graph, layoutParameters, Node, readParameters, svgScreenTransformVector } from '../Graph'
-import { getMemberName, isValueObject } from '../TracerUtils'
+import { defaultLayoutParameters, Edge, Graph, Node, Structure } from '../Graph'
+import { getMemberName, getValueString } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
@@ -17,89 +16,87 @@ const classes = {
     menuProvider: 'd-flex'
 }
 
-const modules = {
+const shapes = {
     array: ArrayModule,
     column: ColumnModule,
     field: FieldModule,
     map: MapModule
 }
 
-export const Obj = (props: {
-    id: string
-    obj: tracer.Obj
-    node: Node
-    graphData: Graph
-    update: React.Dispatch<{}>
-}) => {
+export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph; update: React.Dispatch<{}> }) => {
     const container$ = React.useRef<HTMLDivElement>()
     const references = React.useRef<{ id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }[]>()
     references.current = []
+    const previousObj = React.useRef<tracer.Obj>()
     const previousMembers = React.useRef<{ [id: string]: tracer.Member }>({})
-    const dispatch = useDispatch()
+    const members = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
+    if (props.obj !== previousObj.current)
+        previousMembers.current = Object.fromEntries(
+            previousObj.current?.members.map(member => [getMemberName(member), member]) ?? []
+        )
+    previousObj.current = props.obj
 
     const defaultShape = React.useMemo(
         () =>
-            Object.entries(modules).reduce(
+            Object.entries(shapes).reduce(
                 (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.category) ? name : acc),
-                undefined as string
-            ),
+                undefined
+            ) as keyof typeof shapes,
         [props.obj.category]
     )
-    const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
-    const parameters = props.graphData.getNodeParameters(props.node)
-
-    const { Shape } = modules[shape as keyof typeof modules]
+    const shape = (props.node.getShape() ?? props.node.setShape(defaultShape)) as keyof typeof shapes
+    const parameters = props.node.getParameters().get(shape, shapes[shape].defaultParameters)
+    const Shape = shapes[shape].Shape
 
     React.useLayoutEffect(() => {
-        const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
         const screenSize = { x: rect.width, y: rect.height }
-        const [svgSize] = svgScreenTransformVector('toSvg', svg, true, screenSize)
-        props.node.size = svgSize
+        const [svgSize] = props.graph.view.transformVector('toSvg', true, screenSize)
+        props.node.size.width = svgSize.x
+        props.node.size.height = svgSize.y
     })
 
     React.useLayoutEffect(() => {
-        const svg = container$.current.closest('svg')
         const rect = container$.current.getBoundingClientRect()
         references.current.forEach(({ id: target, name, ref$, edge }) => {
             const refRect = ref$.getBoundingClientRect()
             const screenDelta = { x: refRect.left - rect.left, y: refRect.top - rect.top }
             const screenSize = { x: refRect.width, y: refRect.height }
-            const [svgDelta, svgSize] = svgScreenTransformVector('toSvg', svg, true, screenDelta, screenSize)
+            const [svgDelta, svgSize] = props.graph.view.transformVector('toSvg', true, screenDelta, screenSize)
             const delta = { x: svgDelta.x + svgSize.x / 2, y: svgDelta.y + svgSize.y / 2 }
-            props.graphData.pushEdge(props.node.id, name, { ...edge, from: { delta }, target, to: { mode: 'near' } })
+            props.graph.pushEdge(props.node.id, name, {
+                ...edge,
+                self: true,
+                target,
+                from: { delta, source: 'self' },
+                to: { delta: { x: 0, y: 0 }, source: 'target-near' }
+            })
         })
     })
 
-    React.useLayoutEffect(() => props.graphData.callSubscriptions(props.node.id))
+    React.useLayoutEffect(() => props.graph.subscriptions.call(props.id))
 
     React.useEffect(() => {
-        previousMembers.current = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
-    })
-
-    React.useEffect(() => {
-        const layout = readParameters(props.node.layout.parameters, layoutParameters)
-        const member = previousMembers.current[layout.member]
-        if (!layout.automatic || !member || !isValueObject(member.value)) return
-        const node = props.graphData.getNode(member.value[0])
-        const baseNode = props.graphData.findStructureBaseNode(node)
-        const position = props.node.layout.position ?? props.graphData.getNodePosition(baseNode)
-        props.node.layout.position = position
-        const structure = props.graphData.applyStructureLayout(
-            node,
-            position,
-            layout.direction as any,
-            undefined,
-            undefined,
-            undefined,
-            'override'
+        const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
+        if (!layoutParameters.enable) return (props.node.layout.position = undefined)
+        const target = layoutParameters.member ? getValueString(members[layoutParameters.member].value) : props.id
+        const node = props.graph.getNode(target)
+        const structure = node.findStructure()
+        if (!node.layout.position) node.layout.position = structure.base.getPosition()
+        const layout = structure.applyLayout(
+            {
+                breadth: layoutParameters['breadth increment'],
+                depth: layoutParameters['depth increment']
+            },
+            layoutParameters.direction === 'horizontal',
+            node.layout.position,
+            'ovr'
         )
-        props.graphData.subscribe(
-            baseNode.id,
-            () => (props.node.layout.position = props.graphData.getNodePosition(baseNode))
-        )
-        props.graphData.setAnimate(true)
-        Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
+        props.graph.subscriptions.subscribe(structure.base.id, () => {
+            props.node.layout.position = props.graph.getNode(structure.base.id).getPosition()
+        })
+        props.graph.animate = true
+        Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
         // dispatch(actionActions.append({ name: 'auto layout', payload: 'automatic' }))
     })
 
@@ -109,30 +106,30 @@ export const Obj = (props: {
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const direction = event.altKey ? 'vertical' : 'horizontal'
-                    const mode = event.ctrlKey ? 'override' : 'available'
-                    const structure = props.graphData.applyStructureLayout(
-                        props.node,
-                        undefined,
-                        direction,
-                        undefined,
-                        undefined,
-                        undefined,
-                        mode
+                    const horizontal = !event.altKey
+                    const mode = event.ctrlKey ? 'ovr' : 'avl'
+                    const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
+                    const layout = props.node.findStructure().applyLayout(
+                        {
+                            breadth: layoutParameters['breadth increment'],
+                            depth: layoutParameters['depth increment']
+                        },
+                        horizontal,
+                        props.node.getPosition(),
+                        'ovr'
                     )
-                    props.graphData.setAnimate(true)
-                    Object.values(structure.members).forEach(node => props.graphData.callSubscriptions(node.id))
+                    props.graph.animate = true
+                    Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
                     // dispatch(actionActions.append({ name: 'auto layout', payload: 'manual' }))
                 }
             }}
             onDrag={(event, delta) => {
-                const svg = container$.current.closest('svg')
-                const [svgDelta] = svgScreenTransformVector('toSvg', svg, false, delta)
+                const [svgDelta] = props.graph.view.transformVector('toSvg', false, delta)
                 const depth = event.altKey ? Infinity : 0
-                const mode = event.ctrlKey ? 'override' : 'available'
-                const movedNodes = props.graphData.moveNodePositions(props.node, depth, svgDelta, undefined, mode)
-                props.graphData.setAnimate(false)
-                Object.values(movedNodes).forEach(node => props.graphData.callSubscriptions(node.id))
+                const mode = event.ctrlKey ? 'ovr' : 'avl'
+                const movedNodes = props.node.move(svgDelta, depth, mode)
+                props.graph.animate = false
+                Object.values(movedNodes).forEach(node => props.graph.subscriptions.call(node.id))
             }}
         >
             <MenuProvider id={props.node.id} className={classes.menuProvider}>
@@ -140,7 +137,7 @@ export const Obj = (props: {
                     <Shape
                         id={props.node.id}
                         obj={props.obj}
-                        parameters={parameters}
+                        parameters={parameters as any}
                         previousMembers={previousMembers.current}
                         onReference={reference => references.current.push(reference)}
                     />
@@ -151,64 +148,82 @@ export const Obj = (props: {
     )
 }
 
-const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graphData: Graph; update: React.Dispatch<{}> }) => {
+const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph; update: React.Dispatch<{}> }) => {
     const defaultShape = React.useMemo(
         () =>
-            Object.entries(modules).reduce(
+            Object.entries(shapes).reduce(
                 (acc, [name, mod]) => acc ?? (mod.defaults.has(props.obj.category) ? name : acc),
-                undefined as string
-            ),
+                undefined
+            ) as keyof typeof shapes,
         [props.obj.category]
     )
     const supportedShapes = React.useMemo(
         () =>
-            Object.entries(modules).reduce(
+            Object.entries(shapes).reduce(
                 (acc, [name, mod]) => (mod.supported.has(props.obj.category) && acc.push(name), acc),
-                [] as string[]
-            ),
+                []
+            ) as (keyof typeof shapes)[],
         [props.obj.category]
     )
-    const shape = props.graphData.getNodeShape(props.node) ?? defaultShape
-    const parameters = props.graphData.getNodeParameters(props.node)
-
-    const { defaultParameters } = modules[shape as keyof typeof modules]
+    const shape = (props.node.getShape() ?? props.node.setShape(defaultShape)) as keyof typeof shapes
+    const parameters = props.node.getParameters().get(shape, shapes[shape].defaultParameters)
 
     return (
         <Menu id={props.node.id}>
-            <Item onClick={args => ((props.node.mode = props.node.mode === 'own' ? 'type' : 'own'), props.update({}))}>
-                <span title='click to change'>{`using ${props.node.mode} parameters`}</span>
+            <Item
+                onClick={args => {
+                    props.node.mode = props.node.mode === 'self' ? 'type' : 'self'
+                    props.update({})
+                }}
+            >
+                <span title='Click to change mode'>
+                    {`using ${props.node.mode === 'self' ? 'local' : 'type'} parameters`}
+                </span>
             </Item>
             <Separator />
-            <Submenu label='shape'>
-                <Item onClick={args => (props.graphData.setNodeShape(props.node, undefined), props.update({}))}>
-                    {'reset'}
+            <Submenu label='Shapes'>
+                <Item
+                    onClick={() => {
+                        props.node.setShape(defaultShape)
+                        props.update({})
+                    }}
+                >
+                    {'Click to reset shape'}
                 </Item>
                 {supportedShapes.map((shape, i) => (
-                    <Item key={i} onClick={args => (props.graphData.setNodeShape(props.node, shape), props.update({}))}>
-                        {shape}
+                    <Item
+                        key={i}
+                        onClick={() => {
+                            props.node.setShape(shape)
+                            props.update({})
+                        }}
+                    >
+                        {`${shape[0].toUpperCase()}${shape.slice(1)}`}
                     </Item>
                 ))}
             </Submenu>
             <Separator />
-            <Submenu label='parameters'>
+            <Submenu label='Shape parameters'>
                 <Parameters
-                    withReset
+                    resetMessage='Click to reset parameters'
                     parameters={parameters}
-                    defaults={defaultParameters}
                     obj={props.obj}
-                    onChange={parameters => (
-                        props.graphData.setNodeParameters(props.node, parameters), props.update({})
-                    )}
+                    onChange={parameters => {
+                        props.node.getParameters().set(props.node.getShape(), parameters)
+                        props.update({})
+                    }}
                 />
             </Submenu>
             <Separator />
-            <Submenu label='layout'>
+            <Submenu label='Automatic layout'>
                 <Parameters
-                    withReset
-                    parameters={props.node.layout.parameters}
-                    defaults={layoutParameters}
+                    resetMessage='Click to reset layout parameters'
+                    parameters={props.node.parameters.get('layout', defaultLayoutParameters)}
                     obj={props.obj}
-                    onChange={parameters => ((props.node.layout.parameters = parameters), props.update({}))}
+                    onChange={parameters => {
+                        props.node.parameters.set('layout', parameters)
+                        props.update({})
+                    }}
                 />
             </Submenu>
         </Menu>

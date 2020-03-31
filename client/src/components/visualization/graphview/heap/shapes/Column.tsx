@@ -3,7 +3,7 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
-import { Edge, readParameters, UnknownParameters } from '../../Graph'
+import { ComputedParameters, Edge } from '../../Graph'
 import { getDisplayValue, getMemberName, isSameMember } from '../../TracerUtils'
 
 const classes = {
@@ -33,15 +33,14 @@ export const Shape = (props: {
     id: string
     obj: tracer.Obj
     previousMembers: { [id: string]: tracer.Member }
-    parameters: UnknownParameters
+    parameters: ComputedParameters<typeof defaultParameters>
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
-    const parameters = readParameters(props.parameters, defaultParameters)
-    const showIndices = parameters['show indices']
-    const showValues = parameters['show values']
-    const columnWidth = parameters['column width']
-    const columnHeight = parameters['column height']
-    const deltaMode = parameters['size mode']
+    const showIndices = props.parameters['show indices']
+    const showValues = props.parameters['show values']
+    const columnWidth = props.parameters['column width']
+    const columnHeight = props.parameters['column height']
+    const deltaMode = props.parameters['size mode']
 
     const computeDeltaRatios = (values: number[]) => {
         const min = Math.min(...values)

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
-import { Edge, readParameters, UnknownParameters } from '../../Graph'
+import { ComputedParameters, Edge } from '../../Graph'
 import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
 
 const classes = {
@@ -20,7 +20,7 @@ const styles = {
 }
 
 export const defaultParameters = {
-    member: { value: undefined as string, members: 'all' as const },
+    member: { value: undefined as string, members: 'all' as const, self: false },
     'show key': { value: true, bool: true as const },
     'show references': { value: false, bool: true as const },
     'references position': { value: 'right', options: ['right', 'bottom'] }
@@ -33,15 +33,14 @@ export const Shape = (props: {
     id: string
     obj: tracer.Obj
     previousMembers: { [id: string]: tracer.Member }
-    parameters: UnknownParameters
+    parameters: ComputedParameters<typeof defaultParameters>
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const members = Object.fromEntries(props.obj.members.map(member => [getMemberName(member), member]))
-    const parameters = readParameters(props.parameters, defaultParameters)
-    const memberName = parameters.member
-    const showKey = parameters['show key']
-    const showReferences = parameters['show references']
-    const referencesPosition = parameters['references position']
+    const memberName = props.parameters.member
+    const showKey = props.parameters['show key']
+    const showReferences = props.parameters['show references']
+    const referencesPosition = props.parameters['references position']
 
     const renderField = (member: tracer.Member) => {
         const name = getMemberName(member)

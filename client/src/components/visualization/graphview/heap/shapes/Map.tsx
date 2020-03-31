@@ -3,7 +3,7 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
-import { Edge, readParameters, UnknownParameters } from '../../Graph'
+import { ComputedParameters, Edge } from '../../Graph'
 import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
 
 const classes = {
@@ -31,13 +31,12 @@ export const Shape = (props: {
     id: string
     obj: tracer.Obj
     previousMembers: { [id: string]: tracer.Member }
-    parameters: UnknownParameters
+    parameters: ComputedParameters<typeof defaultParameters>
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
-    const parameters = readParameters(props.parameters, defaultParameters)
-    const showKeys = parameters['show keys']
-    const keyWidth = parameters['key width']
-    const valueWidth = parameters['value width']
+    const showKeys = props.parameters['show keys']
+    const keyWidth = props.parameters['key width']
+    const valueWidth = props.parameters['value width']
 
     const renderEntry = (member: tracer.Member) => {
         const name = getMemberName(member)

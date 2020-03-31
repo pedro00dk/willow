@@ -3,7 +3,7 @@ import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
 import { Base } from './Base'
-import { Edge, readParameters, UnknownParameters } from '../../Graph'
+import { ComputedParameters, Edge } from '../../Graph'
 import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
 
 const classes = {
@@ -34,15 +34,14 @@ export const Shape = (props: {
     id: string
     obj: tracer.Obj
     previousMembers: { [id: string]: tracer.Member }
-    parameters: UnknownParameters
+    parameters: ComputedParameters<typeof defaultParameters>
     onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
-    const parameters = readParameters(props.parameters, defaultParameters)
-    const showIndices = parameters['show indices']
-    const cellWidth = parameters['cell width']
-    const orientation = parameters.orientation === 'horizontal' ? 'row' : 'column'
-    const wrapArray = parseInt(parameters['wrap array']) || props.obj.members.length
-    const wrapIndices = parameters['wrap indices']
+    const showIndices = props.parameters['show indices']
+    const cellWidth = props.parameters['cell width']
+    const orientation = props.parameters.orientation === 'horizontal' ? 'row' : 'column'
+    const wrapArray = parseInt(props.parameters['wrap array']) || props.obj.members.length
+    const wrapIndices = props.parameters['wrap indices']
 
     const chunks = props.obj.members.reduce((acc, member, i) => {
         const chunkIndex = Math.floor(i / wrapArray)
