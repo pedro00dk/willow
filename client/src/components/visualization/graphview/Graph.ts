@@ -67,7 +67,7 @@ export class Node {
     render = true
     positions = [] as { x: number; y: number }[]
     size = { width: 0, height: 0 }
-    mode = 'type' as 'self' | 'type'
+    mode = 'type' as 'local' | 'type'
     shape = undefined as string
     layout = { position: undefined as { x: number; y: number } }
     parameters = new Parameters()
@@ -117,17 +117,17 @@ export class Node {
     }
 
     getShape() {
-        if (this.mode === 'self') return this.shape
+        if (this.mode === 'local') return this.shape
         return this.graph.getType(this.type).shape
     }
 
     setShape(shape: string) {
-        if (this.mode === 'self') return (this.shape = shape)
+        if (this.mode === 'local') return (this.shape = shape)
         return (this.graph.getType(this.type).shape = shape)
     }
 
     getParameters() {
-        return this.mode === 'self' ? this.parameters : this.graph.getType(this.type).parameters
+        return this.mode === 'local' ? this.parameters : this.graph.getType(this.type).parameters
     }
 
     getParents(depth = 0, includeBase = true, filter = (parent: Node) => true, pool: { [id: string]: Node } = {}) {
@@ -247,8 +247,8 @@ export class Parameters {
 }
 
 export const defaultLayoutParameters = {
-    enable: { value: false, bool: true as const },
-    member: { value: undefined as string, members: 'all' as const, self: true },
+    enabled: { value: false, bool: true as const },
+    target: { value: undefined as string, members: 'all' as const, self: true },
     direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
     'breadth increment': { value: 1.5, range: [1, 3] as [number, number] },
     'depth increment': { value: 1.5, range: [1, 3] as [number, number] }

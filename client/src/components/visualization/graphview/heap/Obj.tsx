@@ -78,8 +78,11 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
 
     React.useEffect(() => {
         const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
-        if (!layoutParameters.enable) return (props.node.layout.position = undefined)
-        const target = layoutParameters.member ? getValueString(members[layoutParameters.member].value) : props.id
+        if (!layoutParameters.enabled) return (props.node.layout.position = undefined)
+        const target = !layoutParameters.target
+            ? props.id
+            : members[layoutParameters.target] && getValueString(members[layoutParameters.target].value)
+        if (!target) return
         const node = props.graph.getNode(target)
         const structure = node.findStructure()
         if (!node.layout.position) node.layout.position = structure.base.getPosition()
@@ -90,7 +93,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
             },
             layoutParameters.direction === 'horizontal',
             node.layout.position,
-            'ovr'
+            'avl'
         )
         props.graph.subscriptions.subscribe(structure.base.id, () => {
             props.node.layout.position = props.graph.getNode(structure.base.id).getPosition()
@@ -171,14 +174,12 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
     return (
         <Menu id={props.node.id}>
             <Item
-                onClick={args => {
-                    props.node.mode = props.node.mode === 'self' ? 'type' : 'self'
+                onClick={() => {
+                    props.node.mode = props.node.mode === 'local' ? 'type' : 'local'
                     props.update({})
                 }}
             >
-                <span title='Click to change mode'>
-                    {`using ${props.node.mode === 'self' ? 'local' : 'type'} parameters`}
-                </span>
+                <span title='Click to change mode'>{`using ${props.node.mode} parameters`}</span>
             </Item>
             <Separator />
             <Submenu label='Shapes'>
