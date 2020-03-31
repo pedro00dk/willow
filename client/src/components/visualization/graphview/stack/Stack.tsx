@@ -15,7 +15,7 @@ const styles = {
 export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; update: React.Dispatch<{}> }) => {
     const previousStack = React.useRef<tracer.Scope[]>()
     const previousMembers = React.useRef<{ [scope: number]: { [name: string]: tracer.Member } }>({})
-    const stack = props.tracer.steps[props.graph.getIndex()].snapshot?.stack || []
+    const stack = props.tracer.steps[props.graph.index].snapshot?.stack || []
     const scopesDepths = stack.map((scope, i) => ({ scope, depth: i }))
     const membersDepths = scopesDepths
         .flatMap(({ scope, depth }) => scope.members.map(member => ({ member, depth })))
@@ -53,8 +53,8 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
                 props.graph.pushEdge(node.id, `${depth}-${memberName}`, {
                     self: true,
                     target: id,
-                    from: { targetDelta: deltas[i] },
-                    to: { mode: 'position' },
+                    from: { delta: deltas[i], source: 'target' },
+                    to: { delta: undefined, source: 'target-near' },
                     draw: 'line',
                     color: styles.color(changed),
                     width: styles.width(i, depth, stack.length),

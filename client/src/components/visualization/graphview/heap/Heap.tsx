@@ -7,10 +7,8 @@ import { Obj } from './Obj'
 
 export const Heap = (props: { tracer: DefaultState['tracer']; graph: Graph; update: React.Dispatch<{}> }) => {
     const idsDepths = React.useRef<{ [id: string]: number }[]>([])
-    const available = props.tracer.available
-    const index = props.graph.getIndex()
-    const { stack = [], heap = {} } = (available && props.tracer.steps[index].snapshot) || {}
-    if (!available) idsDepths.current = []
+    const index = props.graph.index
+    const { stack = [], heap = {} } = props.tracer.steps[index].snapshot ?? {}
 
     const computeIdsDepths = (roots: { [id: string]: number }, depths: { [id: string]: number } = {}) => {
         Object.entries(roots)
@@ -49,7 +47,7 @@ export const Heap = (props: { tracer: DefaultState['tracer']; graph: Graph; upda
                 node.depth = idsDepths.current[index][id]
                 return (
                     <SvgNode key={id} id={id} graph={props.graph}>
-                        <Obj id={id} obj={obj} node={node} graphData={props.graph} update={props.update} />
+                        <Obj id={id} obj={obj} node={node} graph={props.graph} update={props.update} />
                     </SvgNode>
                 )
             })}
