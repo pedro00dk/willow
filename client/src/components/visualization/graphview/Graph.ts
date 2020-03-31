@@ -177,7 +177,6 @@ export class Edge {
         const { delta, source } = this.from
         const selfPosition = this.graph.getNode(this.id).getPosition(index)
         const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
-        console.log({ delta, source, selfPosition, targetPosition })
         if (source === 'origin') return delta
         else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
         else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }

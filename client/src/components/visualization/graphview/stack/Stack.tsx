@@ -35,7 +35,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
     ]
 
     const idMembers = membersDepths.reduce((acc, { member, depth }, i) => {
-        const id = getValueString(member.key)
+        const id = getValueString(member.value)
         if (!acc[id]) acc[id] = []
         acc[id].push({ member, depth })
         return acc
@@ -54,7 +54,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
                     self: true,
                     target: id,
                     from: { delta: deltas[i], source: 'target' },
-                    to: { delta: undefined, source: 'target-near' },
+                    to: { delta: { x: 0, y: 0 }, source: 'target' },
                     draw: 'line',
                     color: styles.color(changed),
                     width: styles.width(i, depth, stack.length),
