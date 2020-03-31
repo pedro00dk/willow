@@ -101,14 +101,14 @@ export class Node {
         return position
     }
 
-    centralize(random: 0, mode: 'all' | 'ovr' | 'avl' = 'avl', index = this.graph.index) {
+    centralize(random = 0, mode = 'avl' as 'all' | 'ovr' | 'avl', index = this.graph.index) {
         const position = this.graph.view.boxCenter()
-        position.x += (Math.random() - 0.5) * 2 * random - this.size.width / 2
-        position.y += (Math.random() - 0.5) * 2 * random - this.size.height / 2
+        position.x += (Math.random() - 0.5) * 2 * this.graph.view.box.width * random - this.size.width / 2
+        position.y += (Math.random() - 0.5) * 2 * this.graph.view.box.height * random - this.size.height / 2
         return this.setPosition(position, mode, index)
     }
 
-    move(delta: { x: number; y: number }, depth = 0, mode: 'all' | 'ovr' | 'avl' = 'avl', index = this.graph.index) {
+    move(delta: { x: number; y: number }, depth = 0, mode = 'avl' as 'all' | 'ovr' | 'avl', index = this.graph.index) {
         return this.getChildren(depth, true, (children: Node) => {
             const position = children.getPosition(index)
             children.setPosition({ x: position.x + delta.x, y: position.y + delta.y }, mode, index)
@@ -177,7 +177,7 @@ export class Edge {
         const { delta, source } = this.from
         const selfPosition = this.graph.getNode(this.id).getPosition(index)
         const targetPosition = this.target && this.graph.getNode(this.target).getPosition(index)
-        console.log({delta, source, selfPosition, targetPosition})
+        console.log({ delta, source, selfPosition, targetPosition })
         if (source === 'origin') return delta
         else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
         else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
@@ -193,8 +193,8 @@ export class Edge {
         else if (source === 'target') return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
         else
             return {
-                x: Math.min(Math.max(from.x, targetPosition.x), targetPosition.x + targetSize.width),
-                y: Math.min(Math.max(from.y, targetPosition.y), targetPosition.y + targetSize.height)
+                x: Math.min(Math.max(from.x, targetPosition.x + delta.x), targetPosition.x + targetSize.width),
+                y: Math.min(Math.max(from.y, targetPosition.y + delta.y), targetPosition.y + targetSize.height)
             }
     }
 
@@ -368,7 +368,7 @@ export class Structure {
         increment = { breadth: 1.5, depth: 1.5 },
         horizontal = true,
         position = this.base.getPosition(),
-        mode: 'all' | 'ovr' | 'avl' = 'avl',
+        mode = 'avl' as 'all' | 'ovr' | 'avl',
         index = this.graph.index
     ) {
         const [layout] = this.computeLayout()
