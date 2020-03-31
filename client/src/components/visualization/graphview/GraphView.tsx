@@ -5,7 +5,9 @@ import { Heap } from './heap/Heap'
 import { Stack } from './stack/Stack'
 import { SvgView } from './svg/SvgView'
 
-const graphContext = React.createContext(new Graph({ width: 1200, height: 1000 }, { right: 20, bottom: 20 }))
+const graphContext = React.createContext(
+    new Graph({ width: 1200, height: 1000 }, { left: 0, top: 0, right: 20, bottom: 20 })
+)
 
 export const GraphView = () => {
     const update = React.useState({})[1]
@@ -17,10 +19,10 @@ export const GraphView = () => {
         tracer: state.tracer
     }))
     if (!tracer.available && !preserveLayout) graph.clearNodes()
-    graph.setSize(tracer.available ? tracer.steps.length : 0)
-    graph.setIndex(tracer.available ? index : 0)
-    graph.setAnimate(true)
-    graph.clearSubscriptions()
+    graph.steps = tracer.available ? tracer.steps.length : 0
+    graph.index = tracer.available ? index : 0
+    graph.animate = true
+    graph.subscriptions.clear()
     graph.clearEdges()
 
     React.useLayoutEffect(() => {
