@@ -27,33 +27,210 @@ export const svgScreenTransformVector = (
     return shiftedVectors
 }
 
-// GraphData component types definitions
+// GraphData computes all manipulations in the Graph visualization
 
-export type Node = {
-    readonly id: string
-    render: boolean
-    positions: { x: number; y: number }[]
-    size: { x: number; y: number }
-    depth: number
-    type: string
-    mode: 'own' | 'type'
-    shape: string
-    parameters: NodeParameters
-    layout: {
-        position: { x: number; y: number }
-        parameters: ComputedParameters<typeof layoutParameters>
+class View {
+    size = { width: Infinity, height: Infinity }
+    padding = { left: 0, top: 0, right: 0, bottom: 0 }
+    box = { x: 0, y: 0, width: 0, height: 0 }
+
+    center() {
+        return { x: this.size.width, y: this.size.height }
+    }
+
+    boxCenter() {
+        return { x: this.box.x + this.box.width / 2, y: this.box.y + this.box.height / 2 }
+    }
+
+    pad(position: { x: number; y: number }) {
+        return {
+            x: Math.min(Math.max(position.x, this.padding.left), this.size.width - this.padding.right),
+            y: Math.min(Math.max(position.y, this.padding.top), this.size.height - this.padding.bottom)
+        }
     }
 }
 
-export type NodeType = {
-    shape: string
-    parameters: NodeParameters
+class Subscriptions {
+    private subscriptions: { [id: string]: (() => void)[] } = {}
+
+    subscribe(id: string, callback: () => void) {
+        const subscriptions = this.subscriptions[id] ?? (this.subscriptions[id] = [])
+        subscriptions.push(callback)
+    }
+
+    call(id: string) {
+        this.subscriptions[id]?.forEach(subscription => subscription())
+    }
+
+    clear() {
+        this.subscriptions = {}
+    }
 }
 
-export type NodeEdges = { children: Edge[]; parents: Edge[]; loose: Edge[] }
+export class Node {
+    readonly graph: Graph
+    readonly id: string
+    type = ''
+    depth = 0
+    render = true
+    positions = [] as { x: number; y: number }[]
+    size = { width: 0, height: 0 }
+    mode = 'type' as 'self' | 'type'
+    shapes = new Shapes()
+    layout: {
+        position: { x: number; y: number }
+        parameters: ComputedParameters<typeof layoutParameters>
+    } = {
+        position: undefined,
+        parameters: readParameters(undefined, layoutParameters)
+    }
 
-export type NodeParameters = {
-    [shape: string]: UnknownParameters
+    constructor(graph: Graph, id: string, partial?: Partial<Node>) {
+        Object.assign(this, partial)
+        this.graph = graph
+        this.id = id
+    }
+
+    getPosition(index: number = this.graph.index) {
+        return this.positions[index] ?? this.setPosition({ x: 0, y: 0 })
+    }
+
+    setPosition(position: { x: number; y: number }, mode: 'all' | 'ovr' | 'avl' = 'avl', index = this.graph.index) {
+        const steps = this.graph.steps
+        position = this.graph.view.pad(position)
+        switch (mode) {
+            case 'all':
+                for (let i = 0; i < steps; i++) this.positions[i] = position
+                break
+            case 'ovr':
+                for (let i = index; i < steps; i++) this.positions[i] = position
+                break
+            case 'avl':
+                const base = this.positions[index]
+                for (let i = index; i < steps && (!this.positions[i] || this.positions[i] === base); i++)
+                    this.positions[i] = position
+                break
+        }
+        return position
+    }
+
+    centralize(random: 0, mode: 'all' | 'ovr' | 'avl' = 'avl', index = this.graph.index) {
+        const position = this.graph.view.boxCenter()
+        position.x += (Math.random() - 0.5) * 2 * random - this.size.width / 2
+        position.y += (Math.random() - 0.5) * 2 * random - this.size.height / 2
+        return this.setPosition(position, mode, index)
+    }
+
+    move(delta: { x: number; y: number }, depth = 0, mode: 'all' | 'ovr' | 'avl' = 'avl', index = this.graph.index) {
+        return this.getChildren(depth, true, (children: Node) => {
+            const position = children.getPosition(index)
+            children.setPosition({ x: position.x + delta.x, y: position.y + delta.y }, mode, index)
+            return true
+        })
+    }
+
+    getShape() {
+        if (this.mode === 'self') return this.shape
+        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
+        return typeData.shape
+    }
+
+    setShape(shape: string) {
+        if (this.mode === 'self') return (this.shape = shape)
+        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
+        return (typeData.shape = shape)
+    }
+
+    getParameters() {
+        if (this.mode === 'self') return this.parameters[this.shape] ?? {}
+        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
+        return typeData.parameters[this.shape]
+    }
+
+    setParameters(parameters: UnknownParameters) {
+        if (this.mode === 'self') return (this.parameters[this.shape] = parameters)
+        const typeData = this.graph.types[this.type] ?? (this.graph.types[this.type] = { shape: '', parameters: {} })
+        return (typeData.parameters[typeData.shape] = parameters)
+    }
+
+    getParents(depth = 0, includeBase = true, filter = (parent: Node) => true, pool: { [id: string]: Node } = {}) {
+        if (depth < 0 || pool[this.id] || !filter(this)) return pool
+        if (includeBase) pool[this.id] = this
+        this.graph
+            .getEdges(this.id)
+            .parents.forEach(edge => this.graph.getNode(edge.id).getParents(depth - 1, true, filter, pool))
+        return pool
+    }
+
+    getChildren(depth = 0, includeBase = true, filter = (child: Node) => true, pool: { [id: string]: Node } = {}) {
+        if (depth < 0 || pool[this.id] || !filter(this)) return pool
+        if (includeBase) pool[this.id] = this
+        this.graph
+            .getEdges(this.id)
+            .children.forEach(edge => this.graph.getNode(edge.target).getChildren(depth - 1, true, filter, pool))
+        return pool
+    }
+}
+
+export class Edge {
+    readonly graph: Graph
+    readonly id: string
+    readonly name: string
+    self = true
+    target: string = undefined
+    from = { delta: { x: 0, y: 0 }, source: 'origin' as 'origin' | 'self' | 'target' }
+    to = { delta: { x: 0, y: 0 }, source: 'origin' as 'origin' | 'self' | 'target' | 'target-near' }
+    draw = 'curve' as 'line' | 'curve'
+    width = 1
+    color = 'black'
+    text = ''
+
+    constructor(graph: Graph, id: string, name: string, partial?: Partial<Edge>) {
+        Object.assign(this, partial)
+        this.graph = graph
+        this.id = id
+        this.name = name
+    }
+
+    private computeFrom() {
+        const { delta, source } = this.from
+        const selfPosition = this.graph.getNode(this.id).getPosition()
+        const targetPosition = this.target && this.graph.getNode(this.target).getPosition()
+        if (source === 'origin') return delta
+        else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
+        else return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
+    }
+
+    private computeTo(from = this.computeFrom()) {
+        const { delta, source } = this.from
+        const selfPosition = this.graph.getNode(this.id).getPosition()
+        const targetPosition = this.target && this.graph.getNode(this.target).getPosition()
+        const targetSize = this.target && this.graph.getNode(this.target).size
+        if (source === 'origin') return delta
+        else if (source === 'self') return { x: selfPosition.x + delta.x, y: selfPosition.y + delta.y }
+        else if (source === 'target') return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
+        else
+            return {
+                x: Math.min(Math.max(from.x, targetPosition.x), targetPosition.x + targetSize.width),
+                y: Math.min(Math.max(from.y, targetPosition.y), targetPosition.y + targetSize.height)
+            }
+    }
+
+    private computeCurvature(ratio: number, from = this.computeFrom(), endPoint = this.computeTo(from)) {
+        const center = { x: lerp(from.x, endPoint.x, 0.5), y: lerp(from.y, endPoint.y, 0.5) }
+        if (this.draw === 'line') return center
+        const parallelVector = { x: endPoint.x - from.x, y: endPoint.y - from.y }
+        const orthogonalVector = { x: parallelVector.y * ratio, y: -parallelVector.x * ratio }
+        const curvature = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
+        return curvature
+    }
+
+    computePath() {
+        const from = this.computeFrom()
+        const to = this.computeTo(from)
+        const curvature = this.computeCurvature(0.1, from, to)
+        return `M ${from.x},${from.y} Q ${curvature.x},${curvature.y} ${to.x},${to.y}`
+    }
 }
 
 export type ShapeParameters = {
@@ -68,84 +245,30 @@ export type UnknownParameters = { [name: string]: ShapeParameters[keyof ShapePar
 
 export type ComputedParameters<T extends ShapeParameters> = { [name in keyof T]: T[name]['value'] }
 
-export type Edge = Readonly<{
-    id: string
-    name: string
-    self: boolean
-    target: string
-    from:
-        | { delta: { x: number; y: number } }
-        | { targetDelta: { x: number; y: number } }
-        | { point: { x: number; y: number } }
-    to:
-        | { delta: { x: number; y: number } }
-        | { mode: 'position' | 'size' | 'center' | 'corner' | 'near' }
-        | { point: { x: number; y: number } }
-    draw: 'line' | 'curve'
-    width: number
-    color: string
-    text: string
-}>
+export class Shapes {
+    private shape = ''
+    private parameters = { [this.shape]: {} } as { [shape: string]: UnknownParameters }
 
-export type Structure = {
-    members: { [id: string]: Node }
-    links: { [id: string]: { children: Node[]; parents: Node[] } }
-    base: Node
-    size: number
-    depth: number
-    hasCycleEdge: boolean
-    hasParentEdge: boolean
-    hasCrossEdge: boolean
-}
-
-// Default object creation functions for defined types
-
-const createBaseNode = (id: string): Node => ({
-    id,
-    render: true,
-    positions: [],
-    size: { x: 0, y: 0 },
-    depth: undefined,
-    type: undefined,
-    mode: 'type',
-    shape: undefined,
-    parameters: {},
-    layout: {
-        position: undefined,
-        parameters: readParameters(undefined, layoutParameters)
+    get<T extends ShapeParameters>(defaultParameters: T) {
+        return [this.shape, this.resolveParameters(defaultParameters)]
     }
-})
 
-const createBaseNodeType = (): NodeType => ({
-    shape: undefined,
-    parameters: {}
-})
+    setShape(shape: string) {
+        this.shape = shape
+        if (!this.parameters[shape]) this.parameters = {}
+    }
 
-const createBaseNodeEdges = (): NodeEdges => ({ children: [], parents: [], loose: [] })
+    setParameters(parameters: UnknownParameters) {
+        this.parameters[this.shape] = parameters
+    }
 
-const createBaseEdge = (id: string, name: string): Edge => ({
-    id,
-    name,
-    self: true,
-    target: undefined,
-    from: { point: { x: 0, y: 0 } },
-    to: { point: { x: 0, y: 0 } },
-    draw: 'curve',
-    width: 1,
-    color: 'black',
-    text: undefined
-})
-
-const createBaseStructure = (): Structure => ({
-    members: {},
-    links: {},
-    base: undefined,
-    size: 0,
-    depth: 0,
-    hasCycleEdge: false,
-    hasParentEdge: false,
-    hasCrossEdge: false
-})
+    private resolveParameters<T extends ShapeParameters>(defaultParameters: T) {
+        const parameters = this.parameters[this.shape]
+        return Object.fromEntries(
+            Object.entries(defaultParameters).map(([name, def]) => [name, parameters ? parameters[name] : def.value])
+        ) as ComputedParameters<T>
+    }
+}
 
 // Helper objects and functions for Parameters and Layout components of Node
 
@@ -155,90 +278,157 @@ export const layoutParameters = {
     member: { value: undefined as string, members: 'all' as const }
 }
 
-export const readParameters = <T extends UnknownParameters, U extends ShapeParameters>(parameters: T, defaults: U) =>
-    Object.fromEntries(
-        Object.entries(defaults).map(([name, def]) => [name, parameters ? parameters[name] : def.value])
-    ) as ComputedParameters<U>
-
-// GraphData computes all manipulations in the Graph visualization
-
-class View {
-    constructor(
-        public size: { width: number; height: number } = { width: Infinity, height: Infinity },
-        public padding: { right: number; bottom: number } = { right: 0, bottom: 0 },
-        public box: { x: number; y: number; width: number; height: number } = { x: 0, y: 0, width: 0, height: 0 }
-    ) {}
-
-    getCenter() {
-        return { x: this.box.x + this.box.width / 2, y: this.box.y + this.box.height / 2 }
+export class Structure {
+    readonly graph: Graph
+    base: Node
+    members = {} as { [id: string]: Node }
+    links = {} as { [id: string]: { children: Node[]; parents: Node[] } }
+    size = 0
+    depth = 0
+    cycleEdges = 0
+    parentEdges = 0
+    crossEdges = 0
+    info = {
+        type: 'linear' as 'linear' | 'tree' | 'fuzzy',
+        parenting: false,
+        children: 0
     }
 
-    padPoint(point: { x: number; y: number }) {
-        return {
-            x: Math.min(Math.max(point.x, 0), this.size.width - this.padding.right),
-            y: Math.min(Math.max(point.y, 0), this.size.height - this.padding.bottom)
+    constructor(graph: Graph, node: Node) {
+        this.graph = graph
+        this.findBase(node)
+        this.expand()
+        this.analyze()
+    }
+
+    private findBase(node: Node) {
+        const parents = node.getParents(Infinity, true, (parent: Node) => parent.type === node.type)
+        this.base = Object.values(parents).reduce((acc, parent) => (parent.depth > acc.depth ? parent : acc), node)
+    }
+
+    private expand(node = this.base, ancestors = [] as Node[], depth = 0) {
+        const newMember = !this.members[node.id]
+        const parent = ancestors[ancestors.length - 1]
+        const grandParent = ancestors[ancestors.length - 2]
+        if (parent) {
+            this.links[parent.id].children.push(node)
+            this.links[node.id].parents.push(parent)
         }
+        if (node.id === parent?.id) this.cycleEdges++
+        else if (node.id === grandParent?.id) this.parentEdges++
+        else if (!newMember) this.crossEdges++
+        if (!newMember) return
+        this.members[node.id] = node
+        this.links[node.id] = { children: [], parents: [] }
+        this.size++
+        this.depth = Math.max(this.depth, depth)
+        ancestors.push(node)
+        this.graph
+            .getEdges(node.id)
+            .children.map(edge => this.graph.getNode(edge.target))
+            .forEach(child => child.type !== this.base.type && this.expand(child, ancestors, depth + 1))
+        ancestors.pop()
+    }
+
+    private analyze() {
+        this.info.type = this.crossEdges > 0 ? 'fuzzy' : this.depth < this.size ? 'tree' : 'linear'
+        this.info.parenting = this.parentEdges > 0
+        const children = Object.values(this.links).reduce((acc, links) => Math.max(acc, links.children.length), 0)
+        this.info.children = Math.max(children - Number(this.info.parenting), 0)
+    }
+
+    private computeLayout(
+        node = this.base,
+        delta = { breadth: 0, depth: 0 },
+        layout = {} as { [id: string]: typeof delta }
+    ) {
+        if (layout[node.id]) return [layout, delta] as const
+        layout[node.id] = { breadth: 0, depth: 0 }
+        const beforeChildrenDelta = delta
+        const afterChildrenDelta: typeof delta = this.links[node.id].children.reduce(
+            (acc, child) => {
+                const isSelf = child.id === node.id
+                const isParent = !isSelf && !!layout[child.id]
+                if (isSelf || isParent) return acc
+                const beforeChildDelta = acc
+                beforeChildDelta.depth++
+                const [, afterChildDelta] = this.computeLayout(child, beforeChildDelta, layout)
+                afterChildDelta.depth--
+                return afterChildDelta
+            },
+            { ...beforeChildrenDelta }
+        )
+        const isLeaf = beforeChildrenDelta.breadth === afterChildrenDelta.breadth
+        if (isLeaf) afterChildrenDelta.breadth++
+        layout[node.id].breadth = (beforeChildrenDelta.breadth + afterChildrenDelta.breadth - 1) / 2
+        layout[node.id].depth = beforeChildrenDelta.depth
+        return [layout, afterChildrenDelta] as const
+    }
+
+    private transformLayout(
+        layout: { [id: string]: { breadth: number; depth: number } },
+        scale = { breadth: 1, depth: 1 },
+        translate = { breadth: 0, depth: 0 }
+    ) {
+        Object.values(layout).forEach(delta => {
+            delta.breadth = delta.breadth * scale.breadth + translate.breadth
+            delta.depth = delta.depth * scale.depth + translate.depth
+        })
+    }
+
+    private resolveLayout(
+        layout: { [id: string]: { breadth: number; depth: number; [resolved: string]: number } },
+        breadth: string,
+        depth: string
+    ) {
+        Object.values(layout).forEach(delta => {
+            delta[breadth] = delta.breadth
+            delta[depth] = delta.depth
+        })
+    }
+
+    applyLayout(
+        increment = { breadth: 1.5, depth: 1.5 },
+        horizontal = true,
+        position = this.base.getPosition(),
+        mode: 'all' | 'ovr' | 'avl' = 'avl',
+        index = this.graph.index
+    ) {
+        const [layout] = this.computeLayout()
+        const baseDelta = layout[this.base.id]
+        const scale = {
+            breadth: (horizontal ? this.base.size.height : this.base.size.width) * increment.breadth,
+            depth: (horizontal ? this.base.size.width : this.base.size.height) * increment.depth
+        }
+        const translate = {
+            breadth: horizontal ? position.y : position.x,
+            depth: horizontal ? position.x : position.y
+        }
+        this.transformLayout(layout, undefined, { breadth: -baseDelta.breadth, depth: -baseDelta.depth })
+        this.transformLayout(layout, scale, translate)
+        this.resolveLayout(layout, horizontal ? 'y' : 'x', horizontal ? 'x' : 'y')
+        Object.entries(layout).forEach(([id, position]) => this.members[id].setPosition(position as any, mode, index))
+        return layout
     }
 }
 
 export class Graph {
+    index: number = 0
+    steps: number = 0
+    animate: boolean = true
     view: View = new View()
-    private index: number = 0
-    private size: number = 0
-    private animate: boolean = true
-    private subscriptions: { [id: string]: (() => void)[] } = {}
-    private nodes: { [id: string]: Node } = {}
-    private types: { [type: string]: NodeType } = {}
-    private edges: { [id: string]: NodeEdges } = {}
+    subscriptions = new Subscriptions()
+    nodes: { [id: string]: Node } = {}
+    types: { [type: string]: { shape: string; parameters: { [shape: string]: UnknownParameters } } } = {}
+    edges: { [id: string]: { children: Edge[]; parents: Edge[]; loose: Edge[] } } = {}
 
-    constructor(viewSize: { width: number; height: number }, viewPadding: { right: number; bottom: number }) {
-        this.view.size = viewSize
-        this.view.padding = viewPadding
-    }
-
-    getIndex() {
-        return this.index
-    }
-
-    setIndex(index: number) {
-        return (this.index = Math.min(Math.max(index, 0), this.size))
-    }
-
-    getSize() {
-        return this.size
-    }
-
-    setSize(programSize: number) {
-        return (this.size = Math.max(programSize, 0))
-    }
-
-    getAnimate() {
-        return this.animate
-    }
-
-    setAnimate(animate: boolean) {
-        return (this.animate = animate)
-    }
-
-    subscribe(id: string, callback: () => void) {
-        const subscriptions = this.subscriptions[id] ?? (this.subscriptions[id] = [])
-        subscriptions.push(callback)
-    }
-
-    callSubscriptions(id: string) {
-        this.subscriptions[id]?.forEach(subscription => subscription())
-    }
-
-    clearSubscriptions() {
-        this.subscriptions = {}
+    constructor(size: View['size'], padding: View['padding']) {
+        this.view.size = size
+        this.view.padding = padding
     }
 
     getNode(id: string, partial: Partial<Node> = {}) {
-        return this.nodes[id] ?? (this.nodes[id] = { ...createBaseNode(id), ...partial, id })
-    }
-
-    getNodeType(type: string, partial: Partial<NodeType> = {}) {
-        return this.types[type] ?? (this.types[type] = { ...createBaseNodeType(), ...partial })
+        return this.nodes[id] ?? (this.nodes[id] = new Node(this, id, partial))
     }
 
     clearNodes() {
@@ -251,264 +441,17 @@ export class Graph {
     }
 
     getEdges(id: string) {
-        return this.edges[id] ?? (this.edges[id] = createBaseNodeEdges())
+        return this.edges[id] ?? (this.edges[id] = { children: [], parents: [], loose: [] })
     }
 
     pushEdge(id: string, name: string, partial: Partial<Edge> = {}) {
-        const edge: Edge = { ...createBaseEdge(id, name), ...partial, id, name }
-        if (!edge.self || edge.target == undefined) return this.getEdges(id).loose.push(edge)
+        const edge = new Edge(this, id, name, partial)
+        if (!edge.self || !edge.target) return this.getEdges(id).loose.push(edge)
         this.getEdges(id).children.push(edge)
         this.getEdges(edge.target).parents.push(edge)
     }
 
     clearEdges() {
         this.edges = {}
-    }
-
-    // Helper methods (properties changed by all following methods must not be changed directly)
-
-    getNodePosition(node: Node, index: number = this.index) {
-        return node.positions[index] ?? this.setNodePositions(node, { x: 0, y: 0 })
-    }
-
-    setNodePositions(
-        node: Node,
-        position: { x: number; y: number },
-        index = this.index,
-        mode: 'all' | 'index' | 'override' | 'available' = 'available'
-    ) {
-        const paddedPosition = this.view.padPoint(position)
-        switch (mode) {
-            case 'all':
-                for (let i = 0; i < this.getSize(); i++) node.positions[i] = paddedPosition
-                break
-            case 'index':
-                node.positions[index] = paddedPosition
-                break
-            case 'override':
-                for (let i = index; i < this.getSize(); i++) node.positions[i] = paddedPosition
-                break
-            case 'available':
-                const basePosition = node.positions[index]
-                for (
-                    let i = index;
-                    i < this.getSize() && (!node.positions[i] || node.positions[i] === basePosition);
-                    i++
-                )
-                    node.positions[i] = paddedPosition
-                break
-        }
-        return paddedPosition
-    }
-
-    getNodeShape(node: Node) {
-        return node.mode === 'own' ? node.shape : this.getNodeType(node.type).shape
-    }
-
-    setNodeShape(node: Node, shape: string) {
-        return node.mode === 'own' ? (node.shape = shape) : (this.getNodeType(node.type).shape = shape)
-    }
-
-    getNodeParameters(node: Node) {
-        if (node.mode === 'own') return node.parameters[node.shape]
-        const nodeType = this.getNodeType(node.type)
-        return nodeType.parameters[nodeType.shape]
-    }
-
-    setNodeParameters(node: Node, parameters: UnknownParameters) {
-        if (node.mode === 'own') return (node.parameters[node.shape] = parameters)
-        const nodeType = this.getNodeType(node.type)
-        return (nodeType.parameters[nodeType.shape] = parameters)
-    }
-
-    getNodeRecursiveChildren(node: Node, depth = 0, skipBase = false, pool: { [id: string]: Node } = {}) {
-        if (depth < 0 || pool[node.id]) return pool
-        if (!skipBase) pool[node.id] = node
-        this.getEdges(node.id).children.forEach(edge =>
-            this.getNodeRecursiveChildren(this.getNode(edge.target), depth - 1, false, pool)
-        )
-        return pool
-    }
-
-    moveNodePositions(
-        node: Node,
-        depth = 0,
-        delta: { x: number; y: number },
-        index = this.index,
-        mode: 'all' | 'index' | 'override' | 'available' = 'available'
-    ) {
-        const children = this.getNodeRecursiveChildren(node, depth)
-        Object.values(children).forEach(child => {
-            const position = this.getNodePosition(child, index)
-            this.setNodePositions(child, { x: position.x + delta.x, y: position.y + delta.y }, index, mode)
-        })
-        return children
-    }
-
-    findStructureBaseNode(node: Node): Node {
-        const highestParent = this.getEdges(node.id)
-            .parents.map(edge => this.getNode(edge.id))
-            .reduce((acc, parent) => (parent.type === acc.type && parent.depth < acc.depth ? parent : acc), node)
-        return highestParent === node ? node : this.findStructureBaseNode(highestParent)
-    }
-
-    findStructure(node: Node, parent: Node = undefined, depth = 0, structure = createBaseStructure()): Structure {
-        if (!structure.base) {
-            structure.base = this.findStructureBaseNode(node)
-            return this.findStructure(structure.base, undefined, 0, structure)
-        }
-        const isMember = !!structure.members[node.id]
-        if (!isMember) {
-            structure.members[node.id] = node
-            structure.links[node.id] = { children: [], parents: [] }
-            structure.size++
-            structure.depth = Math.max(structure.depth, depth)
-            this.getEdges(node.id)
-                .children.map(edge => this.getNode(edge.target))
-                .forEach(child => {
-                    if (child.type !== structure.base.type) return
-                    this.findStructure(child, node, depth + 1, structure)
-                    const isSameAsParent = node.id === parent?.id
-                    const childIsSameAsParent = child.id === parent?.id
-                    structure.hasCycleEdge = structure.hasCycleEdge || isSameAsParent
-                    structure.hasParentEdge = structure.hasParentEdge || (!isSameAsParent && childIsSameAsParent)
-                    structure.hasCrossEdge = structure.hasCrossEdge || (!isSameAsParent && !childIsSameAsParent)
-                })
-        }
-        if (parent && node.id !== parent.id) {
-            structure.links[parent.id].children.push(node)
-            structure.links[node.id].parents.push(parent)
-        }
-        return structure
-    }
-
-    computeStructureLayout(
-        structure: Structure,
-        horizontal: boolean,
-        increment: { x: number; y: number },
-        normalize: boolean = true,
-        node = structure.base,
-        depth = { x: 0, y: 0 },
-        positions: { [id: string]: { x: number; y: number } } = {}
-    ): [{ [id: string]: { x: number; y: number } }, { x: number; y: number }] {
-        if (positions[node.id]) return [positions, depth]
-        positions[node.id] = { x: 0, y: 0 }
-        const childrenEndDepth = structure.links[node.id].children.reduce(
-            (acc, child) => {
-                if (positions[child.id]) return acc
-                const childDepth = { x: acc.x + Number(horizontal), y: acc.y + Number(!horizontal) }
-                const [, childEndDepth] = this.computeStructureLayout(
-                    structure,
-                    horizontal,
-                    increment,
-                    normalize,
-                    child,
-                    childDepth,
-                    positions
-                )
-                return childEndDepth
-            },
-            { ...depth }
-        )
-        const isLeaf = horizontal ? depth.y === childrenEndDepth.y : depth.x === childrenEndDepth.x
-        positions[node.id].x = increment.x * (horizontal || isLeaf ? depth.x : (depth.x + childrenEndDepth.x - 1) / 2)
-        positions[node.id].y = increment.y * (!horizontal || isLeaf ? depth.y : (depth.y + childrenEndDepth.y - 1) / 2)
-        const endDepth = {
-            x: childrenEndDepth.x + (horizontal ? -1 : isLeaf ? 1 : 0),
-            y: childrenEndDepth.y + (!horizontal ? -1 : isLeaf ? 1 : 0)
-        }
-        if (normalize && node === structure.base) {
-            const origin = { x: positions[structure.base.id].x, y: positions[structure.base.id].y }
-            Object.values(positions).forEach(position => ((position.x -= origin.x), (position.y -= origin.y)))
-        }
-        return [positions, endDepth]
-    }
-
-    applyStructureLayout(
-        node: Node,
-        position: { x: number; y: number } = undefined,
-        direction = 'horizontal' as 'horizontal' | 'vertical',
-        incrementRatio = { x: 1.5, y: 1.5 },
-        normalize = true,
-        index = this.index,
-        mode: 'all' | 'index' | 'override' | 'available' = 'available'
-    ) {
-        const structure = this.findStructure(node)
-        console.log('structure', structure)
-        const sizeAnchor = node.size
-        const increment = { x: sizeAnchor.x * incrementRatio.x, y: sizeAnchor.y * incrementRatio.y }
-        const [positions] = this.computeStructureLayout(structure, direction === 'horizontal', increment, normalize)
-        const anchor = position ?? this.getNodePosition(node, index)
-        Object.entries(positions).forEach(([id, delta]) =>
-            this.setNodePositions(this.getNode(id), { x: anchor.x + delta.x, y: anchor.y + delta.y }, index, mode)
-        )
-        return structure
-    }
-
-    computeEdgeStartPoint(edge: Edge) {
-        const delta = (edge.from as any).delta as { x: number; y: number }
-        const targetDelta = (edge.from as any).targetDelta as { x: number; y: number }
-        const point = (edge.from as any).point as { x: number; y: number }
-        if (delta) {
-            const sourceNode = this.getNode(edge.id)
-            const sourcePosition = this.getNodePosition(sourceNode)
-            return { x: sourcePosition.x + delta.x, y: sourcePosition.y + delta.y }
-        } else if (targetDelta) {
-            if (edge.target != undefined) {
-                const targetNode = this.getNode(edge.target)
-                const targetPosition = this.getNodePosition(targetNode)
-                return { x: targetPosition.x + targetDelta.x, y: targetPosition.y + targetDelta.y }
-            } else {
-                const targetPoint = (edge.to as any).point as { x: number; y: number }
-                return { x: targetPoint.x + delta.x, y: targetPoint.y + delta.y }
-            }
-        }
-        return point
-    }
-
-    computeEdgeEndPoint(edge: Edge, startPoint = this.computeEdgeStartPoint(edge)) {
-        const mode = (edge.to as any).mode as string
-        const delta = (edge.to as any).delta as { x: number; y: number }
-        const point = (edge.to as any).point as { x: number; y: number }
-        if (edge.target != undefined) {
-            const targetNode = this.getNode(edge.target)
-            const targetPosition = this.getNodePosition(targetNode)
-            const targetSize = targetNode.size
-            if (mode != undefined) {
-                switch (mode) {
-                    case 'position':
-                        return { x: targetPosition.x, y: targetPosition.y }
-                    case 'near': // TODO implement other cases
-                    default:
-                        return {
-                            x: Math.min(Math.max(startPoint.x, targetPosition.x), targetPosition.x + targetSize.x),
-                            y: Math.min(Math.max(startPoint.y, targetPosition.y), targetPosition.y + targetSize.y)
-                        }
-                }
-            }
-            return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
-        }
-        return point
-    }
-
-    computeEdgeCurvatureControlPoint(
-        edge: Edge,
-        ratio: number,
-        startPoint = this.computeEdgeStartPoint(edge),
-        endPoint = this.computeEdgeEndPoint(edge, startPoint)
-    ) {
-        const centerPoint = { x: lerp(startPoint.x, endPoint.x, 0.5), y: lerp(startPoint.y, endPoint.y, 0.5) }
-        if (edge.draw === 'line') return centerPoint
-        const parallelVector = { x: endPoint.x - startPoint.x, y: endPoint.y - startPoint.y }
-        const orthogonalVector = { x: parallelVector.y * ratio, y: -parallelVector.x * ratio }
-        const controlPoint = { x: centerPoint.x + orthogonalVector.x, y: centerPoint.y + orthogonalVector.y }
-        return controlPoint
-    }
-
-    computeEdgePathData(edge: Edge) {
-        const startPoint = this.computeEdgeStartPoint(edge)
-        const endPoint = this.computeEdgeEndPoint(edge, startPoint)
-        const controlPoint = this.computeEdgeCurvatureControlPoint(edge, 0.1, startPoint, endPoint)
-        return `M ${startPoint.x},${startPoint.y} Q ${controlPoint.x},${controlPoint.y} ${endPoint.x},${endPoint.y}`
     }
 }
