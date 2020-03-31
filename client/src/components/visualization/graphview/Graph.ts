@@ -238,18 +238,14 @@ export class Parameters {
     private parameters = {} as { [selector: string]: UnknownParameters }
 
     get<T extends DefaultParameters>(selector: string, defaultParameters: T) {
-        return this.resolve(this.parameters[selector], defaultParameters)
+        const parameters = this.parameters[selector] ?? {}
+        return Object.fromEntries(
+            Object.entries(defaultParameters).map(([name, def]) => [name, parameters[name] ?? def.value])
+        ) as ComputedParameters<T>
     }
 
     set(selector: string, parameters: UnknownParameters) {
         this.parameters[selector] = parameters
-    }
-
-    private resolve<T extends DefaultParameters>(currentParameters: UnknownParameters, defaultParameters: T) {
-        const parameters = currentParameters ?? {}
-        return Object.fromEntries(
-            Object.entries(defaultParameters).map(([name, def]) => [name, parameters[name] ?? def.value])
-        ) as ComputedParameters<T>
     }
 }
 
