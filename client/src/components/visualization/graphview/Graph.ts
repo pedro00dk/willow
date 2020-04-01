@@ -103,8 +103,8 @@ export class Node {
 
     centralize(random = 0, mode = 'avl' as 'all' | 'ovr' | 'avl', index = this.graph.index) {
         const position = this.graph.view.boxCenter()
-        position.x += (Math.random() - 0.5) * 2 * this.graph.view.box.width * random - this.size.width / 2
-        position.y += (Math.random() - 0.5) * 2 * this.graph.view.box.height * random - this.size.height / 2
+        position.x += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.width - this.size.width) / 2)
+        position.y += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.height - this.size.height) / 2)
         return this.setPosition(position, mode, index)
     }
 
