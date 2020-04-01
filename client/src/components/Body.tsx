@@ -69,20 +69,22 @@ const Visualization = () => {
     const dispatch = useDispatch()
     const getState = useGetState()
 
+    React.useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            const available = getState().tracer.available
+            if (available && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+            const directionChar = event.key === 'ArrowLeft' ? '<-' : '->'
+            dispatch(actions.index.step(directionChar, !event.ctrlKey ? 'v' : !event.altKey ? '-' : '^'))
+            const step = event.key === 'ArrowLeft' ? 'step backward' : 'step forward'
+            const index = getState().index
+            dispatch(actions.user.action({ name: step, payload: { index, using: 'keyboard' } }), false)
+        }
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [])
+
     return (
-        <div
-            className={classes.visualization}
-            onKeyDown={event => {
-                const available = getState().tracer.available
-                if (available && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-                const directionChar = event.key === 'ArrowLeft' ? '<-' : '->'
-                dispatch(actions.index.step(directionChar, !event.ctrlKey ? 'v' : !event.altKey ? '-' : '^'))
-                const step = event.key === 'ArrowLeft' ? 'step backward' : 'step forward'
-                const index = getState().index
-                dispatch(actions.user.action({ name: step, payload: { index, using: 'keyboard' } }), false)
-            }}
-            tabIndex={0}
-        >
+        <div className={classes.visualization} tabIndex={0}>
             <SplitPane orientation='column' ratio={0.35}>
                 <SplitPane ratio={0.25} range={[0.1, 0.6]}>
                     <Stack />
