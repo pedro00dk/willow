@@ -30,7 +30,7 @@ export type Step = {
  * Snapshot contains the state of a program at a certain execution point.
  */
 export type Snapshot = {
-    info: 'ok' | 'warn' | 'error'
+    event: 'line' | 'call' | 'return' | 'exception'
     stack: Scope[]
     heap: { [k: string]: Obj }
 }
