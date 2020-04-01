@@ -27,6 +27,7 @@ export const colors = {
     gray: {
         main: 'darkgray',
         light: 'lightgray',
+        lighter: 'gainsboro',
         dark: 'gray',
         darker: 'rgba(48,48,48,1)'
     }
