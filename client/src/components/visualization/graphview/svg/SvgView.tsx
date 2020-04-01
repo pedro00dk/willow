@@ -18,6 +18,13 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
         height: { min: viewSize.height / 4, max: viewSize.height }
     }
 
+    const onRef = (ref$: SVGSVGElement) => {
+        if (!ref$) return
+        container$.current = ref$
+        props.graph.view.screenCtm = container$.current.getScreenCTM()
+        props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
+    }
+
     React.useLayoutEffect(() => {
         const onResize = () => {
             const element$ = container$.current
@@ -25,10 +32,10 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
             if (element$.clientWidth === parent$.clientWidth && element$.clientHeight === parent$.clientHeight) return
             element$.style.width = `${parent$.clientWidth}px`
             element$.style.height = `${parent$.clientHeight}px`
+            props.graph.view.box = box.current
+            props.graph.view.screenCtm = container$.current.getScreenCTM()
+            props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
         }
-        props.graph.view.box = box.current
-        props.graph.view.screenCtm = container$.current.getScreenCTM()
-        props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
         onResize()
         globalThis.addEventListener('paneResize', onResize)
         return () => globalThis.removeEventListener('paneResize', onResize)
@@ -66,7 +73,7 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
 
     return (
         <svg
-            ref={container$}
+            ref={onRef}
             className={classes.container}
             viewBox={Object.values(box.current).join(' ')}
             preserveAspectRatio='xMidYMid meet'
@@ -86,12 +93,12 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
             }}
         >
             <title>{'Drag and scroll to pawn and zoom'}</title>
-            <g opacity={0.4}>
-                <rect fill={colors.gray.main} x={-10000} y={-10000} width={20000} height={20000} />
+            <g>
+                <rect fill={colors.gray.lighter} x={-10000} y={-10000} width={20000} height={20000} />
                 <rect fill='white' {...viewSize} />
                 <rect
                     fill='none'
-                    stroke={colors.gray.main}
+                    stroke={colors.gray.lighter}
                     x={viewSize.width / 4}
                     y={viewSize.height / 4}
                     width={viewSize.width / 2}
