@@ -5,7 +5,6 @@ import { Scope } from './Scope'
 const classes = {
     container: 'd-flex flex-column position-absolute overflow-auto',
     unavailable: 'text-center h4 m-auto'
-
 }
 
 export const Stack = () => {
