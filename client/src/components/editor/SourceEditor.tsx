@@ -16,9 +16,10 @@ import 'brace/snippets/text'
 import 'brace/theme/chrome'
 
 const classes = {
-    ok: `position-absolute ${css({ background: colors.blue.light })}`,
-    warn: `position-absolute ${css({ background: colors.yellow.light })}`,
-    error: `position-absolute ${css({ background: colors.red.light })}`
+    call: `position-absolute ${css({ background: colors.green.lighter })}`,
+    line: `position-absolute ${css({ background: colors.blue.lighter })}`,
+    return: `position-absolute ${css({ background: colors.yellow.lighter })}`,
+    exception: `position-absolute ${css({ background: colors.red.lighter })}`
 }
 
 const supportedLanguages = new Set(['java', 'python'])
@@ -26,7 +27,7 @@ const supportedLanguages = new Set(['java', 'python'])
 export const SourceEditor = () => {
     const editor = React.useRef<ace.Editor>()
     const language = React.useRef('')
-    const highlight = React.useRef({ line: -1, info: '' })
+    const highlight = React.useRef({ line: -1, event: '' })
     const dispatch = useDispatch()
     const { source } = useSelection(state => ({ source: state.source }))
 
@@ -56,14 +57,14 @@ export const SourceEditor = () => {
         if (!editor.current || !state.tracer.available) return
         const snapshot = state.tracer.steps[state.index].snapshot
         const line = snapshot?.stack[snapshot.stack.length - 1].line
-        const info = snapshot?.info
+        const event = snapshot?.event
         Object.values(editor.current.session.getMarkers(false) as { [id: number]: EditorMarker })
             .filter(marker => marker.id > 2)
             .forEach(marker => editor.current.session.removeMarker(marker.id))
         if (!snapshot) return
         highlight.current.line = line
-        highlight.current.info = info
-        editor.current.session.addMarker(new Range(line, 0, line, 1), classes[info], 'fullLine', false)
+        highlight.current.event = event
+        editor.current.session.addMarker(new Range(line, 0, line, 1), classes[event], 'fullLine', false)
         editor.current.scrollToLine(line, true, true, undefined)
     })
 
