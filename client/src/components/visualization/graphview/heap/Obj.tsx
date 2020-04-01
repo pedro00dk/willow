@@ -110,7 +110,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                 className: classes.container,
                 onDoubleClick: event => {
                     const horizontal = !event.altKey
-                    const mode = event.ctrlKey ? 'ovr' : 'avl'
+                    const mode = !event.ctrlKey ? 'avl' : !event.shiftKey ? 'ovr' : 'all'
                     const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
                     const layout = props.node.findStructure().applyLayout(
                         {
@@ -119,7 +119,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                         },
                         horizontal,
                         props.node.getPosition(),
-                        'ovr'
+                        mode
                     )
                     props.graph.animate = true
                     Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
@@ -129,7 +129,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
             onDrag={(event, delta) => {
                 const [svgDelta] = props.graph.view.transformVector('toSvg', false, delta)
                 const depth = event.altKey ? Infinity : 0
-                const mode = event.ctrlKey ? 'ovr' : 'avl'
+                const mode = !event.ctrlKey ? 'avl' : !event.shiftKey ? 'ovr' : 'all'
                 const movedNodes = props.node.move(svgDelta, depth, mode)
                 props.graph.animate = false
                 Object.values(movedNodes).forEach(node => props.graph.subscriptions.call(node.id))
