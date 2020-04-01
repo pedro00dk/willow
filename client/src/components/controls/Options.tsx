@@ -3,9 +3,9 @@ import { actions, useDispatch, useSelection } from '../../reducers/Store'
 
 const classes = {
     container: 'd-flex align-items-center',
-    option: 'custom-control custom-switch mx-3',
-    optionInput: 'custom-control-input',
-    optionLabel: 'custom-control-label'
+    toggle: 'custom-control custom-switch mx-3',
+    toggleInput: 'custom-control-input',
+    toggleLabel: 'custom-control-label'
 }
 
 export const Options = () => {
@@ -14,9 +14,9 @@ export const Options = () => {
 
     return (
         <div className={classes.container}>
-            <div className={classes.option} title='Toggle visualization view'>
+            <div className={classes.toggle} title='Toggle visualization view'>
                 <input
-                    className={classes.optionInput}
+                    className={classes.toggleInput}
                     type='checkbox'
                     id='visualization'
                     checked={visualization}
@@ -26,13 +26,13 @@ export const Options = () => {
                         dispatch(actions.user.action({ name: 'visualization', payload: enable }), false)
                     }}
                 />
-                <label className={classes.optionLabel} htmlFor='visualization'>
+                <label className={classes.toggleLabel} htmlFor='visualization'>
                     {'Visualization'}
                 </label>
             </div>
-            <div className={classes.option} title='Save the graph layout for the next trace'>
+            <div className={classes.toggle} title='Save the graph layout for the next trace'>
                 <input
-                    className={classes.optionInput}
+                    className={classes.toggleInput}
                     type='checkbox'
                     id='preserveLayout'
                     checked={preserveLayout}
@@ -42,7 +42,7 @@ export const Options = () => {
                         dispatch(actions.user.action({ name: 'preserve layout', payload: enable }), false)
                     }}
                 />
-                <label className={classes.optionLabel} htmlFor='preserveLayout'>
+                <label className={classes.toggleLabel} htmlFor='preserveLayout'>
                     {'Preserve layout'}
                 </label>
             </div>
