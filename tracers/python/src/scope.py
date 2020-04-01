@@ -25,7 +25,8 @@ def create_globals(allowed_builtins: set, override_builtins: dict, allowed_modul
 
     def halt_import(module, globals_, locals_, fromlist, level):
         if module not in allowed_modules:
-            raise ModuleNotFoundError(f'access to {repr(module)} is halted, allowed modules: {str(allowed_modules)}')
+            error_message = f'Access to {repr(module)} is halted.\nAllowed modules are {str(allowed_modules)}.'
+            raise ModuleNotFoundError(error_message)
         return import_(module, globals_, locals_, fromlist, level)
 
     if import_ is not None:

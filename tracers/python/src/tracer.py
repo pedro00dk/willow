@@ -59,8 +59,8 @@ class Tracer:
         except Exception as e:
             type_ = type(e).__name__
             traceback_ = traceback.format_exception(type(e), e, e.__traceback__)
-            traceback_.pop(1)  # remove exec() traceback line (assuming it is an exception from the traced code)
-            error = {'exception': {'type': type_, 'traceback': ''.join(traceback_)}}
+            filtered_traceback = filter(lambda line: not line.startswith(f'  File "{__file__}"'), traceback_)
+            error = {'exception': {'type': type_, 'traceback': ''.join(filtered_traceback)}}
             self._response['steps'].append({'error': error, 'print': ''.join(self._print_cache)})
 
         finally:
@@ -78,7 +78,7 @@ class Tracer:
         This trace implementation skips the first call event of a program.
         - frame: `frame`: frame where the state data will be extracted from
         - event: `str`: frame event type, one of: call, line, exception or return
-        - args: `any[]`: list of arguments only populated in exception events, not used in the inspection
+        - args: `any | any[t]`: return object if event is return or exception data if event is exception
         """
         if not frame.f_code.co_filename == '<script>' or not event in Tracer.TRACERABLE_EVENTS:
             return self._trace
@@ -89,7 +89,7 @@ class Tracer:
             raise TracerStopException(f'Program too long, maximum steps allowed: {self._steps}')
 
         self._current_step += 1
-        snapshot = self._inspector.inspect(frame, event, self._exec_frame)
+        snapshot = self._inspector.inspect(frame, event, args, self._exec_frame)
         self._response['steps'].append({'snapshot': snapshot, 'print': ''.join(self._print_cache)})
         self._print_cache = []
         return self._trace
@@ -128,7 +128,7 @@ class Tracer:
         """
         Hook to advert the debugee program that the builtin open() is not supported.
         """
-        raise FileNotFoundError('builtin function open() is not supported, use input() and print() for IO')
+        raise FileNotFoundError('builtin open() is not supported, use input() and print() for IO')
 
 
 class TracerStopException(Exception):

@@ -22,16 +22,8 @@ def main():
     }
 
     response = tracer.Tracer(request).run()
-
-    print(
-        json.dumps(
-            response,
-            check_circular=False,
-            indent=4 if options.pretty else None,
-            separators=None if options.pretty else (',', ':')
-        ),
-        end=''
-    )
+    indent, separators = (4, None) if options.pretty else (None, (',', ':'))
+    print(json.dumps(response, check_circular=False, indent=indent, separators=separators), end='')
 
 
 if __name__ == '__main__':
