@@ -1,9 +1,10 @@
 import React from 'react'
 import 'react-contexify/dist/ReactContexify.min.css'
 import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
+import { actions, useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
-import { defaultLayoutParameters, Edge, Graph, Node, Structure } from '../Graph'
+import { defaultLayoutParameters, Edge, Graph, Node } from '../Graph'
 import { getMemberName, getValueString } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
@@ -35,6 +36,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
             previousObj.current?.members.map(member => [getMemberName(member), member]) ?? []
         )
     previousObj.current = props.obj
+    const dispatch = useDispatch()
 
     const defaultShape = React.useMemo(
         () =>
@@ -44,6 +46,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
             ) as keyof typeof shapes,
         [props.obj.category]
     )
+
     const shape = (props.node.getShape() ?? props.node.setShape(defaultShape)) as keyof typeof shapes
     const parameters = props.node.getParameters().get(shape, shapes[shape].defaultParameters)
     const Shape = shapes[shape].Shape
@@ -100,7 +103,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
         })
         props.graph.animate = true
         Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
-        // dispatch(actionActions.append({ name: 'auto layout', payload: 'automatic' }))
+        dispatch(actions.user.action({ name: 'layout', payload: 'automatic' }))
     })
 
     return (
@@ -123,7 +126,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                     )
                     props.graph.animate = true
                     Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
-                    // dispatch(actionActions.append({ name: 'auto layout', payload: 'manual' }))
+                    dispatch(actions.user.action({ name: 'layout', payload: 'manual' }))
                 }
             }}
             onDrag={(event, delta) => {
@@ -152,6 +155,8 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
 }
 
 const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph; update: React.Dispatch<{}> }) => {
+    const dispatch = useDispatch()
+
     const defaultShape = React.useMemo(
         () =>
             Object.entries(shapes).reduce(
@@ -160,6 +165,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
             ) as keyof typeof shapes,
         [props.obj.category]
     )
+
     const supportedShapes = React.useMemo(
         () =>
             Object.entries(shapes).reduce(
@@ -168,6 +174,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
             ) as (keyof typeof shapes)[],
         [props.obj.category]
     )
+
     const shape = (props.node.getShape() ?? props.node.setShape(defaultShape)) as keyof typeof shapes
     const parameters = props.node.getParameters().get(shape, shapes[shape].defaultParameters)
 
@@ -177,6 +184,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                 onClick={() => {
                     props.node.mode = props.node.mode === 'local' ? 'type' : 'local'
                     props.update({})
+                    dispatch(actions.user.action({ name: 'change node mode', payload: props.node.mode }))
                 }}
             >
                 <span title='Click to change mode'>{`using ${props.node.mode} parameters`}</span>
@@ -187,6 +195,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                     onClick={() => {
                         props.node.setShape(defaultShape)
                         props.update({})
+                        dispatch(actions.user.action({ name: 'change shape', payload: defaultShape }))
                     }}
                 >
                     {'Click to reset shape'}
@@ -197,6 +206,7 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                         onClick={() => {
                             props.node.setShape(shape)
                             props.update({})
+                            dispatch(actions.user.action({ name: 'change shape', payload: shape }))
                         }}
                     >
                         {`${shape[0].toUpperCase()}${shape.slice(1)}`}
