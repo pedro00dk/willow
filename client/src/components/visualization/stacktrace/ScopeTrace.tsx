@@ -18,8 +18,10 @@ const classes = {
 }
 
 const styles = {
-    background: (selected: boolean, threw: boolean) =>
-        selected ? (threw ? colors.red.dark : colors.blue.main) : threw ? colors.red.main : colors.blue.lighter,
+    background: (selected: boolean, call: boolean, return_: boolean, exception: boolean, threw: boolean) => {
+        const color = call ? colors.green : return_ ? colors.yellow : exception || threw ? colors.red : colors.blue
+        return color[selected ? 'light' : 'lighter']
+    },
     childWidth: (childSize: number, parentSize: number) => `${(childSize / parentSize) * 100}%`,
     childMargin: (childStart: number, previousChildEnd: number, parentSize: number) =>
         `${((childStart - previousChildEnd) / parentSize) * 100}%`
@@ -29,11 +31,16 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
     const container$ = React.useRef<HTMLDivElement>()
     const [displayMode, setDisplayMode] = React.useState<'all' | 'dim' | 'hide'>('all')
     const dispatch = useDispatch()
-    const selected = useSelection(
-        state => state.index >= props.scopeSlice.range[0] && state.index <= props.scopeSlice.range[1]
-    )
+    const selected = useSelection(state => {
+        const event = state.tracer.steps?.[state.index].snapshot?.event
+        const selected = state.index >= props.scopeSlice.range[0] && state.index <= props.scopeSlice.range[1]
+        const call = selected && event === 'call' && state.index === props.scopeSlice.range[0]
+        const return_ = selected && event === 'return' && state.index === props.scopeSlice.range[1]
+        const exception = selected && event === 'exception'
+        const error = !!state.tracer.steps?.[props.scopeSlice.range[0]].error
+        return [selected, call, return_, exception, error] as const
+    })
     const scopeSize = props.scopeSlice.range[1] - props.scopeSlice.range[0] + 1
-    const error = props.scopeSlice.scopes[props.scopeSlice.scopes.length - 1]?.line === undefined
 
     const childrenScopeSlices = React.useMemo(() => {
         return props.scopeSlice.children.reduce((acc, childStackSlice, i) => {
@@ -72,7 +79,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
             {props.scopeSlice.scopes.length !== 0 && displayMode !== 'hide' && (
                 <div
                     className={classes.scope}
-                    style={{ background: styles.background(selected, error) }}
+                    style={{ background: styles.background(...selected) }}
                     title={props.scopeSlice.name}
                     onClick={() => {
                         const index = props.scopeSlice.range[0]

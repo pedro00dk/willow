@@ -7,7 +7,7 @@ import { SvgNode } from '../svg/SvgNode'
 import { isSameMember, isValueObject, getMemberName, getDisplayValue, getValueString } from '../TracerUtils'
 
 const styles = {
-    color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark),
+    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark),
     width: (variableIndex: number, variableDepth: number, stackDepth: number) =>
         variableDepth === stackDepth - 1 ? 2.5 : variableIndex < 2 ? 1 : 0.5
 }
@@ -56,7 +56,7 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
                     from: { delta: deltas[i], source: 'target' },
                     to: { delta: { x: 0, y: 0 }, source: 'target' },
                     draw: 'line',
-                    color: styles.color(changed),
+                    color: styles.edge(changed),
                     width: styles.width(i, depth, stack.length),
                     text: displayKey
                 })

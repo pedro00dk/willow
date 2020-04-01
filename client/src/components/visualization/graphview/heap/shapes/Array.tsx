@@ -15,8 +15,8 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.yellow.light : colors.blue.light),
-    color: (changed: boolean) => (changed ? colors.yellow.darker : colors.gray.dark)
+    background: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter),
+    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.blue.main)
 }
 
 export const defaultParameters = {
@@ -82,7 +82,7 @@ export const Shape = (props: {
                             id: (member.value as [string])[0],
                             name,
                             ref$,
-                            edge: { color: styles.color(changed), text: displayIndex }
+                            edge: { color: styles.edge(changed), text: displayIndex }
                         })
                     }}
                     className={classes.value}
