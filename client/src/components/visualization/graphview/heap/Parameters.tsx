@@ -15,6 +15,7 @@ const RangeParameter = (props: {
     name: string
     value: number
     range: [number, number]
+    tick: number
     onChange: (value: number) => void
 }) => (
     <Item>
@@ -24,6 +25,7 @@ const RangeParameter = (props: {
             value={props.value}
             min={props.range[0]}
             max={props.range[1]}
+            step={props.tick}
             onChange={event => props.onChange(event.target.valueAsNumber)}
         />
     </Item>
@@ -102,6 +104,7 @@ export const Parameters = (props: {
                     name={name}
                     value={props.parameters[name] as number}
                     range={(def as any).range}
+                    tick={(def as any).tick}
                     onChange={value => props.onChange({ ...props.parameters, [name]: value })}
                 />
             ) : (def as any).options ? (
