@@ -5,7 +5,7 @@ import { actions, useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
 import { defaultLayoutParameters, Edge, Graph, Node } from '../Graph'
-import { getMemberName, getValueString } from '../TracerUtils'
+import { getMemberName, getValueString, isValueObject } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
 import * as ColumnModule from './shapes/Column'
@@ -86,18 +86,20 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
         if (!layoutParameters.enabled) return (props.node.layout.position = undefined)
         const target = !layoutParameters.target
             ? props.id
-            : members[layoutParameters.target] && getValueString(members[layoutParameters.target].value)
-        if (!target) return
-        const node = props.graph.getNode(target)
-        const structure = node.findStructure()
-        if (!node.layout.position) node.layout.position = structure.base.getPosition()
+            : members[layoutParameters.target] && isValueObject(members[layoutParameters.target].value)
+            ? getValueString(members[layoutParameters.target].value)
+            : undefined
+        if (!target || target === props.id) return
+        const structure = props.graph.getNode(target).findStructure()
+        if (!props.node.layout.position) props.node.layout.position = structure.base.getPosition()
+        structure.base.setPosition(props.node.layout.position, 'avl')
         const layout = structure.applyLayout(
             {
                 breadth: layoutParameters['breadth increment'],
                 depth: layoutParameters['depth increment']
             },
             layoutParameters.direction === 'horizontal',
-            node.layout.position,
+            props.node.layout.position,
             'avl'
         )
         props.graph.subscriptions.subscribe(structure.base.id, () => {
