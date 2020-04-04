@@ -8,8 +8,6 @@ class View {
     size = { width: Infinity, height: Infinity }
     padding = { left: 0, top: 0, right: 0, bottom: 0 }
     box = { x: 0, y: 0, width: 0, height: 0 }
-    screenCtm = new DOMMatrix()
-    inverseScreenCtm = new DOMMatrix()
 
     center() {
         return { x: this.size.width, y: this.size.height }
@@ -26,14 +24,24 @@ class View {
         }
     }
 
-    transformPoint(direction: 'toSvg' | 'toScreen', zoom: boolean, ...points: { x: number; y: number }[]) {
-        let matrix = direction === 'toSvg' ? this.inverseScreenCtm : this.screenCtm
+    transformPoint(
+        direction: 'toSvg' | 'toScreen',
+        svg: SVGSVGElement,
+        zoom: boolean,
+        ...points: { x: number; y: number }[]
+    ) {
+        let matrix = direction === 'toSvg' ? svg.getScreenCTM().inverse() : svg.getScreenCTM()
         if (zoom) matrix = matrix.scale(1 / globalThis.devicePixelRatio, 1 / globalThis.devicePixelRatio)
         return points.map(point => new DOMPoint(point.x, point.y).matrixTransform(matrix) as { x: number; y: number })
     }
 
-    transformVector(direction: 'toSvg' | 'toScreen', zoom: boolean, ...vectors: { x: number; y: number }[]) {
-        const [root, ...shiftedVectors] = this.transformPoint(direction, zoom, { x: 0, y: 0 }, ...vectors)
+    transformVector(
+        direction: 'toSvg' | 'toScreen',
+        svg: SVGSVGElement,
+        zoom: boolean,
+        ...vectors: { x: number; y: number }[]
+    ) {
+        const [root, ...shiftedVectors] = this.transformPoint(direction, svg, zoom, { x: 0, y: 0 }, ...vectors)
         shiftedVectors.forEach(vector => {
             vector.x -= root.x
             vector.y -= root.y

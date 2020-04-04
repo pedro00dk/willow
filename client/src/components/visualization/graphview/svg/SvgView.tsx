@@ -18,13 +18,6 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
         height: { min: viewSize.height / 4, max: viewSize.height }
     }
 
-    const onRef = (ref$: SVGSVGElement) => {
-        if (!ref$) return
-        container$.current = ref$
-        props.graph.view.screenCtm = container$.current.getScreenCTM()
-        props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
-    }
-
     React.useLayoutEffect(() => {
         const onResize = () => {
             const element$ = container$.current
@@ -33,8 +26,6 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
             element$.style.width = `${parent$.clientWidth}px`
             element$.style.height = `${parent$.clientHeight}px`
             props.graph.view.box = box.current
-            props.graph.view.screenCtm = container$.current.getScreenCTM()
-            props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
         }
         onResize()
         globalThis.addEventListener('paneResize', onResize)
@@ -46,8 +37,6 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
         box.current.y = Math.min(Math.max(box.current.y - delta.y, ranges.y.min), ranges.y.max - box.current.height)
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
         props.graph.view.box = box.current
-        props.graph.view.screenCtm = container$.current.getScreenCTM()
-        props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
     }
 
     const scaleBox = (point: { x: number; y: number }, direction: 'in' | 'out') => {
@@ -67,13 +56,11 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
         box.current.height = size.height
         container$.current.setAttribute('viewBox', Object.values(box.current).join(' '))
         props.graph.view.box = box.current
-        props.graph.view.screenCtm = container$.current.getScreenCTM()
-        props.graph.view.inverseScreenCtm = container$.current.getScreenCTM().inverse()
     }
 
     return (
         <svg
-            ref={onRef}
+            ref={container$}
             className={classes.container}
             viewBox={Object.values(box.current).join(' ')}
             preserveAspectRatio='xMidYMid meet'
@@ -83,12 +70,12 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
             onMouseMove={event => {
                 if (!click.current) return
                 const screenDelta = { x: event.movementX, y: event.movementY }
-                const [svgDelta] = props.graph.view.transformVector('toSvg', true, screenDelta)
+                const [svgDelta] = props.graph.view.transformVector('toSvg', container$.current, true, screenDelta)
                 translateBox(svgDelta)
             }}
             onWheel={event => {
                 const screenPoint = { x: event.clientX, y: event.clientY }
-                const [svgPoint] = props.graph.view.transformPoint('toSvg', true, screenPoint)
+                const [svgPoint] = props.graph.view.transformPoint('toSvg', container$.current, true, screenPoint)
                 scaleBox(svgPoint, event.deltaY < 0 ? 'in' : 'out')
             }}
         >
