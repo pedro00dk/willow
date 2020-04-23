@@ -18,11 +18,12 @@ const classes = {
 
 export const Body = () => {
     const visualization = useSelection(state => state.options.visualization)
-    if (visualization)
-        return (
-            <div className={classes.container}>
-                <Controls />
-                <div className={classes.panel}>
+
+    return (
+        <div className={classes.container}>
+            <Controls />
+            <div className={classes.panel}>
+                {visualization ? (
                     <SplitPane key={Math.random()} ratio={0.3}>
                         <SplitPane orientation='column' ratio={0.66}>
                             <Frame title='Editor'>
@@ -39,14 +40,7 @@ export const Body = () => {
                         </SplitPane>
                         <Visualization />
                     </SplitPane>
-                </div>
-            </div>
-        )
-    else
-        return (
-            <div className={classes.container}>
-                <Controls />
-                <div className={classes.panel}>
+                ) : (
                     <SplitPane key={Math.random()} ratio={0.66}>
                         <Frame title='Editor'>
                             <SourceEditor />
@@ -60,9 +54,10 @@ export const Body = () => {
                             </Frame>
                         </SplitPane>
                     </SplitPane>
-                </div>
+                )}
             </div>
-        )
+        </div>
+    )
 }
 
 const Visualization = () => {

@@ -10,7 +10,7 @@ const classes = {
 
 export const Options = () => {
     const dispatch = useDispatch()
-    const { visualization, preserveLayout } = useSelection(state => state.options)
+    const { visualization, preserveLayout, reapplyLayout } = useSelection(state => state.options)
 
     return (
         <div className={classes.container}>
@@ -44,6 +44,22 @@ export const Options = () => {
                 />
                 <label className={classes.toggleLabel} htmlFor='preserveLayout'>
                     {'Preserve layout'}
+                </label>
+            </div>
+            <div className={classes.toggle} title='Re-apply object layouts in double clicked nodes'>
+                <input
+                    className={classes.toggleInput}
+                    type='checkbox'
+                    id='reapplyLayout'
+                    checked={reapplyLayout}
+                    onChange={event => {
+                        const enable = event.target.checked
+                        dispatch(actions.options.setReapplyLayout(enable))
+                        dispatch(actions.user.action({ name: 'reapply layout', payload: enable }), false)
+                    }}
+                />
+                <label className={classes.toggleLabel} htmlFor='reapplyLayout'>
+                    {'Re-apply layout'}
                 </label>
             </div>
         </div>
