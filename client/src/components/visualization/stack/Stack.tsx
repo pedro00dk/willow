@@ -4,7 +4,7 @@ import { Scope } from './Scope'
 
 const classes = {
     container: 'd-flex flex-column position-absolute overflow-auto',
-    unavailable: 'text-center h4 m-auto'
+    unavailable: 'text-center text-secondary h4 m-auto'
 }
 
 export const Stack = () => {
@@ -27,7 +27,9 @@ export const Stack = () => {
         return () => removeEventListener('paneResize', onResize)
     }, [container$.current])
 
-    React.useEffect(() => container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' }))
+    React.useEffect(() => {
+        container$.current.scrollBy({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' })
+    })
 
     return (
         <div ref={container$} className={classes.container}>

@@ -2,7 +2,7 @@ import { css } from 'emotion'
 import React from 'react'
 import { colors } from '../../../colors'
 import * as tracer from '../../../types/tracer'
-import { getDisplayValue, getMemberName, isSameMember } from '../graphview/TracerUtils'
+import { getValueDisplay, getValueString, isSameMember } from '../graphview/TracerUtils'
 
 const classes = {
     container: 'd-flex flex-column table table-sm table-hover border',
@@ -13,17 +13,17 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => changed && colors.yellow.lighter
+    cellColor: (changed: boolean) => changed && colors.yellow.lighter
 }
 
 export const Scope = (props: { scope: tracer.Scope }) => {
-    const previousScope = React.useRef<tracer.Scope>()
     const previousMembers = React.useRef<{ [name: string]: tracer.Member }>({})
-    if (props.scope !== previousScope.current)
+
+    React.useEffect(() => {
         previousMembers.current = Object.fromEntries(
-            previousScope.current?.members.map(member => [getMemberName(member), member]) ?? []
+            props.scope.members.map(member => [getValueString(member.key), member])
         )
-    previousScope.current = props.scope
+    }, [props.scope])
 
     return (
         <table className={classes.container}>
@@ -34,14 +34,15 @@ export const Scope = (props: { scope: tracer.Scope }) => {
             </thead>
             <tbody className={classes.column}>
                 {props.scope.members.map((member, i) => {
-                    const changed = !isSameMember(member, previousMembers.current[getMemberName(member)])
-                    const displayKey = getDisplayValue(member.key)
-                    const displayValue = getDisplayValue(member.value)
+                    const key = getValueString(member.key)
+                    const changed = !isSameMember(member, previousMembers.current[key])
+                    const displayKey = getValueDisplay(member.key)
+                    const displayValue = getValueDisplay(member.value)
                     return (
                         <tr
                             key={i}
                             className={classes.row}
-                            style={{ background: styles.background(changed) }}
+                            style={{ background: styles.cellColor(changed) }}
                             title={displayValue}
                         >
                             <td className={classes.cell}>{displayKey}</td>
