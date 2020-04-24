@@ -25,8 +25,8 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
         })
         return acc
     }, {} as { [id: string]: { [scope: string]: { [key: string]: tracer.Member } } })
-
     const previousReferenceMembers = React.useRef<typeof referenceMembers>({})
+
     React.useEffect(() => {
         previousReferenceMembers.current = referenceMembers
     }, [stack])
