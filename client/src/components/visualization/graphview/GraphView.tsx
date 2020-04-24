@@ -31,7 +31,7 @@ export const GraphView = () => {
         const onResize = () => zoom !== devicePixelRatio && setZoom(devicePixelRatio)
         addEventListener('paneResize', onResize)
         return () => removeEventListener('paneResize', onResize)
-    }, [zoom])
+    }, [])
 
     return (
         <SvgView graph={graph}>

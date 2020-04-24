@@ -1,7 +1,7 @@
 import { css } from 'emotion'
 import React from 'react'
-import { useSelection } from '../../reducers/Store'
 import { colors } from '../../colors'
+import { useSelection } from '../../reducers/Store'
 
 const classes = {
     container: `position-fixed ${css({ left: '50%', top: '2%', zIndex: 20 })}`,

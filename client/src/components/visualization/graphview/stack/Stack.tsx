@@ -13,6 +13,7 @@ const styles = {
 }
 
 export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; update: React.Dispatch<{}> }) => {
+    const node = props.graph.getNode('stack')
     const stack = props.tracer.steps[props.graph.index].snapshot?.stack || []
     const referenceMembers = stack.reduce((acc, scope, i) => {
         scope.members.forEach(member => {
@@ -33,7 +34,6 @@ export const Stack = (props: { tracer: DefaultState['tracer']; graph: Graph; upd
 
     const edgeDelta = (size: number, angle: number) => ({ x: -size * Math.cos(angle), y: -size * Math.sin(angle) })
 
-    const node = props.graph.getNode('stack')
     Object.entries(referenceMembers).forEach(([id, members]) => {
         const displayMembers = Object.entries(members)
             .flatMap(([scope, keys]) => Object.entries(keys).flatMap(([key, member]) => ({ scope, key, member })))
