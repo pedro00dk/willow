@@ -169,7 +169,7 @@ export class Edge {
     target: string = undefined
     from = { delta: { x: 0, y: 0 }, source: 'origin' as 'origin' | 'self' | 'target' }
     to = { delta: { x: 0, y: 0 }, source: 'origin' as 'origin' | 'self' | 'target' | 'target-near' }
-    draw = 'curve' as 'line' | 'curve'
+    shape = 'curve' as 'line' | 'curve'
     width = 1
     color = 'black'
     text = ''
@@ -212,7 +212,7 @@ export class Edge {
         endPoint = this.computeTo(index, from)
     ) {
         const center = { x: lerp(from.x, endPoint.x, 0.5), y: lerp(from.y, endPoint.y, 0.5) }
-        if (this.draw === 'line') return center
+        if (this.shape === 'line') return center
         const parallelVector = { x: endPoint.x - from.x, y: endPoint.y - from.y }
         const orthogonalVector = { x: parallelVector.y * ratio, y: -parallelVector.x * ratio }
         const curvature = { x: center.x + orthogonalVector.x, y: center.y + orthogonalVector.y }
