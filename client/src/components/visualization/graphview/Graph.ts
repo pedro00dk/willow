@@ -77,8 +77,8 @@ export class Node {
     size = { width: 0, height: 0 }
     mode = 'type' as 'local' | 'type'
     shape = undefined as string
-    layout = { position: undefined as { x: number; y: number } }
     parameters = new Parameters()
+    layout = { enabled: false, horizontal: true }
 
     constructor(graph: Graph, id: string, partial?: Partial<Node>) {
         Object.assign(this, partial)
@@ -254,14 +254,6 @@ export class Parameters {
     }
 }
 
-export const defaultLayoutParameters = {
-    enabled: { value: false, bool: true as const },
-    target: { value: undefined as string, members: 'all' as const, self: true },
-    direction: { value: 'horizontal', options: ['horizontal', 'vertical'] },
-    'breadth increment': { value: 1.5, range: [1, 3] as [number, number], tick: 0.1 },
-    'depth increment': { value: 1.5, range: [1, 3] as [number, number], tick: 0.1 }
-}
-
 export class Structure {
     readonly graph: Graph
     base: Node
@@ -397,9 +389,10 @@ export class Structure {
 }
 
 export class Graph {
-    index: number = 0
-    steps: number = 0
-    animate: boolean = true
+    index = 0
+    steps = 0
+    animate = true
+    reapplyLayout = true
     view: View = new View()
     subscriptions = new Subscriptions()
     nodes: { [id: string]: Node } = {}

@@ -4,7 +4,7 @@ import { Item, Menu, MenuProvider, Separator, Submenu } from 'react-contexify'
 import { actions, useDispatch } from '../../../../reducers/Store'
 import * as tracer from '../../../../types/tracer'
 import { Draggable } from '../../../utils/Draggable'
-import { defaultLayoutParameters, Edge, Graph, Node } from '../Graph'
+import { Edge, Graph, Node } from '../Graph'
 import { getMemberName, getValueString, isValueObject } from '../TracerUtils'
 import { Parameters } from './Parameters'
 import * as ArrayModule from './shapes/Array'
@@ -82,29 +82,19 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
     React.useLayoutEffect(() => props.graph.subscriptions.call(props.id))
 
     React.useEffect(() => {
-        const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
-        if (!layoutParameters.enabled) return (props.node.layout.position = undefined)
-        const target = !layoutParameters.target
-            ? props.id
-            : members[layoutParameters.target] && isValueObject(members[layoutParameters.target].value)
-            ? getValueString(members[layoutParameters.target].value)
-            : undefined
-        if (!target || target === props.id) return
-        const structure = props.graph.getNode(target).findStructure()
-        if (!props.node.layout.position) props.node.layout.position = structure.base.getPosition()
-        structure.base.setPosition(props.node.layout.position, 'avl')
+        if (!props.node.layout.enabled) return
+        const structure = props.node.findStructure()
+        props.node.layout.enabled = false
+        structure.base.layout.enabled = true
+        structure.base.layout.horizontal = props.node.layout.horizontal
+        const position = props.node.getPosition()
+        console.log(props.node.id, position)
         const layout = structure.applyLayout(
-            {
-                breadth: layoutParameters['breadth increment'],
-                depth: layoutParameters['depth increment']
-            },
-            layoutParameters.direction === 'horizontal',
-            props.node.layout.position,
+            { breadth: 1.5, depth: 1.5 },
+            structure.base.layout.horizontal,
+            position,
             'avl'
         )
-        props.graph.subscriptions.subscribe(structure.base.id, () => {
-            props.node.layout.position = props.graph.getNode(structure.base.id).getPosition()
-        })
         props.graph.animate = true
         Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
         dispatch(actions.user.action({ name: 'layout', payload: 'automatic' }))
@@ -118,18 +108,19 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                 onDoubleClick: event => {
                     const horizontal = !event.altKey
                     const mode = !event.ctrlKey ? 'avl' : !event.shiftKey ? 'ovr' : 'all'
-                    const layoutParameters = props.node.parameters.get('layout', defaultLayoutParameters)
-                    const layout = props.node.findStructure().applyLayout(
-                        {
-                            breadth: layoutParameters['breadth increment'],
-                            depth: layoutParameters['depth increment']
-                        },
+                    const structure = props.node.findStructure()
+                    console.log(props.node.getPosition())
+                    const layout = structure.applyLayout(
+                        { breadth: 1.5, depth: 1.5 },
                         horizontal,
                         props.node.getPosition(),
                         mode
                     )
                     props.graph.animate = true
                     Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
+                    Object.values(structure.members).forEach(node => (node.layout.enabled = false))
+                    structure.base.layout.enabled = props.graph.reapplyLayout
+                    structure.base.layout.horizontal = horizontal
                     dispatch(actions.user.action({ name: 'layout', payload: 'manual' }))
                 }
             }}
@@ -227,19 +218,6 @@ const ObjMenu = (props: { id: string; obj: tracer.Obj; node: Node; graph: Graph;
                     obj={props.obj}
                     onChange={parameters => {
                         props.node.getParameters().set(props.node.getShape(), parameters)
-                        props.update({})
-                    }}
-                />
-            </Submenu>
-            <Separator />
-            <Submenu label='Automatic layout'>
-                <Parameters
-                    resetMessage='Click to reset layout parameters'
-                    parameters={props.node.parameters.get('layout', defaultLayoutParameters)}
-                    defaults={defaultLayoutParameters}
-                    obj={props.obj}
-                    onChange={parameters => {
-                        props.node.parameters.set('layout', parameters)
                         props.update({})
                     }}
                 />
