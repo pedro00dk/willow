@@ -27,7 +27,7 @@ export const Scope = (props: { scope: tracer.Scope }) => {
 
     return (
         <table className={classes.container}>
-            <thead className={classes.column}>
+            <thead className={classes.column} title={props.scope.name}>
                 <tr className={classes.row}>
                     <th className={classes.headerCell}>{props.scope.name}</th>
                 </tr>

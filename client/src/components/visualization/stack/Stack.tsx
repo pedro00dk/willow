@@ -4,7 +4,7 @@ import { Scope } from './Scope'
 
 const classes = {
     container: 'd-flex flex-column position-absolute overflow-auto',
-    unavailable: 'text-center text-secondary h4 m-auto'
+    label: 'text-center text-secondary h4 m-auto'
 }
 
 export const Stack = () => {
@@ -38,7 +38,7 @@ export const Stack = () => {
             ) : stack.length > 0 ? (
                 stack.map((scope, i) => <Scope key={i} scope={scope} />)
             ) : (
-                <span className={classes.unavailable}>{'Stack unavailable'}</span>
+                <span className={classes.label}>{'Stack unavailable'}</span>
             )}
         </div>
     )
