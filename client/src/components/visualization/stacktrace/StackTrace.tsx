@@ -41,7 +41,7 @@ export const StackTrace = () => {
         <div
             ref={container$}
             className={classes.container}
-            title='Click in a scope to go to its start&#10;Double-click to go to its end'
+            title='Click in a scope to go to the start&#10;Double-click to go to the end'
         >
             {available && <ScopeTrace scopeSlice={rootScopeSlice} />}
         </div>

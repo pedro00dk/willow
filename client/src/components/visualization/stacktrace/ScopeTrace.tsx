@@ -6,7 +6,7 @@ import { ScopeSlice } from './StackTrace'
 
 const classes = {
     container: 'd-flex flex-column w-100',
-    scope: `text-truncate w-100' ${css({
+    scope: `text-truncate w-100 ${css({
         backgroundClip: 'content-box !important',
         border: '1px solid transparent',
         cursor: 'default',
@@ -18,7 +18,7 @@ const classes = {
 }
 
 const styles = {
-    background: (selected: boolean, call: boolean, return_: boolean, exception: boolean, threw: boolean) => {
+    scopeColor: (selected: boolean, call: boolean, return_: boolean, exception: boolean, threw: boolean) => {
         const color = call ? colors.green : return_ ? colors.yellow : exception || threw ? colors.red : colors.blue
         return color[selected ? 'light' : 'lighter']
     },
@@ -79,7 +79,7 @@ export const ScopeTrace = React.memo((props: { scopeSlice: ScopeSlice }) => {
             {props.scopeSlice.scopes.length !== 0 && displayMode !== 'hide' && (
                 <div
                     className={classes.scope}
-                    style={{ background: styles.background(...selected) }}
+                    style={{ background: styles.scopeColor(...selected) }}
                     title={props.scopeSlice.name}
                     onClick={() => {
                         const index = props.scopeSlice.range[0]
