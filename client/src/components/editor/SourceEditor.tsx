@@ -1,10 +1,4 @@
 import ace from 'brace'
-import { css } from 'emotion'
-import React from 'react'
-import { colors } from '../../colors'
-import { actions, useDispatch, useSelection } from '../../reducers/Store'
-import { EditorMarker, Range, TextEditor } from './TextEditor'
-
 import 'brace/ext/language_tools'
 import 'brace/ext/searchbox'
 import 'brace/mode/java'
@@ -14,6 +8,12 @@ import 'brace/snippets/java'
 import 'brace/snippets/python'
 import 'brace/snippets/text'
 import 'brace/theme/chrome'
+import { css } from 'emotion'
+import React from 'react'
+import { colors } from '../../colors'
+import { actions, useDispatch, useSelection } from '../../reducers/Store'
+import { EditorMarker, Range, TextEditor } from './TextEditor'
+
 
 const classes = {
     call: `position-absolute ${css({ background: colors.green.lighter })}`,
