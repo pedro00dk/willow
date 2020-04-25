@@ -9,10 +9,10 @@ const classes = {
 
 export const Stack = () => {
     const container$ = React.useRef<HTMLDivElement>()
-    const { available, stack = [] } = useSelection(state => ({
-        available: state.tracer.available,
-        stack: state.tracer.available && state.tracer.steps[state.index].snapshot?.stack
-    }))
+    const { available, event = 'line', stack = [] } = useSelection(state => {
+        const snapshot = state.tracer.steps?.[state.index].snapshot
+        return { available: state.tracer.available, event: snapshot?.event, stack: snapshot?.stack }
+    })
 
     React.useLayoutEffect(() => {
         const onResize = () => {
@@ -34,9 +34,9 @@ export const Stack = () => {
     return (
         <div ref={container$} className={classes.container}>
             {!available ? (
-                <Scope scope={{ line: 0, name: 'Stack', members: [] }} />
+                <Scope scope={{ line: 0, name: 'Stack', members: [] }} event={event} last={false} />
             ) : stack.length > 0 ? (
-                stack.map((scope, i) => <Scope key={i} scope={scope} />)
+                stack.map((scope, i) => <Scope key={i} scope={scope} event={event} last={i === stack.length - 1} />)
             ) : (
                 <span className={classes.label}>{'Stack unavailable'}</span>
             )}

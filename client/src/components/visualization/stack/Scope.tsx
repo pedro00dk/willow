@@ -13,10 +13,14 @@ const classes = {
 }
 
 const styles = {
+    headColor: (event: tracer.Snapshot['event'], last: boolean) => {
+        if (!last || event === 'line') return 'none'
+        return (event === 'call' ? colors.green : event === 'return' ? colors.yellow : colors.red).lighter
+    },
     cellColor: (changed: boolean) => changed && colors.yellow.lighter
 }
 
-export const Scope = (props: { scope: tracer.Scope }) => {
+export const Scope = (props: { scope: tracer.Scope; event: tracer.Snapshot['event']; last: boolean }) => {
     const previousMembers = React.useRef<{ [name: string]: tracer.Member }>({})
 
     React.useEffect(() => {
@@ -27,7 +31,11 @@ export const Scope = (props: { scope: tracer.Scope }) => {
 
     return (
         <table className={classes.container}>
-            <thead className={classes.column} title={props.scope.name}>
+            <thead
+                className={classes.column}
+                title={props.scope.name}
+                style={{ background: styles.headColor(props.event, props.last) }}
+            >
                 <tr className={classes.row}>
                     <th className={classes.headerCell}>{props.scope.name}</th>
                 </tr>
