@@ -2,9 +2,8 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
-import { Base } from './Base'
-import { ComputedParameters, Edge } from '../../Graph'
-import { getDisplayValue, getMemberName, isSameMember } from '../../TracerUtils'
+import { ComputedParameters, Edge, Node } from '../../Graph'
+import { getValueDisplay, getValueString, isSameMember } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex align-items-end text-nowrap',
@@ -15,7 +14,7 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter)
+    cellColor: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter)
 }
 
 export const defaultParameters = {
@@ -32,9 +31,10 @@ export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list'])
 export const Shape = (props: {
     id: string
     obj: tracer.Obj
+    node: Node
     previousMembers: { [id: string]: tracer.Member }
     parameters: ComputedParameters<typeof defaultParameters>
-    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
+    onReference: (reference: { key: string; target: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const showIndices = props.parameters['show indices']
     const showValues = props.parameters['show values']
@@ -69,16 +69,16 @@ export const Shape = (props: {
     }
 
     const renderColumn = (member: tracer.Member, ratio: number, columnIndex: number) => {
-        const name = getMemberName(member)
+        const key = getValueString(member.key)
         const displayIndex = (member.key as number).toString()
-        const displayValue = getDisplayValue(member.value, props.id)
-        const changed = !isSameMember(member, props.previousMembers[name])
+        const displayValue = getValueDisplay(member.value, props.id)
+        const changed = !isSameMember(member, props.previousMembers[key])
 
         return (
             <div
                 key={columnIndex}
                 className={classes.element}
-                style={{ background: styles.background(changed), width: columnWidth }}
+                style={{ background: styles.cellColor(changed), width: columnWidth }}
                 title={displayValue}
             >
                 <div className={classes.column} style={{ height: `${ratio * columnHeight}px` }} />
@@ -89,20 +89,20 @@ export const Shape = (props: {
     }
 
     return (
-        <Base title={props.obj.type}>
-            <div className={classes.container}>
-                {!supported.has(props.obj.category)
-                    ? 'incompatible'
-                    : props.obj.members.length === 0
-                    ? 'empty'
-                    : props.obj.members.some(member => typeof member.value !== 'number' || !isFinite(member.value))
-                    ? 'not a number'
-                    : (() => {
-                          const values = props.obj.members.map(member => member.value as number)
-                          const ratios = columnDiff === 'delta' ? computeDeltaRatios(values) : computeStepRatios(values)
-                          return props.obj.members.map((member, i) => renderColumn(member, ratios[i], i))
-                      })()}
-            </div>
-        </Base>
+        <div className={classes.container}>
+            {!supported.has(props.obj.category) ? (
+                <span title={'Object type not supported by shape'}>{'error'}</span>
+            ) : props.obj.members.length === 0 ? (
+                <span title={'Object is empty'}>{'[]'}</span>
+            ) : props.obj.members.some(member => typeof member.value !== 'number' || !isFinite(member.value)) ? (
+                <span title={'Object contains non number or infinity value'}>{'error'}</span>
+            ) : (
+                (() => {
+                    const values = props.obj.members.map(member => member.value as number)
+                    const ratios = columnDiff === 'delta' ? computeDeltaRatios(values) : computeStepRatios(values)
+                    return props.obj.members.map((member, i) => renderColumn(member, ratios[i], i))
+                })()
+            )}
+        </div>
     )
 }

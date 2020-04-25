@@ -2,9 +2,8 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
-import { Base } from './Base'
-import { ComputedParameters, Edge } from '../../Graph'
-import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
+import { ComputedParameters, Edge, Node } from '../../Graph'
+import { getValueDisplay, getValueString, isSameMember, isValueReference } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex text-nowrap',
@@ -15,8 +14,8 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter),
-    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.blue.main)
+    cellColor: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter),
+    edgeColor: (changed: boolean) => (changed ? colors.yellow.darker : colors.blue.main)
 }
 
 export const defaultParameters = {
@@ -33,9 +32,10 @@ export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list', '
 export const Shape = (props: {
     id: string
     obj: tracer.Obj
+    node: Node
     previousMembers: { [id: string]: tracer.Member }
     parameters: ComputedParameters<typeof defaultParameters>
-    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
+    onReference: (reference: { key: string; target: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const showIndices = props.parameters['show indices']
     const cellWidth = props.parameters['cell width']
@@ -57,18 +57,18 @@ export const Shape = (props: {
     )
 
     const renderCell = (member: tracer.Member, cellIndex: number) => {
-        const name = getMemberName(member)
-        const displayIndex = (wrapIndices ? cellIndex : (member.key as number)).toString()
-        const displayValue = getDisplayValue(member.value, props.id)
-        const isObject = isValueObject(member.value)
-        const changed = !isSameMember(member, props.previousMembers[name])
+        const key = getValueString(member.key)
+        const displayIndex = wrapIndices ? cellIndex.toString() : getValueDisplay(member.key)
+        const displayValue = getValueDisplay(member.value, props.id)
+        const isReference = isValueReference(member.value)
+        const changed = !isSameMember(member, props.previousMembers[key])
 
         return (
             <div
                 key={cellIndex}
                 className={classes.element}
                 style={{
-                    background: styles.background(changed),
+                    background: styles.cellColor(changed),
                     flexDirection: orientation === 'row' ? 'column' : 'row',
                     width: cellWidth
                 }}
@@ -77,12 +77,12 @@ export const Shape = (props: {
                 {showIndices && <span className={classes.index}>{displayIndex}</span>}
                 <span
                     ref={ref$ => {
-                        if (!ref$ || !isObject) return
+                        if (!ref$ || !isReference) return
                         props.onReference({
-                            id: (member.value as [string])[0],
-                            name,
+                            key,
+                            target: getValueString(member.value),
                             ref$,
-                            edge: { color: styles.edge(changed), text: displayIndex }
+                            edge: { color: styles.edgeColor(changed), text: displayIndex }
                         })
                     }}
                     className={classes.value}
@@ -94,14 +94,14 @@ export const Shape = (props: {
     }
 
     return (
-        <Base title={props.obj.type}>
-            <div className={classes.container} style={{ flexDirection: orientation === 'row' ? 'column' : 'row' }}>
-                {!supported.has(props.obj.category)
-                    ? 'incompatible'
-                    : props.obj.members.length === 0
-                    ? 'empty'
-                    : chunks.map((chunk, i) => renderChunk(chunk, i))}
-            </div>
-        </Base>
+        <div className={classes.container} style={{ flexDirection: orientation === 'row' ? 'column' : 'row' }}>
+            {!supported.has(props.obj.category) ? (
+                <span title={'Object type not supported by shape'}>{'error'}</span>
+            ) : props.obj.members.length === 0 ? (
+                <span title={'Object is empty'}>{'[ ]'}</span>
+            ) : (
+                chunks.map((chunk, i) => renderChunk(chunk, i))
+            )}
+        </div>
     )
 }

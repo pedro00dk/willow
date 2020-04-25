@@ -2,9 +2,8 @@ import { css } from 'emotion'
 import * as React from 'react'
 import { colors } from '../../../../../colors'
 import * as tracer from '../../../../../types/tracer'
-import { Base } from './Base'
-import { ComputedParameters, Edge } from '../../Graph'
-import { getDisplayValue, getMemberName, isSameMember, isValueObject } from '../../TracerUtils'
+import { ComputedParameters, Edge, Node } from '../../Graph'
+import { getValueDisplay, getValueString, isSameMember, isValueReference } from '../../TracerUtils'
 
 const classes = {
     container: 'd-flex flex-column text-nowrap',
@@ -14,8 +13,8 @@ const classes = {
 }
 
 const styles = {
-    background: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter),
-    edge: (changed: boolean) => (changed ? colors.yellow.darker : colors.blue.main)
+    cellColor: (changed: boolean) => (changed ? colors.yellow.lighter : colors.blue.lighter),
+    edgeColor: (changed: boolean) => (changed ? colors.yellow.darker : colors.blue.main)
 }
 
 export const defaultParameters = {
@@ -30,38 +29,40 @@ export const supported: ReadonlySet<tracer.Obj['category']> = new Set(['list', '
 export const Shape = (props: {
     id: string
     obj: tracer.Obj
+    node: Node
     previousMembers: { [id: string]: tracer.Member }
     parameters: ComputedParameters<typeof defaultParameters>
-    onReference: (reference: { id: string; name: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
+    onReference: (reference: { key: string; target: string; ref$: HTMLSpanElement; edge: Partial<Edge> }) => void
 }) => {
     const showKeys = props.parameters['show keys']
     const keyWidth = props.parameters['key width']
     const valueWidth = props.parameters['value width']
 
     const renderEntry = (member: tracer.Member) => {
-        const name = getMemberName(member)
-        const displayKey = getDisplayValue(member.key, props.id)
-        const displayValue = getDisplayValue(member.value, props.id)
-        const isKeyObject = isValueObject(member.key)
-        const isValObject = isValueObject(member.value)
-        const changed = !isSameMember(member, props.previousMembers[name])
+        const key = getValueString(member.key)
+        const value = getValueString(member.value)
+        const displayKey = getValueDisplay(member.key, props.id)
+        const displayValue = getValueDisplay(member.value, props.id)
+        const isKeyReference = isValueReference(member.key)
+        const isValReference = isValueReference(member.value)
+        const changed = !isSameMember(member, props.previousMembers[key])
 
         return (
             <div
-                key={name}
+                key={key}
                 className={classes.element}
-                style={{ background: styles.background(changed) }}
+                style={{ background: styles.cellColor(changed) }}
                 title={displayValue}
             >
                 {showKeys && (
                     <span
                         ref={ref$ => {
-                            if (!ref$ || !isKeyObject) return
+                            if (!ref$ || !isKeyReference) return
                             props.onReference({
-                                id: (member.key as [string])[0],
-                                name: `${name}-key`,
+                                key: `${key}-key`,
+                                target: key,
                                 ref$,
-                                edge: { color: styles.edge(changed) }
+                                edge: { color: styles.edgeColor(changed) }
                             })
                         }}
                         className={classes.key}
@@ -72,12 +73,12 @@ export const Shape = (props: {
                 )}
                 <span
                     ref={ref$ => {
-                        if (!ref$ || !isValObject) return
+                        if (!ref$ || !isValReference) return
                         props.onReference({
-                            id: (member.value as [string])[0],
-                            name,
+                            key,
+                            target: value,
                             ref$,
-                            edge: { color: styles.edge(changed), text: displayKey }
+                            edge: { color: styles.edgeColor(changed), text: displayKey }
                         })
                     }}
                     className={classes.value}
@@ -90,14 +91,14 @@ export const Shape = (props: {
     }
 
     return (
-        <Base title={props.obj.type}>
-            <div className={classes.container}>
-                {!supported.has(props.obj.category)
-                    ? 'incompatible'
-                    : props.obj.members.length === 0
-                    ? 'empty'
-                    : props.obj.members.map(member => renderEntry(member))}
-            </div>
-        </Base>
+        <div className={classes.container}>
+            {!supported.has(props.obj.category) ? (
+                <span title={'Object type not supported by shape'}>{'error'}</span>
+            ) : props.obj.members.length === 0 ? (
+                <span title={'Object is empty'}>{'{ }'}</span>
+            ) : (
+                props.obj.members.map(member => renderEntry(member))
+            )}
+        </div>
     )
 }

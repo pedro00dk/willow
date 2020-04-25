@@ -2,7 +2,7 @@ import React from 'react'
 import { Item } from 'react-contexify'
 import * as tracer from '../../../../types/tracer'
 import { DefaultParameters, UnknownParameters } from '../Graph'
-import { isValueObject, getMemberName } from '../TracerUtils'
+import { getValueString, isValueReference } from '../TracerUtils'
 
 const FlagParameter = (props: { name: string; value: boolean; onChange: (value: boolean) => void }) => (
     <Item>
@@ -59,12 +59,12 @@ const MemberParameter = (props: {
     const memberNames = props.obj.members
         .filter(
             member =>
-                !isValueObject(member.key) &&
+                !isValueReference(member.key) &&
                 (props.members === 'all' ||
-                    (props.members === 'values' && !isValueObject(member.value)) ||
-                    (props.members === 'references' && isValueObject(member.value)))
+                    (props.members === 'values' && !isValueReference(member.value)) ||
+                    (props.members === 'references' && isValueReference(member.value)))
         )
-        .map(member => getMemberName(member))
+        .map(member => getValueString(member.key))
 
     return (
         <Item>
