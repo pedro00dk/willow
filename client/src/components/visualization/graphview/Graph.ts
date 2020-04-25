@@ -392,7 +392,6 @@ export class Graph {
     index = 0
     steps = 0
     animate = true
-    reapplyLayout = true
     view: View = new View()
     subscriptions = new Subscriptions()
     nodes: { [id: string]: Node } = {}

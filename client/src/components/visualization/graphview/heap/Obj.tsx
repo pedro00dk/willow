@@ -110,7 +110,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                     const position = props.node.getPosition()
                     const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, mode)
                     Object.values(structure.members).forEach(node => (node.layout.enabled = false))
-                    structure.base.layout.enabled = props.graph.reapplyLayout
+                    structure.base.layout.enabled = true
                     structure.base.layout.horizontal = horizontal
                     props.graph.animate = true
                     Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))

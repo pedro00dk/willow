@@ -4,7 +4,6 @@
 type State = {
     visualization: boolean
     preserveLayout: boolean
-    reapplyLayout: boolean
     liveProgramming: boolean
 }
 
@@ -12,13 +11,11 @@ type Action =
     | { type: 'options/set'; payload: State }
     | { type: 'options/setVisualization'; payload: boolean }
     | { type: 'options/setPreserveLayout'; payload: boolean }
-    | { type: 'options/setReapplyLayout'; payload: boolean }
     | { type: 'options/setLiveProgramming'; payload: boolean }
 
 const initialState: State = {
     visualization: true,
     preserveLayout: true,
-    reapplyLayout: true,
     liveProgramming: true
 }
 
@@ -30,8 +27,6 @@ export const reducer = (state: State = initialState, action: Action): State => {
             return { ...state, visualization: action.payload }
         case 'options/setPreserveLayout':
             return { ...state, preserveLayout: action.payload }
-            case 'options/setReapplyLayout':
-                return { ...state, reapplyLayout: action.payload }
         case 'options/setLiveProgramming':
             return { ...state, liveProgramming: action.payload }
         default:
@@ -51,14 +46,9 @@ const setPreserveLayout = (preserveLayout: boolean): Action => ({
     payload: preserveLayout
 })
 
-const setReapplyLayout = (reapplyLayout: boolean): Action => ({
-    type: 'options/setReapplyLayout',
-    payload: reapplyLayout
-})
-
 const setLiveProgramming = (liveProgramming: boolean): Action => ({
     type: 'options/setLiveProgramming',
     payload: liveProgramming
 })
 
-export const actions = { set, setVisualization, setPreserveLayout, setReapplyLayout, setLiveProgramming }
+export const actions = { set, setVisualization, setPreserveLayout, setLiveProgramming }
