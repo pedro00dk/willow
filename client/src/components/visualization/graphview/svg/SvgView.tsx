@@ -92,7 +92,6 @@ export const SvgView = (props: { graph: Graph; children?: React.ReactNode }) => 
                     height={viewSize.height / 2}
                 />
             </g>
-
             {props.children}
         </svg>
     )
