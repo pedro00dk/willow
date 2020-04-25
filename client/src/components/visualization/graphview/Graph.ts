@@ -74,7 +74,7 @@ export class Node {
     depth = 0
     render = true
     positions = [] as { x: number; y: number }[]
-    size = { width: 0, height: 0 }
+    size = { x: 0, y: 0 }
     mode = 'type' as 'local' | 'type'
     shape = undefined as string
     parameters = new Parameters()
@@ -111,8 +111,8 @@ export class Node {
 
     centralize(random = 0, mode = 'avl' as 'all' | 'ovr' | 'avl', index = this.graph.index) {
         const position = this.graph.view.boxCenter()
-        position.x += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.width - this.size.width) / 2)
-        position.y += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.height - this.size.height) / 2)
+        position.x += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.width - this.size.x) / 2)
+        position.y += (Math.random() - 0.5) * 2 * random * ((this.graph.view.box.height - this.size.y) / 2)
         return this.setPosition(position, mode, index)
     }
 
@@ -164,7 +164,7 @@ export class Node {
 export class Edge {
     readonly graph: Graph
     readonly id: string
-    readonly name: string
+    readonly key: string
     self = true
     target: string = undefined
     from = { delta: { x: 0, y: 0 }, source: 'origin' as 'origin' | 'self' | 'target' }
@@ -178,7 +178,7 @@ export class Edge {
         Object.assign(this, partial)
         this.graph = graph
         this.id = id
-        this.name = name
+        this.key = name
     }
 
     private computeFrom(index = this.graph.index) {
@@ -200,8 +200,8 @@ export class Edge {
         else if (source === 'target') return { x: targetPosition.x + delta.x, y: targetPosition.y + delta.y }
         else
             return {
-                x: Math.min(Math.max(from.x, targetPosition.x + delta.x), targetPosition.x + targetSize.width),
-                y: Math.min(Math.max(from.y, targetPosition.y + delta.y), targetPosition.y + targetSize.height)
+                x: Math.min(Math.max(from.x, targetPosition.x + delta.x), targetPosition.x + targetSize.x),
+                y: Math.min(Math.max(from.y, targetPosition.y + delta.y), targetPosition.y + targetSize.y)
             }
     }
 
@@ -373,8 +373,8 @@ export class Structure {
         const [layout] = this.computeLayout()
         const baseDelta = layout[this.base.id]
         const scale = {
-            breadth: (horizontal ? this.base.size.height : this.base.size.width) * increment.breadth,
-            depth: (horizontal ? this.base.size.width : this.base.size.height) * increment.depth
+            breadth: (horizontal ? this.base.size.y : this.base.size.x) * increment.breadth,
+            depth: (horizontal ? this.base.size.x : this.base.size.y) * increment.depth
         }
         const translate = {
             breadth: horizontal ? position.y : position.x,
