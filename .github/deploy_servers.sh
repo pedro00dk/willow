@@ -30,7 +30,8 @@ sudo docker container run \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     docker.pkg.github.com/${REPOSITORY}/willow-api \
     -- \
-    --tracer python "${PYTHON_TRACER}" \ # --tracer java "${JAVA_TRACER}" \
+    --tracer python "${PYTHON_TRACER}" \ 
+    --tracer java "${JAVA_TRACER}" \
     --auth \
     --auth-client-id "${AUTH_CLIENT_ID}" \
     --auth-client-secret "${AUTH_CLIENT_SECRET}" \
