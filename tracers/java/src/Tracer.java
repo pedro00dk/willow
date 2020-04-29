@@ -1,5 +1,6 @@
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.event.*;
 
@@ -20,6 +21,7 @@ public class Tracer {
     private Inspector inspector;
     private JsonObject response;
     private int currentStep;
+    private boolean firstStep;
     private List<String> printCache;
 
     /**
@@ -34,6 +36,7 @@ public class Tracer {
         inspector = new Inspector();
         response = null;
         currentStep = 0;
+        firstStep = true;
         printCache = new ArrayList<>();
     }
 
@@ -95,13 +98,14 @@ public class Tracer {
      * Trace the event.
      * trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising a
      * TraceStopException to stop the Executor.
+     * This trace implementation skips the first event of a program.
      *
      * @param event event where the stack and heap data will be extracted from.
      * @throws PrintedException
      * @throws TracerStopException
      * @throws IncompatibleThreadStateException
      */
-    private void trace(Event event) throws PrintedException, TracerStopException, IncompatibleThreadStateException {
+    private void trace(Event event) throws PrintedException, TracerStopException, IncompatibleThreadStateException, AbsentInformationException {
         // check errors print in stdout or stderr in non Locatable frames
         if ((event instanceof VMStartEvent ||
                 event instanceof VMDeathEvent ||
@@ -118,6 +122,10 @@ public class Tracer {
         if (!(event instanceof LocatableEvent) || !((LocatableEvent) event).thread().name().equals("main")) return;
         if (this.currentStep++ >= this.steps)
             throw new TracerStopException("Program too long, maximum steps allowed: " + this.steps);
+        if (firstStep) {
+            firstStep = false;
+            return;
+        }
 
         var snapshot = inspector.inspect((LocatableEvent) event);
         var step = new JsonObject();

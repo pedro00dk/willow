@@ -1,8 +1,9 @@
-import inspector
-import scope
 import sys
 import traceback
 import types
+
+import inspector
+import scope
 
 
 class Tracer:
@@ -75,7 +76,7 @@ class Tracer:
         However these frames are ignored when _filename is checked, tracing only frames of the debugee program.
         _trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising
         a TraceStopException to stop exec().
-        This trace implementation skips the first call event of a program.
+        This trace implementation skips the first event of a program.
         - frame: `frame`: frame where the state data will be extracted from
         - event: `str`: frame event type, one of: call, line, exception or return
         - args: `any | any[t]`: return object if event is return or exception data if event is exception
