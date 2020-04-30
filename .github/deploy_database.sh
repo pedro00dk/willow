@@ -1,6 +1,6 @@
 # Deploy database script
 
-DATABASE_USER=${1}
+DATABASE_USERNAME=${1}
 DATABASE_PASSWORD=${2}
 DATABASE_DIRECTORY=${3}
 DATABASE_PORT=${4}
@@ -14,7 +14,7 @@ docker pull mongo
 
 echo "
 db = db.getSiblingDB('admin')
-db.createUser({ user: '${DATABASE_USER}', pwd: '${DATABASE_PASSWORD}', roles: ['root'] })
+db.createUser({ user: '${DATABASE_USERNAME}', pwd: '${DATABASE_PASSWORD}', roles: ['root'] })
 " > ./createDatabaseAdmin.js
 
 sudo mkdir --parents "${DATABASE_DIRECTORY}"
@@ -22,7 +22,7 @@ sudo cp ./createDatabaseAdmin.js "${DATABASE_DIRECTORY}/createDatabaseAdmin.js"
 
 docker container run \
     --name mongo-noauth \
-    --rm --detach --publish ${DATABASE_PORT}:27017 --volume ${DATABASE_DIRECTORY}:/data/db/ \
+    --rm --detach --volume ${DATABASE_DIRECTORY}:/data/db/ \
     mongo \
     mongod
 

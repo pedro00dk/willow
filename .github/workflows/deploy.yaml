@@ -8,8 +8,8 @@ on:
 jobs:
   #
   #
-  build:
-    name: Build and deploy docker images
+  docker:
+    name: Build and deploy docker images to github registry
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,31 +17,38 @@ jobs:
         with:
           ref: deploy
 
-      - name: Build docker images
+      - name: Build images
         run: |
           docker image build --pull --no-cache --tag willow-api -- ./api/
           docker image build --pull --no-cache --tag willow-client -- ./client/
           docker image build --pull --no-cache --tag willow-tracer-java -- ./tracers/java/
           docker image build --pull --no-cache --tag willow-tracer-python -- ./tracers/python/
+          docker image ls
 
-      - name: Deploy images to github registry
+      - name: Tag images
         run: |
-          USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
-          docker login --username ${USERNAME} --password ${{ github.token }} docker.pkg.github.com
           docker image tag willow-api docker.pkg.github.com/${{ github.repository }}/willow-api
           docker image tag willow-client docker.pkg.github.com/${{ github.repository }}/willow-client
           docker image tag willow-tracer-java docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
           docker image tag willow-tracer-python docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
           docker image ls
+
+      - name: Sign in
+        run: |
+          GITHUB_USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
+          docker login --username ${GITHUB_USERNAME} --password ${{ github.token }} docker.pkg.github.com
+
+      - name: Deploy images
+        run: |
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-api
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-client
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
           docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
   #
   #
-  deploy:
-    name: Deploy to google cloud
-    needs: build
+  gcloud:
+    name: Fetch images and deploy into google cloud
+    needs: docker
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,80 +56,88 @@ jobs:
         with:
           ref: deploy
 
-      - name: Sign in and setup gcloud
+      - name: Sign in
         run: |
-          echo ${{ secrets.GCLOUD_SETUP_SERVICE_ACCOUNT_KEY }} | base64 --decode > ./key.json
-          gcloud auth activate-service-account ${{ secrets.GCLOUD_SETUP_SERVICE_ACCOUNT_EMAIL }} --key-file ./key.json
-          gcloud config set project ${{ secrets.GCLOUD_SETUP_PROJECT }}
-          gcloud config set compute/zone ${{ secrets.GCLOUD_SETUP_COMPUTE_ZONE }}
+          GCP_AUTH_KEY=$(echo ${{ secrets.GCP_AUTH_KEY }} | base64 --decode)
+          GCP_PROJECT=$(echo ${GCP_AUTH_KEY} | grep -Po '"project_id"\s*:\s*".*?"' | cut -d \" -f4)
+          GCP_EMAIL=$(echo ${GCP_AUTH_KEY} | grep -Po '"client_email"\s*:\s*".*?"' | cut -d \" -f4)
+          echo ${GCP_AUTH_KEY} > ./key-file.json
+          gcloud auth activate-service-account ${GCP_EMAIL} --key-file ./key-file.json
+          gcloud config set project ${GCP_PROJECT}
+          gcloud config set compute/zone ${{ secrets.GCP_COMPUTE_ZONE }}
 
-      - name: Configure firewall rules
+      - name: Configure firewall
         run: |
           gcloud compute firewall-rules create allow-database \
-              --action=ALLOW --direction=INGRESS --rules=tcp:58328 --target-tags=database-server \
+              --action=ALLOW --direction=INGRESS --rules=tcp:59328 --target-tags=database-server \
               || true
           gcloud compute firewall-rules create allow-api \
-              --action=ALLOW --direction=INGRESS --rules=tcp:52966 --target-tags=api-server \
+              --action=ALLOW --direction=INGRESS --rules=tcp:52561 --target-tags=api-server \
               || true
 
-      - name: Configure database compute instance
+      - name: Create database instance
         run: |
-          if [ ${{ secrets.GCLOUD_DATABASE_INSTANCE_RESET }} == 'true' ] # reset the instance wipes all user data
+          if [ ${{ secrets.GCP_DATABASE_RESET }} == 'true' ]
           then
-              gcloud --quiet compute instances delete ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
+              gcloud --quiet compute instances delete willow-database \
                   || true
           fi
           gcloud compute instances create \
-              ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
-              --machine-type ${{ secrets.GCLOUD_DATABASE_INSTANCE_TYPE }} \
+              willow-database \
+              --machine-type ${{ secrets.GCP_DATABASE_TYPE }} \
               --image-project cos-cloud --image-family cos-stable \
               --boot-disk-size 10GB --boot-disk-type pd-ssd \
               --tags database-server \
               || true
 
-      - name: Configure server compute instance
+      - name: Create server instance
         run: |
-          if [ ${{ secrets.GCLOUD_SERVER_INSTANCE_RESET }} == 'true' ]
+          if [ ${{ secrets.GCP_SERVER_RESET }} == 'true' ]
           then
-              gcloud --quiet compute instances delete ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} \
+              gcloud --quiet compute instances delete willow-server \
                   || true
           fi
           gcloud compute instances create \
-              ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} \
-              --machine-type ${{ secrets.GCLOUD_SERVER_INSTANCE_TYPE }} \
+              willow-server \
+              --machine-type ${{ secrets.GCP_SEVER_TYPE }} \
               --image-project cos-cloud --image-family cos-stable \
               --boot-disk-size 10GB \
               --tags http-server,https-server,api-server \
               || true
 
-      - name: Run deploy script on database compute instance
+      - name: Deploy database instance
         run: |
           cat ./.github/deploy_database.sh |
-          sed "s/\${1}/${{ secrets.DATABASE_USER }}/" |
+          sed "s/\${1}/${{ secrets.DATABASE_USERNAME }}/" |
           sed "s/\${2}/${{ secrets.DATABASE_PASSWORD }}/" |
           sed "s%\${3}%/home/mongo/data/db%" |
-          sed "s/\${4}/58328/" |
+          sed "s/\${4}/59328/" |
           tee ./deploy_database_filled.sh
+          gcloud compute instances add-metadata willow-database \
+              --metadata-from-file startup-script=./deploy_database_filled.sh
+          gcloud --quiet compute ssh willow-database -- "sh -c $(cat ./deploy_database_filled.sh)"
 
-          gcloud --quiet compute ssh ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} -- \
-            "sh -c $(cat ./deploy_database_filled.sh)"
-
-      - name: Run deploy script on server compute instance
+      - name: Deploy server instance
         run: |
-          USERNAME=$(echo ${{ github.repository }} | cut -d '/' -f 1)
-          DATABASE_IP=$(
-              gcloud compute instances describe ${{ secrets.GCLOUD_DATABASE_INSTANCE_NAME }} \
-                  --format 'get(networkInterfaces[0].networkIP)'
-          )
-          DATABASE_URL="mongodb://${{ secrets.DATABASE_USER }}:${{ secrets.DATABASE_PASSWORD }}@${DATABASE_IP}:58328"
+          GITHUB_USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
+          DATABASE_PRIVATE_IP=$(gcloud compute instances describe willow-database --format 'get(networkInterfaces[0].networkIP)')
+          DATABASE_PUBLIC_IP=$(gcloud compute instances describe willow-database --format 'get(networkInterfaces[0].accessConfigs[0].natIP)')
+          SERVER_PRIVATE_IP=$(gcloud compute instances describe willow-server --format 'get(networkInterfaces[0].networkIP)')
+          SERVER_PUBLIC_IP=$(gcloud compute instances describe willow-server --format 'get(networkInterfaces[0].accessConfigs[0].natIP)')
+          API_DB_URL="mongodb://${{ secrets.DATABASE_USERNAME }}:${{ secrets.DATABASE_PASSWORD }}@${DATABASE_PRIVATE_IP}:59328"
+          CLIENT_API="http://${SERVER_PUBLIC_IP}:52561"
+          CLIENT_API="http://willowbeta.xyz:52561"
           cat ./.github/deploy_servers.sh |
-          sed "s/\${1}/${USERNAME}/" |
+          sed "s/\${1}/${GITHUB_USERNAME}/" |
           sed "s/\${2}/${{ github.token }}/" |
           sed "s%\${3}%${{ github.repository }}%" |
-          sed "s%\${4}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_ID }}%" |
-          sed "s%\${5}%${{ secrets.GCLOUD_CREDENTIALS_AUTHENTICATION_CLIENT_SECRET }}%" |
-          sed "s%\${6}%${{ secrets.API_URL }}%" |
-          sed "s%\${7}%${DATABASE_URL}%" |
+          sed "s/\${4}/${{ secrets.API_AUTH_CLIENT_ID }}/" |
+          sed "s/\${5}/${{ secrets.API_AUTH_CLIENT_SECRET }}/" |
+          sed "s%\${6}%${API_DB_URL}%" |
+          sed "s/\${7}/52561/" |
+          sed "s%\${8}%${CLIENT_API}%" |
+          sed "s/\${9}/80/" |
           tee ./deploy_servers_filled.sh
-          gcloud --quiet compute ssh ${{ secrets.GCLOUD_SERVER_INSTANCE_NAME }} -- \
-            "sh -c $(cat ./deploy_servers_filled.sh)"
+          gcloud compute instances add-metadata willow-server \
+              --metadata-from-file startup-script=./deploy_servers_filled.sh
+          gcloud --quiet compute ssh willow-server -- "sh -c $(cat ./deploy_servers_filled.sh)"
