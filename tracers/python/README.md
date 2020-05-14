@@ -7,6 +7,58 @@ Snapshots of the stack and heap, and errors generated during execution are compo
 The Makefile can be used to start the tracer command line interface.
 The arguments are passed in to the python script through the ARGS variable.
 
+## Execution Modes
+
+This tool provides three way to execute, they are:
+
+### Server
+
+```shell
+$ make setup
+$ . .venv/bin/activate
+$ make server
+SERVER=true python ./main.py
+ * Serving Flask app "Python tracer Server" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:8000/ (Press CTRL+C to quit)
+
+```
+
+The request must be provided through POST requests.
+
+### Cloud Function
+
+Before running the deploy command, you must login to your gcp account and configure project and function region.
+You can also change the make command to set these properties.
+
+```shell
+$ make deploy
+gcloud functions deploy cloud_python_tracer --runtime python37 --trigger-http --allow-unauthenticated
+Deploying function (may take a while - up to 2 minutes)...done.
+availableMemoryMb: 256
+entryPoint: cloud_python_tracer
+httpsTrigger:
+  url: <function-url>
+ingressSettings: ALLOW_ALL
+labels:
+  deployment-tool: cli-gcloud
+name: <function-name>
+runtime: python37
+serviceAccountEmail: <service-account>
+sourceUploadUrl: <upload-url>
+status: ACTIVE
+timeout: 60s
+updateTime: <date>
+versionId: '20'
+```
+
+The request must be provided through POST requests.
+
+### Terminal
+
 ```shell
 $ make run ARGS='--help'
 python ./src/main.py --help
@@ -25,7 +77,8 @@ $ make run --silent ARGS='--pretty --test'
 ```
 
 The request must be provided through the tracer standard input stream.
-The tracer response is printed to the standard output stream.
+
+## Request Format
 
 The request must be in the json format with the following properties:
 
@@ -39,13 +92,13 @@ The request must be in the json format with the following properties:
 
 ## Docker
 
-This tracer image does not require especial options to build or run.
+This application can also run from a container in server or terminal execution modes
 
 ```shell
-$ docker image build --tag willow-tracer-python -- ./
+$ docker image build --tag <image-name> -- ./
 
-$ # docker ENTRYPOINT='make run' CMD=''
+$ # docker CMD='make terminal'
 $ # ex:
-$ docker container run --rm --interactive --tty -- willow-tracer-python
-$ docker container run --rm --interactive --tty -- willow-tracer-python --silent ARGS='--pretty'
+$ docker container run --rm --interactive --tty -- <image-name> # CMD is implicit, for terminal mode
+$ docker container run --rm --interactive --tty -- willow-tracer-python make server # for server mode
 ```
