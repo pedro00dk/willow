@@ -2,8 +2,7 @@ import sys
 import traceback
 import types
 
-import inspector
-import scope
+from . import inspector, scope
 
 
 class Tracer:

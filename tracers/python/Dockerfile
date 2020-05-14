@@ -4,8 +4,12 @@ RUN apk add make
 
 WORKDIR /app
 
-ADD ./Dockerfile ./Makefile ./
-ADD ./res ./res/
-ADD ./src ./src/
+ADD ./requeriments.txt ./
+RUN pip install -r ./requeriments.txt
 
-ENTRYPOINT ["make", "run"]
+ADD ./main.py ./Makefile ./
+ADD ./res ./res/
+ADD ./tracer ./tracer/
+
+
+CMD ["make", "terminal"]
