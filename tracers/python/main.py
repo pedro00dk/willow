@@ -64,4 +64,4 @@ if __name__ == '__main__':
     if os.environ.get('SERVER') != 'true':
         terminal_tracer()
     else:
-        server_tracer().run(host='0.0.0.0', port=8000)
+        server_tracer().run(host='0.0.0.0', port=8000, threaded=False, processes=8)
