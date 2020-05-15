@@ -1,12 +1,9 @@
-setup:
+build:
 	python -m venv .venv
-	.venv/bin/pip install -r requeriments.txt
+	.venv/bin/pip install -r requirements.txt
 
-terminal:
-	python ./main.py ${ARGS}
-
-server:
-	SERVER=true python ./main.py
+run:
+	.venv/bin/python ./main.py ${ARGS}
 
 deploy:
 	gcloud functions deploy cloud_python_tracer --runtime python37 --trigger-http --allow-unauthenticated

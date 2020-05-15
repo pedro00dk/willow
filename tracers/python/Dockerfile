@@ -4,12 +4,12 @@ RUN apk add make
 
 WORKDIR /app
 
-ADD ./requeriments.txt ./
-RUN pip install -r ./requeriments.txt
+ADD ./Makefile ./requirements.txt ./
+RUN make build
 
-ADD ./main.py ./Makefile ./
+ADD ./main.py ./
 ADD ./res ./res/
 ADD ./tracer ./tracer/
 
 
-CMD ["make", "terminal"]
+CMD ["make", "run"]

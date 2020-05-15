@@ -7,18 +7,40 @@ Snapshots of the stack and heap, and errors generated during execution are compo
 The Makefile can be used to start the tracer command line interface.
 The arguments are passed in to the python script through the ARGS variable.
 
-## Execution Modes
+```shell
+$ make build
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+    ....
 
-This tool provides three way to execute, they are:
+$ make run ARGS='--help'
+.venv/bin/python ./main.py --help
+usage:
+    tracer [options]
+    request: {"source?": "string", "input"?: "string", "steps?": "number"}
+
+
+Python Tracer CLI
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --server           Enable http server mode
+  --port PORT        The server port
+  --process PROCESS  Number of server processes
+  --pretty           Pretty print output
+  --test             Run the test sourcePython Tracer CLI
+
+```
+
+This tool provides three ways to execute, they are:
 
 ### Server
 
 ```shell
-$ make setup
-$ . .venv/bin/activate
-$ make server
-SERVER=true python ./main.py
- * Serving Flask app "Python tracer Server" (lazy loading)
+$ make build
+$ make run ARGS='--server'
+.venv/bin/python ./main.py --server
+ * Serving Flask app "Python Tracer" (lazy loading)
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
@@ -29,9 +51,18 @@ SERVER=true python ./main.py
 
 The request must be provided through POST requests.
 
+### Terminal
+
+```shell
+$ # use the --silent flag to disable echoing command recipes
+$ make run --silent ARGS='--pretty --test'
+```
+
+The request must be provided through the tracer standard input stream.
+
 ### Cloud Function
 
-Before running the deploy command, you must login to your gcp account and configure project and function region.
+Before running the deploy command, you must login to your gcp account and `gcloud config set` for `project` and `function/region`.
 You can also change the make command to set these properties.
 
 ```shell
@@ -57,26 +88,6 @@ versionId: '20'
 
 The request must be provided through POST requests.
 
-### Terminal
-
-```shell
-$ make run ARGS='--help'
-python ./src/main.py --help
-usage: tracer [options]
-  stdin: {"source?": "string", "input"?: "string", "steps?": "number"}
-
-Python tracer CLI
-
-optional arguments:
-  -h, --help  show this help message and exit
-  --pretty    Pretty print output
-  --test      Run the test source
-
-$ # use the --silent flag to disable echoing command recipes
-$ make run --silent ARGS='--pretty --test'
-```
-
-The request must be provided through the tracer standard input stream.
 
 ## Request Format
 
