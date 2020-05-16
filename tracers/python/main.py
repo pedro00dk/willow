@@ -35,24 +35,27 @@ def server(options):
 
 
 def service(request):
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Max-Age': '3600',
-        'Content-Type': 'application/json'
-    }
-    if request.method == 'OPTIONS':
-        return '', 204, headers
-    elif request.method != 'POST':
-        return 'not allowed', 405, headers
-    test = request.args.get('test') == 'true'
-    pretty = request.args.get('pretty') == 'true'
-    request_body = request.get_json(silent=True)
-    if request_body is None:
-        return 'empty body', 400, headers
-    response_body = trace(request_body, test, pretty)
-    return response_body, 200, headers
+    try:
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '3600',
+            'Content-Type': 'application/json'
+        }
+        if request.method == 'OPTIONS':
+            return '', 204, headers
+        elif request.method != 'POST':
+            return 'not allowed', 405, headers
+        test = request.args.get('test') == 'true'
+        pretty = request.args.get('pretty') == 'true'
+        request_body = request.get_json(silent=True)
+        if request_body is None:
+            return 'empty body', 400, headers
+        response_body = trace(request_body, test, pretty)
+        return response_body, 200, headers
+    except Exception as e:
+        return str(e), 500, headers
 
 
 def terminal(options):

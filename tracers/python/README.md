@@ -29,7 +29,6 @@ optional arguments:
   --process PROCESS  Number of server processes
   --pretty           Pretty print output
   --test             Run the test sourcePython Tracer CLI
-
 ```
 
 This tool provides three ways to execute, they are:
@@ -46,7 +45,36 @@ $ make run ARGS='--server'
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://0.0.0.0:8000/ (Press CTRL+C to quit)
+```
 
+The request must be provided through POST requests.
+
+### Cloud Function
+
+Before running the deploy command, you must login to your gcp account and `gcloud config set` for `project` and `function/region`.
+You can also change the make command to set these properties.
+
+```shell
+$ make deploy
+gcloud functions deploy python_tracer --entry-point service --runtime python37 \
+        --memory 256MB --timeout 30s --max-instances 50 --allow-unauthenticated --trigger-http
+Deploying function (may take a while - up to 2 minutes)...done.                                                                                                      
+availableMemoryMb: 256
+entryPoint: service
+httpsTrigger:
+  url: <function-url>
+ingressSettings: ALLOW_ALL
+labels:
+  deployment-tool: cli-gcloud
+maxInstances: 50
+name: <function-name>
+runtime: python37
+serviceAccountEmail: <service-account>
+sourceUploadUrl: <upload-url>
+status: ACTIVE
+timeout: 30s
+updateTime: <date>
+versionId: <version>
 ```
 
 The request must be provided through POST requests.
@@ -59,35 +87,6 @@ $ make run --silent ARGS='--pretty --test'
 ```
 
 The request must be provided through the tracer standard input stream.
-
-### Cloud Function
-
-Before running the deploy command, you must login to your gcp account and `gcloud config set` for `project` and `function/region`.
-You can also change the make command to set these properties.
-
-```shell
-$ make deploy
-gcloud functions deploy cloud_python_tracer --runtime python37 --trigger-http --allow-unauthenticated
-Deploying function (may take a while - up to 2 minutes)...done.
-availableMemoryMb: 256
-entryPoint: cloud_python_tracer
-httpsTrigger:
-  url: <function-url>
-ingressSettings: ALLOW_ALL
-labels:
-  deployment-tool: cli-gcloud
-name: <function-name>
-runtime: python37
-serviceAccountEmail: <service-account>
-sourceUploadUrl: <upload-url>
-status: ACTIVE
-timeout: 60s
-updateTime: <date>
-versionId: '20'
-```
-
-The request must be provided through POST requests.
-
 
 ## Request Format
 

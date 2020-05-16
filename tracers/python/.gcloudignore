@@ -1,6 +1,6 @@
-**/.venv/
-**/.vscode/
-**/__pycache__/
+.venv/
+.vscode/
+__pycache__/
 *.py[cod]
 *$py.class
 *.so
