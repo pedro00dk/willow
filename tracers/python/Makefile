@@ -6,4 +6,5 @@ run:
 	.venv/bin/python ./main.py ${ARGS}
 
 deploy:
-	gcloud functions deploy cloud_python_tracer --runtime python37 --trigger-http --allow-unauthenticated
+	gcloud functions deploy python_tracer --entry-point service --runtime python37 \
+		--memory 256MB --timeout 30s --max-instances 50 --allow-unauthenticated --trigger-http

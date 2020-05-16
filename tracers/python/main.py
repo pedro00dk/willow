@@ -30,17 +30,11 @@ def cli():
 
 def server(options):
     app = flask.Flask('Python Tracer')
-    app.add_url_rule('/', methods=['POST', 'OPTIONS'], view_func=lambda: cloud_python_tracer(flask.request))
+    app.add_url_rule('/', methods=['POST', 'OPTIONS'], view_func=lambda: service(flask.request))
     app.run(host='0.0.0.0', port=options.port, threaded=False, processes=options.process)
 
 
-def terminal(options):
-    request = json.loads(input())
-    response = trace(request, options.test, options.pretty)
-    print(response)
-
-
-def cloud_python_tracer(request):
+def service(request):
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
@@ -57,8 +51,14 @@ def cloud_python_tracer(request):
     request_body = request.get_json(silent=True)
     if request_body is None:
         return 'empty body', 400, headers
-    response = trace(request_body, test, pretty)
-    return response, 200, headers
+    response_body = trace(request_body, test, pretty)
+    return response_body, 200, headers
+
+
+def terminal(options):
+    request = json.loads(input())
+    response = trace(request, options.test, options.pretty)
+    print(response)
 
 
 def trace(request, test, pretty):
