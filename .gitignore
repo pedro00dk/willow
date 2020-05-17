@@ -5,38 +5,26 @@
 #!.vscode/settings.json
 #!.vscode/extensions.json
 
-### JetBrains
-.idea/
-.idea_modules/
-*.iws
-out/
-bin/
-
 ### NodeJS
 node_modules/
 package-lock.json
 # parcel
-.cache
+.cache/
 dist/
-#
-coverage
-.npm
-
 
 ### Java
 *.class
-*.log
-#*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+*.jar
+# maven
+target/
+# trash
+.settings/
+.classpath
+.project
 
 ### Python
 __pycache__/
+.venv/
 *.py[cod]
 *$py.class
 *.so
-.venv
