@@ -2,7 +2,7 @@
 
 import java.util.*;
 
-public class Main {
+public class Test {
     public static void main(String[] args) throws Exception {
         var b = true;
         var i = 1234;
