@@ -1,3 +1,5 @@
+package tracer;
+
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.VirtualMachine;
@@ -28,6 +30,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 /**
  * Executes source code.
  */
@@ -40,13 +43,21 @@ class Executor {
      * @param trace     consumer called for each produced event.
      * @param inputHook supplier that provides input to the debugee program, called only once.
      * @param printHook consumer called after frames that produce some output in the standard streams.
-     * @param lockHook  consumer called if the debugee VM takes more than 1 second to produce an event (stops the Executor).
+     * @param lockHook  consumer called if the debugee VM takes more than 1 second to produce an event (stops the
+     *                  Executor).
      * @throws IOException
      * @throws IllegalConnectorArgumentsException
      * @throws VMStartException
      * @throws ApplicationExternalException
      */
-    void execute(String source, LambdaUtils.ConsumerT<Event> trace, Supplier<String> inputHook, LambdaUtils.ConsumerT<String> printHook, LambdaUtils.ConsumerT<String> lockHook) throws Exception {
+    void execute(
+        String source,
+        LambdaUtils.ConsumerT<Event> trace,
+        Supplier<String> inputHook,
+        LambdaUtils.ConsumerT<String> printHook,
+        LambdaUtils.ConsumerT<String> lockHook
+    )
+        throws Exception {
         var filename = getFilename(source);
         var path = generateProject(source, filename);
         compileProject(path, filename);
@@ -59,8 +70,7 @@ class Executor {
         stdin.flush();
         stdin.close();
         try {
-            outerLoop:
-            while (true) {
+            outerLoop: while (true) {
                 vm.resume();
                 var eventSet = vm.eventQueue().remove(1000);
                 if (eventSet == null) {
@@ -68,7 +78,10 @@ class Executor {
                     break;
                 }
                 for (var event : eventSet) {
-                    if (event instanceof ThreadStartEvent && !allowedThreads.contains(((ThreadStartEvent) event).thread().name())) {
+                    if (
+                        event instanceof ThreadStartEvent &&
+                            !allowedThreads.contains(((ThreadStartEvent) event).thread().name())
+                    ) {
                         ((ThreadStartEvent) event).thread().interrupt();
                         continue;
                     }
@@ -92,39 +105,43 @@ class Executor {
     }
 
     /**
-     * Generate a filename for the source based on its contents.
-     * The filename is the name of the class that contains the main method. If not found, Main.java is returned.
+     * Generate a filename for the source based on its contents. The filename is the name of the class that contains the
+     * main method. If not found, Main.java is returned.
      *
      * @param source source code string
      * @return source code filename
      */
     private String getFilename(String source) {
         var commentStringRegex = Pattern
-                .compile("(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/|[\\t]*//.*)|\"(\\\\.|[^\\\\\"])*\"|'(\\\\[\\s\\S]|[^'])*'");
+            .compile(
+                "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/|[\\t]*//.*)|\"(\\\\.|[^\\\\\"])*\"|'(\\\\[\\s\\S]|[^'])*'"
+            );
         var stripedCode = commentStringRegex.matcher(source).replaceAll("");
 
         var classRegex = Pattern.compile("(public\\s+class\\s+([A-Za-z][A-Za-z0-9_]*))");
         var classMatcher = classRegex.matcher(stripedCode);
 
-        var classesIndicesNames = Stream.generate(classMatcher::find)
-                .takeWhile(found -> found)
-                .map(found -> Map.entry(classMatcher.start(), classMatcher.group(2)))
-                .collect(Collectors.toList());
+        var classesIndicesNames = Stream
+            .generate(classMatcher::find)
+            .takeWhile(found -> found)
+            .map(found -> Map.entry(classMatcher.start(), classMatcher.group(2)))
+            .collect(Collectors.toList());
 
         var mainMethodRegex = Pattern.compile("(public\\s+static\\s+void\\s+main\\s*\\(.*\\))");
         var mainMethodMatcher = mainMethodRegex.matcher(stripedCode);
-        var mainMethodIndices = Stream.generate(mainMethodMatcher::find)
-                .takeWhile(found -> found)
-                .map(f -> mainMethodMatcher.start())
-                .collect(Collectors.toList());
+        var mainMethodIndices = Stream
+            .generate(mainMethodMatcher::find)
+            .takeWhile(found -> found)
+            .map(f -> mainMethodMatcher.start())
+            .collect(Collectors.toList());
 
         if (classesIndicesNames.isEmpty() || mainMethodIndices.isEmpty()) return "Main.java";
 
         var mainIndex = mainMethodIndices.get(0);
         var classesBeforeMain = classesIndicesNames
-                .stream()
-                .filter(classIndexName -> classIndexName.getKey() < mainIndex)
-                .collect(Collectors.toList());
+            .stream()
+            .filter(classIndexName -> classIndexName.getKey() < mainIndex)
+            .collect(Collectors.toList());
         if (!classesBeforeMain.isEmpty()) return classesBeforeMain.get(0).getValue() + ".java";
         else return classesIndicesNames.get(0).getValue() + ".java";
 
@@ -172,9 +189,11 @@ class Executor {
         var output = new StringWriter();
         var task = compiler.getTask(output, fileManager, dgCollector, javacOptions, null, javaFiles);
         if (!task.call()) {
-            var diagnostic = dgCollector.getDiagnostics().stream()
-                    .map(Diagnostic::toString)
-                    .collect(Collectors.joining("\n", "\n", "\n"));
+            var diagnostic = dgCollector
+                .getDiagnostics()
+                .stream()
+                .map(Diagnostic::toString)
+                .collect(Collectors.joining("\n", "\n", "\n"));
             throw new ApplicationExternalException("Compilation fail:\n" + output.toString() + diagnostic);
         }
     }
@@ -189,7 +208,10 @@ class Executor {
      * @throws IOException
      * @throws VMStartException
      */
-    private VirtualMachine launchVirtualMachine(Path path, String filename) throws IllegalConnectorArgumentsException, IOException, VMStartException {
+    private VirtualMachine launchVirtualMachine(Path path, String filename)
+        throws IllegalConnectorArgumentsException,
+        IOException,
+        VMStartException {
         var binPath = Paths.get(path.toString(), "bin/");
         var vmm = VirtualMachineManagerImpl.virtualMachineManager();
         var connector = vmm.defaultConnector();
@@ -210,14 +232,14 @@ class Executor {
     private Set<String> configureEventRequests(VirtualMachine vm, Path path) {
         var defaultThreads = List.copyOf(vm.allThreads());
         var mainThread = defaultThreads
-                .stream()
-                .filter(t -> t.name().equals("main"))
-                .findFirst()
-                .orElseThrow(() -> new NullPointerException("main thread not found"));
+            .stream()
+            .filter(t -> t.name().equals("main"))
+            .findFirst()
+            .orElseThrow(() -> new NullPointerException("main thread not found"));
         var allowedThreadsNames = defaultThreads
-                .stream()
-                .map(ThreadReference::name)
-                .collect(Collectors.toCollection(HashSet::new));
+            .stream()
+            .map(ThreadReference::name)
+            .collect(Collectors.toCollection(HashSet::new));
         allowedThreadsNames.addAll(Set.of("Common-Cleaner", "DestroyJavaVM"));
 
         var vmDeathRequest = vm.eventRequestManager().createVMDeathRequest();
@@ -228,49 +250,37 @@ class Executor {
 
         var classNames = getUserClasses(path);
 
-        var methodEntryRequests = classNames
-                .stream()
-                .map(className -> {
-                    var methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
-                    methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-                    methodEntryRequest.addThreadFilter(mainThread);
-                    methodEntryRequest.addClassFilter(className);
-                    return methodEntryRequest;
-                })
-                .collect(Collectors.toList());
+        var methodEntryRequests = classNames.stream().map(className -> {
+            var methodEntryRequest = vm.eventRequestManager().createMethodEntryRequest();
+            methodEntryRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            methodEntryRequest.addThreadFilter(mainThread);
+            methodEntryRequest.addClassFilter(className);
+            return methodEntryRequest;
+        }).collect(Collectors.toList());
 
-        var methodExitRequests = classNames
-                .stream()
-                .map(className -> {
-                    var methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
-                    methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-                    methodExitRequest.addThreadFilter(mainThread);
-                    methodExitRequest.addClassFilter(className);
-                    return methodExitRequest;
-                })
-                .collect(Collectors.toList());
+        var methodExitRequests = classNames.stream().map(className -> {
+            var methodExitRequest = vm.eventRequestManager().createMethodExitRequest();
+            methodExitRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            methodExitRequest.addThreadFilter(mainThread);
+            methodExitRequest.addClassFilter(className);
+            return methodExitRequest;
+        }).collect(Collectors.toList());
 
-        var stepRequests = classNames
-                .stream()
-                .map(className -> {
-                    var stepRequest = vm
-                            .eventRequestManager()
-                            .createStepRequest(mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-                    stepRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-                    stepRequest.addClassFilter(className);
-                    return stepRequest;
-                })
-                .collect(Collectors.toList());
+        var stepRequests = classNames.stream().map(className -> {
+            var stepRequest = vm
+                .eventRequestManager()
+                .createStepRequest(mainThread, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+            stepRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            stepRequest.addClassFilter(className);
+            return stepRequest;
+        }).collect(Collectors.toList());
 
-        var exceptionRequests = classNames
-                .stream()
-                .map(className -> {
-                    var exceptionRequest = vm.eventRequestManager().createExceptionRequest(null, true, true);
-                    exceptionRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
-                    exceptionRequest.addClassFilter(className);
-                    return exceptionRequest;
-                })
-                .collect(Collectors.toList());
+        var exceptionRequests = classNames.stream().map(className -> {
+            var exceptionRequest = vm.eventRequestManager().createExceptionRequest(null, true, true);
+            exceptionRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
+            exceptionRequest.addClassFilter(className);
+            return exceptionRequest;
+        }).collect(Collectors.toList());
 
         vmDeathRequest.enable();
         threadStartRequest.enable();
@@ -293,20 +303,22 @@ class Executor {
         var binPath = Paths.get(path.toString(), "bin/");
         try {
             return Files
-                    .list(binPath)
-                    .map(p -> p.getFileName().toString())
-                    .map(s -> s.substring(0, s.lastIndexOf('.')))
-                    .collect(Collectors.toList());
+                .list(binPath)
+                .map(p -> p.getFileName().toString())
+                .map(s -> s.substring(0, s.lastIndexOf('.')))
+                .collect(Collectors.toList());
         } catch (IOException e) {
             return List.of();
         }
     }
 
     /**
-     * Exception used to represent errors not catchable in the default tracing process.
-     * (ex.: empty file -> detected in compilation, no main method found -> sent as error in standard error stream)
+     * Exception used to represent errors not catchable in the default tracing process. (ex.: empty file -> detected in
+     * compilation, no main method found -> sent as error in standard error stream)
      */
     static class ApplicationExternalException extends Exception {
+        private static final long serialVersionUID = 1L;
+
         ApplicationExternalException(String message) {
             super(message);
         }

@@ -1,3 +1,5 @@
+package tracer;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,6 +8,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 
 import java.util.*;
+
 
 /**
  * Inspect events and produces maps with their state data.

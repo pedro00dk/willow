@@ -1,3 +1,5 @@
+package tracer;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.jdi.AbsentInformationException;
@@ -11,25 +13,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 /**
  * Traces a java requests.
  */
 public class Tracer {
-    private String source;
-    private String input;
-    private int steps;
-    private Inspector inspector;
+    private final String source;
+    private final String input;
+    private final int steps;
+    private final Inspector inspector;
+    private final List<String> printCache;
     private JsonObject response;
     private int currentStep;
     private boolean firstStep;
-    private List<String> printCache;
 
     /**
      * Create the tracer with the request, which contains the program source, input and steps to run.
      *
      * @param request request
      */
-    public Tracer(JsonObject request) {
+    public Tracer(final JsonObject request) {
         this.source = request.get("source").getAsString();
         this.input = request.get("input").getAsString();
         this.steps = request.get("steps").getAsInt();
@@ -41,52 +44,50 @@ public class Tracer {
     }
 
     /**
-     * Run the source and inspect the debugee program state.
-     * The debugee program runs in a new JVM.
-     * The execution is analysed by the trace(), which is called by the Executor.
-     * The trace() may raise TraceStopExceptions or PrintedExceptions to stop the tracing process, the only way to stop
-     * the Executor.
-     * run(), trace() and the Executor might also raise unexpected exceptions, that will the be captured and returned
-     * the same way as exceptions from the debugee program, being easily distinguishable by their tracebacks.
+     * Run the source and inspect the debugee program state. The debugee program runs in a new JVM. The execution is
+     * analysed by the trace(), which is called by the Executor. The trace() may raise TraceStopExceptions or
+     * PrintedExceptions to stop the tracing process, the only way to stop the Executor. run(), trace() and the Executor
+     * might also raise unexpected exceptions, that will the be captured and returned the same way as exceptions from
+     * the debugee program, being easily distinguishable by their tracebacks.
      *
      * @return the tracer response
      */
-    JsonObject run() {
+    public JsonObject run() {
         response = new JsonObject();
         response.add("steps", new JsonArray());
         try {
             new Executor().execute(source, this::trace, this::inputHook, this::printHook, this::lockHook);
         } catch (Executor.ApplicationExternalException | TracerStopException e) {
-            var error = new JsonObject();
+            final var error = new JsonObject();
             error.addProperty("cause", e.getMessage());
-            var step = new JsonObject();
+            final var step = new JsonObject();
             step.add("error", error);
             step.addProperty("prints", String.join("", printCache));
             response.get("steps").getAsJsonArray().add(step);
             return response;
-        } catch (PrintedException e) {
-            var exception = new JsonObject();
+        } catch (final PrintedException e) {
+            final var exception = new JsonObject();
             exception.addProperty("type", e.type);
             exception.addProperty("traceback", e.traceback);
-            var error = new JsonObject();
+            final var error = new JsonObject();
             error.add("exception", exception);
-            var step = new JsonObject();
+            final var step = new JsonObject();
             step.add("error", error);
             step.addProperty("print", String.join("", printCache));
             response.get("steps").getAsJsonArray().add(step);
-        } catch (Exception e) {
-            var error = new JsonObject();
-            var tracebackWriter = new StringWriter();
+        } catch (final Exception e) {
+            final var error = new JsonObject();
+            final var tracebackWriter = new StringWriter();
             e.printStackTrace(new PrintWriter(tracebackWriter, true));
-            var traceback = Arrays
-                    .stream(tracebackWriter.toString().split("\n"))
-                    .map(l -> l + "\n")
-                    .collect(Collectors.joining());
-            var exception = new JsonObject();
+            final var traceback = Arrays
+                .stream(tracebackWriter.toString().split("\n"))
+                .map(l -> l + "\n")
+                .collect(Collectors.joining());
+            final var exception = new JsonObject();
             exception.addProperty("type", e.getClass().getName());
             exception.addProperty("traceback", traceback);
             error.add("exception", exception);
-            var step = new JsonObject();
+            final var step = new JsonObject();
             step.add("error", error);
             step.addProperty("print", String.join("", printCache));
             response.get("steps").getAsJsonArray().add(step);
@@ -95,40 +96,44 @@ public class Tracer {
     }
 
     /**
-     * Trace the event.
-     * trace() may stop the tracing process if the program reaches the maximum number of steps, it is done by raising a
-     * TraceStopException to stop the Executor.
-     * This trace implementation skips the first event of a program.
+     * Trace the event. trace() may stop the tracing process if the program reaches the maximum number of steps, it is
+     * done by raising a TraceStopException to stop the Executor. This trace implementation skips the first event of a
+     * program.
      *
      * @param event event where the stack and heap data will be extracted from.
      * @throws PrintedException
      * @throws TracerStopException
      * @throws IncompatibleThreadStateException
      */
-    private void trace(Event event) throws PrintedException, TracerStopException, IncompatibleThreadStateException, AbsentInformationException {
+    private void trace(final Event event)
+        throws PrintedException,
+        TracerStopException,
+        IncompatibleThreadStateException,
+        AbsentInformationException {
         // check errors print in stdout or stderr in non Locatable frames
-        if ((event instanceof VMStartEvent ||
+        if (
+            (event instanceof VMStartEvent ||
                 event instanceof VMDeathEvent ||
                 event instanceof VMDisconnectEvent ||
                 event instanceof ThreadStartEvent ||
-                event instanceof ThreadDeathEvent)
-                && !this.printCache.isEmpty()
+                event instanceof ThreadDeathEvent) && !this.printCache.isEmpty()
         ) {
             // exception printed in the error stream is collected to be shown inside a threw object
-            var exceptionTraceback = String.join("", this.printCache);
+            final var exceptionTraceback = String.join("", this.printCache);
             this.printCache.clear();
             throw new PrintedException(exceptionTraceback);
         }
         if (!(event instanceof LocatableEvent) || !((LocatableEvent) event).thread().name().equals("main")) return;
-        if (this.currentStep++ >= this.steps)
-            throw new TracerStopException("Program too long, maximum steps allowed: " + this.steps);
+        if (
+            this.currentStep++ >= this.steps
+        ) throw new TracerStopException("Program too long, maximum steps allowed: " + this.steps);
         if (firstStep) {
             firstStep = false;
             return;
         }
 
-        var snapshot = inspector.inspect((LocatableEvent) event);
-        var step = new JsonObject();
+        final var snapshot = inspector.inspect((LocatableEvent) event);
+        final var step = new JsonObject();
         step.add("snapshot", snapshot);
         step.addProperty("print", String.join("", printCache));
         response.get("steps").getAsJsonArray().add(step);
@@ -149,7 +154,7 @@ public class Tracer {
      *
      * @param text the text collected from the standard output and error streams.
      */
-    private void printHook(String text) {
+    private void printHook(final String text) {
         this.printCache.add(text);
     }
 
@@ -159,7 +164,7 @@ public class Tracer {
      * @param cause the expected cause, may be null
      * @throws TracerStopException
      */
-    private void lockHook(String cause) throws TracerStopException {
+    private void lockHook(final String cause) throws TracerStopException {
         throw new TracerStopException("program requires input or slow function call");
     }
 
@@ -167,28 +172,29 @@ public class Tracer {
      * Exception used to stop the Executor.
      */
     static class TracerStopException extends Exception {
-        TracerStopException(String message) {
+        private static final long serialVersionUID = 1L;
+
+        TracerStopException(final String message) {
             super(message);
         }
     }
 
     /**
-     * Exception used to indicate that the debugee program printed an exception in the error stream.
-     * The exception data is captured by the PrintedException.
-     * Always happens when the program finishes throwing an exception.
+     * Exception used to indicate that the debugee program printed an exception in the error stream. The exception data
+     * is captured by the PrintedException. Always happens when the program finishes throwing an exception.
      */
     static class PrintedException extends Exception {
+        private static final long serialVersionUID = 1L;
         String type;
         String traceback;
 
-        PrintedException(String printedException) {
+        PrintedException(final String printedException) {
             super();
-            var classStartIndex = printedException.indexOf(' ', 20) + 1; // skip "Exception in thread "
-            var endClassIndex = printedException.indexOf(' ', classStartIndex);
+            final var classStartIndex = printedException.indexOf(' ', 20) + 1; // skip "Exception in thread "
+            final var endClassIndex = printedException.indexOf(' ', classStartIndex);
             type = printedException.substring(classStartIndex, endClassIndex);
             traceback = printedException;
         }
     }
-
 
 }
