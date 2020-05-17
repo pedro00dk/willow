@@ -1,8 +1,11 @@
 build:
-	javac -cp src/:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED -d out/ src/Main.java
+	mvn clean
+	mvn compile
+	mvn assembly:single
 
-run: ./out/Main.class
-	java -cp out/:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main ${ARGS}
+run:
+	java -jar target/*.jar ${ARGS}
 
-run-suppress-trash:
-	(java -cp out/:lib/* --add-exports jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED Main ${ARGS} 3>&1 1>&2 2>&3 | grep -iv 'picked') 3>&1 1>&2 2>&3
+deploy:
+	gcloud alpha functions deploy java_tracer --entry-point Main --runtime java11 \
+		--memory 1024MB --timeout 60s --max-instances 50 --allow-unauthenticated --trigger-http
