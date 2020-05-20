@@ -1,11 +1,10 @@
 /**
  * Tracer reducer updates the state that stores the result of a tracing process and keep track of the tracing index.
  */
-import { api } from '../../api'
-import { ClientRequest } from '../../types/model'
+import axios from 'axios'
 import * as tracer from '../../types/tracer'
-import { DefaultAsyncAction } from '../Store'
-import { actions as storeActions } from '../Store'
+import { Request } from '../../types/tracer'
+import { actions as storeActions, DefaultAsyncAction } from '../Store'
 
 type State = {
     fetching: boolean
@@ -49,10 +48,12 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/trace' })
     try {
         const { language, source, input, options } = getState()
-        const request: ClientRequest = {
-            language: language.languages[language.selected],
+        const tracerUrl = language.languages[language.selected]
+        console.log(language, tracerUrl)
+        const request: Request = {
             source: source.content.join('\n'),
-            input: input.content.join('\n')
+            input: input.content.join('\n'),
+            steps: 1000 // TODO set steps based 
         }
         const onProgress = (event: ProgressEvent) => {
             const phase = event.target instanceof XMLHttpRequestUpload ? 'upload' : 'download'
@@ -60,7 +61,7 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
             dispatch({ type: 'tracer/status', payload: { phase, progress } })
         }
         const response = (
-            await api.post<tracer.Response>('/api/tracer/trace', request, {
+            await axios.post<tracer.Response>(tracerUrl, request, {
                 onUploadProgress: onProgress,
                 onDownloadProgress: onProgress
             })
