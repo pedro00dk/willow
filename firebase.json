@@ -5,6 +5,7 @@
     },
 
     "hosting": {
+        "site": "willow-beta",
         "public": "client/dist/build",
         "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
         "rewrites": [
