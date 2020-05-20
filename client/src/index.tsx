@@ -6,6 +6,5 @@ import { App } from './components/App'
 
 const firebaseConfig = JSON.parse(process.env['FIREBASE_CONFIG'])
 firebase.initializeApp(firebaseConfig)
-firebase.firestore().collection('languages').get().then(x => console.log(x.docs.map(a => [a.id, a.data()])))
 
 ReactDom.render(<App />, document.getElementById('root'))
