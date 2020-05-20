@@ -1,30 +1,30 @@
 /**
  * Language reducer stores the available programming languages and which one is chosen.
  */
-import { api } from '../api'
+import firebase from 'firebase'
 import { DefaultAsyncAction } from './Store'
 
 type State = {
     fetching: boolean
-    languages: string[]
-    selected: number
+    languages: { [language: string]: string }
+    selected: string
 }
 
 type Action =
-    | { type: 'language/fetch'; payload?: string[]; error?: string }
-    | { type: 'language/select'; payload: number }
+    | { type: 'language/fetch'; payload?: { [language: string]: string }; error?: string }
+    | { type: 'language/select'; payload: string }
 
 const initialState: State = {
     fetching: false,
-    languages: [],
-    selected: 0
+    languages: {},
+    selected: undefined
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
     switch (action.type) {
         case 'language/fetch':
             return action.payload
-                ? { ...initialState, languages: action.payload, selected: 0 }
+                ? { ...initialState, languages: action.payload, selected: Object.keys(action.payload)[0] }
                 : action.error
                 ? { ...initialState }
                 : { ...initialState, fetching: true }
@@ -38,13 +38,15 @@ export const reducer = (state: State = initialState, action: Action): State => {
 const fetch = (): DefaultAsyncAction => async dispatch => {
     dispatch({ type: 'language/fetch' })
     try {
-        const languages = (await api.get<string[]>('/api/tracer/languages')).data
+        const languages = (await firebase.firestore().collection('languages').get()).docs
+            .map(doc => ({ language: doc.id, url: doc.data().tracer }))
+            .reduce((acc, next) => ((acc[next.language] = next.url), acc), {} as { [language: string]: string })
         dispatch({ type: 'language/fetch', payload: languages })
     } catch (error) {
         dispatch({ type: 'language/fetch', error: error?.response?.data ?? error.toString() })
     }
 }
 
-const select = (selected: number): Action => ({ type: 'language/select', payload: selected })
+const select = (selected: string): Action => ({ type: 'language/select', payload: selected })
 
 export const actions = { fetch, select }

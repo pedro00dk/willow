@@ -13,7 +13,6 @@ const classes = {
 export const Language = () => {
     const dispatch = useDispatch()
     const { language } = useSelection(state => ({ language: state.language }))
-    const selected = language.languages[language.selected]
 
     return (
         <div className={classes.container} title='Choose a language'>
@@ -24,10 +23,10 @@ export const Language = () => {
             </div>
             <select
                 className={classes.select}
-                value={selected}
-                onChange={event => dispatch(actions.language.select(event.target.selectedIndex))}
+                value={language.selected}
+                onChange={event => dispatch(actions.language.select(event.target.value))}
             >
-                {language.languages.map(language => (
+                {Object.keys(language.languages).map(language => (
                     <option key={language}>{language}</option>
                 ))}
             </select>
