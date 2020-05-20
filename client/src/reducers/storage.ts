@@ -1,5 +1,3 @@
-import { api, apiUrl } from '../api'
-import { RequestAction, Program, User } from '../types/model'
 import { actions as storeActions, DefaultAsyncAction } from './Store'
 
 /**
@@ -26,7 +24,7 @@ const storage = (): DefaultAsyncAction => async (dispatch, getState) => {
 const retrieve = (): DefaultAsyncAction => async dispatch => {
     dispatch(storeActions.input.set((localStorage.getItem('input') ?? '').split('\n'), true), false)
     dispatch(storeActions.source.set((localStorage.getItem('source') ?? '').split('\n'), true), false)
-    dispatch(storeActions.language.select(parseInt(localStorage.getItem('language')) || 0), false)
+    dispatch(storeActions.language.select(localStorage.getItem('language')), false)
     const rawOptions = localStorage.getItem('options')
     dispatch(storeActions.options.set(rawOptions ? JSON.parse(rawOptions) : {}))
 }
@@ -39,7 +37,7 @@ const persist = (): DefaultAsyncAction => async (dispatch, getState) => {
         const { input, source, language, options } = getState()
         localStorage.setItem('input', input.content.join('\n'))
         localStorage.setItem('source', source.content.join('\n'))
-        localStorage.setItem('language', language.selected.toString())
+        localStorage.setItem('language', language.selected)
         localStorage.setItem('options', JSON.stringify(options))
     }, 5000)
 }
