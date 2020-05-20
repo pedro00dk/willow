@@ -8,9 +8,18 @@
 ### NodeJS
 node_modules/
 package-lock.json
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firebase-debug.log*
 # parcel
 .cache/
 dist/
+# Firebase
+.firebase/
+.firebaserc
 
 ### Java
 *.class
