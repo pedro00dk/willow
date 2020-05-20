@@ -14,7 +14,6 @@ import { colors } from '../../colors'
 import { actions, useDispatch, useSelection } from '../../reducers/Store'
 import { EditorMarker, Range, TextEditor } from './TextEditor'
 
-
 const classes = {
     call: `position-absolute ${css({ background: colors.green.lighter })}`,
     line: `position-absolute ${css({ background: colors.blue.lighter })}`,
@@ -22,7 +21,7 @@ const classes = {
     exception: `position-absolute ${css({ background: colors.red.lighter })}`
 }
 
-const supportedLanguages = new Set(['java', 'python'])
+const supportedLanguages = ['java', 'python']
 
 export const SourceEditor = () => {
     const editor = React.useRef<ace.Editor>()
@@ -46,9 +45,9 @@ export const SourceEditor = () => {
 
     useSelection(async state => {
         await undefined
-        const selectedLanguage = state.language.languages[state.language.selected]
-        if (!editor.current || language.current === selectedLanguage) return
-        language.current = supportedLanguages.has(selectedLanguage) ? selectedLanguage : 'text'
+        const selected = state.language.selected
+        if (!editor.current || selected == undefined || language.current === selected) return
+        language.current = supportedLanguages.reduce((acc, next) => (selected.includes(next) ? next : acc), 'text')
         editor.current.session.setMode(`ace/mode/${language.current}`)
     })
 
