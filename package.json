@@ -4,5 +4,14 @@
         "name": "Pedro Henrique",
         "email": "pedro00dk@gmail.com"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "firebase-tools": "8.3.0"
+    },
+    "scripts": {
+        "login": "firebase login --reauth",
+        "init": "firebase init",
+        "start": "firebase emulators:start",
+        "deploy": "firebase deploy"
+    }
 }

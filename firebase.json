@@ -1,0 +1,28 @@
+{
+    "firestore": {
+        "rules": "firestore/firestore.rules",
+        "indexes": "firestore/firestore.indexes.json"
+    },
+
+    "hosting": {
+        "public": "client/dist/build",
+        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    },
+    "emulators": {
+        "functions": {
+            "port": 5001
+        },
+        "firestore": {
+            "port": 8080
+        },
+        "hosting": {
+            "port": 5000
+        }
+    }
+}
