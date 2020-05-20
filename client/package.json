@@ -3,7 +3,6 @@
     "devDependencies": {
         "@types/react": "16.9.34",
         "@types/react-dom": "16.9.6",
-        "http-server": "latest",
         "parcel-bundler": "latest",
         "prettier": "latest",
         "typescript": "latest"
@@ -13,15 +12,16 @@
         "axios": "0.19.2",
         "brace": "0.11.1",
         "emotion": "10.0.27",
+        "firebase": "7.14.4",
         "react": "16.13.1",
         "react-contexify": "4.1.1",
         "react-dom": "16.13.1"
     },
     "scripts": {
-        "types": "mkdir --parents ./src/types && cp ../types/* ./src/types",
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "build": "parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
-        "start": "{ [ \"$API\" ] || { echo 'API not defined!' && exit 1; }; } && { [ \"$PORT\" ] || PORT=1234; } && echo \"API: $API, PORT: $PORT\" && npm run build && http-server -p \"$PORT\" -- ./dist/build",
-        "start:dev": "{ [ \"$API\" ] || { echo 'API not defined!' && exit 1; }; } && { [ \"$PORT\" ] || PORT=1234; } && echo \"API: $API, PORT: $PORT\" && parcel serve --no-cache -d ./dist/ -p \"$PORT\" -- \"$npm_package_main\""
+        "start": "parcel serve --no-cache -d ./dist/ -p 5000 -- \"$npm_package_main\"",
+        "serve": "npm run build && cd ../ && npx firebase emulators:start --only hosting",
+        "deploy": "npm run build && cd ../ && npx firebase deploy --only hosting"
     }
 }
