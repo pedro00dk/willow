@@ -29,7 +29,8 @@ export const reducer = (state: State = initialState, action: Action): State => {
                 ? { ...initialState }
                 : { ...initialState, fetching: true }
         case 'language/select':
-            return { ...state, selected: action.payload }
+            const languages = Object.keys(state.languages)
+            return { ...state, selected: languages.includes(action.payload) ? action.payload : languages[0] }
         default:
             return state
     }
