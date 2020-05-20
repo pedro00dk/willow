@@ -1,7 +1,7 @@
 /**
  * Language reducer stores the available programming languages and which one is chosen.
  */
-import firebase from 'firebase'
+import firebase from 'firebase/app'
 import { DefaultAsyncAction } from './Store'
 
 type State = {
