@@ -1,5 +1,4 @@
 import firebase from 'firebase/app'
-import { Program, RequestAction } from '../types/model'
 import { DefaultAsyncAction } from './Store'
 
 /**
@@ -8,25 +7,26 @@ import { DefaultAsyncAction } from './Store'
 type State = {
     fetching: boolean
     user: { id: string; name: string; email: string }
-    actions: { cache: RequestAction[]; sending: RequestAction[] }
-    initialized: boolean
-    programs: Program[]
+    actions: {
+        cache: { name: string; date: string; payload: any }[]
+        sending: { name: string; date: string; payload: any }[]
+    }
+    sender: boolean
 }
 
 type Action =
     | { type: 'user/signin' }
     | { type: 'user/signout' }
     | { type: 'user/load'; payload?: { user: State['user'] } }
-    | { type: 'user/action'; payload: RequestAction }
-    | { type: 'user/actionInit'; payload: boolean }
-    | { type: 'user/actionSend'; payload: {}; error?: string }
+    | { type: 'user/action'; payload: State['actions']['cache'][0] }
+    | { type: 'user/sender'; payload: boolean }
+    | { type: 'user/send'; payload: {}; error?: string }
 
 const initialState: State = {
     fetching: false,
     user: undefined,
     actions: { cache: [], sending: [] },
-    initialized: false,
-    programs: []
+    sender: false
 }
 
 export const reducer = (state: State = initialState, action: Action): State => {
@@ -35,24 +35,20 @@ export const reducer = (state: State = initialState, action: Action): State => {
         case 'user/signout':
             return state
         case 'user/load':
-            console.log(action)
-            const a = action.payload
+            return action.payload
                 ? { ...initialState, fetching: false, ...action.payload }
                 : { ...initialState, fetching: true }
-            console.log('reducer', action.payload)
-            return a
-
         case 'user/action':
             state.actions.cache.push(action.payload)
-            return { ...state }
-        case 'user/actionInit':
-            return { ...state, initialized: action.payload }
-        case 'user/actionSend':
+            return state
+        case 'user/sender':
+            return { ...state, sender: action.payload }
+        case 'user/send':
             return action.payload
                 ? { ...state, actions: { cache: state.actions.cache, sending: [] } }
                 : action.error
                 ? { ...state, actions: { cache: [...state.actions.sending, ...state.actions.cache], sending: [] } }
-                : { ...state, actions: { cache: [], sending: state.actions.cache }, initialized: true }
+                : { ...state, actions: { cache: [], sending: state.actions.cache }, sender: true }
         default:
             return state
     }
@@ -77,30 +73,36 @@ const fetch = (): DefaultAsyncAction => async dispatch => {
     })
 }
 
-const action = (action: Pick<RequestAction, 'name' | 'payload'>): DefaultAsyncAction => async (dispatch, getState) => {
-    // const user = getState().user.user
-    // if (!user) return
-    // dispatch(sendAction())
-    // dispatch({ type: 'user/action', payload: { ...action, date: new Date().toJSON() } })
+const action = (action: Partial<State['actions']['cache'][0]>): DefaultAsyncAction => async (dispatch, getState) => {
+    const user = getState().user.user
+    if (!user) return
+    dispatch(sender(), false)
+    dispatch({ type: 'user/action', payload: { ...action, date: new Date().toJSON() } }, false)
 }
 
-const sendAction = (): DefaultAsyncAction => async (dispatch, getState) => {
-    // const initialized = getState().user.initialized
-    // if (initialized) return
-    // dispatch({ type: 'user/actionInit', payload: true })
-    // setInterval(async () => {
-    //     const cache = getState().user.actions.cache
-    //     if (cache.length === 0) return
-    //     dispatch({ type: 'user/actionSend' }, false)
-    //     const sending = getState().user.actions.sending
-    //     try {
-    //         await api.post('/api/action', sending)
-    //         dispatch({ type: 'user/actionSend', payload: {} }, false)
-    //     } catch (error) {
-    //         dispatch({ type: 'user/actionSend', error: error?.response?.data ?? error.toString() })
-    //         dispatch({ type: 'user/actionInit', payload: false }, false)
-    //     }
-    // }, 5000)
+const sender = (): DefaultAsyncAction => async (dispatch, getState) => {
+    const enabled = getState().user.sender
+    if (enabled) return
+    dispatch({ type: 'user/sender', payload: true }, false)
+    const send = async () => {
+        const cache = getState().user.actions.cache
+        if (cache.length === 0) return
+        dispatch({ type: 'user/send' }, false)
+        const sending = getState().user.actions.sending
+        const user = getState().user.user
+        try {
+            await firebase
+                .firestore()
+                .collection('actions')
+                .doc(user.id)
+                .update({ actions: firebase.firestore.FieldValue.arrayUnion(...sending) })
+            dispatch({ type: 'user/send', payload: {} }, false)
+        } catch (error) {
+            dispatch({ type: 'user/send', error: error.toString() }, false)
+        }
+    }
+    setInterval(send, 10000)
+    window.onunload = send
 }
 
 export const actions = { signin, signout, fetch, action }
