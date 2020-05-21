@@ -11,7 +11,26 @@
     "scripts": {
         "login": "firebase login --reauth",
         "init": "firebase init",
-        "start": "firebase emulators:start",
-        "deploy": "firebase deploy"
+        "//0": "//",
+        "require:function_region": "[ \"${FUNCTION_REGION}\" ] || { echo 'firebase function region not set (us-east1, us-central1, etc)' ; exit 1 ; }",
+        "require:get_languages_url": "[ \"${GET_LANGUAGES_URL}\" ] || { echo 'firebase get languages url not set' ; exit 1 ; }",
+        "require:set_languages_url": "[ \"${SET_LANGUAGES_URL}\" ] || { echo 'firebase set languages url not set' ; exit 1 ; }",
+        "require:tracer_urls": "[ \"${TRACER_URLS_JSON}\" ] || { echo 'tracer urls json not set' ; exit 1 ; }",
+        "//1": "//",
+        "start:tracers:java": "cd ./tracers/java && make build && make run ARGS='--server --port 10000'",
+        "start:tracers:python": "cd ./tracers/python && make build && make run ARGS='--server --port 10001'",
+        "deploy:tracers:java": "cd ./tracers/java && make deploy",
+        "deploy:tracers:python": "cd ./tracers/python && make deploy",
+        "//2": "//",
+        "start:all": " npm run require:function_region && FIREBASE_TESTING=localhost:8080 npm --prefix ./client/ run build && firebase emulators:start",
+        "start:functions": "npm run require:function_region && firebase emulators:start --only firestore,functions",
+        "deploy:all": "npm run require:function_region && FIREBASE_TESTING=false npm --prefix ./client/ run build && firebase deploy",
+        "deploy:functions": "npm run require:function_region && firebase deploy --only firestore,functions",
+        "function:logs": "firebase functions:log",
+        "//3": "//",
+        "start:functions:get_languages": "npm run require:get_languages_url && curl \"${GET_LANGUAGES_URL}\"",
+        "start:functions:set_languages": "npm run require:set_languages_url && curl -X POST -H 'Content-Type:application/json' --data '{\"java\":\"http://localhost:10000\",\"python\":\"http://localhost:10001\"}' \"${SET_LANGUAGES_URL}\"",
+        "deploy:functions:get_languages": "npm run require:get_languages_url && curl \"${GET_LANGUAGES_URL}\"",
+        "deploy:functions:set_languages": "npm run require:set_languages_url && npm run require:tracer_urls && curl -X POST -H 'Content-Type:application/json' --data \"${TRACER_URLS_JSON}\" \"${SET_LANGUAGES_URL}\""
     }
 }
