@@ -19,9 +19,11 @@
     },
     "scripts": {
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
-        "build": "parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
-        "start": "parcel serve --no-cache -d ./dist/ -p 5000 -- \"$npm_package_main\"",
-        "serve": "npm run build && cd ../ && npx firebase emulators:start --only hosting",
-        "deploy": "npm run build && cd ../ && npx firebase deploy --only hosting"
+        "//0": "//",
+        "require:firebase_config": "[ \"${FIREBASE_CONFIG}\" ] || { echo 'FIREBASE_CONFIG env not set (app data)' ; exit 1 ; }",
+        "require:firebase_testing": "[ \"${FIREBASE_TESTING}\" ] || { echo 'FIREBASE_TESTING env not set (false or local firestore address without protocol)' ; exit 1 ; }",
+        "//1": "//",
+        "build": "npm run require:firebase_config && npm run require:firebase_testing && parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
+        "start": "npm run require:firebase_config && npm run require:firebase_testing && parcel serve --no-cache -d ./dist/ -p 5000 -- \"$npm_package_main\""
     }
 }
