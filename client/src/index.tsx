@@ -1,5 +1,6 @@
 import '@babel/polyfill' // regeneratorRuntime
 import firebase from 'firebase/app'
+import 'firebase/auth'
 import 'firebase/firestore'
 import React from 'react'
 import ReactDom from 'react-dom'

@@ -1,4 +1,5 @@
-import { Program, RequestAction, User } from '../types/model'
+import firebase from 'firebase/app'
+import { Program, RequestAction } from '../types/model'
 import { DefaultAsyncAction } from './Store'
 
 /**
@@ -6,7 +7,7 @@ import { DefaultAsyncAction } from './Store'
  */
 type State = {
     fetching: boolean
-    user: User
+    user: { id: string; name: string; email: string }
     actions: { cache: RequestAction[]; sending: RequestAction[] }
     initialized: boolean
     programs: Program[]
@@ -15,7 +16,7 @@ type State = {
 type Action =
     | { type: 'user/signin' }
     | { type: 'user/signout' }
-    | { type: 'user/fetch'; payload?: { user: User; programs: Program[] }; error?: string }
+    | { type: 'user/load'; payload?: { user: State['user'] } }
     | { type: 'user/action'; payload: RequestAction }
     | { type: 'user/actionInit'; payload: boolean }
     | { type: 'user/actionSend'; payload: {}; error?: string }
@@ -33,12 +34,14 @@ export const reducer = (state: State = initialState, action: Action): State => {
         case 'user/signin':
         case 'user/signout':
             return state
-        case 'user/fetch':
-            return action.payload
+        case 'user/load':
+            console.log(action)
+            const a = action.payload
                 ? { ...initialState, fetching: false, ...action.payload }
-                : action.error
-                ? { ...initialState }
                 : { ...initialState, fetching: true }
+            console.log('reducer', action.payload)
+            return a
+
         case 'user/action':
             state.actions.cache.push(action.payload)
             return { ...state }
@@ -56,23 +59,22 @@ export const reducer = (state: State = initialState, action: Action): State => {
 }
 
 const signin = (): DefaultAsyncAction => async () => {
-    // window.location.href = `${apiUrl}/api/auth/signin`
+    const provider = new firebase.auth.GoogleAuthProvider()
+    firebase.auth().signInWithRedirect(provider)
 }
 
 const signout = (): DefaultAsyncAction => async () => {
-    // window.location.href = `${apiUrl}/api/auth/signout`
+    firebase.auth().signOut()
 }
 
 const fetch = (): DefaultAsyncAction => async dispatch => {
-    // dispatch({ type: 'user/fetch' })
-    // try {
-    //     let user = (await api.get<User>('/api/auth/user')).data
-    //     user = typeof user === 'object' ? user : undefined
-    //     const programs = user ? (await api.get<Program[]>('/api/program')).data : []
-    //     dispatch({ type: 'user/fetch', payload: { user, programs } })
-    // } catch (error) {
-    //     dispatch({ type: 'user/fetch', error: error?.response?.data ?? error.toString() })
-    // }
+    dispatch({ type: 'user/load' })
+    firebase.auth().onAuthStateChanged(user => {
+        dispatch({
+            type: 'user/load',
+            payload: { user: user ? { id: user.uid, name: user.displayName, email: user.email } : undefined }
+        })
+    })
 }
 
 const action = (action: Pick<RequestAction, 'name' | 'payload'>): DefaultAsyncAction => async (dispatch, getState) => {
