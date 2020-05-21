@@ -13,9 +13,7 @@
         "firebase-functions": "3.6.1"
     },
     "scripts": {
-        "serve": "cd ../ && npx firebase emulators:start --only functions",
-        "shell": "cd ../ && npx firebase functions:shell",
-        "start": "npm run shell",
+        "start": "cd ../ && npx firebase emulators:start --only firestore,functions",
         "deploy": "cd ../ && npx firebase deploy --only functions",
         "logs": "cd ../ && npx firebase functions:log"
     }
