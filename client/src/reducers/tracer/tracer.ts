@@ -49,25 +49,30 @@ const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     try {
         const { language, source, input, options } = getState()
         const tracerUrl = language.languages[language.selected]
-        console.log(language, tracerUrl)
         const request: Request = {
             source: source.content.join('\n'),
             input: input.content.join('\n'),
-            steps: 1000 // TODO set steps based 
+            steps: 1000 // TODO set steps based
         }
         const onProgress = (event: ProgressEvent) => {
             const phase = event.target instanceof XMLHttpRequestUpload ? 'upload' : 'download'
             const progress = event.loaded / event.total
             dispatch({ type: 'tracer/status', payload: { phase, progress } })
         }
+        const startTime = Date.now()
         const response = (
             await axios.post<tracer.Response>(tracerUrl, request, {
                 onUploadProgress: onProgress,
                 onDownloadProgress: onProgress
             })
         ).data
+        const elapsedTime = Date.now() - startTime
+        const compilationError = response.steps.length === 1 && !!response.steps[0].error
+        const runtimeError = response.steps.length > 1 && !!response.steps[response.steps.length - 1].error
+        const action = { request, elapsedTime, compilationError, runtimeError }
         dispatch({ type: 'tracer/trace', payload: response }, false)
         dispatch({ type: 'tracer/available' }, false)
+        dispatch(storeActions.user.action({ name: 'trace', payload: action }))
         await dispatch(storeActions.index.set(options.visualization ? 0 : Infinity), false)
         await dispatch(storeActions.output.compute(), false)
         dispatch({ type: 'tracer/available' })
