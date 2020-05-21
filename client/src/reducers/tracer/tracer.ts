@@ -47,12 +47,13 @@ export const reducer = (state: State = initialState, action: Action): State => {
 const trace = (): DefaultAsyncAction => async (dispatch, getState) => {
     dispatch({ type: 'tracer/trace' })
     try {
-        const { language, source, input, options } = getState()
+        const { language, source, input, options, user } = getState()
         const tracerUrl = language.languages[language.selected]
+
         const request: Request = {
             source: source.content.join('\n'),
             input: input.content.join('\n'),
-            steps: 1000 // TODO set steps based
+            steps: user.user ? 1000 : 400
         }
         const onProgress = (event: ProgressEvent) => {
             const phase = event.target instanceof XMLHttpRequestUpload ? 'upload' : 'download'
