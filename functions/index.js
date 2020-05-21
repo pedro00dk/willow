@@ -16,8 +16,16 @@ const cors = response => {
 
 exports.listTracers = functions.region(region).https.onRequest(async (request, response) => {
     cors(response)
-    const tracers = (await firestore.collection('tracers').get()).docs
+    const tracers = (await firestore.collection('languages').get()).docs
         .map(document => document)
-        .reduce((acc, next) => ((acc[next.id] = next.data()['url']), acc), {})
+        .reduce((acc, next) => ((acc[next.id] = next.data()['tracer']), acc), {})
     response.status(200).json(tracers)
 })
+
+exports.createUser = functions
+    .region(region)
+    .auth.user()
+    .onCreate(user => {
+        firestore.collection('users').doc(user.uid).create({ name: user.displayName, email: user.email })
+        firestore.collection('actions').doc(user.uid).create({ actions: [] })
+    })
