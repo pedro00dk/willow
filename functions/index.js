@@ -27,7 +27,7 @@ const cors = (request, response, methods) => {
     return true
 }
 
-exports.listLanguages = functions.region(region).https.onRequest(async (request, response) => {
+exports.getLanguages = functions.region(region).https.onRequest(async (request, response) => {
     if (!cors(request, response, ['GET'])) return
     const tracers = (await firestore.collection('languages').get()).docs
         .map(document => document)
