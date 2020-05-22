@@ -6,7 +6,7 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "firebase-tools": "8.3.0"
+        "firebase-tools": "8.4.0"
     },
     "scripts": {
         "login": "firebase login --reauth",
