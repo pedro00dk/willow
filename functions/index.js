@@ -4,7 +4,7 @@ const functions = require('firebase-functions')
 admin.initializeApp({})
 const firestore = admin.firestore()
 
-const region = process.env['REGION'] || 'us-east1'
+const region = process.env['FUNCTION_REGION'] || 'us-east1'
 
 /**
  * @param {Parameters<Parameters<functions.https.onRequest>[0]>[0]} request
