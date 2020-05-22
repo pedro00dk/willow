@@ -125,7 +125,7 @@ class Inspector {
      * @return the transformed value
      */
     private JsonElement inspectValue(JsonObject heap, Value value, ThreadReference threadReference) {
-        if (value == null) new JsonPrimitive("null");
+        if (value == null) return new JsonPrimitive("null");
         if (value instanceof PrimitiveValue) return inspectPrimitive((PrimitiveValue) value);
         if (value instanceof ObjectReference) return inspectObject(heap, (ObjectReference) value, threadReference);
         return new JsonPrimitive("void");
@@ -178,7 +178,7 @@ class Inspector {
         }
         if (heap.has(orderedId)) {
             var idValue = new JsonArray(1);
-            idValue.add(id);
+            idValue.add(orderedId);
             return idValue;
         }
         var className = value.referenceType().name();
