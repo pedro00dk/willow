@@ -200,7 +200,7 @@ class Inspector {
         if (valueClass != null && Map.class.isAssignableFrom(valueClass))
             return inspectMap(heap, value, orderedId, className, "map", threadReference);
         var referenceData = value.referenceType().toString().split(" ");
-        if (!referenceData[0].equals("class") && !referenceData[1].contains("."))
+        if (referenceData[0].equals("class") && !referenceData[1].contains("."))
             return inspectUserObject(heap, value, orderedId, className, "map", threadReference);
         return new JsonPrimitive("class " + className);
     }
