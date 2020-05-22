@@ -6,10 +6,8 @@ on:
       - deploy
 
 jobs:
-  #
-  #
-  docker:
-    name: Build and deploy docker images to github registry
+  deploy:
+    name: Deploy to GCP and Firebase
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,127 +15,57 @@ jobs:
         with:
           ref: deploy
 
-      - name: Build images
-        run: |
-          docker image build --pull --no-cache --tag willow-api -- ./api/
-          docker image build --pull --no-cache --tag willow-client -- ./client/
-          docker image build --pull --no-cache --tag willow-tracer-java -- ./tracers/java/
-          docker image build --pull --no-cache --tag willow-tracer-python -- ./tracers/python/
-          docker image ls
-
-      - name: Tag images
-        run: |
-          docker image tag willow-api docker.pkg.github.com/${{ github.repository }}/willow-api
-          docker image tag willow-client docker.pkg.github.com/${{ github.repository }}/willow-client
-          docker image tag willow-tracer-java docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
-          docker image tag willow-tracer-python docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
-          docker image ls
-
-      - name: Sign in
-        run: |
-          GITHUB_USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
-          docker login --username ${GITHUB_USERNAME} --password ${{ github.token }} docker.pkg.github.com
-
-      - name: Deploy images
-        run: |
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-api
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-client
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-java
-          docker image push docker.pkg.github.com/${{ github.repository }}/willow-tracer-python
-  #
-  #
-  gcloud:
-    name: Fetch images and deploy into google cloud
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: deploy
-
-      - name: Sign in
+      - name: Authentication and configuration
         run: |
           GCP_AUTH_KEY=$(echo ${{ secrets.GCP_AUTH_KEY }} | base64 --decode)
+          echo ${GCP_AUTH_KEY} > ./key.json # gcloud authentication (gcloud and firebase share credentials)
+
           GCP_PROJECT=$(echo ${GCP_AUTH_KEY} | grep -Po '"project_id"\s*:\s*".*?"' | cut -d \" -f4)
           GCP_EMAIL=$(echo ${GCP_AUTH_KEY} | grep -Po '"client_email"\s*:\s*".*?"' | cut -d \" -f4)
-          echo ${GCP_AUTH_KEY} > ./key-file.json
-          gcloud auth activate-service-account ${GCP_EMAIL} --key-file ./key-file.json
+
+          GCP_COMPUTE_ZONE=${{ secrets.GCP_COMPUTE_ZONE }}
+          GCP_COMPUTE_REGION=$(echo ${GCP_COMPUTE_ZONE} | cut -d '-' -f 1,2)
+          GCP_FUNCTIONS_REGION=${GCP_COMPUTE_REGION}
+
+          gcloud auth activate-service-account ${GCP_EMAIL} --key-file ./key.json
           gcloud config set project ${GCP_PROJECT}
-          gcloud config set compute/zone ${{ secrets.GCP_COMPUTE_ZONE }}
+          gcloud config set compute/zone ${GCP_COMPUTE_ZONE}
+          gcloud config set compute/region ${GCP_COMPUTE_REGION}
+          gcloud config set functions/region ${GCP_FUNCTIONS_REGION}
 
-      - name: Configure firewall
+      - name: Install project dependencies
         run: |
-          gcloud compute firewall-rules create allow-database \
-              --action=ALLOW --direction=INGRESS --rules=tcp:59328 --target-tags=database-server \
-              || true
-          gcloud compute firewall-rules create allow-api \
-              --action=ALLOW --direction=INGRESS --rules=tcp:52561 --target-tags=api-server \
-              || true
+          npm install
 
-      - name: Create database instance
-        run: |
-          if [ ${{ secrets.GCP_DATABASE_RESET }} == 'true' ]
-          then
-              gcloud --quiet compute instances delete willow-database \
-                  || true
-          fi
-          gcloud compute instances create \
-              willow-database \
-              --machine-type ${{ secrets.GCP_DATABASE_TYPE }} \
-              --image-project cos-cloud --image-family cos-stable \
-              --boot-disk-size 10GB --boot-disk-type pd-ssd \
-              --tags database-server \
-              || true
+      # - name: Deploy tracer functions
+      #   run: |
+      #     npm run deploy:tracers:java | tee java_function.yml
+      #     JAVA_FUNCTION_URL=$(cat java_function.yml | grep url | cut -d ' ' -f 4)
+      #     echo ::set-env JAVA_FUNCTION_URL="${JAVA_FUNCTION_URL}"
 
-      - name: Create server instance
-        run: |
-          if [ ${{ secrets.GCP_SERVER_RESET }} == 'true' ]
-          then
-              gcloud --quiet compute instances delete willow-server \
-                  || true
-          fi
-          gcloud compute instances create \
-              willow-server \
-              --machine-type ${{ secrets.GCP_SEVER_TYPE }} \
-              --image-project cos-cloud --image-family cos-stable \
-              --boot-disk-size 10GB \
-              --tags http-server,https-server,api-server \
-              || true
+      #     npm run deploy:tracers:python | tee python_function.yml
+      #     PYTHON_FUNCTION_URL=$(cat python_function.yml | grep url | cut -d ' ' -f 4)
+      #     echo ::set-env PYTHON_FUNCTION_URL="${PYTHON_FUNCTION_URL}"
 
-      - name: Deploy database instance
+      - name: Deploy firestore, functions and hosting
         run: |
-          cat ./.github/deploy_database.sh |
-          sed "s/\${1}/${{ secrets.DATABASE_USERNAME }}/" |
-          sed "s/\${2}/${{ secrets.DATABASE_PASSWORD }}/" |
-          sed "s%\${3}%/home/mongo/data/db%" |
-          sed "s/\${4}/59328/" |
-          tee ./deploy_database_filled.sh
-          gcloud compute instances add-metadata willow-database \
-              --metadata-from-file startup-script=./deploy_database_filled.sh
-          gcloud --quiet compute ssh willow-database -- "sh -c $(cat ./deploy_database_filled.sh)"
+          GOOGLE_APPLICATION_CREDENTIALS=./key.json # firebase authentication (do not change variable name)
+          export FIREBASE_CONFIG=$(echo ${{ secrets.FIREBASE_WEBAPP_CONFIGURATION }} | base64 --decode)
+          export FUNCTION_REGION=${GCP_COMPUTE_REGION}
+          echo ${FIREBASE_CONFIG}
+          echo ${FUNCTION_REGION}
+          npm run deploy:all -- --force
 
-      - name: Deploy server instance
-        run: |
-          GITHUB_USERNAME=$(echo ${{ github.repository }} | cut -d / -f 1)
-          DATABASE_PRIVATE_IP=$(gcloud compute instances describe willow-database --format 'get(networkInterfaces[0].networkIP)')
-          DATABASE_PUBLIC_IP=$(gcloud compute instances describe willow-database --format 'get(networkInterfaces[0].accessConfigs[0].natIP)')
-          SERVER_PRIVATE_IP=$(gcloud compute instances describe willow-server --format 'get(networkInterfaces[0].networkIP)')
-          SERVER_PUBLIC_IP=$(gcloud compute instances describe willow-server --format 'get(networkInterfaces[0].accessConfigs[0].natIP)')
-          API_DB_URL="mongodb://${{ secrets.DATABASE_USERNAME }}:${{ secrets.DATABASE_PASSWORD }}@${DATABASE_PRIVATE_IP}:59328"
-          CLIENT_API="http://${SERVER_PUBLIC_IP}:52561"
-          CLIENT_API="http://willowbeta.xyz:52561"
-          cat ./.github/deploy_servers.sh |
-          sed "s/\${1}/${GITHUB_USERNAME}/" |
-          sed "s/\${2}/${{ github.token }}/" |
-          sed "s%\${3}%${{ github.repository }}%" |
-          sed "s/\${4}/${{ secrets.API_AUTH_CLIENT_ID }}/" |
-          sed "s/\${5}/${{ secrets.API_AUTH_CLIENT_SECRET }}/" |
-          sed "s%\${6}%${API_DB_URL}%" |
-          sed "s/\${7}/52561/" |
-          sed "s%\${8}%${CLIENT_API}%" |
-          sed "s/\${9}/80/" |
-          tee ./deploy_servers_filled.sh
-          gcloud compute instances add-metadata willow-server \
-              --metadata-from-file startup-script=./deploy_servers_filled.sh
-          gcloud --quiet compute ssh willow-server -- "sh -c $(cat ./deploy_servers_filled.sh)"
+          gcloud functions describe setLanguages | tee set_function.yml
+          SET_LANGUAGES_URL=$(cat set_function.yml | grep url | cut -d ' ' -f 4)
+          echo ::set-env SET_LANGUAGES_URL="${SET_LANGUAGES_URL}"
+
+          gcloud functions describe getLanguages | tee get_function.yml
+          GET_LANGUAGES_URL=$(cat get_function.yml | grep url | cut -d ' ' -f 4)
+          echo ::set-env GET_LANGUAGES_URL="${GET_LANGUAGES_URL}"
+
+      # - name: Update firestore language tracer urls
+      #   run: |
+      #     export TRACER_URLS_JSON="{\"python\": \"${PYTHON_FUNCTION_URL}\", \"java (beta)\": \"JAVA_FUNCTION_URL\"}"
+      #     npm run deploy:functions:set_languages
+      #     npm run deploy:functions:get_languages
