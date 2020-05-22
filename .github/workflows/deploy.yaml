@@ -18,11 +18,12 @@ jobs:
       - name: Authentication and configuration
         run: |
           GCP_AUTH_KEY=$(echo ${{ secrets.GCP_AUTH_KEY }} | base64 --decode)
-          echo ${GCP_AUTH_KEY} > ./key.json # gcloud authentication (gcloud and firebase share credentials)
+
+          # gcloud authentication (gcloud and firebase share credentials)
+          echo ${GCP_AUTH_KEY} > ./key.json
 
           GCP_PROJECT=$(echo ${GCP_AUTH_KEY} | grep -Po '"project_id"\s*:\s*".*?"' | cut -d \" -f4)
           GCP_EMAIL=$(echo ${GCP_AUTH_KEY} | grep -Po '"client_email"\s*:\s*".*?"' | cut -d \" -f4)
-
           GCP_COMPUTE_ZONE=${{ secrets.GCP_COMPUTE_ZONE }}
           GCP_COMPUTE_REGION=$(echo ${GCP_COMPUTE_ZONE} | cut -d '-' -f 1,2)
           GCP_FUNCTIONS_REGION=${GCP_COMPUTE_REGION}
@@ -33,39 +34,32 @@ jobs:
           gcloud config set compute/region ${GCP_COMPUTE_REGION}
           gcloud config set functions/region ${GCP_FUNCTIONS_REGION}
 
+          # firebase authentication uses variable with key patch
+          echo ::set-env name=GOOGLE_APPLICATION_CREDENTIALS::./key.json
+          echo ::set-env name=FIREBASE_PROJECT::${GCP_PROJECT}
+          echo ::set-env name=FIREBASE_WEBAPP_CONFIGURATION::$(echo ${{ secrets.FIREBASE_WEBAPP_CONFIGURATION }} | base64 --decode)
+          echo ::set-env name=FIREBASE_FUNCTIONS_REGION::${GCP_FUNCTIONS_REGION}
+
       - name: Install project dependencies
         run: |
           npm install
-
-      # - name: Deploy tracer functions
-      #   run: |
-      #     npm run deploy:tracers:java | tee java_function.yml
-      #     JAVA_FUNCTION_URL=$(cat java_function.yml | grep url | cut -d ' ' -f 4)
-      #     echo ::set-env JAVA_FUNCTION_URL="${JAVA_FUNCTION_URL}"
-
-      #     npm run deploy:tracers:python | tee python_function.yml
-      #     PYTHON_FUNCTION_URL=$(cat python_function.yml | grep url | cut -d ' ' -f 4)
-      #     echo ::set-env PYTHON_FUNCTION_URL="${PYTHON_FUNCTION_URL}"
+          npm --prefix ./client/ install
+          npm --prefix ./functions/ install
 
       - name: Deploy firestore, functions and hosting
         run: |
-          GOOGLE_APPLICATION_CREDENTIALS=./key.json # firebase authentication (do not change variable name)
-          export FIREBASE_CONFIG=$(echo ${{ secrets.FIREBASE_WEBAPP_CONFIGURATION }} | base64 --decode)
-          export FUNCTION_REGION=${GCP_COMPUTE_REGION}
-          echo ${FIREBASE_CONFIG}
-          echo ${FUNCTION_REGION}
-          npm run deploy:all -- --force
-
+          FIREBASE_CONFIG="${FIREBASE_WEBAPP_CONFIGURATION}" FUNCTION_REGION=${FIREBASE_FUNCTIONS_REGION} npm run deploy:all -- --force --project ${FIREBASE_PROJECT}
           gcloud functions describe setLanguages | tee set_function.yml
-          SET_LANGUAGES_URL=$(cat set_function.yml | grep url | cut -d ' ' -f 4)
-          echo ::set-env SET_LANGUAGES_URL="${SET_LANGUAGES_URL}"
-
           gcloud functions describe getLanguages | tee get_function.yml
-          GET_LANGUAGES_URL=$(cat get_function.yml | grep url | cut -d ' ' -f 4)
-          echo ::set-env GET_LANGUAGES_URL="${GET_LANGUAGES_URL}"
+          echo ::set-env name=SET_LANGUAGES_URL::$(cat set_function.yml | grep url | cut -d ' ' -f 4)
+          echo ::set-env name=GET_LANGUAGES_URL::$(cat get_function.yml | grep url | cut -d ' ' -f 4)
 
-      # - name: Update firestore language tracer urls
-      #   run: |
-      #     export TRACER_URLS_JSON="{\"python\": \"${PYTHON_FUNCTION_URL}\", \"java (beta)\": \"JAVA_FUNCTION_URL\"}"
-      #     npm run deploy:functions:set_languages
-      #     npm run deploy:functions:get_languages
+      - name: Deploy tracer functions and update firestore
+        run: |
+          npm run deploy:tracers:java | tee java_function.yml
+          npm run deploy:tracers:python | tee python_function.yml
+          export JAVA_FUNCTION_URL=$(cat java_function.yml | grep url | cut -d ' ' -f 4)
+          export PYTHON_FUNCTION_URL=$(cat python_function.yml | grep url | cut -d ' ' -f 4)
+          export TRACER_URLS_JSON="{\"python\": \"${PYTHON_FUNCTION_URL}\", \"java (beta)\": \"${JAVA_FUNCTION_URL}\"}"
+          npm run deploy:functions:set_languages
+          npm run deploy:functions:get_languages
