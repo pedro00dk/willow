@@ -4,47 +4,70 @@ A tool to inspect python code.
 This tool analyses the execution of a script at each step.
 Snapshots of the stack and heap, and errors generated during execution are composed in a record of the program states, the record is then returned.
 
-The Makefile can be used to start the tracer command line interface.
-The arguments are passed in to the python script through the ARGS variable.
+The Makefile can be used to start the tracer in terminal or emulator modes, or deploy the function to the cloud (requires gcloud and authentication).
+
+## Request Format
+
+The request must be in the json format with the following properties:
+
+```json
+{
+    "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
+    "input": "The string input to be provided to the program through stdin. It is optional, but the program might raise an EOFError if not enough input is provided.",
+    "steps": "the maximum number of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
+}
+```
+
+## Building
 
 ```shell
 $ make build
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
     ....
-
-$ make run ARGS='--help'
-.venv/bin/python ./main.py --help
-usage:
-    tracer [options]
-    request: {"source?": "string", "input"?: "string", "steps?": "number"}
-
-
-Python Tracer CLI
-
-optional arguments:
-  -h, --help         show this help message and exit
-  --server           Enable http server mode
-  --port PORT        The server port
-  --process PROCESS  Number of server processes
-  --pretty           Pretty print output
-  --test             Run the test sourcePython Tracer CLI
 ```
 
-This tool provides three ways to execute, they are:
-
-### Server
+## Terminal Mode
 
 ```shell
-$ make build
-$ make run ARGS='--server'
-.venv/bin/python ./main.py --server
- * Serving Flask app "Python Tracer" (lazy loading)
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
- * Debug mode: off
- * Running on http://0.0.0.0:8000/ (Press CTRL+C to quit)
+$ # use the --silent flag to disable echoing command recipes
+$ # ARGS are options to enable pretty print and run the test file, which ignores only the source field)
+$ # The request must be provided through standard input stream
+$ make terminal --silent ARGS='pretty test'
+{}
+...
+
+$ echo {} | make terminal ARGS='test'
+.venv/bin/python ./main.py terminal test
+...
+```
+
+The request must be provided through the tracer standard input stream.
+
+### Emulator Mode
+
+```shell
+$ make emulator
+.venv/bin/functions-framework --target service 
+[2020-05-23 15:31:53 -0300] [197051] [INFO] Starting gunicorn 20.0.4
+[2020-05-23 15:31:53 -0300] [197051] [INFO] Listening at: http://0.0.0.0:8080 (197051)
+[2020-05-23 15:31:53 -0300] [197051] [INFO] Using worker: threads
+[2020-05-23 15:31:53 -0300] [197053] [INFO] Booting worker with pid: 197053
+...
+
+$ # Help and extra emulator flags can be passed using ARGS
+$ make emulator ARGS='--help'
+Usage: functions-framework [OPTIONS]
+
+Options:
+  --target TEXT                  [required]
+  --source PATH
+  --signature-type [http|event]
+  --host TEXT
+  --port INTEGER
+  --debug
+  --dry-run
+  --help                         Show this message and exit.
 ```
 
 The request must be provided through POST requests.
@@ -78,37 +101,3 @@ versionId: <version>
 ```
 
 The request must be provided through POST requests.
-
-### Terminal
-
-```shell
-$ # use the --silent flag to disable echoing command recipes
-$ make run --silent ARGS='--pretty --test'
-```
-
-The request must be provided through the tracer standard input stream.
-
-## Request Format
-
-The request must be in the json format with the following properties:
-
-```json
-{
-    "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
-    "input": "The string input to be provided to the program through stdin. It is optional, but the program might raise an EOFError if not enough input is provided.",
-    "steps": "the maximum number of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
-}
-```
-
-## Docker
-
-This application can also run from a container in server or terminal execution modes
-
-```shell
-$ docker image build --tag <image-name> -- ./
-
-$ # docker CMD='make terminal'
-$ # ex:
-$ docker container run --rm --interactive --tty -- <image-name> # CMD is implicit, for terminal mode
-$ docker container run --rm --interactive --tty -- willow-tracer-python make server # for server mode
-```

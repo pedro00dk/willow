@@ -1,40 +1,35 @@
 import json
-import os
 import pathlib
-
-import flask
+import sys
 
 from tracer import tracer
 
 
-def main():
-    options = cli()
-    server(options) if options.server else terminal(options)
+def terminal():
+    """
+    Run the tracer in terminal mode. Used to test and debug the tracer.
+    To enable pretty input and test, the option string must be added to the command.
+    The program must be provided with the tracer request through its input:
 
-
-def cli():
-    import argparse
-    parser = argparse.ArgumentParser(description='Python Tracer CLI', usage=argparse.SUPPRESS)
-    parser.usage = '''
-    tracer [options]
-    request: {"source?": "string", "input"?: "string", "steps?": "number"}
-    '''
-    parser.add_argument('--server', default=False, action='store_true', help='Enable http server mode')
-    parser.add_argument('--port', default=8000, help='The server port')
-    parser.add_argument('--process', default=4, help='Number of server processes')
-    parser.add_argument('--pretty', default=False, action='store_true', help='Pretty print output')
-    parser.add_argument('--test', default=False, action='store_true', help='Run the test source')
-    options = parser.parse_args()
-    return options
-
-
-def server(options):
-    app = flask.Flask('Python Tracer')
-    app.add_url_rule('/', methods=['POST', 'OPTIONS'], view_func=lambda: service(flask.request))
-    app.run(host='0.0.0.0', port=options.port, threaded=False, processes=options.process)
+    {"source?": "string", "input"?: "string", "steps?": "number"}
+    """
+    pretty = 'pretty' in sys.argv
+    test = 'test' in sys.argv
+    request = json.loads(input())
+    response = trace(request, test, pretty)
+    print(response)
 
 
 def service(request):
+    """
+    Trace service function used by the serveless framework.
+    It can be tested locally with the functions-framework package.
+    Request method must be POST (or OPTIONS for CORS), and contain the Content-Type set to application/json.
+    The pretty and test options must be provided in the request parameters and set to true.
+    The request body must match de following schema:
+
+    {"source?": "string", "input"?: "string", "steps?": "number"}
+    """
     try:
         headers = {
             'Access-Control-Allow-Origin': '*',
@@ -47,8 +42,8 @@ def service(request):
             return '', 204, headers
         elif request.method != 'POST':
             return 'not allowed', 405, headers
-        test = request.args.get('test') == 'true'
         pretty = request.args.get('pretty') == 'true'
+        test = request.args.get('test') == 'true'
         request_body = request.get_json(silent=True)
         if request_body is None:
             return 'empty body', 400, headers
@@ -58,13 +53,10 @@ def service(request):
         return str(e), 500, headers
 
 
-def terminal(options):
-    request = json.loads(input())
-    response = trace(request, options.test, options.pretty)
-    print(response)
-
-
 def trace(request, test, pretty):
+    """
+    Trace the received request with the provided options and return the response as a json string.
+    """
     tracer_request = {
         'source': request.get('source') if not test and request.get('source') is not None else
         pathlib.Path('./res/test.py').read_text(encoding='utf8') if test else '',
@@ -78,4 +70,5 @@ def trace(request, test, pretty):
 
 
 if __name__ == '__main__':
-    main()
+    if 'terminal' in sys.argv:
+        terminal()
