@@ -4,50 +4,52 @@ A tool to inspect java code.
 This tool analyses the execution of a source at each step.
 Snapshots of the stack and heap, and errors generated during execution are composed in a record of the program states, the record is then returned.
 
-The Makefile can be used to start the tracer command line interface.
-The arguments are passed in to the java program through the ARGS variable.
+The Makefile can be used to start the tracer in terminal or emulator modes, or deploy the function to the cloud (requires gcloud and authentication).
+
+## Request Format
+
+The request must be in the json format with the following properties:
+
+```json
+{
+    "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
+    "input": "The string input to be provided to the program through stdin. It is optional, but the program might raise an EOFError if not enough input is provided.",
+    "steps": "the maximum number of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
+}
+```
+
+## Building
 
 ```shell
 $ make build
-mvn clean
+mvn clean compile
 ...
-mvn compile
-...
-mvn assembly:single
-...
-
-$ make run ARGS='--help'
-java -jar target/*.jar --help
-usage: 
-        tracer [options]
-        stdin: {"source?": "string", "input"?: "string", "steps?": "number"}
-
-Java tracer CLI
-
-named arguments:
-  -h, --help             show this help message and exit
-  --server               Enable http server mode
-  --port PORT            The server port
-  --pretty               Pretty print output
-  --test                 Run the test code
 ```
 
-This tool provides three ways to execute, they are:
+## Terminal Mode
 
-### Server
+```
+$ make terminal
+...
+[INFO] --- exec-maven-plugin:1.6.0:exec (default-cli) @ java-tracer ---
 
-```shell
-$ make build
-$ make run ARGS='--server'
-java -jar target/*.jar --server
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
- * Serving Spark app "Java Tracer"
- * Running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
-The request must be provided through POST requests.
+## Emulator Mode
+
+```
+$ make emulator
+...
+[INFO] Calling Invoker with [--classpath, /home/pedro/Documents/Projects/willow/tracers/java/out/classes:/home/pedro/.m2/repository/com/google/cloud/functions/functions-framework-api/1.0.1/functions-framework-api-1.0.1.jar:/home/pedro/.m2/repository/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar, --target, Main]
+[INFO] Logging initialized @2898ms to org.eclipse.jetty.util.log.Slf4jLog
+[INFO] jetty-9.4.26.v20200117; built: 2020-01-17T12:35:33.676Z; git: 7b38981d25d14afb4a12ff1f2596756144edf695; jvm 13.0.2+8
+[INFO] Started o.e.j.s.ServletContextHandler@28f9fedd{/,null,AVAILABLE}
+[INFO] Started ServerConnector@4c7e978c{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}
+[INFO] Started @3128ms
+INFO: Serving function...
+INFO: Function: Main
+INFO: URL: http://localhost:8080/
+```
 
 ### Cloud Function
 
@@ -80,37 +82,3 @@ versionId: <version>
 ```
 
 The request must be provided through POST requests.
-
-### Terminal
-
-```shell
-$ # use the --silent flag to disable echoing command recipes
-$ make run --silent ARGS='--pretty --test'
-```
-
-The request must be provided through the tracer standard input stream.
-
-## Request Format
-
-The request must be in the json format with the following properties:
-
-```json
-{
-    "source": "A string of the program source code to be traced. If not provided, the tracer will use an empty string.",
-    "input": "The string input to be provided to the program through stdin. It is optional, but the program might raise an EOFError if not enough input is provided.",
-    "steps": "the maximum number of steps the script can execute. It considers only steps in the provided script, API calls from other modules are not counted."
-}
-```
-
-## Docker
-
-This application can also run from a container in server or terminal execution modes
-
-```shell
-$ docker image build --tag <image-name> -- ./
-
-$ # docker CMD='make terminal'
-$ # ex:
-$ docker container run --rm --interactive --tty -- <image-name> # CMD is implicit, for terminal mode
-$ docker container run --rm --interactive --tty -- willow-tracer-python make server # for server mode
-```

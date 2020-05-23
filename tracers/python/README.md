@@ -24,7 +24,7 @@ The request must be in the json format with the following properties:
 $ make build
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
-    ....
+...
 ```
 
 ## Terminal Mode
