@@ -25,7 +25,7 @@ dist/
 *.class
 *.jar
 # maven
-target/
+out/
 # trash
 .settings/
 .classpath

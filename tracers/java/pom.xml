@@ -11,58 +11,70 @@
         <maven.compiler.source>11</maven.compiler.source>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.google.cloud.functions</groupId>
-            <artifactId>functions-framework-api</artifactId>
-            <version>1.0.0-alpha-2-rc3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.argparse4j</groupId>
-            <artifactId>argparse4j</artifactId>
-            <version>0.8.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sparkjava</groupId>
-            <artifactId>spark-core</artifactId>
-            <version>2.9.1</version>
-        </dependency>
-    </dependencies>
-
     <build>
+        <sourceDirectory>${project.basedir}/src</sourceDirectory>
+        <directory>${project.basedir}/out</directory>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/res</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>.google/</exclude>
-                    </excludes>
+                    <source>11</source>
+                    <target>11</target>
                     <compilerArgs>
-                        <arg>--add-exports=jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
 
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>--add-exports</argument>
+                        <argument>jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED</argument>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>Main</argument>
+                        <argument>terminal</argument>
+                        <argument>pretty</argument>
+                        <argument>test</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.functions</groupId>
+                <artifactId>function-maven-plugin</artifactId>
+                <version>0.9.1</version>
+                <configuration>
+                    <functionTarget>Main</functionTarget>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.cloud.functions</groupId>
+            <artifactId>functions-framework-api</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+    </dependencies>
+
 </project>

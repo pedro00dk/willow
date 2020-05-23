@@ -1,10 +1,11 @@
 build:
-	mvn clean
-	mvn compile
-	mvn assembly:single
+	mvn clean compile
 
-run:
-	java -jar target/*.jar ${ARGS}
+terminal:
+	mvn clean compile exec:exec
+
+emulator:
+	mvn clean function:run
 
 deploy:
 	gcloud alpha functions deploy java_tracer --entry-point Main --runtime java11 \
