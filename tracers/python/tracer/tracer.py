@@ -27,6 +27,7 @@ class Tracer:
         self._exec_frame = None
         self._input_index = 0
         self._print_cache = []
+        self._trace_functions = []
 
     def run(self):
         """
@@ -49,7 +50,9 @@ class Tracer:
 
         try:
             compiled = compile(self._source, '<script>', 'exec')
-            sys.settrace(self._trace)
+            self._trace_functions.append(self._trace)
+            self._trace_functions.append(sys.gettrace())
+            sys.settrace(self._multi_trace)
             exec(compiled, sandbox_globals)
 
         except TracerStopException as e:
@@ -64,9 +67,21 @@ class Tracer:
             self._response['steps'].append({'error': error, 'print': ''.join(self._print_cache)})
 
         finally:
-            sys.settrace(None)
+            if self._trace in self._trace_functions:
+                self._trace_functions.remove(self._trace)
 
         return self._response
+
+    def _multi_trace(self, frame: types.FrameType, event: str, args):
+        """
+        The multi trace is used to allow multiple tracer functions run at once.
+        Since both tracer and debugger use sys.settrace to analyse code, the trace function overwrite the debugger tracer.
+        This prevents the debugger to work properly.
+        This function multiplexes the local tracer and the debugger tracer, allowing both to run correctly.
+        """
+        self._trace_functions = [trace(frame, event, args) for trace in self._trace_functions if trace is not None]
+        return self._multi_trace if len(self._trace_functions) > 1 else \
+            self._trace_functions.pop() if len(self._trace_functions) == 1 else None
 
     def _trace(self, frame: types.FrameType, event: str, args):
         """
