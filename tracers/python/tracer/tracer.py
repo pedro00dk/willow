@@ -27,7 +27,6 @@ class Tracer:
         self._exec_frame = None
         self._input_index = 0
         self._print_cache = []
-        self._trace_functions = []
 
     def run(self):
         """
@@ -50,9 +49,7 @@ class Tracer:
 
         try:
             compiled = compile(self._source, '<script>', 'exec')
-            self._trace_functions.append(self._trace)
-            self._trace_functions.append(sys.gettrace())
-            sys.settrace(self._multi_trace)
+            sys.settrace(self._trace)
             exec(compiled, sandbox_globals)
 
         except TracerStopException as e:
@@ -67,21 +64,9 @@ class Tracer:
             self._response['steps'].append({'error': error, 'print': ''.join(self._print_cache)})
 
         finally:
-            if self._trace in self._trace_functions:
-                self._trace_functions.remove(self._trace)
+            sys.settrace(None)
 
         return self._response
-
-    def _multi_trace(self, frame: types.FrameType, event: str, args):
-        """
-        The multi trace is used to allow multiple tracer functions run at once.
-        Since both tracer and debugger use sys.settrace to analyse code, the trace function overwrite the debugger tracer.
-        This prevents the debugger to work properly.
-        This function multiplexes the local tracer and the debugger tracer, allowing both to run correctly.
-        """
-        self._trace_functions = [trace(frame, event, args) for trace in self._trace_functions if trace is not None]
-        return self._multi_trace if len(self._trace_functions) > 1 else \
-            self._trace_functions.pop() if len(self._trace_functions) == 1 else None
 
     def _trace(self, frame: types.FrameType, event: str, args):
         """
@@ -102,7 +87,6 @@ class Tracer:
             return self._trace
         if self._current_step >= self._steps:
             raise TracerStopException(f'Program too long, maximum steps allowed: {self._steps}')
-
         self._current_step += 1
         snapshot = self._inspector.inspect(frame, event, args, self._exec_frame)
         self._response['steps'].append({'snapshot': snapshot, 'print': ''.join(self._print_cache)})
