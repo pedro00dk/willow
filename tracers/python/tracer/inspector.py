@@ -81,6 +81,8 @@ class Inspector:
             ]
         if event == 'return' and len(stack) > 1:
             stack[-1]['members'].append({'key': '#return#', 'value': self._inspect_object(heap, args, classes, module)})
+        elif event == 'exception':
+            stack[-1]['members'].append({'key': '#exception#', 'value': repr(args[1])})
         return heap
 
     def _inspect_object(self, heap: dict, obj, classes: set, module: str):
