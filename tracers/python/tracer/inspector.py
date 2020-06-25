@@ -47,8 +47,9 @@ class Inspector:
         """
         filename = frame.f_code.co_filename
         frames = []
-        while frame is not None and frame != stop_frame and frame.f_code.co_filename == filename:
-            frames.append(frame)
+        while frame is not None and frame != stop_frame:
+            if frame.f_code.co_filename == filename:
+                frames.append(frame)
             frame = frame.f_back
         frames.reverse()
         return frames
