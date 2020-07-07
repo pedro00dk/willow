@@ -23,6 +23,7 @@ The request must be in the json format with the following properties:
 ```shell
 $ make build
 python -m venv .venv
+.venv/bin/pip install --upgrade pip
 .venv/bin/pip install -r requirements.txt
 ...
 ```
@@ -30,52 +31,35 @@ python -m venv .venv
 ## Terminal Mode
 
 ```shell
-$ # use the --silent flag to disable echoing command recipes
-$ # ARGS are options to enable pretty print and run the test file, which ignores only the source field)
+$ # ARGS provide options to enable pretty print (pretty) and run the test files (test)
 $ # The request must be provided through standard input stream
 $ make terminal --silent ARGS='pretty test'
 {}
 ...
 
-$ echo {} | make terminal ARGS='test'
-.venv/bin/python ./main.py terminal test
+$ echo "{\"source\":\"print('hello world')\"}" | make terminal ARGS='pretty'
+.venv/bin/python ./main.py terminal pretty
 ...
 ```
-
-The request must be provided through the tracer standard input stream.
 
 ### Emulator Mode
 
 ```shell
+$ # The request must be provided through POST requests.
 $ make emulator
-.venv/bin/functions-framework --target service 
-[2020-05-23 15:31:53 -0300] [197051] [INFO] Starting gunicorn 20.0.4
-[2020-05-23 15:31:53 -0300] [197051] [INFO] Listening at: http://0.0.0.0:8080 (197051)
-[2020-05-23 15:31:53 -0300] [197051] [INFO] Using worker: threads
-[2020-05-23 15:31:53 -0300] [197053] [INFO] Booting worker with pid: 197053
+.venv/bin/functions-framework --target service --port 8081
+[2020-07-07 19:45:12 -0300] [52263] [INFO] Starting gunicorn 20.0.4
+[2020-07-07 19:45:12 -0300] [52263] [INFO] Listening at: http://0.0.0.0:8081 (52263)
+[2020-07-07 19:45:12 -0300] [52263] [INFO] Using worker: threads
+[2020-07-07 19:45:12 -0300] [52265] [INFO] Booting worker with pid: 52265
+
 ...
-
-$ # Help and extra emulator flags can be passed using ARGS
-$ make emulator ARGS='--help'
-Usage: functions-framework [OPTIONS]
-
-Options:
-  --target TEXT                  [required]
-  --source PATH
-  --signature-type [http|event]
-  --host TEXT
-  --port INTEGER
-  --debug
-  --dry-run
-  --help                         Show this message and exit.
 ```
-
-The request must be provided through POST requests.
 
 ### Cloud Function
 
 Before running the deploy command, you must login to your gcp account and `gcloud config set` for `project` and `function/region`.
-You can also change the make command to set these properties.
+You can also change the make command to configure deployment options.
 
 ```shell
 $ make deploy

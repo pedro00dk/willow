@@ -28,16 +28,19 @@ mvn clean compile
 
 ## Terminal Mode
 
-```
+```shell
+$ # Terminal mode will execute and trace the program in the resources folder
+$ # A empty request must be provided through standard input stream ({})
 $ make terminal
 ...
 [INFO] --- exec-maven-plugin:1.6.0:exec (default-cli) @ java-tracer ---
-
+{}
 ```
 
 ## Emulator Mode
 
-```
+```shell
+$ # The request must be provided through POST requests.
 $ make emulator
 ...
 [INFO] Calling Invoker with [--classpath, /home/pedro/Documents/Projects/willow/tracers/java/out/classes:/home/pedro/.m2/repository/com/google/cloud/functions/functions-framework-api/1.0.1/functions-framework-api-1.0.1.jar:/home/pedro/.m2/repository/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar, --target, Main]
@@ -54,7 +57,7 @@ INFO: URL: http://localhost:8080/
 ### Cloud Function
 
 Before running the deploy command, you must login to your gcp account and `gcloud config set` for `project` and `function/region`.
-You can also change the make command to set these properties.
+You can also change the make command to configure deployment options.
 
 This is a java 11 cloud function, it requires previous alpha registration to be able to use the java 11 runtime.
 
