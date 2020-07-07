@@ -8,7 +8,7 @@ Demonstration video: https://www.youtube.com/watch?v=y4KFEZGWVtA
 
 ## Usage Instructions
 
-[Check usage instructions here](./wiki/HOW_TO_USE.md)
+[Check usage instructions here](./docs/HOW_TO_USE.md)
 
 ## Examples:
 
