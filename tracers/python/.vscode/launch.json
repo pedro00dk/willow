@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "console": "integratedTerminal",
-            "pythonPath": "${config:python.interpreterPath}",
+            "pythonPath": "${command:python.interpreterPath}",
             "program": "main.py",
             "args": ["terminal", "pretty", "test"]
         }
