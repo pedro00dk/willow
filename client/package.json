@@ -1,29 +1,27 @@
 {
     "main": "./public/index.html",
     "devDependencies": {
-        "@types/react": "16.9.34",
-        "@types/react-dom": "16.9.6",
+        "@types/react": "16.9.41",
+        "@types/react-dom": "16.9.8",
         "parcel-bundler": "latest",
         "prettier": "latest",
         "typescript": "latest"
     },
     "dependencies": {
-        "@babel/polyfill": "7.8.7",
+        "@babel/polyfill": "7.10.4",
         "axios": "0.19.2",
         "brace": "0.11.1",
         "emotion": "10.0.27",
-        "firebase": "7.14.4",
+        "firebase": "7.15.5",
         "react": "16.13.1",
         "react-contexify": "4.1.1",
         "react-dom": "16.13.1"
     },
     "scripts": {
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
-        "//0": "//",
-        "require:firebase_config": "[ \"${FIREBASE_CONFIG}\" ] || { echo 'FIREBASE_CONFIG env not set (app data)' ; exit 1 ; }",
-        "require:firebase_testing": "[ \"${FIREBASE_TESTING}\" ] || { echo 'FIREBASE_TESTING env not set (false or local firestore address without protocol)' ; exit 1 ; }",
-        "//1": "//",
-        "build": "npm run require:firebase_config && npm run require:firebase_testing && parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
-        "start": "npm run require:firebase_config && npm run require:firebase_testing && parcel serve --no-cache -d ./dist/ -p 5000 -- \"$npm_package_main\""
+        "require:firebase_webapp_configuration": "[ \"${FIREBASE_WEBAPP_CONFIGURATION}\" ] || { echo 'FIREBASE_WEBAPP_CONFIGURATION not set (firebase config object containing web app config content, not file path)' ; exit 1 ; }",
+        "require:firestore_emulator": "[ \"${FIRESTORE_EMULATOR}\" ] || { echo 'FIRESTORE_EMULATOR not set ('false' or local firestore address without protocol)' ; exit 1 ; }",
+        "build": "npm run require:firebase_webapp_configuration && npm run require:firestore_emulator && parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
+        "start": "npm run require:firebase_webapp_configuration && npm run require:firestore_emulator && parcel serve --no-cache -d ./dist/ -p 5002 -- \"$npm_package_main\""
     }
 }

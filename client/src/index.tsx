@@ -6,11 +6,11 @@ import React from 'react'
 import ReactDom from 'react-dom'
 import { App } from './components/App'
 
-const firebaseConfigEnv = process.env['FIREBASE_CONFIG']
-const firebaseTestingEnv = process.env['FIREBASE_TESTING']
+const webappConfigurationString = process.env['FIREBASE_WEBAPP_CONFIGURATION']
+const firestoreEmulatorAddress = process.env['FIRESTORE_EMULATOR']
 
-const firebaseConfig = JSON.parse(firebaseConfigEnv)
-firebase.initializeApp(firebaseConfig)
-if (firebaseTestingEnv !== 'false') firebase.firestore().settings({ host: firebaseTestingEnv, ssl: false })
+const webappConfiguration = JSON.parse(webappConfigurationString)
+firebase.initializeApp(webappConfiguration)
+if (firestoreEmulatorAddress !== 'false') firebase.firestore().settings({ host: firestoreEmulatorAddress, ssl: false })
 
 ReactDom.render(<App />, document.getElementById('root'))
