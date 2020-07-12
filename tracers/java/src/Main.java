@@ -1,8 +1,5 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
@@ -14,16 +11,6 @@ import tracer.Tracer;
 
 
 public class Main implements HttpFunction {
-
-    public static void terminal(List<String> argsList) {
-        var pretty = argsList.contains("pretty");
-        var test = argsList.contains("test");
-        var scan = new Scanner(System.in);
-        var request = new Gson().fromJson(scan.nextLine(), JsonObject.class);
-        scan.close();
-        var response = trace(request, test, pretty);
-        System.out.println(response);
-    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -42,8 +29,6 @@ public class Main implements HttpFunction {
             response.getWriter().append("not allowed").close();
             return;
         }
-        var pretty = request.getQueryParameters().getOrDefault("pretty", List.of()).contains("true");
-        var test = request.getQueryParameters().getOrDefault("test", List.of()).contains("true");
         var body = request.getReader().lines().collect(Collectors.joining("\n"));
         JsonObject requestBody = null;
         try {
@@ -53,19 +38,17 @@ public class Main implements HttpFunction {
             response.getWriter().append("empty body").close();
             return;
         }
-        var responseBody = trace(requestBody, test, pretty);
+        var responseBody = trace(requestBody, false);
         response.setStatusCode(200);
         response.getWriter().append(responseBody).close();
     }
 
-    public static String trace(JsonObject request, boolean test, boolean pretty) {
+    public static String trace(JsonObject request, boolean pretty) {
         var source = request.get("source");
         var input = request.get("input");
         var steps = request.get("steps");
         var tracerRequest = new JsonObject();
-        var testFile = test
-            ? new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("Test.java"))).lines().collect(Collectors.joining("\n")) : "";
-        tracerRequest.addProperty("source", !test && source != null ? source.getAsString() : test ? testFile : "");
+        tracerRequest.addProperty("source", source != null ? source.getAsString() : "");
         tracerRequest.addProperty("input", input != null ? input.getAsString() : "");
         tracerRequest.addProperty("steps", steps != null ? Math.min(Math.max(0, steps.getAsInt()), 10000) : 5000);
         var tracerResponse = new Tracer(tracerRequest).run();
@@ -75,8 +58,21 @@ public class Main implements HttpFunction {
         return stringResponse;
     }
 
+    public static void test() {
+        var source = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("Test.java")))
+            .lines()
+            .collect(Collectors.joining("\n"));
+        var input = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("Input.txt")))
+            .lines()
+            .collect(Collectors.joining("\n"));
+        var request = new JsonObject();
+        request.addProperty("source", source);
+        request.addProperty("input", input);
+        request.addProperty("steps", 10000);
+        System.out.println(trace(request, true));
+    }
+
     public static void main(String[] args) {
-        var argsList = Arrays.asList(args);
-        if (argsList.contains("terminal")) terminal(argsList);
+        test();
     }
 }
