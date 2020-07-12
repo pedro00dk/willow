@@ -5,21 +5,6 @@ import sys
 from tracer import tracer
 
 
-def terminal():
-    """
-    Run the tracer in terminal mode. Used to test and debug the tracer.
-    To enable pretty input and test, the option string must be added to the command.
-    The program must be provided with the tracer request through its input:
-
-    {"source?": "string", "input"?: "string", "steps?": "number"}
-    """
-    pretty = 'pretty' in sys.argv
-    test = 'test' in sys.argv
-    request = json.loads(input())
-    response = trace(request, test, pretty)
-    print(response)
-
-
 def service(request):
     """
     Trace service function used by the serveless framework.
@@ -42,24 +27,21 @@ def service(request):
             return '', 204, headers
         elif request.method != 'POST':
             return 'not allowed', 405, headers
-        pretty = request.args.get('pretty') == 'true'
-        test = request.args.get('test') == 'true'
         request_body = request.get_json(silent=True)
         if request_body is None:
             return 'empty body', 400, headers
-        response_body = trace(request_body, test, pretty)
+        response_body = trace(request_body)
         return response_body, 200, headers
     except Exception as e:
         return str(e), 500, headers
 
 
-def trace(request, test, pretty):
+def trace(request, pretty=False):
     """
-    Trace the received request with the provided options and return the response as a json string.
+    Trace the received request and options, and return the response as a json string.
     """
     tracer_request = {
-        'source': request.get('source') if not test and request.get('source') is not None else
-        pathlib.Path('./res/test.py').read_text(encoding='utf8') if test else '',
+        'source': request.get('source') if request.get('source') is not None else '',
         'input': request.get('input') if request.get('input') is not None else '',
         'steps': min(max(0, request.get('steps')), 10000) if request.get('steps') is not None else 5000
     }
@@ -69,6 +51,18 @@ def trace(request, test, pretty):
     return string_response
 
 
-if __name__ == '__main__':
-    if 'terminal' in sys.argv:
-        terminal()
+def test():
+    """
+    Test function used to debug the tracer.
+    """
+    request = {
+        'source': pathlib.Path('./res/test.py').read_text(encoding='utf8'),
+        'input': pathlib.Path('./res/input.txt').read_text(encoding='utf8'),
+        'steps': 10000
+    }
+    response = trace(request, True)
+    print(response)
+
+
+if __name__ == '__main__':  # functions-framework import this module with __name__ == 'main', not '__main__'
+    test()
