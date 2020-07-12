@@ -38,6 +38,7 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
     const previousMembers = React.useRef<typeof members>({})
     const references = React.useRef<{ key: string; target: string; ref$: HTMLSpanElement; edge: Partial<Edge> }[]>([])
     const dispatch = useDispatch()
+    props.node.layout.applied = false
 
     const defaultShape = React.useMemo(
         () =>
@@ -76,15 +77,31 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
 
     React.useEffect(() => {
         if (!props.node.layout.enabled) return
+        if (props.node.layout.applied) return
+        console.log(props.node.id)
         const structure = props.node.findStructure()
-        const horizontal = (structure.base.layout.horizontal = props.node.layout.horizontal)
+        if (Object.keys(structure.members).length == 1) return
+        const previousStructure = props.node.layout.structure
+        if (previousStructure != undefined)
+            Object.values(previousStructure.members).forEach(node => {
+                console.log('cleaning', node.id)
+                if (node === props.node) return
+                node.layout.enabled = false
+                node.layout.applied = false
+                node.layout.position = undefined
+                node.layout.structure = undefined
+            })
         const position = props.node.layout.position ?? props.node.getPosition()
-        const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, 'ovr')
+        const horizontal = props.node.layout.horizontal
+        const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, 'avl')
         Object.values(structure.members).forEach(node => {
-            node.layout.enabled = false
+            console.log('restoring', node.id)
+            node.layout.enabled = true
+            node.layout.applied = true
+            node.layout.horizontal = horizontal
             node.layout.position = position
+            node.layout.structure = structure
         })
-        structure.base.layout.enabled = true
         props.graph.animate = true
         Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
         dispatch(actions.user.action({ name: 'layout', payload: 'automatic' }))
@@ -107,14 +124,17 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                 ref: container$,
                 className: classes.container,
                 onDoubleClick: event => {
-                    const mode = !event.ctrlKey ? 'ovr' : !event.shiftKey ? 'avl' : 'all'
                     const structure = props.node.findStructure()
                     const horizontal = !event.altKey
                     const position = props.node.getPosition()
-                    const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, mode)
-                    Object.values(structure.members).forEach(node => (node.layout.enabled = false))
-                    structure.base.layout.enabled = true
-                    structure.base.layout.horizontal = horizontal
+                    Object.values(structure.members).forEach(node => {
+                        node.layout.enabled = true
+                        node.layout.applied = true
+                        node.layout.horizontal = horizontal
+                        node.layout.position = position
+                        node.layout.structure = structure
+                    })
+                    const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, 'ovr')
                     props.graph.animate = true
                     Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
                     props.update({})
@@ -127,12 +147,25 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                 const depth = event.altKey ? Infinity : 0
                 const mode = !event.ctrlKey ? 'ovr' : !event.shiftKey ? 'avl' : 'all'
                 const movedNodes = props.node.move(svgDelta, depth, mode)
-                props.node.layout.enabled = false
-                props.node.layout.position = undefined
+                const previousStructure = props.node.layout.structure
+                if (previousStructure != undefined)
+                    Object.values(previousStructure.members).forEach(node => {
+                        node.layout.enabled = false
+                        node.layout.applied = false
+                        node.layout.position = undefined
+                        node.layout.structure = undefined
+                    })
+                const currentStructure = props.node.findStructure()
+                Object.values(currentStructure.members).forEach(node => {
+                    node.layout.enabled = false
+                    node.layout.applied = false
+                    node.layout.position = undefined
+                    node.layout.structure = undefined
+                })
                 props.graph.animate = false
                 Object.values(movedNodes).forEach(node => props.graph.subscriptions.call(node.id))
             }}
-            onDragEnd={() => (wrapper$.current.style.background = styles.layoutHighlight(props.node.layout.enabled))}
+            onDragEnd={() => props.update({})}
         >
             <MenuProvider id={props.id} className={classes.menuProvider}>
                 <div className={classes.menuProvider}>
