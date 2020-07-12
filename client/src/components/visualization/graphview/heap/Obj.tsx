@@ -78,9 +78,12 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
         if (!props.node.layout.enabled) return
         const structure = props.node.findStructure()
         const horizontal = (structure.base.layout.horizontal = props.node.layout.horizontal)
-        const position = props.node.getPosition()
+        const position = props.node.layout.position ?? props.node.getPosition()
         const layout = structure.applyLayout({ breadth: 1.5, depth: 1.5 }, horizontal, position, 'ovr')
-        Object.values(structure.members).forEach(node => (node.layout.enabled = false))
+        Object.values(structure.members).forEach(node => {
+            node.layout.enabled = false
+            node.layout.position = position
+        })
         structure.base.layout.enabled = true
         props.graph.animate = true
         Object.keys(layout).forEach(id => props.graph.subscriptions.call(id))
@@ -125,10 +128,11 @@ export const Obj = (props: { id: string; obj: tracer.Obj; node: Node; graph: Gra
                 const mode = !event.ctrlKey ? 'ovr' : !event.shiftKey ? 'avl' : 'all'
                 const movedNodes = props.node.move(svgDelta, depth, mode)
                 props.node.layout.enabled = false
+                props.node.layout.position = undefined
                 props.graph.animate = false
                 Object.values(movedNodes).forEach(node => props.graph.subscriptions.call(node.id))
             }}
-            onDragEnd={() => wrapper$.current.style.background = styles.layoutHighlight(props.node.layout.enabled)}
+            onDragEnd={() => (wrapper$.current.style.background = styles.layoutHighlight(props.node.layout.enabled))}
         >
             <MenuProvider id={props.id} className={classes.menuProvider}>
                 <div className={classes.menuProvider}>

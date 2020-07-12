@@ -78,7 +78,7 @@ export class Node {
     mode = 'type' as 'local' | 'type'
     shape = undefined as string
     parameters = new Parameters()
-    layout = { enabled: false, horizontal: true }
+    layout = { enabled: false, horizontal: true, position: undefined as { x: number; y: number } }
 
     constructor(graph: Graph, id: string, partial?: Partial<Node>) {
         Object.assign(this, partial)
