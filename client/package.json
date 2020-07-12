@@ -21,7 +21,7 @@
         "format": "shopt -s extglob globstar && prettier --config ./.prettierrc.json -c --write ./src/**/*.ts* && shopt -u extglob globstar",
         "require:firebase_webapp_configuration": "[ \"${FIREBASE_WEBAPP_CONFIGURATION}\" ] || { echo 'FIREBASE_WEBAPP_CONFIGURATION not set (firebase config object containing web app config content, not file path)' ; exit 1 ; }",
         "require:firestore_emulator": "[ \"${FIRESTORE_EMULATOR}\" ] || { echo 'FIRESTORE_EMULATOR not set ('false' or local firestore address without protocol)' ; exit 1 ; }",
-        "build": "npm run require:firebase_webapp_configuration && npm run require:firestore_emulator && parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
+        "build": "npm run require:firebase_webapp_configuration && npm run require:firestore_emulator && rm -r ./dist/build && parcel build --no-cache --no-source-maps -d ./dist/build -- \"$npm_package_main\"",
         "start": "npm run require:firebase_webapp_configuration && npm run require:firestore_emulator && parcel serve --no-cache -d ./dist/ -p 5002 -- \"$npm_package_main\""
     }
 }
