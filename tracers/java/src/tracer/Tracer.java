@@ -121,6 +121,7 @@ public class Tracer {
             // exception printed in the error stream is collected to be shown inside a threw object
             final var exceptionTraceback = String.join("", this.printCache);
             this.printCache.clear();
+            if (exceptionTraceback.contains("Picked up JAVA_TOOL_OPTIONS:")) return;
             throw new PrintedException(exceptionTraceback);
         }
         if (!(event instanceof LocatableEvent) || !((LocatableEvent) event).thread().name().equals("main")) return;
