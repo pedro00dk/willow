@@ -57,7 +57,7 @@ const Brand = () => (
 )
 
 const Help = () => {
-    const helpUrl = 'https://github.com/pedro00dk/willow/blob/master/docs/HOW_TO_USE.md'
+    const helpUrl = 'https://github.com/pedro00dk/willow/blob/master/wiki/HOW_TO_USE.md'
 
     return (
         <a className={classes.menu.link} href={helpUrl} target='_blank'>

@@ -4,13 +4,13 @@
 
 ## Interface
 
-![](../wiki/images/overview.gif)
+![](./images/overview.gif)
 
 ## Toolbar
 
 The toolbar contains **language** and execution controls. Choose the language you want to use and click **play** to start. The **left and right arrows** are used to step backwards and forwards in the code. You can also use the **keyboard arrows**.
 
-![](../wiki/images/toolbar.png)
+![](./images/toolbar.png)
 
 The **Visualization** toggle on the right side enable and disable the visualization panes.
 **Preserve Layout** remember manipulations done in a program visualization for the next execution of a program. It is useful when the user runs consecutive, slightly modified versions of the same program.
@@ -19,7 +19,7 @@ The **Visualization** toggle on the right side enable and disable the visualizat
 
 On the left side there are two editors for source code and input, and an output pane.
 
-![](../wiki/images/editors.png)
+![](./images/editors.png)
 
 The **source editor** provides basic syntax highlight and snippets for the chosen language in the toolbar.
 During the execution of the program, it also highlights the line to be executed, and show color codes for function calls, returns and exceptions.
@@ -46,7 +46,7 @@ The stack trace also shows the current point of the program with a highlight col
 The stack trace scopes can also be used for program navigation.
 By clicking on then, the program execution point will jump to the start of the function scope, if double-click, it will jump to the end of the function scope.
 
-![](../wiki/images/stack.png)
+![](./images/stack.png)
 
 ### Heap
 
@@ -61,7 +61,7 @@ The available shapes are:
 
 Shapes also have extra parameters that change the way they are displayed.
 
-![](../wiki/images/shapes.png)
+![](./images/shapes.png)
 
 The heap view can be moved and zoomed by dragging and scrolling.
 
@@ -73,7 +73,7 @@ For the sake of the visualization and depending on the language, things that sho
 Objects can be moved inside the heap area by dragging them.
 Many objects can be moved at once by pressing `ALT` if they are linked.
 
-![](../wiki/images/position.gif)
+![](./images/position.gif)
 
 The effects of the positioning apply from the program step it moved up until the end of the program.
 
@@ -81,4 +81,4 @@ Automatic layout of data structures can be enabled by double clicking any elemen
 The base element will present a darker contour, meaning that the data structure auto layout is enabled.
 If the base element is moved or deleted, the auto layout is disabled.
 
-![](../wiki/images/layout.gif)
+![](./images/layout.gif)
