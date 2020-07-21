@@ -33,13 +33,12 @@ export const Stack = () => {
 
     return (
         <div ref={container$} className={classes.container}>
-            {!available ? (
-                <Scope scope={{ line: 0, name: 'Stack', members: [] }} event={event} last={false} />
-            ) : stack.length > 0 ? (
-                stack.map((scope, i) => <Scope key={i} scope={scope} event={event} last={i === stack.length - 1} />)
-            ) : (
-                <span className={classes.label}>{'Stack unavailable'}</span>
-            )}
+            {available &&
+                (stack.length > 0 ? (
+                    stack.map((scope, i) => <Scope key={i} scope={scope} event={event} last={i === stack.length - 1} />)
+                ) : (
+                    <span className={classes.label}>{'Stack unavailable'}</span>
+                ))}
         </div>
     )
 }

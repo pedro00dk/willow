@@ -82,10 +82,16 @@ const Visualization = () => {
         <div className={classes.visualization} tabIndex={0}>
             <SplitPane orientation='column' ratio={0.35}>
                 <SplitPane ratio={0.25} range={[0.1, 0.6]}>
-                    <Stack />
-                    <StackTrace />
+                    <Frame title='Stack'>
+                        <Stack />
+                    </Frame>
+                    <Frame title='Call tree'>
+                        <StackTrace />
+                    </Frame>
                 </SplitPane>
-                <GraphView />
+                <Frame title='Heap'>
+                    <GraphView />
+                </Frame>
             </SplitPane>
         </div>
     )
