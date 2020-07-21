@@ -14,8 +14,15 @@ const classes = {
 
 const styles = {
     headColor: (event: tracer.Snapshot['event'], last: boolean) => {
-        if (!last || event === 'line') return 'none'
-        return (event === 'call' ? colors.green : event === 'return' ? colors.yellow : colors.red).lighter
+        const color =
+            event === 'call'
+                ? colors.green
+                : event === 'line'
+                ? colors.blue
+                : event === 'return'
+                ? colors.yellow
+                : colors.red
+        return last ? color.lighter : undefined
     },
     cellColor: (changed: boolean) => changed && colors.yellow.lighter
 }
