@@ -44,7 +44,9 @@ class Tracer:
         """
         self._response = {'steps': []}
         overide_builtins = {'input': self._input_hook, 'print': self._print_hook, 'open': self._open_hook}
-        allowed_modules = {'copy', 'datetime', 'functools', 'itertools', 'math', 'random', 're', 'string', 'time'}
+        allowed_modules = {
+            'copy', 'datetime', 'functools', 'heapq', 'itertools', 'math', 'random', 're', 'string', 'time'
+        }
         sandbox_globals = scope.create_globals(None, overide_builtins, allowed_modules, True)
 
         try:
